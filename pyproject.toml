@@ -26,7 +26,7 @@ parse_feature_table = "ddbj_record_validator.feature_table.parse_feature_table:m
 packages = ["ddbj_record_validator", "ddbj_record_validator.feature_table"]
 
 [tool.mypy]
-files = ["./ddbj_record_validator/**/*.py"]
+files = ["./ddbj_record_validator/**/*.py", "./tests/**/*.py"]
 follow_imports = "silent"
 strict = true
 
