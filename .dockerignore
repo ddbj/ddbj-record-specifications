@@ -1,0 +1,9 @@
+# Ignore everything
+**
+
+!ddbj_record_validator
+!feature_table
+!LICENSE
+!pyproject.toml
+!README.md
+!schemas
