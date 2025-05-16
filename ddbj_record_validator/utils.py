@@ -12,3 +12,7 @@ def get_root_path() -> Path:
 
 def get_schema_dir_path() -> Path:
     return get_root_path().joinpath("schemas")
+
+
+def get_feature_table_dir_path() -> Path:
+    return get_root_path().joinpath("feature_table")
