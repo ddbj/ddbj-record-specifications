@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ddbj-record-validator:latest
+    container_name: ddbj-record-validator
+    volumes:
+      - ${PWD}:/app
+    working_dir: /app
+    command: [ "sleep", "infinity" ]
+    init: true

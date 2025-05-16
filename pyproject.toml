@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ddbj-record-validator"
+authors = [{ name = "Bioinformatics and DDBJ Center" }]
+readme = { file = "README.md", content-type = "text/markdown" }
+version = "0.1.0"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+dependencies = ["beautifulsoup4", "pydantic"]
+
+[project.urls]
+Homepage = "https://github.com/ddbj/ddbj-record-specifications"
+Documentation = "https://github.com/ddbj/ddbj-record-specifications/blob/main/README.md"
+Repository = "https://github.com/ddbj/ddbj-record-specifications.git"
+
+[project.optional-dependencies]
+tests = ["isort", "mypy", "pylint", "pytest-mock", "pytest"]
+
+[project.scripts]
+parse_feature_table = "ddbj_record_validator.feature_table.parse_feature_table:main"
+
+[tool.setuptools]
+packages = ["ddbj_record_validator", "ddbj_record_validator.feature_table"]
+
+[tool.mypy]
+files = ["./ddbj_record_validator/**/*.py"]
+follow_imports = "silent"
+strict = true
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114", # Missing module docstring
+    "C0115", # Missing class docstring
+    "C0116", # Missing function or method docstring
+    "C0301", # Line too long
+    "R0801", # Similar lines in 2 files
+    "R0903", # Too few public methods
+    "R0911", # Too many return statements
+    "R0912", # Too many branches
+    "R0913", # Too many arguments
+    "R0914", # Too many local variables
+    "R1705", # Unnecessary "else" after "return"
+    "W0511", # Fixme
+    "W0718", # Broad exception caught
+    "W0719", # Exception type of Exception
+    "I1101", # c-extension-no-member
+]

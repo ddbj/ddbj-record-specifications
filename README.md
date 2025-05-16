@@ -57,7 +57,7 @@ INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/fe
 
 ## ユーティリティスクリプト
 
-- scripts/parse_feature_table.py: INSDC HTML 仕様から `features.json` / `qualifiers.json` を自動生成
+- ddbj_record_validator/feature_table/parse_feature_table.py: INSDC HTML 仕様から `features.json` / `qualifiers.json` を自動生成
 - その他、スキーマの生成や変換に関わる補助スクリプトを随時追加予定
 
 ## 今後の展望
@@ -65,6 +65,13 @@ INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/fe
 - v2.0 スキーマの確定と公開
 - 単体 CLI バリデータの提供 (単一バイナリまたは Python CLI)
 - API Server 形式でのバリデーションサービスの提供
+
+## Development
+
+```bash
+docker compose up -d --build
+docker compose exec app bash
+```
 
 ## License
 
