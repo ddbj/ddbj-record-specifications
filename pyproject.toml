@@ -21,6 +21,7 @@ tests = ["isort", "mypy", "pylint", "pytest-mock", "pytest"]
 
 [project.scripts]
 parse_feature_table = "ddbj_record_validator.feature_table.parse_feature_table:main"
+dump_v1_schema = "ddbj_record_validator.schema_v1:main"
 
 [tool.setuptools]
 packages = ["ddbj_record_validator", "ddbj_record_validator.feature_table"]
