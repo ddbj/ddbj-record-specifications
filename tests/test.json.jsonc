@@ -1,14 +1,24 @@
 {
   "schema_version": "0.1",
-  "SUBMISSION": {
-    "DBLINK": {
+  "program の都合の metadata": {
+    "由来情報": {
+      "どの format から来たのかの情報": "GFF とか？"
+    },
+    // 他にも機会的に残しておきたい情報はあるはず
+  },
+  "submission": {
+    "trad_submission_category": "GNM",
+    "division": "BCT",
+    "locus_tag_prefix": "PLH",
+    "hold_date": "20250331", // nest を浅くするという志向で DATE から外に出した (やるかやらないかは置いておいて)
+    "dblink": {
       "project": "PRJDB99999",
       "biosample": "SAMD999999",
       "sequence read archive": [
         "DRR999990"
       ]
     },
-    "SUBMITTER": {
+    "submitter": {
       "ab_name": [
         "Mishima,H.",
         "Tanizawa,Y.",
@@ -25,7 +35,7 @@
       "street": "Yata 1111",
       "zip": "411-8540"
     },
-    "REFERENCE": [
+    "reference": [
       {
         "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
         "ab_name": [
@@ -37,7 +47,7 @@
         "year": "2023"
       }
     ],
-    "COMMENT": [
+    "comment": [
       {
         "line": [
           "Comment line1",
@@ -49,21 +59,17 @@
           "Annotated by DFAST https://dfast.ddbj.nig.ac.jp/"
         ]
       }
-    ],
-    "DATE": {
-      "hold_date": "20250331"
-    },
-    "trad_submission_category": "GNM"
+    ]
   },
-  "EXPERIMENT": {
+  "experiment": {
     "tagset_id": "Genome-Assembly-Data",
     "Assembly Method": "HGAP v. x.x",
     "Genome Coverage": "60x",
     "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
   },
-  "SOURCE": [
-    {
-      "organism": " Paucilactobacillus hokkaidonensis",
+  "sequences": { // 配列自体の object, sequence の実体も含めた metadata
+    "common_source": {
+      "organism": " Paucilactobacillus hok`kaidonensis",
       "strain": "LOOC260",
       "mol_type": "genomic DNA",
       "type_material": "type strain",
@@ -72,56 +78,32 @@
       "isolation_source": "silage",
       "geo_loc_name": "Japan:Hokkaido"
     },
-  ]
-  "ENTRIES": [ // 意味としては、sequence entry
-    "COMMON_SOURCE": {
-      "organism": " Paucilactobacillus hokkaidonensis",
-      "strain": "LOOC260",
-      "mol_type": "genomic DNA",
-      "type_material": "type strain",
-      "collection_date": "2012-04-01",
-      "culture_collection": "JCM:18460",
-      "isolation_source": "silage",
-      "geo_loc_name": "Japan:Hokkaido"
-    },
-    [
+    "entries": [
       {
-        "id": "chromosome", // or fasta の header の ID
+        "id": "chromosome", // fasta の header の ID, 登録者の local ID, submitter sequence ID
         "name": "chromosome",
         "type": "chromosome",
         "topology": "circular",
         "sequence": "<trimmed>",
-        // 全長の情報をもたせる
         "location": "1..2277985",
-        "SOURCE": { // 個別に書いた source が優先される
-          // "organism": " Paucilactobacillus hokkaidonensis",
-          // "strain": "LOOC260",
-          // "mol_type": "genomic DNA",
-          // "type_material": "type strain",
-          // "collection_date": "2012-04-01",
-          // "culture_collection": "JCM:18460",
-          // "isolation_source": "silage",
-          // "geo_loc_name": "Japan:Hokkaido"
+        "source": { // Optional, 個別に書いた場合、この source が common_source を上書きする
+          "organism": " Paucilactobacillus hokkaidonensis",
+          "strain": "LOOC260",
+          "qualifiers": {
+            "ff_definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, complete genome"
+            ]
+          }
         }
       }
     ]
-  ]
-  "FEATURES": [
-    {
-      "id": "feature_8",
-      "type": "source",
-      "location": "1..2277985",
-      "sequence_id": "chromosome", // どの sequence に対する feature か
-      "qualifiers": {
-        "ff_definition": [
-          "@@[organism]@@ @@[strain]@@ DNA, complete genome"
-        ]
-      }
-    },
+  },
+  "features": [ // "features.type == "source" はなくなる
     {
       "id": "feature_10",
       "type": "CDS",
       "location": "360..1676",
+      "sequence_id": "chromosome", // どの sequence に対する feature か
       "qualifiers": {
         "product": [
           "chromosomal replication initiator protein DnaA"
@@ -131,6 +113,8 @@
         ],
         "codon_start": [
           "1"
-        ],
-      ],
+        ]
+      }
     }
+  ],
+}

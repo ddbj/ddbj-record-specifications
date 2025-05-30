@@ -161,14 +161,22 @@ def extract_features_from_html(html: str) -> List[Feature]:
     return features
 
 
-def dump_features(features: List[Feature]) -> None:
+def dump_full_features(features: List[Feature]) -> None:
     feature_table_dir_path = get_feature_table_dir_path()
 
     features_full_path = feature_table_dir_path.joinpath("features_full.json")
     with features_full_path.open("w", encoding="utf-8") as file:
         json.dump([feature.model_dump() for feature in features], file, indent=2, ensure_ascii=False)
 
-    def _parse_keys(lines: List[str]) -> List[str]:
+
+class FeatureSummary(BaseModel):
+    feature_key: str
+    mandatory_qualifiers: List[str]
+    optional_qualifiers: List[str]
+
+
+def to_features_summary(features: List[Feature]) -> List[FeatureSummary]:
+   def _parse_keys(lines: List[str]) -> List[str]:
         keys = []
         for line in lines:
             if not line.startswith("/"):
@@ -185,9 +193,9 @@ def dump_features(features: List[Feature]) -> None:
             "mandatory_qualifiers": _parse_keys(feature.mandatory_qualifiers),
             "optional_qualifiers": _parse_keys(feature.optional_qualifiers),
         })
-    features_json_path = feature_table_dir_path.joinpath("features.json")
-    with features_json_path.open("w", encoding="utf-8") as file:
-        json.dump(features_summary, file, indent=2, ensure_ascii=False)
+
+    return features_summary
+
 
 
 class Qualifier(BaseModel):

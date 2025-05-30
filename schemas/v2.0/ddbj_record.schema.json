@@ -1,0 +1,783 @@
+{
+  "properties": {
+    "schema_version": {
+      "examples": [
+        "0.2"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "provenance": {
+      "properties": {},
+      "title": "Provenance",
+      "type": "object"
+    },
+    "submission": {
+      "properties": {
+        "trad_submission_category": {
+          "description": "If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
+          "enum": [
+            "WGS",
+            "GNM"
+          ],
+          "examples": [
+            "GNM"
+          ],
+          "title": "Trad Submission Category",
+          "type": "string"
+        },
+        "division": {
+          "examples": [
+            "BCT"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "locus_tag_prefix": {
+          "examples": [
+            "PLH"
+          ],
+          "title": "Locus Tag Prefix",
+          "type": "string"
+        },
+        "hold_date": {
+          "examples": [
+            "20250101"
+          ],
+          "title": "Hold Date",
+          "type": "string"
+        },
+        "dblink": {
+          "properties": {
+            "bioproject": {
+              "examples": [
+                "PRJDB999999"
+              ],
+              "title": "Bioproject",
+              "type": "string"
+            },
+            "biosample": {
+              "examples": [
+                "SAMD999999"
+              ],
+              "title": "Biosample",
+              "type": "string"
+            },
+            "sequence_read_archive": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "DRA999999"
+              ],
+              "title": "Sequence Read Archive"
+            }
+          },
+          "required": [
+            "bioproject",
+            "biosample"
+          ],
+          "title": "Dblink",
+          "type": "object"
+        },
+        "submitter": {
+          "properties": {
+            "url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "http://example.com"
+              ],
+              "title": "Url"
+            },
+            "ab_name": {
+              "examples": [
+                "Hiro,S."
+              ],
+              "items": {
+                "type": "string"
+              },
+              "title": "Ab Name",
+              "type": "array"
+            },
+            "contact": {
+              "examples": [
+                "Hiro Sue"
+              ],
+              "title": "Contact",
+              "type": "string"
+            },
+            "email": {
+              "examples": [
+                "hsue@example.com"
+              ],
+              "title": "Email",
+              "type": "string"
+            },
+            "institute": {
+              "examples": [
+                "Example University"
+              ],
+              "title": "Institute",
+              "type": "string"
+            },
+            "department": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "Example Department"
+              ],
+              "title": "Department"
+            },
+            "country": {
+              "examples": [
+                "Japan"
+              ],
+              "title": "Country",
+              "type": "string"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "Tokyo"
+              ],
+              "title": "State"
+            },
+            "city": {
+              "examples": [
+                "Shinjuku"
+              ],
+              "title": "City",
+              "type": "string"
+            },
+            "street": {
+              "examples": [
+                "1-2-3 Example Street"
+              ],
+              "title": "Street",
+              "type": "string"
+            },
+            "zip": {
+              "examples": [
+                "123-4567"
+              ],
+              "title": "Zip",
+              "type": "string"
+            }
+          },
+          "required": [
+            "ab_name",
+            "contact",
+            "email",
+            "institute",
+            "country",
+            "city",
+            "street",
+            "zip"
+          ],
+          "title": "Submitter",
+          "type": "object"
+        },
+        "reference": {
+          "items": {
+            "properties": {
+              "title": {
+                "examples": [
+                  "Example Title"
+                ],
+                "title": "Title",
+                "type": "string"
+              },
+              "ab_name": {
+                "examples": [
+                  "Hiro,S."
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Ab Name",
+                "type": "array"
+              },
+              "status": {
+                "enum": [
+                  "Unpublished",
+                  "In press",
+                  "Published"
+                ],
+                "examples": [
+                  "Unpublished"
+                ],
+                "title": "Status",
+                "type": "string"
+              },
+              "year": {
+                "examples": [
+                  "2025"
+                ],
+                "title": "Year",
+                "type": "string"
+              },
+              "journal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Journal"
+              },
+              "volume": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Volume"
+              },
+              "start_page": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Start Page"
+              },
+              "end_page": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "End Page"
+              }
+            },
+            "required": [
+              "title",
+              "ab_name",
+              "status",
+              "year",
+              "journal",
+              "volume",
+              "start_page",
+              "end_page"
+            ],
+            "title": "Reference",
+            "type": "object"
+          },
+          "title": "Reference",
+          "type": "array"
+        },
+        "comment": {
+          "items": {
+            "properties": {
+              "line": {
+                "examples": [
+                  "Example comment line 1",
+                  "Annotated by DFAST"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Line",
+                "type": "array"
+              }
+            },
+            "required": [
+              "line"
+            ],
+            "title": "Comment",
+            "type": "object"
+          },
+          "title": "Comment",
+          "type": "array"
+        }
+      },
+      "required": [
+        "trad_submission_category",
+        "division",
+        "locus_tag_prefix",
+        "hold_date",
+        "dblink",
+        "submitter",
+        "reference",
+        "comment"
+      ],
+      "title": "Submission",
+      "type": "object"
+    },
+    "experiment": {
+      "properties": {
+        "tagset_id": {
+          "examples": [
+            "Genome-Assembly-Data"
+          ],
+          "title": "Tagset Id",
+          "type": "string"
+        },
+        "assembly_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "HGAP v. x.x.x"
+          ],
+          "title": "Assembly Method"
+        },
+        "assembly_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "Mmus_1.0"
+          ],
+          "title": "Assembly Name"
+        },
+        "genome_coverage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "100x"
+          ],
+          "title": "Genome Coverage"
+        },
+        "sequencing_technology": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "PacBio RS II"
+          ],
+          "title": "Sequencing Technology"
+        }
+      },
+      "required": [
+        "tagset_id",
+        "assembly_method",
+        "assembly_name",
+        "genome_coverage",
+        "sequencing_technology"
+      ],
+      "title": "Experiment",
+      "type": "object"
+    },
+    "sequence": {
+      "properties": {
+        "common_source": {
+          "properties": {
+            "organism": {
+              "examples": [
+                "Paucilactobacillus hokkaidonensis"
+              ],
+              "title": "Organism",
+              "type": "string"
+            },
+            "strain": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "LOOC260"
+              ],
+              "title": "Strain"
+            },
+            "mol_type": {
+              "examples": [
+                "genomic DNA"
+              ],
+              "title": "Mol Type",
+              "type": "string"
+            },
+            "type_material": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "type strain"
+              ],
+              "title": "Type Material"
+            },
+            "collection_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "2012-04-01"
+              ],
+              "title": "Collection Date"
+            },
+            "culture_collection": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "JCM:18460"
+              ],
+              "title": "Culture Collection"
+            },
+            "isolation_source": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "silage"
+              ],
+              "title": "Isolation Source"
+            },
+            "geo_loc_name": {
+              "examples": [
+                "Japan:Hokkaido"
+              ],
+              "title": "Geo Loc Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "organism",
+            "mol_type",
+            "geo_loc_name"
+          ],
+          "title": "CommonSource",
+          "type": "object"
+        },
+        "entries": {
+          "items": {
+            "properties": {
+              "id": {
+                "description": " fasta \u306e header \u306e ID, \u767b\u9332\u8005\u306e local ID, submitter sequence ID",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "description": "The user-specified name of the sequence (e.g., contig1, contig2, etc. for draft genomes).",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "description": "The type of the sequence (e.g., chromosome, plasmid, unplaced, other).",
+                "enum": [
+                  "chromosome",
+                  "plasmid",
+                  "unplaced",
+                  "other"
+                ],
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Type",
+                "type": "string"
+              },
+              "topology": {
+                "description": "The topology of the sequence (e.g., linear, circular).",
+                "enum": [
+                  "circular",
+                  "linear"
+                ],
+                "examples": [
+                  "circular"
+                ],
+                "title": "Topology",
+                "type": "string"
+              },
+              "sequence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "examples": [
+                  "atgc..."
+                ],
+                "title": "Sequence"
+              },
+              "location": {
+                "examples": [
+                  "1..2277985"
+                ],
+                "title": "Location",
+                "type": "string"
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "organism": {
+                        "examples": [
+                          "Paucilactobacillus hokkaidonensis"
+                        ],
+                        "title": "Organism",
+                        "type": "string"
+                      },
+                      "strain": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "examples": [
+                          "LOOC260"
+                        ],
+                        "title": "Strain"
+                      },
+                      "qualifies": {
+                        "properties": {},
+                        "title": "SourceQualifiers",
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "organism",
+                      "qualifies"
+                    ],
+                    "title": "Source",
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Optional, \u500b\u5225\u306b\u66f8\u3044\u305f\u5834\u5408\u3001\u3053\u306e source \u304c common_source \u3092\u4e0a\u66f8\u304d\u3059\u308b"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "topology",
+              "sequence",
+              "location",
+              "source"
+            ],
+            "title": "Entry",
+            "type": "object"
+          },
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "common_source",
+        "entries"
+      ],
+      "title": "Sequence",
+      "type": "object"
+    },
+    "features": {
+      "items": {
+        "anyOf": [
+          {
+            "properties": {
+              "id": {
+                "examples": [
+                  "feature_8"
+                ],
+                "title": "Id",
+                "type": "string"
+              },
+              "type": {
+                "examples": [
+                  "CDS"
+                ],
+                "title": "Type",
+                "type": "string"
+              },
+              "location": {
+                "examples": [
+                  "1..2277985"
+                ],
+                "title": "Location",
+                "type": "string"
+              },
+              "sequence_id": {
+                "description": "The ID of the sequence to which this feature belongs.",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Sequence Id",
+                "type": "string"
+              },
+              "qualifiers": {
+                "properties": {},
+                "title": "FeatureQualifiers",
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "location",
+              "sequence_id",
+              "qualifiers"
+            ],
+            "title": "Feature",
+            "type": "object"
+          },
+          {
+            "properties": {
+              "id": {
+                "examples": [
+                  "feature_8"
+                ],
+                "title": "Id",
+                "type": "string"
+              },
+              "type": {
+                "examples": [
+                  "CDS"
+                ],
+                "title": "Type",
+                "type": "string"
+              },
+              "location": {
+                "examples": [
+                  "1..2277985"
+                ],
+                "title": "Location",
+                "type": "string"
+              },
+              "sequence_id": {
+                "description": "The ID of the sequence to which this feature belongs.",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Sequence Id",
+                "type": "string"
+              },
+              "qualifiers": {
+                "properties": {},
+                "title": "FeatureQualifiers",
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "location",
+              "sequence_id",
+              "qualifiers"
+            ],
+            "title": "GffFeature",
+            "type": "object"
+          }
+        ]
+      },
+      "title": "Features",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "provenance",
+    "submission",
+    "experiment",
+    "sequence",
+    "features"
+  ],
+  "title": "DdbjRecord",
+  "type": "object"
+}
