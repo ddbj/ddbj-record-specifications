@@ -1,0 +1,1729 @@
+{
+  "properties": {
+    "schema_version": {
+      "examples": [
+        "0.2.0"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "provenance": {
+      "additionalProperties": true,
+      "properties": {
+        "source_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The original format of the input data, e.g., GFF3, Genbank, EMBL, etc.",
+          "examples": [
+            "GFF3"
+          ],
+          "title": "Source Format"
+        }
+      },
+      "title": "Provenance",
+      "type": "object"
+    },
+    "submission": {
+      "properties": {
+        "submitters": {
+          "items": {
+            "properties": {
+              "name": {
+                "examples": [
+                  "Hanako Mishima"
+                ],
+                "title": "Name",
+                "type": "string"
+              },
+              "abbr_name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "Mishima,H."
+                ],
+                "title": "Abbr Name"
+              },
+              "email": {
+                "examples": [
+                  "mishima@ddbj.nig.ac.jp"
+                ],
+                "title": "Email",
+                "type": "string"
+              },
+              "organization": {
+                "properties": {
+                  "name": {
+                    "examples": [
+                      "National Institute of Genetics"
+                    ],
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "abbreviation": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "NIG"
+                    ],
+                    "title": "Abbreviation"
+                  },
+                  "url": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "http://www.ddbj.nig.ac.jp"
+                    ],
+                    "title": "Url"
+                  },
+                  "role": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "owner"
+                    ],
+                    "title": "Role"
+                  },
+                  "type": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "institution",
+                          "company",
+                          "government",
+                          "non-profit",
+                          "consortium",
+                          "other"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "institution"
+                    ],
+                    "title": "Type"
+                  },
+                  "address": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "country": {
+                            "examples": [
+                              "Japan"
+                            ],
+                            "title": "Country",
+                            "type": "string"
+                          },
+                          "state": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "examples": [
+                              "Shizuoka"
+                            ],
+                            "title": "State"
+                          },
+                          "city": {
+                            "examples": [
+                              "Mishima"
+                            ],
+                            "title": "City",
+                            "type": "string"
+                          },
+                          "street": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "examples": [
+                              "Yata 1111"
+                            ],
+                            "title": "Street"
+                          },
+                          "postal_code": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "examples": [
+                              "411-8540"
+                            ],
+                            "title": "Postal Code"
+                          }
+                        },
+                        "required": [
+                          "country",
+                          "city"
+                        ],
+                        "title": "Address",
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "address"
+                ],
+                "title": "Organization",
+                "type": "object"
+              },
+              "orcid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "0000-0000-0000-0000"
+                ],
+                "title": "Orcid"
+              }
+            },
+            "required": [
+              "name",
+              "email",
+              "organization"
+            ],
+            "title": "Person",
+            "type": "object"
+          },
+          "title": "Submitters",
+          "type": "array"
+        },
+        "db_xrefs": {
+          "items": {
+            "properties": {
+              "db": {
+                "enum": [
+                  "BioProject",
+                  "BioSample",
+                  "DRA",
+                  "ENA",
+                  "GenBank",
+                  "RefSeq"
+                ],
+                "examples": [
+                  "BioProject"
+                ],
+                "title": "Db",
+                "type": "string"
+              },
+              "id": {
+                "description": "The accession number of the database.",
+                "examples": [
+                  "PRJDB999999"
+                ],
+                "title": "Id",
+                "type": "string"
+              },
+              "relation_type": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "is_part_of",
+                      "has_part",
+                      "is_derived_from",
+                      "is_associated_with",
+                      "represents",
+                      "replaces",
+                      "is_replaced_by",
+                      "is_equivalent_to",
+                      "was_used_by",
+                      "is_version_of",
+                      "is_metadata_for",
+                      "is_input_of",
+                      "is_output_of"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "is_part_of"
+                ],
+                "title": "Relation Type"
+              }
+            },
+            "required": [
+              "db",
+              "id"
+            ],
+            "title": "Xref",
+            "type": "object"
+          },
+          "title": "Db Xrefs",
+          "type": "array"
+        },
+        "references": {
+          "items": {
+            "properties": {
+              "title": {
+                "examples": [
+                  "Sequence and analysis of mouse ch.8"
+                ],
+                "title": "Title",
+                "type": "string"
+              },
+              "authors": {
+                "items": {
+                  "properties": {
+                    "name": {
+                      "examples": [
+                        "Hanako Mishima"
+                      ],
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "abbr_name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "Mishima,H."
+                      ],
+                      "title": "Abbr Name"
+                    },
+                    "email": {
+                      "examples": [
+                        "mishima@ddbj.nig.ac.jp"
+                      ],
+                      "title": "Email",
+                      "type": "string"
+                    },
+                    "organization": {
+                      "properties": {
+                        "name": {
+                          "examples": [
+                            "National Institute of Genetics"
+                          ],
+                          "title": "Name",
+                          "type": "string"
+                        },
+                        "abbreviation": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "examples": [
+                            "NIG"
+                          ],
+                          "title": "Abbreviation"
+                        },
+                        "url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "examples": [
+                            "http://www.ddbj.nig.ac.jp"
+                          ],
+                          "title": "Url"
+                        },
+                        "role": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "examples": [
+                            "owner"
+                          ],
+                          "title": "Role"
+                        },
+                        "type": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "institution",
+                                "company",
+                                "government",
+                                "non-profit",
+                                "consortium",
+                                "other"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "examples": [
+                            "institution"
+                          ],
+                          "title": "Type"
+                        },
+                        "address": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "country": {
+                                  "examples": [
+                                    "Japan"
+                                  ],
+                                  "title": "Country",
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "examples": [
+                                    "Shizuoka"
+                                  ],
+                                  "title": "State"
+                                },
+                                "city": {
+                                  "examples": [
+                                    "Mishima"
+                                  ],
+                                  "title": "City",
+                                  "type": "string"
+                                },
+                                "street": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "examples": [
+                                    "Yata 1111"
+                                  ],
+                                  "title": "Street"
+                                },
+                                "postal_code": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "examples": [
+                                    "411-8540"
+                                  ],
+                                  "title": "Postal Code"
+                                }
+                              },
+                              "required": [
+                                "country",
+                                "city"
+                              ],
+                              "title": "Address",
+                              "type": "object"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "address"
+                      ],
+                      "title": "Organization",
+                      "type": "object"
+                    },
+                    "orcid": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "0000-0000-0000-0000"
+                      ],
+                      "title": "Orcid"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "email",
+                    "organization"
+                  ],
+                  "title": "Person",
+                  "type": "object"
+                },
+                "title": "Authors",
+                "type": "array"
+              },
+              "consortiums": {
+                "items": {
+                  "properties": {
+                    "name": {
+                      "examples": [
+                        "National Institute of Genetics"
+                      ],
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "abbreviation": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "NIG"
+                      ],
+                      "title": "Abbreviation"
+                    },
+                    "url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "http://www.ddbj.nig.ac.jp"
+                      ],
+                      "title": "Url"
+                    },
+                    "role": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "owner"
+                      ],
+                      "title": "Role"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "institution",
+                            "company",
+                            "government",
+                            "non-profit",
+                            "consortium",
+                            "other"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "institution"
+                      ],
+                      "title": "Type"
+                    },
+                    "address": {
+                      "anyOf": [
+                        {
+                          "properties": {
+                            "country": {
+                              "examples": [
+                                "Japan"
+                              ],
+                              "title": "Country",
+                              "type": "string"
+                            },
+                            "state": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "examples": [
+                                "Shizuoka"
+                              ],
+                              "title": "State"
+                            },
+                            "city": {
+                              "examples": [
+                                "Mishima"
+                              ],
+                              "title": "City",
+                              "type": "string"
+                            },
+                            "street": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "examples": [
+                                "Yata 1111"
+                              ],
+                              "title": "Street"
+                            },
+                            "postal_code": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "examples": [
+                                "411-8540"
+                              ],
+                              "title": "Postal Code"
+                            }
+                          },
+                          "required": [
+                            "country",
+                            "city"
+                          ],
+                          "title": "Address",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "address"
+                  ],
+                  "title": "Organization",
+                  "type": "object"
+                },
+                "title": "Consortiums",
+                "type": "array"
+              },
+              "status": {
+                "enum": [
+                  "Unpublished",
+                  "In press",
+                  "Published"
+                ],
+                "examples": [
+                  "Unpublished"
+                ],
+                "title": "Status",
+                "type": "string"
+              },
+              "year": {
+                "examples": [
+                  "2025"
+                ],
+                "title": "Year",
+                "type": "string"
+              },
+              "journal": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "Nature"
+                ],
+                "title": "Journal"
+              },
+              "volume": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "8"
+                ],
+                "title": "Volume"
+              },
+              "issue": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "1"
+                ],
+                "title": "Issue"
+              },
+              "start_page": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "15"
+                ],
+                "title": "Start Page"
+              },
+              "end_page": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "20"
+                ],
+                "title": "End Page"
+              },
+              "date_published": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "2025-01-01"
+                ],
+                "title": "Date Published"
+              },
+              "doi": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "10.1038/nature12345"
+                ],
+                "title": "Doi"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "https://doi.org/10.1038/nature12345"
+                ],
+                "title": "Url"
+              },
+              "pubmed_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "12345678"
+                ],
+                "title": "Pubmed Id"
+              }
+            },
+            "required": [
+              "title",
+              "authors",
+              "consortiums",
+              "status",
+              "year"
+            ],
+            "title": "Reference",
+            "type": "object"
+          },
+          "title": "References",
+          "type": "array"
+        },
+        "comments": {
+          "examples": [
+            "Example comment line 1",
+            "Annotated by DFAST"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Comments",
+          "type": "array"
+        },
+        "trad_submission_category": {
+          "anyOf": [
+            {
+              "enum": [
+                "WGS",
+                "GNM"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
+          "examples": [
+            "GNM"
+          ],
+          "title": "Trad Submission Category"
+        },
+        "submission_category": {
+          "enum": [
+            "WGS",
+            "GNM",
+            "MAG",
+            "SAG",
+            "TLS",
+            "HTG",
+            "TSA",
+            "HTC",
+            "EST"
+          ],
+          "examples": [
+            "WGS"
+          ],
+          "title": "Submission Category",
+          "type": "string"
+        },
+        "datatype": {
+          "enum": [
+            "WGS",
+            "TLS",
+            "TPA",
+            "TPA-WGS"
+          ],
+          "examples": [
+            "WGS"
+          ],
+          "title": "Datatype",
+          "type": "string"
+        },
+        "division": {
+          "enum": [
+            "CON",
+            "ENV",
+            "EST",
+            "GSS",
+            "HTC",
+            "HTG",
+            "STS",
+            "SYN",
+            "TSA"
+          ],
+          "examples": [
+            "EST"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "locus_tag_prefix": {
+          "examples": [
+            "PLH"
+          ],
+          "title": "Locus Tag Prefix",
+          "type": "string"
+        },
+        "hold_date": {
+          "examples": [
+            "2025-01-01"
+          ],
+          "title": "Hold Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "submitters",
+        "db_xrefs",
+        "references",
+        "comments",
+        "trad_submission_category",
+        "submission_category",
+        "datatype",
+        "division",
+        "locus_tag_prefix",
+        "hold_date"
+      ],
+      "title": "Submission",
+      "type": "object"
+    },
+    "experiments": {
+      "items": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "examples": [
+              "Genome Assembly of Mmus_1.0"
+            ],
+            "title": "Title"
+          },
+          "design": {
+            "properties": {
+              "design_description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Design Description"
+              },
+              "descriptor": {
+                "properties": {
+                  "library_name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Library Name"
+                  },
+                  "library_strategy": {
+                    "examples": [
+                      "WGS",
+                      "RNA-Seq",
+                      "ChIP-Seq",
+                      "ATAC-Seq"
+                    ],
+                    "title": "Library Strategy",
+                    "type": "string"
+                  },
+                  "library_source": {
+                    "title": "Library Source",
+                    "type": "string"
+                  },
+                  "library_selection": {
+                    "title": "Library Selection",
+                    "type": "string"
+                  },
+                  "library_layout": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "SINGLE",
+                              "PAIRED"
+                            ],
+                            "title": "Type",
+                            "type": "string"
+                          },
+                          "nominal_length": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "title": "Nominal Length"
+                          },
+                          "nominal_sdev": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "title": "Nominal Sdev"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "nominal_length",
+                          "nominal_sdev"
+                        ],
+                        "title": "LibraryLayout",
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "targeted_loci": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Targeted Loci"
+                  },
+                  "library_construction_protocol": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Library Construction Protocol"
+                  }
+                },
+                "required": [
+                  "library_name",
+                  "library_strategy",
+                  "library_source",
+                  "library_selection",
+                  "library_layout",
+                  "targeted_loci",
+                  "library_construction_protocol"
+                ],
+                "title": "LibraryDescriptor",
+                "type": "object"
+              }
+            },
+            "required": [
+              "design_description",
+              "descriptor"
+            ],
+            "title": "Library",
+            "type": "object"
+          },
+          "platform": {
+            "anyOf": [
+              {
+                "properties": {
+                  "sequencing": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "instrument_model": {
+                            "examples": [
+                              "PacBio RS II",
+                              "Illumina HiSeq 2500"
+                            ],
+                            "title": "Instrument Model",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "instrument_model"
+                        ],
+                        "title": "SequencingPlatform",
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "array": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "model": {
+                            "examples": [
+                              "Affymetrix GeneChip Mouse Genome 430 2.0 Array"
+                            ],
+                            "title": "Model",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "model"
+                        ],
+                        "title": "ArrayPlatform",
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "sequencing",
+                  "array"
+                ],
+                "title": "ExperimentPlatform",
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "experiment_links": {
+            "anyOf": [
+              {
+                "items": {
+                  "properties": {
+                    "label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Label"
+                    },
+                    "url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Url"
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "url"
+                  ],
+                  "title": "ExperimentLink",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experiment Links"
+          },
+          "experiment_attributes": {
+            "anyOf": [
+              {
+                "items": {
+                  "properties": {
+                    "tag": {
+                      "examples": [
+                        "assembly_method",
+                        "genome_coverage"
+                      ],
+                      "title": "Tag",
+                      "type": "string"
+                    },
+                    "value": {
+                      "examples": [
+                        "HGAP v. x.x.x",
+                        "100x"
+                      ],
+                      "title": "Value",
+                      "type": "string"
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Description"
+                    }
+                  },
+                  "required": [
+                    "tag",
+                    "value",
+                    "description"
+                  ],
+                  "title": "ExperimentAttribute",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Experiment Attributes"
+          }
+        },
+        "required": [
+          "design",
+          "platform",
+          "experiment_links",
+          "experiment_attributes"
+        ],
+        "title": "Experiment",
+        "type": "object"
+      },
+      "title": "Experiments",
+      "type": "array"
+    },
+    "sequences": {
+      "properties": {
+        "common_source": {
+          "properties": {
+            "organism": {
+              "examples": [
+                "Paucilactobacillus hokkaidonensis"
+              ],
+              "title": "Organism",
+              "type": "string"
+            },
+            "mol_type": {
+              "examples": [
+                "genomic DNA"
+              ],
+              "title": "Mol Type",
+              "type": "string"
+            },
+            "qualifiers": {
+              "items": {
+                "additionalProperties": true,
+                "properties": {
+                  "key": {
+                    "examples": [
+                      "organism",
+                      "mol_type",
+                      "strain",
+                      "isolation_source"
+                    ],
+                    "title": "Key",
+                    "type": "string"
+                  },
+                  "value": {
+                    "examples": [
+                      "Paucilactobacillus hokkaidonensis",
+                      "genomic DNA"
+                    ],
+                    "title": "Value",
+                    "type": "string"
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "This is a note for the qualifier."
+                    ],
+                    "title": "Note"
+                  },
+                  "ontology_term": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "NCIT:C12345"
+                    ],
+                    "title": "Ontology Term"
+                  }
+                },
+                "required": [
+                  "key",
+                  "value"
+                ],
+                "title": "Qualifier",
+                "type": "object"
+              },
+              "title": "Qualifiers",
+              "type": "array"
+            }
+          },
+          "required": [
+            "organism",
+            "mol_type"
+          ],
+          "title": "Source",
+          "type": "object"
+        },
+        "entries": {
+          "items": {
+            "properties": {
+              "id": {
+                "description": " fasta \u306e header \u306e ID, \u767b\u9332\u8005\u306e local ID, submitter sequence ID",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Id",
+                "type": "string"
+              },
+              "name": {
+                "description": "The user-specified name of the sequence (e.g., contig1, contig2, etc. for draft genomes).",
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Name",
+                "type": "string"
+              },
+              "type": {
+                "description": "The type of the sequence (e.g., chromosome, plasmid, unplaced, other).",
+                "enum": [
+                  "chromosome",
+                  "plasmid",
+                  "unplaced",
+                  "other"
+                ],
+                "examples": [
+                  "chromosome"
+                ],
+                "title": "Type",
+                "type": "string"
+              },
+              "topology": {
+                "description": "The topology of the sequence (e.g., linear, circular).",
+                "enum": [
+                  "circular",
+                  "linear"
+                ],
+                "examples": [
+                  "circular"
+                ],
+                "title": "Topology",
+                "type": "string"
+              },
+              "sequence": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "atgc..."
+                ],
+                "title": "Sequence"
+              },
+              "location": {
+                "examples": [
+                  "1..2277985"
+                ],
+                "title": "Location",
+                "type": "string"
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "properties": {
+                      "organism": {
+                        "examples": [
+                          "Paucilactobacillus hokkaidonensis"
+                        ],
+                        "title": "Organism",
+                        "type": "string"
+                      },
+                      "mol_type": {
+                        "examples": [
+                          "genomic DNA"
+                        ],
+                        "title": "Mol Type",
+                        "type": "string"
+                      },
+                      "qualifiers": {
+                        "items": {
+                          "additionalProperties": true,
+                          "properties": {
+                            "key": {
+                              "examples": [
+                                "organism",
+                                "mol_type",
+                                "strain",
+                                "isolation_source"
+                              ],
+                              "title": "Key",
+                              "type": "string"
+                            },
+                            "value": {
+                              "examples": [
+                                "Paucilactobacillus hokkaidonensis",
+                                "genomic DNA"
+                              ],
+                              "title": "Value",
+                              "type": "string"
+                            },
+                            "note": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "examples": [
+                                "This is a note for the qualifier."
+                              ],
+                              "title": "Note"
+                            },
+                            "ontology_term": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "examples": [
+                                "NCIT:C12345"
+                              ],
+                              "title": "Ontology Term"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "value"
+                          ],
+                          "title": "Qualifier",
+                          "type": "object"
+                        },
+                        "title": "Qualifiers",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "organism",
+                      "mol_type"
+                    ],
+                    "title": "Source",
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional, \u500b\u5225\u306b\u66f8\u3044\u305f\u5834\u5408\u3001\u3053\u306e source \u304c common_source \u3092\u4e0a\u66f8\u304d\u3059\u308b"
+              },
+              "definition": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Definition"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "topology",
+              "location",
+              "definition"
+            ],
+            "title": "Entry",
+            "type": "object"
+          },
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "common_source",
+        "entries"
+      ],
+      "title": "Sequences",
+      "type": "object"
+    },
+    "features": {
+      "items": {
+        "properties": {
+          "id": {
+            "examples": [
+              "feature_8"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "CDS"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "location": {
+            "examples": [
+              "1..2277985"
+            ],
+            "title": "Location",
+            "type": "string"
+          },
+          "sequence_id": {
+            "description": "The ID of the sequence to which this feature belongs.",
+            "examples": [
+              "chromosome"
+            ],
+            "title": "Sequence Id",
+            "type": "string"
+          },
+          "qualifiers": {
+            "description": "In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
+            "items": {
+              "additionalProperties": true,
+              "properties": {
+                "key": {
+                  "examples": [
+                    "organism",
+                    "mol_type",
+                    "strain",
+                    "isolation_source"
+                  ],
+                  "title": "Key",
+                  "type": "string"
+                },
+                "value": {
+                  "examples": [
+                    "Paucilactobacillus hokkaidonensis",
+                    "genomic DNA"
+                  ],
+                  "title": "Value",
+                  "type": "string"
+                },
+                "note": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "examples": [
+                    "This is a note for the qualifier."
+                  ],
+                  "title": "Note"
+                },
+                "ontology_term": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "examples": [
+                    "NCIT:C12345"
+                  ],
+                  "title": "Ontology Term"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "title": "Qualifier",
+              "type": "object"
+            },
+            "title": "Qualifiers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "location",
+          "sequence_id",
+          "qualifiers"
+        ],
+        "title": "Feature",
+        "type": "object"
+      },
+      "title": "Features",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "provenance",
+    "submission",
+    "experiments",
+    "sequences",
+    "features"
+  ],
+  "title": "DdbjRecord",
+  "type": "object"
+}
