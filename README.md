@@ -18,10 +18,20 @@ DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換�
 
 現在、以下の 2 つのバージョンが存在します。
 
-- **v0.1**: 現在運用中のスキーマ
-- **v0.2**: 次期バージョンとして検討中のスキーマ
+- **v1**: 現在運用中のスキーマ
+- **v2**: 次期バージョンとして検討中のスキーマ
 
 各バージョンの JSON Schema は [./schemas](./schemas) ディレクトリ以下に格納されています。
+
+## JSON Schema の生成方法
+
+```
+# ./ddbj_record_validator/schema_v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
+dump_v1_schema
+
+# ./ddbj_record_validator/schema_v2.py より、./schemas/v1/ddbj_record.schema.json を生成する
+dump_v2_schema
+```
 
 ## Feature / Qualifier 定義
 
