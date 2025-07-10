@@ -21,7 +21,7 @@ DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換�
 - **v1.0**: 現在運用中のスキーマ
 - **v2.0**: 次期バージョンとして検討中のスキーマ
 
-各バージョンの JSON Schema は `/schemas` ディレクトリ以下に格納されています。
+各バージョンの JSON Schema は [./schemas](./schemas) ディレクトリ以下に格納されています。
 
 ## Feature / Qualifier 定義
 

@@ -1,53 +1,60 @@
 import json
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 
 import jsonref
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ddbj_record_validator.utils import get_schema_dir_path
 
 
 class Provenance(BaseModel):
-    pass
+    source_format: Optional[str] = Field(
+        None,
+        examples=["GFF3"],
+        description="The original format of the input data, e.g., GFF3, Genbank, EMBL, etc.",
+    )
+    model_config = ConfigDict(extra="allow")
+
+
+# Submitter (Organization, Grant, Consortium) あたりは、DRA, JGA, ヒトの OR を取る (日本語 and 英語の箱も含めて)
+# そもそも論の最適な interface を決める
+class Submitter(BaseModel):
+    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#submitter
+    ab_name: List[str] = Field(examples=["Mishima,H."])
+    consrtm: Optional[str] = Field(None, examples=["Mouse Genome Consortium"])
+    contact: str = Field(examples=["Hanako Mishima"])
+    email: str = Field(examples=["mishima@ddbj.nig.ac.jp"])
+    url: Optional[str] = Field(None, examples=["http://www.ddbj.nig.ac.jp"])
+    institute: str = Field(examples=["National Institute of Genetics"])
+    department: Optional[str] = Field(None, examples=["DNA Data Bank of Japan"])
+    country: str = Field(examples=["Japan"])
+    state: Optional[str] = Field(None, examples=["Shizuoka"])
+    city: str = Field(examples=["Mishima"])
+    street: str = Field(examples=["Yata 1111"])
+    zip: str = Field(examples=["411-8540"])
 
 
 class Dblink(BaseModel):
+    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#dblink
     bioproject: str = Field(examples=["PRJDB999999"])
     biosample: str = Field(examples=["SAMD999999"])
-    sequence_read_archive: Optional[List[str]] = Field(
-        None,
+    sequence_read_archive: List[str] = Field(
+        default_factory=list,
         examples=["DRA999999"],
     )
 
 
-class Submitter(BaseModel):
-    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#submitter
-    # TODO: 使用可能文字や文字数上限は上のリンクを参照する
-    # TODO: jsonschema level で書くか、別の validator を作るかは要 discussion
-    url: Optional[str] = Field(None, examples=["http://example.com"])
-    ab_name: List[str] = Field(examples=["Hiro,S."])
-    contact: str = Field(examples=["Hiro Sue"])
-    email: str = Field(examples=["hsue@example.com"])
-    institute: str = Field(examples=["Example University"])
-    department: Optional[str] = Field(None, examples=["Example Department"])
-    country: str = Field(examples=["Japan"])
-    state: Optional[str] = Field(None, examples=["Tokyo"])
-    city: str = Field(examples=["Shinjuku"])
-    street: str = Field(examples=["1-2-3 Example Street"])
-    zip: str = Field(examples=["123-4567"])
-
-
 class Reference(BaseModel):
     # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#reference
-    # TODO: 使用可能文字や文字数上限は上のリンクを参照する
-    title: str = Field(examples=["Example Title"])
-    ab_name: List[str] = Field(examples=["Hiro,S."])
+    title: str = Field(examples=["Sequence and analysis of mouse ch.8"])
+    ab_name: List[str] = Field(examples=["Mishima,H."])
+    consrtm: Optional[str] = Field(None, examples=["Mouse Genome Consortium"])
     status: Literal["Unpublished", "In press", "Published"] = Field(examples=["Unpublished"])
     year: str = Field(examples=["2025"])
-    journal: Optional[str]
-    volume: Optional[str]
-    start_page: Optional[str]
-    end_page: Optional[str]
+    journal: Optional[str] = Field(None, examples=["Nature"])
+    volume: Optional[str] = Field(None, examples=["8"])
+    start_page: Optional[str] = Field(None, examples=["15"])
+    end_page: Optional[str] = Field(None, examples=["20"])
 
 
 class Comment(BaseModel):
@@ -56,67 +63,126 @@ class Comment(BaseModel):
 
 
 class Submission(BaseModel):
-    trad_submission_category: Literal["WGS", "GNM"] = Field(
-        description="If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
-        examples=["GNM"],
-    )  # from Common / Datatype
-    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#division
-    # BCT ではないよね
-    division: str = Field(examples=["BCT"])  # from CommonMeta
-    locus_tag_prefix: str = Field(examples=["PLH"])  # from CommonMeta
-    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#date
-    hold_date: str = Field(examples=["20250101"])  # from Common
-    dblink: Dblink  # from Common
-    submitter: Submitter  # from Common
-    reference: List[Reference]  # from Common
-    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#comment
-    comment: List[Comment]  # from Common
+    # # trad_submission_category: Optional[Literal["WGS", "GNM"]] = Field(
+    # #     description="If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
+    # #     examples=["GNM"],
+    # # )
+    # submission_category: Literal["WGS", "GNM", "MAG", "SAG", "TLS", "HTG", "TSA", "HTC", "EST"] = Field(
+    #     examples=["WGS"]
+    # )
+    # # DFAST 的には、WGS or GNM だけど、record として、他の literal も許容できなければならない
+
+    # datatype: Literal["WGS", "TLS", "TPA", "TPA-WGS"] = Field(examples=["WGS"])
+    # division: Literal["CON", "ENV", "EST", "GSS", "HTC", "HTG", "STS", "SYN", "TSA"] = Field(examples=["EST"])
+
+    # # ---
+
+    locus_tag_prefix: str = Field(examples=["PLH"])
+    hold_date: str = Field(examples=["20250101"])
+    dblink: Dblink
+    submitter: Submitter
+    reference: List[Reference]
+    comment: List[Comment]
 
 
-class Experiment(BaseModel):  # from Common/StComment
-    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#comment
-    # https://www.ddbj.nig.ac.jp/ddbj/file-format.html#describing_st_comment
-    # TODO: tagset_id ごとに、必須項目が異なる、詳細は、上のリンク
-    tagset_id: str = Field(examples=["Genome-Assembly-Data"])
-    assembly_method: Optional[str] = Field(
+class ExperimentGenomeAssemblyData(BaseModel):
+    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#describing_st_comment
+    tagset_id: Literal["Genome-Assembly-Data"] = Field(examples=["Genome-Assembly-Data"])
+    assembly_method: str = Field(
         examples=["HGAP v. x.x.x"],
     )
     assembly_name: Optional[str] = Field(
+        None,
         examples=["Mmus_1.0"],
     )
-    genome_coverage: Optional[str] = Field(
+    genome_coverage: str = Field(
         examples=["100x"],
     )
-    sequencing_technology: Optional[str] = Field(
+    sequencing_technology: str = Field(
         examples=["PacBio RS II"],
     )
 
 
-class CommonSource(BaseModel):
-    organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
-    strain: Optional[str] = Field(None, examples=["LOOC260"])
-    mol_type: str = Field(examples=["genomic DNA"])
-    type_material: Optional[str] = Field(None, examples=["type strain"])
-    collection_date: Optional[str] = Field(None, examples=["2012-04-01"])
-    culture_collection: Optional[str] = Field(None, examples=["JCM:18460"])
-    isolation_source: Optional[str] = Field(None, examples=["silage"])
-    geo_loc_name: str = Field(examples=["Japan:Hokkaido"])
+class ExperimentAssemblyData(BaseModel):
+    # ref.: https://www.ddbj.nig.ac.jp/ddbj/file-format.html#describing_st_comment
+    tagset_id: Literal["Assembly-Data"] = Field(examples=["Assembly-Data"])
+    assembly_method: str = Field(
+        examples=["HGAP v. x.x.x"],
+    )
+    assembly_name: Optional[str] = Field(
+        None,
+        examples=["Mmus_1.0"],
+    )
+    coverage: Optional[str] = Field(
+        None,
+        examples=["100x"],
+    )
+    sequencing_technology: str = Field(
+        examples=["PacBio RS II"],
+    )
 
 
-class SourceQualifiers(BaseModel):
-    # Source の Qualifier
-    pass
+class Qualifiers(BaseModel):
+    # organism と mol_type 以外
+    allele: str = Field(
+        description="name of the allele for the given gene",
+        examples=["adh1-1"]
+    )
+    altitude: str = Field(
+        description="geographical altitude of the location from which the sample was collected",
+        examples=["-256 m", "330.12 m"]
+    )
+    anticodon: str = Field(
+        description="location of the anticodon of tRNA and the amino acid for which it codes",
+        examples=["(pos:34..36,aa:Phe,seq:aaa)"]
+    )
+    # TODO 列挙 or コード的に、生成したい
 
 
 class Source(BaseModel):
+    # organism などもあくまで、qualifiers の一部として扱う
     organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
-    strain: Optional[str] = Field(None, examples=["LOOC260"])
-    qualifies: SourceQualifiers
+    mol_type: str = Field(examples=["genomic DNA"])
+
+    # TODO: 全ての qualifiers を optional で列挙する
+    qualifiers: Qualifiers
+
+    # or
+    # {
+    #     "qualifiers": [
+    #         {
+    #             "id": "id_of_qualifier",
+    #             "key": "organism",
+    #             "value": "Paucilactobacillus hokkaidonensis",
+    #             // optional field(情報量を落とさないための field)
+    #             "opt_field1": "opt_value1"
+    #         }
+    #     ]
+    # }
+
+    # model_config = ConfigDict(extra="allow")
+
+    # type_material: Optional[str] = Field(None, examples=["type strain"])
+    # collection_date: Optional[str] = Field(None, examples=["2012-04-01"])
+    # culture_collection: Optional[str] = Field(None, examples=["JCM:18460"])
+    # isolation_source: Optional[str] = Field(None, examples=["silage"])
+    # geo_loc_name: str = Field(examples=["Japan:Hokkaido"])
+
+
+# class Source(BaseModel):
+#     organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
+#     strain: Optional[str] = Field(None, examples=["LOOC260"])
+#     qualifies: SourceQualifiers
+
+
+# organism と mol_type 以外の qualifiers を列挙する
 
 
 class Entry(BaseModel):
-    id: str = Field(examples=["chromosome"],
-                    description=" fasta の header の ID, 登録者の local ID, submitter sequence ID")
+    id: str = Field(
+        examples=["chromosome"],
+        description=" fasta の header の ID, 登録者の local ID, submitter sequence ID"
+    )
     name: str = Field(
         description="The user-specified name of the sequence (e.g., contig1, contig2, etc. for draft genomes).",
         examples=["chromosome"]
@@ -129,62 +195,66 @@ class Entry(BaseModel):
         description="The topology of the sequence (e.g., linear, circular).",
         examples=["circular"],
     )
-    sequence: Optional[str] = Field(examples=["atgc..."])
+    sequence: Optional[str] = Field(None, examples=["atgc..."])
     location: str = Field(examples=["1..2277985"])
     source: Optional[Source] = Field(
+        None,
         description="Optional, 個別に書いた場合、この source が common_source を上書きする"
     )
 
+    # 元 ff_definition
+    definition: Optional[str]
 
-class Sequence(BaseModel):
-    common_source: CommonSource  # from CommonSource
+
+class Sequences(BaseModel):
+    common_source: Source
     entries: List[Entry]
 
 
-class FeatureQualifiers(BaseModel):
-    # Feature の Qualifier
-    pass
-
-
 class Feature(BaseModel):
-    # これの ID は？
     id: str = Field(examples=["feature_8"])
     type: str = Field(examples=["CDS"])
-    # TODO: 要確認 location?
     location: str = Field(examples=["1..2277985"])
     sequence_id: str = Field(
         examples=["chromosome"],
         description="The ID of the sequence to which this feature belongs.",
     )
-    qualifiers: FeatureQualifiers = Field(
+    # TODO: feature の type により、Qualifiers の Optional が Optional じゃなくなる
+    # これは、jsonschema では表現できないため、コード的に表現する
+    qualifiers: Qualifiers = Field(
         description="In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
     )
 
 
-class GffFeature(BaseModel):
-    id: str = Field(examples=["feature_8"])
-    type: str = Field(examples=["CDS"])
-    # TODO: 要確認 location?
-    location: str = Field(examples=["1..2277985"])
-    sequence_id: str = Field(
-        examples=["chromosome"],
-        description="The ID of the sequence to which this feature belongs.",
-    )
-    qualifiers: FeatureQualifiers = Field(
-        description="In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
-    )
-
-
-# Feature が GFF ように extend される
+# class GffFeature(BaseModel):
+#     id: str = Field(examples=["feature_8"])
+#     type: str = Field(examples=["CDS"])
+#     # TODO: 要確認 location?
+#     location: str = Field(examples=["1..2277985"])
+#     sequence_id: str = Field(
+#         examples=["chromosome"],
+#         description="The ID of the sequence to which this feature belongs.",
+#     )
+#     qualifiers: FeatureQualifiers = Field(
+#         description="In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
+#     )
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str = Field(examples=["0.2"])
-    provenance: Provenance
+    schema_version: str = Field(examples=["0.2.0"])
+    provenance: Provenance = Field(
+        description="""
+        Metadata that records the origin and transformation history of the data.
+        It includes details such as the software used for conversion, timestamps and input sources to ensure traceability and reproducibility of the dataset.
+        """
+    )
     submission: Submission
-    experiment: Experiment
-    sequence: Sequence
-    features: List[Feature | GffFeature]
+    # experiment の構造は、JGA, DRA の構造から引用したほうがいいかもしれない
+    # experiment は、List[Experiment] かもしれない
+    # experiment: ExperimentGenomeAssemblyData | ExperimentAssemblyData
+    sequences: Sequences
+    features: List[Feature]
+    # features: List[Feature | GffFeature]
 
 
 # === CLI ===

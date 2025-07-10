@@ -4,7 +4,7 @@
     "由来情報": {
       "どの format から来たのかの情報": "GFF とか？"
     },
-    // 他にも機会的に残しておきたい情報はあるはず
+    // 他にも機械的に残しておきたい情報はあるはず
   },
   "submission": {
     "trad_submission_category": "GNM",
@@ -23,7 +23,7 @@
         "Mishima,H.",
         "Tanizawa,Y.",
         "Nakamura,Y."
-      ],
+      ], // 氏名を分ける
       "contact": "Hanako Mishima",
       "email": "mishima@ddbj.nig.ac.jp",
       "url": "https://ddbj.nig.ac.jp",
@@ -61,12 +61,16 @@
       }
     ]
   },
-  "experiment": {
-    "tagset_id": "Genome-Assembly-Data",
-    "Assembly Method": "HGAP v. x.x",
-    "Genome Coverage": "60x",
-    "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
-  },
+  "experiment": [
+    {
+      "source_id": "ERX000000",
+      "tagset_id": "Genome-Assembly-Data",
+      "assembly_method": "HGAP v. x.x",
+      "assembly_method_version": "v. x.x",
+      "Genome Coverage": "60x",
+      "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
+    }
+  ],
   "sequences": { // 配列自体の object, sequence の実体も含めた metadata
     "common_source": {
       "organism": " Paucilactobacillus hok`kaidonensis",
