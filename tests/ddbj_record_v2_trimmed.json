@@ -1,11 +1,11 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "v2",
   "provenance": {},
   "submission": {
     "submitters": [
       {
         "name": "Hanako Mishima",
-        "abbr_name": "Mishima,H.",
+        "abbreviation": "Mishima,H.",
         "email": "mishima@ddbj.nig.ac.jp",
         "orcid": "0000-0000-0000-0000",
         "organization": {
@@ -20,7 +20,8 @@
             "city": "Mishima",
             "street": "Yata 1111",
             "postal_code": "411-8540"
-          }
+          },
+          "ror_id": "https://ror.org/01xq5f0"
         }
       }
     ],
@@ -119,32 +120,38 @@
     "common_source": {
       "organism": "Paucilactobacillus hokkaidonensis",
       "mol_type": "genomic DNA",
-      "qualifiers": [
-        {
-          "key": "strain",
-          "value": "LOOC260"
-        },
-        {
-          "key": "type_material",
-          "value": "type strain"
-        },
-        {
-          "key": "collection_date",
-          "value": "2012-04-01"
-        },
-        {
-          "key": "culture_collection",
-          "value": "JCM:18460"
-        },
-        {
-          "key": "isolation_source",
-          "value": "silage"
-        },
-        {
-          "key": "geo_loc_name",
-          "value": "Japan:Hokkaido"
-        }
-      ]
+      "qualifiers": {
+        "strain": [
+          {
+            "value": "LOOC260"
+          }
+        ],
+        "type_material": [
+          {
+            "value": "type strain"
+          }
+        ],
+        "collection_date": [
+          {
+            "value": "2012-04-01"
+          }
+        ],
+        "culture_collection": [
+          {
+            "value": "JCM:18460"
+          }
+        ],
+        "isolation_source": [
+          {
+            "value": "silage"
+          }
+        ],
+        "geo_loc_name": [
+          {
+            "value": "Japan:Hokkaido"
+          }
+        ]
+      }
     },
     "entries": [
       {
@@ -182,72 +189,82 @@
       "type": "CDS",
       "location": "360..1676",
       "sequence_id": "chromosome",
-      "qualifiers": [
-        {
-          "key": "product",
-          "value": "chromosomal replication initiator protein DnaA"
-        },
-        {
-          "key": "transl_table",
-          "value": "11"
-        },
-        {
-          "key": "codon_start",
-          "value": "1"
-        },
-        {
-          "key": "gene",
-          "value": "dnaA"
-        },
-        {
-          "key": "inference",
-          "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
-        },
-        {
-          "key": "inference",
-          "value": "similar to AA sequence:RefSeq:WP_003641628.1"
-        },
-        {
-          "key": "locus_tag_id",
-          "value": "00010"
-        }
-      ]
+      "qualifiers": {
+        "product": [
+          {
+            "value": "chromosomal replication initiator protein DnaA"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "dnaA"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_003641628.1"
+          }
+        ],
+        "locus_tag_id": [
+          {
+            "value": "00010"
+          }
+        ]
+      }
     },
     {
       "id": "feature_11",
       "type": "CDS",
       "location": "1852..2991",
       "sequence_id": "chromosome",
-      "qualifiers": [
-        {
-          "key": "product",
-          "value": "DNA polymerase III subunit beta"
-        },
-        {
-          "key": "transl_table",
-          "value": "11"
-        },
-        {
-          "key": "codon_start",
-          "value": "1"
-        },
-        {
-          "key": "gene",
-          "value": "dnaN"
-        },
-        {
-          "key": "inference",
-          "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
-        },
-        {
-          "key": "inference",
-          "value": "similar to AA sequence:RefSeq:WP_003641629.1"
-        },
-        {
-          "key": "locus_tag_id",
-          "value": "00020"
-        }
-      ]
+      "qualifiers": {
+        "product": [
+          {
+            "value": "DNA polymerase III subunit beta"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "dnaN"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_003641629.1"
+          }
+        ],
+        "locus_tag_id": [
+          {
+            "value": "00020"
+          }
+        ]
+      }
     }
   ]
 }

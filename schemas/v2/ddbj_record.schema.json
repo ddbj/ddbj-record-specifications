@@ -2,7 +2,7 @@
   "properties": {
     "schema_version": {
       "examples": [
-        "0.2.0"
+        "v2"
       ],
       "title": "Schema Version",
       "type": "string"
@@ -42,7 +42,7 @@
                 "title": "Name",
                 "type": "string"
               },
-              "abbr_name": {
+              "abbreviation": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -55,7 +55,7 @@
                 "examples": [
                   "Mishima,H."
                 ],
-                "title": "Abbr Name"
+                "title": "Abbreviation"
               },
               "email": {
                 "examples": [
@@ -63,6 +63,21 @@
                 ],
                 "title": "Email",
                 "type": "string"
+              },
+              "orcid": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "examples": [
+                  "0000-0000-0000-0000"
+                ],
+                "title": "Orcid"
               },
               "organization": {
                 "properties": {
@@ -216,6 +231,21 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "ror_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "https://ror.org/01xq5f0"
+                    ],
+                    "title": "Ror Id"
                   }
                 },
                 "required": [
@@ -224,21 +254,6 @@
                 ],
                 "title": "Organization",
                 "type": "object"
-              },
-              "orcid": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "default": null,
-                "examples": [
-                  "0000-0000-0000-0000"
-                ],
-                "title": "Orcid"
               }
             },
             "required": [
@@ -339,7 +354,7 @@
                       "title": "Name",
                       "type": "string"
                     },
-                    "abbr_name": {
+                    "abbreviation": {
                       "anyOf": [
                         {
                           "type": "string"
@@ -352,7 +367,7 @@
                       "examples": [
                         "Mishima,H."
                       ],
-                      "title": "Abbr Name"
+                      "title": "Abbreviation"
                     },
                     "email": {
                       "examples": [
@@ -360,6 +375,21 @@
                       ],
                       "title": "Email",
                       "type": "string"
+                    },
+                    "orcid": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "0000-0000-0000-0000"
+                      ],
+                      "title": "Orcid"
                     },
                     "organization": {
                       "properties": {
@@ -513,6 +543,21 @@
                               "type": "null"
                             }
                           ]
+                        },
+                        "ror_id": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "examples": [
+                            "https://ror.org/01xq5f0"
+                          ],
+                          "title": "Ror Id"
                         }
                       },
                       "required": [
@@ -521,21 +566,6 @@
                       ],
                       "title": "Organization",
                       "type": "object"
-                    },
-                    "orcid": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "0000-0000-0000-0000"
-                      ],
-                      "title": "Orcid"
                     }
                   },
                   "required": [
@@ -702,6 +732,21 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "ror_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "https://ror.org/01xq5f0"
+                      ],
+                      "title": "Ror Id"
                     }
                   },
                   "required": [
@@ -1335,72 +1380,80 @@
               "type": "string"
             },
             "qualifiers": {
-              "items": {
-                "additionalProperties": true,
-                "properties": {
-                  "key": {
-                    "examples": [
-                      "organism",
-                      "mol_type",
-                      "strain",
-                      "isolation_source"
-                    ],
-                    "title": "Key",
-                    "type": "string"
+              "additionalProperties": {
+                "items": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "qualifier_1"
+                      ],
+                      "title": "Id"
+                    },
+                    "value": {
+                      "examples": [
+                        "Paucilactobacillus hokkaidonensis",
+                        "genomic DNA"
+                      ],
+                      "title": "Value",
+                      "type": "string"
+                    },
+                    "note": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "This is a note for the qualifier."
+                      ],
+                      "title": "Note"
+                    },
+                    "ontology_term": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "examples": [
+                        "NCIT:C12345"
+                      ],
+                      "title": "Ontology Term"
+                    }
                   },
-                  "value": {
-                    "examples": [
-                      "Paucilactobacillus hokkaidonensis",
-                      "genomic DNA"
-                    ],
-                    "title": "Value",
-                    "type": "string"
-                  },
-                  "note": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "examples": [
-                      "This is a note for the qualifier."
-                    ],
-                    "title": "Note"
-                  },
-                  "ontology_term": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "examples": [
-                      "NCIT:C12345"
-                    ],
-                    "title": "Ontology Term"
-                  }
+                  "required": [
+                    "value"
+                  ],
+                  "title": "Qualifier",
+                  "type": "object"
                 },
-                "required": [
-                  "key",
-                  "value"
-                ],
-                "title": "Qualifier",
-                "type": "object"
+                "type": "array"
               },
               "title": "Qualifiers",
-              "type": "array"
+              "type": "object"
             }
           },
           "required": [
             "organism",
-            "mol_type"
+            "mol_type",
+            "qualifiers"
           ],
           "title": "Source",
           "type": "object"
@@ -1491,72 +1544,80 @@
                         "type": "string"
                       },
                       "qualifiers": {
-                        "items": {
-                          "additionalProperties": true,
-                          "properties": {
-                            "key": {
-                              "examples": [
-                                "organism",
-                                "mol_type",
-                                "strain",
-                                "isolation_source"
-                              ],
-                              "title": "Key",
-                              "type": "string"
+                        "additionalProperties": {
+                          "items": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "examples": [
+                                  "qualifier_1"
+                                ],
+                                "title": "Id"
+                              },
+                              "value": {
+                                "examples": [
+                                  "Paucilactobacillus hokkaidonensis",
+                                  "genomic DNA"
+                                ],
+                                "title": "Value",
+                                "type": "string"
+                              },
+                              "note": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "examples": [
+                                  "This is a note for the qualifier."
+                                ],
+                                "title": "Note"
+                              },
+                              "ontology_term": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "examples": [
+                                  "NCIT:C12345"
+                                ],
+                                "title": "Ontology Term"
+                              }
                             },
-                            "value": {
-                              "examples": [
-                                "Paucilactobacillus hokkaidonensis",
-                                "genomic DNA"
-                              ],
-                              "title": "Value",
-                              "type": "string"
-                            },
-                            "note": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "default": null,
-                              "examples": [
-                                "This is a note for the qualifier."
-                              ],
-                              "title": "Note"
-                            },
-                            "ontology_term": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "default": null,
-                              "examples": [
-                                "NCIT:C12345"
-                              ],
-                              "title": "Ontology Term"
-                            }
+                            "required": [
+                              "value"
+                            ],
+                            "title": "Qualifier",
+                            "type": "object"
                           },
-                          "required": [
-                            "key",
-                            "value"
-                          ],
-                          "title": "Qualifier",
-                          "type": "object"
+                          "type": "array"
                         },
                         "title": "Qualifiers",
-                        "type": "array"
+                        "type": "object"
                       }
                     },
                     "required": [
                       "organism",
-                      "mol_type"
+                      "mol_type",
+                      "qualifiers"
                     ],
                     "title": "Source",
                     "type": "object"
@@ -1638,68 +1699,75 @@
             "type": "string"
           },
           "qualifiers": {
-            "description": "In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
-            "items": {
-              "additionalProperties": true,
-              "properties": {
-                "key": {
-                  "examples": [
-                    "organism",
-                    "mol_type",
-                    "strain",
-                    "isolation_source"
-                  ],
-                  "title": "Key",
-                  "type": "string"
+            "additionalProperties": {
+              "items": {
+                "additionalProperties": true,
+                "properties": {
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "qualifier_1"
+                    ],
+                    "title": "Id"
+                  },
+                  "value": {
+                    "examples": [
+                      "Paucilactobacillus hokkaidonensis",
+                      "genomic DNA"
+                    ],
+                    "title": "Value",
+                    "type": "string"
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "This is a note for the qualifier."
+                    ],
+                    "title": "Note"
+                  },
+                  "ontology_term": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "examples": [
+                      "NCIT:C12345"
+                    ],
+                    "title": "Ontology Term"
+                  }
                 },
-                "value": {
-                  "examples": [
-                    "Paucilactobacillus hokkaidonensis",
-                    "genomic DNA"
-                  ],
-                  "title": "Value",
-                  "type": "string"
-                },
-                "note": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "examples": [
-                    "This is a note for the qualifier."
-                  ],
-                  "title": "Note"
-                },
-                "ontology_term": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "examples": [
-                    "NCIT:C12345"
-                  ],
-                  "title": "Ontology Term"
-                }
+                "required": [
+                  "value"
+                ],
+                "title": "Qualifier",
+                "type": "object"
               },
-              "required": [
-                "key",
-                "value"
-              ],
-              "title": "Qualifier",
-              "type": "object"
+              "type": "array"
             },
+            "description": "In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
             "title": "Qualifiers",
-            "type": "array"
+            "type": "object"
           }
         },
         "required": [

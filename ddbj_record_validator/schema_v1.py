@@ -133,7 +133,7 @@ class Entry(BaseModel):
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str = Field(examples=["0.1"])
+    schema_version: str = Field(examples=["v1"])
     COMMON: Common = Field(
         description="Corresponds to the COMMON section of the registered file (metadata common to all arrays, such as registrant information)"
     )

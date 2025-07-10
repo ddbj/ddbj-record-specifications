@@ -1,5 +1,5 @@
 import json
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 import jsonref  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field
@@ -41,11 +41,15 @@ class Organization(BaseModel):
         examples=["institution"],
     )   # TODO: Update enum from bs xml, etc.
     address: Optional[Address]
+    ror_id: Optional[str] = Field(
+        None,
+        examples=["https://ror.org/01xq5f0"],
+    )
 
 
 class Person(BaseModel):
     name: str = Field(..., examples=["Hanako Mishima"])
-    abbr_name: Optional[str] = Field(None, examples=["Mishima,H."])
+    abbreviation: Optional[str] = Field(None, examples=["Mishima,H."])
     email: str = Field(..., examples=["mishima@ddbj.nig.ac.jp"])
     orcid: Optional[str] = Field(None, examples=["0000-0000-0000-0000"])
     organization: Organization
@@ -177,7 +181,7 @@ class Experiment(BaseModel):
 
 
 class Qualifier(BaseModel):
-    key: str = Field(..., examples=["organism", "mol_type", "strain", "isolation_source"])  # TODO: Enumerate
+    id: Optional[str] = Field(None, examples=["qualifier_1"])
     value: str = Field(..., examples=["Paucilactobacillus hokkaidonensis", "genomic DNA"])  # TODO: discussion true or false なども存在する
     note: Optional[str] = Field(None, examples=["This is a note for the qualifier."])
     ontology_term: Optional[str] = Field(None, examples=["NCIT:C12345"])  # TODO: discussion, OBO term とか、いらない気もする
@@ -190,7 +194,7 @@ class Source(BaseModel):
     # TODO: organism と mol_type を独立させるか迷っている (source においては必須項目)
     organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
     mol_type: str = Field(examples=["genomic DNA"])
-    qualifiers: List[Qualifier] = Field(default_factory=list)
+    qualifiers: Dict[str, List[Qualifier]]  # Key is qualifier key
 
 
 class Entry(BaseModel):
@@ -236,16 +240,16 @@ class Feature(BaseModel):
         examples=["chromosome"],
         description="The ID of the sequence to which this feature belongs.",
     )
-    qualifiers: List[Qualifier] = Field(
+    qualifiers: Dict[str, List[Qualifier]] = Field(
         description="In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
-    )
+    )  # Key is qualifier key
 
 
 # === DDBJ Record ===
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str = Field(examples=["0.2.0"])
+    schema_version: str = Field(examples=["v2"])
     provenance: Provenance = Field(
         description="""
         Metadata that records the origin and transformation history of the data.
