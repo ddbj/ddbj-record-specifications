@@ -3,7 +3,7 @@ from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from ddbj_record_validator.utils import get_schema_dir_path
+from ddbj_record_validator.utils import deref_schema, get_schema_dir_path
 
 
 class Datatype(BaseModel):
@@ -150,11 +150,12 @@ class DdbjRecord(BaseModel):
 
 def main() -> None:
     schema_dir_path = get_schema_dir_path()
-    schema_path = schema_dir_path.joinpath("v1.0/ddbj_record.schema.json")
+    schema_path = schema_dir_path.joinpath("v1/ddbj_record.schema.json")
     schema_path.parent.mkdir(parents=True, exist_ok=True)
     schema_dict = DdbjRecord.model_json_schema()
+    deref_schema_dict = deref_schema(schema_dict)
     with schema_path.open("w", encoding="utf-8") as f:
-        f.write(json.dumps(schema_dict, indent=2))
+        f.write(json.dumps(deref_schema_dict, indent=2))
 
 
 if __name__ == "__main__":

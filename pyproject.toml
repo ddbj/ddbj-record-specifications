@@ -38,6 +38,7 @@ files = ["./ddbj_record_validator/**/*.py", "./tests/**/*.py"]
 follow_imports = "silent"
 strict = true
 
+
 [tool.pylint.messages_control]
 disable = [
     "C0114", # Missing module docstring
