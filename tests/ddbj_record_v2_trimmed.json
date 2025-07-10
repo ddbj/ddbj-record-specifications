@@ -1,0 +1,253 @@
+{
+  "schema_version": "0.2.0",
+  "provenance": {},
+  "submission": {
+    "submitters": [
+      {
+        "name": "Hanako Mishima",
+        "abbr_name": "Mishima,H.",
+        "email": "mishima@ddbj.nig.ac.jp",
+        "orcid": "0000-0000-0000-0000",
+        "organization": {
+          "name": "National Institute of Genetics",
+          "abbreviation": "NIG",
+          "url": "https://ddbj.nig.ac.jp",
+          "role": "submitter",
+          "type": "institution",
+          "address": {
+            "country": "Japan",
+            "state": "Shizuoka",
+            "city": "Mishima",
+            "street": "Yata 1111",
+            "postal_code": "411-8540"
+          }
+        }
+      }
+    ],
+    "db_xrefs": [
+      {
+        "db": "BioProject",
+        "id": "PRJDB99999",
+        "relation_type": "is_part_of"
+      },
+      {
+        "db": "BioSample",
+        "id": "SAMD999999",
+        "relation_type": "is_part_of"
+      },
+      {
+        "db": "DRA",
+        "id": "DRR999990",
+        "relation_type": "is_derived_from"
+      }
+    ],
+    "references": [
+      {
+        "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
+        "authors": [
+          {
+            "name": "Hanako Mishima",
+            "abbr_name": "Mishima,H.",
+            "email": "mishima@ddbj.nig.ac.jp",
+            "orcid": "0000-0000-0000-0000",
+            "organization": {
+              "name": "National Institute of Genetics"
+            }
+          }
+        ],
+        "consortiums": [],
+        "status": "Unpublished",
+        "year": "2023",
+        "journal": null,
+        "volume": null,
+        "issue": null,
+        "start_page": null,
+        "end_page": null,
+        "date_published": null,
+        "doi": null,
+        "url": null,
+        "pubmed_id": null
+      }
+    ],
+    "comments": [
+      "Example comment line 1",
+      "Annotated by DFAST https://dfast.ddbj.nig.ac.jp/"
+    ],
+    "trad_submission_category": "GNM",
+    "submission_category": "GNM",
+    "datatype": "WGS",
+    "division": "BCT",
+    "locus_tag_prefix": "PLH",
+    "hold_date": "2025-03-31"
+  },
+  "experiments": [
+    {
+      "title": "Genome Assembly of Mmus_1.0",
+      "design": {
+        "design_description": null,
+        "descriptor": {
+          "library_name": null,
+          "library_strategy": "WGS",
+          "library_source": "GENOMIC",
+          "library_selection": "RANDOM",
+          "library_layout": null,
+          "targeted_loci": null,
+          "library_construction_protocol": null
+        }
+      },
+      "platform": {
+        "sequencing": {
+          "instrument_model": "Illumina MiSeq; PacBio RSII"
+        }
+      },
+      "experiment_links": [],
+      "experiment_attributes": [
+        {
+          "tag": "assembly_method",
+          "value": "HGAP v. x.x",
+          "description": "Genome assembly method used"
+        },
+        {
+          "tag": "genome_coverage",
+          "value": "60x",
+          "description": "Estimated genome coverage"
+        }
+      ]
+    }
+  ],
+  "sequences": {
+    "common_source": {
+      "organism": "Paucilactobacillus hokkaidonensis",
+      "mol_type": "genomic DNA",
+      "qualifiers": [
+        {
+          "key": "strain",
+          "value": "LOOC260"
+        },
+        {
+          "key": "type_material",
+          "value": "type strain"
+        },
+        {
+          "key": "collection_date",
+          "value": "2012-04-01"
+        },
+        {
+          "key": "culture_collection",
+          "value": "JCM:18460"
+        },
+        {
+          "key": "isolation_source",
+          "value": "silage"
+        },
+        {
+          "key": "geo_loc_name",
+          "value": "Japan:Hokkaido"
+        }
+      ]
+    },
+    "entries": [
+      {
+        "id": "chromosome",
+        "name": "chromosome",
+        "type": "chromosome",
+        "topology": "circular",
+        "sequence": "<trimmed>",
+        "location": "1..2277985",
+        "source": null
+      },
+      {
+        "id": "pPLH-1",
+        "name": "pPLH-1",
+        "type": "plasmid",
+        "topology": "circular",
+        "sequence": "<trimmed>",
+        "location": "1..81630",
+        "source": null
+      },
+      {
+        "id": "pPLH-2",
+        "name": "pPLH-2",
+        "type": "plasmid",
+        "topology": "linear",
+        "sequence": "<trimmed>",
+        "location": "1..40971",
+        "source": null
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feature_10",
+      "type": "CDS",
+      "location": "360..1676",
+      "sequence_id": "chromosome",
+      "qualifiers": [
+        {
+          "key": "product",
+          "value": "chromosomal replication initiator protein DnaA"
+        },
+        {
+          "key": "transl_table",
+          "value": "11"
+        },
+        {
+          "key": "codon_start",
+          "value": "1"
+        },
+        {
+          "key": "gene",
+          "value": "dnaA"
+        },
+        {
+          "key": "inference",
+          "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+        },
+        {
+          "key": "inference",
+          "value": "similar to AA sequence:RefSeq:WP_003641628.1"
+        },
+        {
+          "key": "locus_tag_id",
+          "value": "00010"
+        }
+      ]
+    },
+    {
+      "id": "feature_11",
+      "type": "CDS",
+      "location": "1852..2991",
+      "sequence_id": "chromosome",
+      "qualifiers": [
+        {
+          "key": "product",
+          "value": "DNA polymerase III subunit beta"
+        },
+        {
+          "key": "transl_table",
+          "value": "11"
+        },
+        {
+          "key": "codon_start",
+          "value": "1"
+        },
+        {
+          "key": "gene",
+          "value": "dnaN"
+        },
+        {
+          "key": "inference",
+          "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+        },
+        {
+          "key": "inference",
+          "value": "similar to AA sequence:RefSeq:WP_003641629.1"
+        },
+        {
+          "key": "locus_tag_id",
+          "value": "00020"
+        }
+      ]
+    }
+  ]
+}

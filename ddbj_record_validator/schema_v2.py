@@ -35,7 +35,7 @@ class Organization(BaseModel):
     name: str = Field(..., examples=["National Institute of Genetics"])
     abbreviation: Optional[str] = Field(None, examples=["NIG"])
     url: Optional[str] = Field(None, examples=["http://www.ddbj.nig.ac.jp"])
-    role: Optional[str] = Field(None, examples=["owner"])  # TODO: Update enum from bs xml, etc.
+    role: Optional[str] = Field(None, examples=["owner"])  # TODO: Update enum from bs xml, etc. Organization に role がつくのがわからない。でも、BS がそうなっている
     type: Optional[Literal["institution", "company", "government", "non-profit", "consortium", "other"]] = Field(
         None,
         examples=["institution"],
@@ -47,8 +47,8 @@ class Person(BaseModel):
     name: str = Field(..., examples=["Hanako Mishima"])
     abbr_name: Optional[str] = Field(None, examples=["Mishima,H."])
     email: str = Field(..., examples=["mishima@ddbj.nig.ac.jp"])
-    organization: Organization
     orcid: Optional[str] = Field(None, examples=["0000-0000-0000-0000"])
+    organization: Organization
 
 
 class Xref(BaseModel):
