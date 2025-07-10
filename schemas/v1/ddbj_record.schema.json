@@ -2,7 +2,7 @@
   "properties": {
     "schema_version": {
       "examples": [
-        "0.1"
+        "v1"
       ],
       "title": "Schema Version",
       "type": "string"
