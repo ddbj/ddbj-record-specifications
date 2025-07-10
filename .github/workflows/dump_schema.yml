@@ -1,0 +1,44 @@
+name: Dump JSON Schema
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ddbj_record_validator/**"
+  workflow_dispatch: {}
+
+jobs:
+  dump-schema:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: python3 -m pip install .
+
+      - name: Dump schema
+        run: |
+          dump_v1_schema
+          dump_v2_schema
+
+      - name: Commit and push if schema changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet schemas/v1/ddbj_record.schema.json schemas/v2/ddbj_record.schema.json; then
+            git add schemas/v1/ddbj_record.schema.json schemas/v2/ddbj_record.schema.json
+            git commit -m "Update JSON Schema files"
+            git push origin main
+          else
+            echo "No changes in schema files, skipping commit."
+          fi
