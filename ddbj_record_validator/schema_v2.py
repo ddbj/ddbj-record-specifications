@@ -24,18 +24,45 @@ class Provenance(BaseModel):
 
 # TODO: update
 class Address(BaseModel):
-    country: str = Field(..., examples=["Japan"])
-    state: Optional[str] = Field(None, examples=["Shizuoka"])
-    city: str = Field(..., examples=["Mishima"])
-    street: Optional[str] = Field(None, examples=["Yata 1111"])
-    postal_code: Optional[str] = Field(None, examples=["411-8540"])
+    country: str = Field(
+        ...,
+        examples=["Japan"],
+    )
+    state: Optional[str] = Field(
+        None,
+        examples=["Shizuoka"],
+    )
+    city: str = Field(
+        ...,
+        examples=["Mishima"],
+    )
+    street: Optional[str] = Field(
+        None,
+        examples=["Yata 1111"],
+    )
+    postal_code: Optional[str] = Field(
+        None,
+        examples=["411-8540"],
+    )
 
 
 class Organization(BaseModel):
-    name: str = Field(..., examples=["National Institute of Genetics"])
-    abbreviation: Optional[str] = Field(None, examples=["NIG"])
-    url: Optional[str] = Field(None, examples=["http://www.ddbj.nig.ac.jp"])
-    role: Optional[str] = Field(None, examples=["owner"])  # TODO: Update enum from bs xml, etc. Organization に role がつくのがわからない。でも、BS がそうなっている
+    name: str = Field(
+        ...,
+        examples=["National Institute of Genetics"],
+    )
+    abbreviation: Optional[str] = Field(
+        None,
+        examples=["NIG"],
+    )
+    url: Optional[str] = Field(
+        None,
+        examples=["http://www.ddbj.nig.ac.jp"],
+    )
+    role: Optional[str] = Field(
+        None,
+        examples=["owner"],
+    )  # TODO: Update enum from bs xml, etc. Organization に role がつくのがわからない。でも、BS がそうなっている
     type: Optional[Literal["institution", "company", "government", "non-profit", "consortium", "other"]] = Field(
         None,
         examples=["institution"],
@@ -48,10 +75,22 @@ class Organization(BaseModel):
 
 
 class Person(BaseModel):
-    name: str = Field(..., examples=["Hanako Mishima"])
-    abbreviation: Optional[str] = Field(None, examples=["Mishima,H."])
-    email: str = Field(..., examples=["mishima@ddbj.nig.ac.jp"])
-    orcid: Optional[str] = Field(None, examples=["0000-0000-0000-0000"])
+    name: str = Field(
+        ...,
+        examples=["Hanako Mishima"],
+    )
+    abbreviation: Optional[str] = Field(
+        None,
+        examples=["Mishima,H."],
+    )
+    email: str = Field(
+        ...,
+        examples=["mishima@ddbj.nig.ac.jp"],
+    )
+    orcid: Optional[str] = Field(
+        None,
+        examples=["0000-0000-0000-0000"],
+    )
     organization: Organization
 
 
@@ -84,27 +123,62 @@ class Xref(BaseModel):
 
 
 class Reference(BaseModel):
-    title: str = Field(examples=["Sequence and analysis of mouse ch.8"])
+    title: str = Field(
+        examples=["Sequence and analysis of mouse ch.8"],
+    )
     authors: List[Person]
     consortiums: List[Organization]
-    status: Literal["Unpublished", "In press", "Published"] = Field(examples=["Unpublished"])
-    year: str = Field(examples=["2025"])
-    journal: Optional[str] = Field(None, examples=["Nature"])
-    volume: Optional[str] = Field(None, examples=["8"])
-    issue: Optional[str] = Field(None, examples=["1"])
-    start_page: Optional[str] = Field(None, examples=["15"])
-    end_page: Optional[str] = Field(None, examples=["20"])
-    date_published: Optional[str] = Field(None, examples=["2025-01-01"])
-    doi: Optional[str] = Field(None, examples=["10.1038/nature12345"])
-    url: Optional[str] = Field(None, examples=["https://doi.org/10.1038/nature12345"])
-    pubmed_id: Optional[str] = Field(None, examples=["12345678"])
+    status: Literal["Unpublished", "In press", "Published"] = Field(
+        examples=["Unpublished"],
+    )
+    year: str = Field(
+        examples=["2025"],
+    )
+    journal: Optional[str] = Field(
+        None,
+        examples=["Nature"],
+    )
+    volume: Optional[str] = Field(
+        None,
+        examples=["8"],
+    )
+    issue: Optional[str] = Field(
+        None,
+        examples=["1"],
+    )
+    start_page: Optional[str] = Field(
+        None,
+        examples=["15"],
+    )
+    end_page: Optional[str] = Field(
+        None,
+        examples=["20"],
+    )
+    date_published: Optional[str] = Field(
+        None,
+        examples=["2025-01-01"],
+    )
+    doi: Optional[str] = Field(
+        None,
+        examples=["10.1038/nature12345"],
+    )
+    url: Optional[str] = Field(
+        None,
+        examples=["https://doi.org/10.1038/nature12345"],
+    )
+    pubmed_id: Optional[str] = Field(
+        None,
+        examples=["12345678"],
+    )
 
 
 class Submission(BaseModel):
     submitters: List[Person]
     db_xrefs: List[Xref]
     references: List[Reference]
-    comments: List[str] = Field(examples=["Example comment line 1", "Annotated by DFAST"])
+    comments: List[str] = Field(
+        examples=["Example comment line 1", "Annotated by DFAST"],
+    )
 
     # TODO: discussion (DFAST 的には、WGS or GNM だけど、record として、他の literal も許容できなければならない、実は階層構造だし、Literal も不十分)
     trad_submission_category: Optional[Literal["WGS", "GNM"]] = Field(
@@ -112,13 +186,20 @@ class Submission(BaseModel):
         examples=["GNM"],
     )
     submission_category: Literal["WGS", "GNM", "MAG", "SAG", "TLS", "HTG", "TSA", "HTC", "EST"] = Field(
-        examples=["WGS"]
+        examples=["WGS"],
     )
-    datatype: Literal["WGS", "TLS", "TPA", "TPA-WGS"] = Field(examples=["WGS"])
-    division: Literal["CON", "ENV", "EST", "GSS", "HTC", "HTG", "STS", "SYN", "TSA"] = Field(examples=["EST"])
-
-    locus_tag_prefix: str = Field(examples=["PLH"])
-    hold_date: str = Field(examples=["2025-01-01"])
+    datatype: Literal["WGS", "TLS", "TPA", "TPA-WGS"] = Field(
+        examples=["WGS"],
+    )
+    division: Literal["CON", "ENV", "EST", "GSS", "HTC", "HTG", "STS", "SYN", "TSA"] = Field(
+        examples=["EST"],
+    )
+    locus_tag_prefix: str = Field(
+        examples=["PLH"],
+    )
+    hold_date: str = Field(
+        examples=["2025-01-01"],
+    )
 
 
 # === Experiment (主に JGA から) ===
@@ -132,7 +213,10 @@ class LibraryLayout(BaseModel):
 
 class LibraryDescriptor(BaseModel):
     library_name: Optional[str]
-    library_strategy: str = Field(..., examples=["WGS", "RNA-Seq", "ChIP-Seq", "ATAC-Seq"])  # TODO: Enumerate (e.g., WGS, RNA-Seq, etc.)
+    library_strategy: str = Field(
+        ...,
+        examples=["WGS", "RNA-Seq", "ChIP-Seq", "ATAC-Seq"],  # TODO: Enumerate (e.g., WGS, RNA-Seq, etc.,)
+    )
     library_source: str
     library_selection: str
     library_layout: Optional[LibraryLayout]
@@ -146,11 +230,17 @@ class Library(BaseModel):
 
 
 class SequencingPlatform(BaseModel):
-    instrument_model: str = Field(..., examples=["PacBio RS II", "Illumina HiSeq 2500"])
+    instrument_model: str = Field(
+        ...,
+        examples=["PacBio RS II", "Illumina HiSeq 2500"],
+    )
 
 
 class ArrayPlatform(BaseModel):
-    model: str = Field(..., examples=["Affymetrix GeneChip Mouse Genome 430 2.0 Array"])
+    model: str = Field(
+        ...,
+        examples=["Affymetrix GeneChip Mouse Genome 430 2.0 Array"],
+    )
 
 
 class ExperimentPlatform(BaseModel):
@@ -164,13 +254,22 @@ class ExperimentLink(BaseModel):
 
 
 class ExperimentAttribute(BaseModel):
-    tag: str = Field(..., examples=["assembly_method", "genome_coverage"])
-    value: str = Field(..., examples=["HGAP v. x.x.x", "100x"])
+    tag: str = Field(
+        ...,
+        examples=["assembly_method", "genome_coverage"],
+    )
+    value: str = Field(
+        ...,
+        examples=["HGAP v. x.x.x", "100x"],
+    )
     description: Optional[str]
 
 
 class Experiment(BaseModel):
-    title: Optional[str] = Field(None, examples=["Genome Assembly of Mmus_1.0"])
+    title: Optional[str] = Field(
+        None,
+        examples=["Genome Assembly of Mmus_1.0"],
+    )
     design: Library
     platform: Optional[ExperimentPlatform]
     experiment_links: Optional[List[ExperimentLink]]
@@ -181,10 +280,22 @@ class Experiment(BaseModel):
 
 
 class Qualifier(BaseModel):
-    id: Optional[str] = Field(None, examples=["qualifier_1"])
-    value: str = Field(..., examples=["Paucilactobacillus hokkaidonensis", "genomic DNA"])  # TODO: discussion true or false なども存在する
-    note: Optional[str] = Field(None, examples=["This is a note for the qualifier."])
-    ontology_term: Optional[str] = Field(None, examples=["NCIT:C12345"])  # TODO: discussion, OBO term とか、いらない気もする
+    id: Optional[str] = Field(
+        None,
+        examples=["qualifier_1"],
+    )
+    value: str = Field(
+        ...,
+        examples=["Paucilactobacillus hokkaidonensis", "genomic DNA"],
+    )  # TODO: discussion true or false なども存在する
+    note: Optional[str] = Field(
+        None,
+        examples=["This is a note for the qualifier."],
+    )
+    ontology_term: Optional[str] = Field(
+        None,
+        examples=["NCIT:C12345"],
+    )  # TODO: discussion, OBO term とか、いらない気もする
 
     # extra field
     model_config = ConfigDict(extra="allow")
@@ -192,19 +303,23 @@ class Qualifier(BaseModel):
 
 class Source(BaseModel):
     # TODO: organism と mol_type を独立させるか迷っている (source においては必須項目)
-    organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
-    mol_type: str = Field(examples=["genomic DNA"])
+    organism: str = Field(
+        examples=["Paucilactobacillus hokkaidonensis"],
+    )
+    mol_type: str = Field(
+        examples=["genomic DNA"],
+    )
     qualifiers: Dict[str, List[Qualifier]]  # Key is qualifier key
 
 
 class Entry(BaseModel):
     id: str = Field(
+        description="fasta の header の ID, 登録者の local ID, submitter sequence ID",
         examples=["chromosome"],
-        description=" fasta の header の ID, 登録者の local ID, submitter sequence ID"
     )
     name: str = Field(
         description="The user-specified name of the sequence (e.g., contig1, contig2, etc. for draft genomes).",
-        examples=["chromosome"]
+        examples=["chromosome"],
     )
     type: Literal["chromosome", "plasmid", "unplaced", "other"] = Field(
         description="The type of the sequence (e.g., chromosome, plasmid, unplaced, other).",
@@ -214,8 +329,13 @@ class Entry(BaseModel):
         description="The topology of the sequence (e.g., linear, circular).",
         examples=["circular"],
     )
-    sequence: Optional[str] = Field(None, examples=["atgc..."])
-    location: str = Field(examples=["1..2277985"])
+    sequence: Optional[str] = Field(
+        None,
+        examples=["atgc..."],
+    )
+    location: str = Field(
+        examples=["1..2277985"],
+    )
     source: Optional[Source] = Field(
         None,
         description="Optional, 個別に書いた場合、この source が common_source を上書きする"
@@ -233,9 +353,15 @@ class Sequences(BaseModel):
 
 
 class Feature(BaseModel):
-    id: str = Field(examples=["feature_8"])
-    type: str = Field(examples=["CDS"])  # TODO: Enumerate (e.g., CDS, gene, rRNA, tRNA, etc.)
-    location: str = Field(examples=["1..2277985"])
+    id: str = Field(
+        examples=["feature_8"],
+    )
+    type: str = Field(
+        examples=["CDS"],  # TODO: Enumerate (e.g., CDS, gene, rRNA, tRNA, etc.,
+    )
+    location: str = Field(
+        examples=["1..2277985"],
+    )
     sequence_id: str = Field(
         examples=["chromosome"],
         description="The ID of the sequence to which this feature belongs.",
@@ -249,7 +375,9 @@ class Feature(BaseModel):
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str = Field(examples=["v2"])
+    schema_version: str = Field(
+        examples=["v2"],
+    )
     provenance: Provenance = Field(
         description="""
         Metadata that records the origin and transformation history of the data.
