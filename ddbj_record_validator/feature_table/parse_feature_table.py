@@ -1,3 +1,8 @@
+"""
+INSDC Feature Table を parse するために、試しに書いてみていた。
+ただ、構造化がどうしても難しいのと、parse した結果を schema に落とし込むと、html の内容が変わるたびに schema を更新しなければならないので、あまり意味がないと判断した。
+今後、validator の実装において、schema レベルの validation ではなく、より詳細な (つまり、各 qualifier の内容までチェックする) validation を行う場合に、ここで parse した結果を利用することになるかもしれないため、コードは残しておく。
+"""
 import html
 import json
 import re
