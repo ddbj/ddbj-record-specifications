@@ -27,19 +27,16 @@
     ],
     "db_xrefs": [
       {
-        "db": "BioProject",
-        "id": "PRJDB99999",
-        "relation_type": "is_part_of"
+        "db": "bioproject",
+        "id": "PRJDB99999"
       },
       {
-        "db": "BioSample",
-        "id": "SAMD999999",
-        "relation_type": "is_part_of"
+        "db": "biosample",
+        "id": "SAMD999999"
       },
       {
-        "db": "DRA",
-        "id": "DRR999990",
-        "relation_type": "is_derived_from"
+        "db": "insdc.sra",
+        "id": "DRR999990"
       }
     ],
     "references": [
@@ -57,7 +54,7 @@
           }
         ],
         "consortiums": [],
-        "status": "Unpublished",
+        "status": "unpublished",
         "year": "2023",
         "journal": null,
         "volume": null,
@@ -75,7 +72,6 @@
       "Annotated by DFAST https://dfast.ddbj.nig.ac.jp/"
     ],
     "trad_submission_category": "GNM",
-    "submission_category": "GNM",
     "datatype": "WGS",
     "division": "BCT",
     "locus_tag_prefix": "PLH",
@@ -83,37 +79,15 @@
   },
   "experiments": [
     {
-      "title": "Genome Assembly of Mmus_1.0",
-      "design": {
-        "design_description": null,
-        "descriptor": {
-          "library_name": null,
-          "library_strategy": "WGS",
-          "library_source": "GENOMIC",
-          "library_selection": "RANDOM",
-          "library_layout": null,
-          "targeted_loci": null,
-          "library_construction_protocol": null
-        }
-      },
+      "id": "experiment_1",
       "platform": {
-        "sequencing": {
-          "instrument_model": "Illumina MiSeq; PacBio RSII"
-        }
+        "instrument_model": "Illumina MiSeq; PacBio RSII"
       },
-      "experiment_links": [],
-      "experiment_attributes": [
-        {
-          "tag": "assembly_method",
-          "value": "HGAP v. x.x",
-          "description": "Genome assembly method used"
-        },
-        {
-          "tag": "genome_coverage",
-          "value": "60x",
-          "description": "Estimated genome coverage"
-        }
-      ]
+      "experiment_attributes": {
+        "tagset_id": "Genome-Assembly-Data",
+        "assembly_method": "HGAP v. x.x",
+        "genome_coverage": "60x"
+      }
     }
   ],
   "sequences": {

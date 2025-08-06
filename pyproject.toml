@@ -30,6 +30,7 @@ tests = [
 parse_feature_table = "ddbj_record_validator.feature_table.parse_feature_table:main"
 dump_v1_schema = "ddbj_record_validator.schema.v1:main"
 dump_v2_schema = "ddbj_record_validator.schema.v2:main"
+validate_record = "ddbj_record_validator.validator:main"
 
 [tool.setuptools]
 packages = [

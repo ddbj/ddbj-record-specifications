@@ -273,7 +273,7 @@ class Submission(BaseModel):
         examples=["WGS"],
         description="The data type of the submission. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
     )
-    division: Optional[None] = Field(
+    division: Optional[str] = Field(
         None,
         examples=["BCT"],
         description="The GenBank division code for the submission.",

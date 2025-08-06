@@ -51,6 +51,11 @@ INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/fe
 
 追加のバリデーションは、`features.json` / `qualifiers.json` の情報を用いて、バリデータツール (将来的には API または CLI) で実行されます。
 
+```
+validate_record v1 --json ./tests/ddbj_record_v1_trimmed.json
+validate_record v2 --json ./tests/ddbj_record_v2_trimmed.json
+```
+
 ### バリデーション出力形式 (案)
 
 ```json
