@@ -1034,13 +1034,20 @@
           "title": "Datatype"
         },
         "division": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": null,
           "description": "The GenBank division code for the submission.",
           "examples": [
             "BCT"
           ],
-          "title": "Division",
-          "type": "null"
+          "title": "Division"
         },
         "locus_tag_prefix": {
           "anyOf": [
