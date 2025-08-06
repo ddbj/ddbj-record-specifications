@@ -1,6 +1,8 @@
 {
+  "description": "Complete DDBJ record structure.\nThis is the root class that contains all information for a DDBJ data submission,\nincluding metadata, sequences, features, and experimental information.",
   "properties": {
     "schema_version": {
+      "description": "The version of the DDBJ record schema used for this data.",
       "examples": [
         "v2"
       ],
@@ -9,10 +11,16 @@
     },
     "provenance": {
       "additionalProperties": true,
+      "description": "Provenance metadata for a ddbj_record file.\nThis class is designed to record the provenance (origin and history) of a ddbj_record file.\nIt is intended to capture metadata that is not directly represented elsewhere, such as\nthe software used for data conversion, timestamps, and input sources. Each application\ncan freely add additional fields as needed, as extra fields are allowed by the model configuration.\nThis flexibility ensures that all relevant provenance information can be included to support\ntraceability and reproducibility of the dataset.",
       "properties": {
         "source_format": {
           "anyOf": [
             {
+              "enum": [
+                "GFF",
+                "ST26",
+                "TradAnnotation"
+              ],
               "type": "string"
             },
             {
@@ -20,7 +28,7 @@
             }
           ],
           "default": null,
-          "description": "The original format of the input data, e.g., GFF3, Genbank, EMBL, etc.",
+          "description": "The original format of the input data, e.g., GFF, ST26, TradAnnotation, etc.",
           "examples": [
             "GFF3"
           ],
@@ -31,11 +39,15 @@
       "type": "object"
     },
     "submission": {
+      "description": "Submission metadata for data deposit to DDBJ.\nThis class contains information about the submitters, cross-references to external databases,\npublication references, and submission-specific parameters such as data type and hold date.",
       "properties": {
         "submitters": {
+          "description": "The list of people who are submitting the data.",
           "items": {
+            "description": "Individual person information.",
             "properties": {
               "name": {
+                "description": "The full name of the person.",
                 "examples": [
                   "Hanako Mishima"
                 ],
@@ -52,12 +64,14 @@
                   }
                 ],
                 "default": null,
+                "description": "The abbreviated name of the person.",
                 "examples": [
                   "Mishima,H."
                 ],
                 "title": "Abbreviation"
               },
               "email": {
+                "description": "The email address of the person.",
                 "examples": [
                   "mishima@ddbj.nig.ac.jp"
                 ],
@@ -74,14 +88,17 @@
                   }
                 ],
                 "default": null,
+                "description": "The ORCID identifier for the person.",
                 "examples": [
                   "0000-0000-0000-0000"
                 ],
                 "title": "Orcid"
               },
               "organization": {
+                "description": "Organization information.",
                 "properties": {
                   "name": {
+                    "description": "The full name of the organization.",
                     "examples": [
                       "National Institute of Genetics"
                     ],
@@ -98,6 +115,7 @@
                       }
                     ],
                     "default": null,
+                    "description": "The abbreviated name of the organization.",
                     "examples": [
                       "NIG"
                     ],
@@ -113,6 +131,7 @@
                       }
                     ],
                     "default": null,
+                    "description": "The URL of the organization's website.",
                     "examples": [
                       "http://www.ddbj.nig.ac.jp"
                     ],
@@ -128,6 +147,7 @@
                       }
                     ],
                     "default": null,
+                    "description": "The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
                     "examples": [
                       "owner"
                     ],
@@ -151,6 +171,7 @@
                       }
                     ],
                     "default": null,
+                    "description": "The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
                     "examples": [
                       "institution"
                     ],
@@ -159,8 +180,10 @@
                   "address": {
                     "anyOf": [
                       {
+                        "description": "Postal address of an organization or person.",
                         "properties": {
                           "country": {
+                            "description": "The country of the address.",
                             "examples": [
                               "Japan"
                             ],
@@ -177,12 +200,14 @@
                               }
                             ],
                             "default": null,
+                            "description": "The state or region of the address.",
                             "examples": [
                               "Shizuoka"
                             ],
                             "title": "State"
                           },
                           "city": {
+                            "description": "The city of the address.",
                             "examples": [
                               "Mishima"
                             ],
@@ -199,6 +224,7 @@
                               }
                             ],
                             "default": null,
+                            "description": "The street address.",
                             "examples": [
                               "Yata 1111"
                             ],
@@ -214,6 +240,7 @@
                               }
                             ],
                             "default": null,
+                            "description": "The postal or ZIP code.",
                             "examples": [
                               "411-8540"
                             ],
@@ -230,7 +257,9 @@
                       {
                         "type": "null"
                       }
-                    ]
+                    ],
+                    "default": null,
+                    "description": "The postal address of the organization."
                   },
                   "ror_id": {
                     "anyOf": [
@@ -242,6 +271,7 @@
                       }
                     ],
                     "default": null,
+                    "description": "The Research Organization Registry (ROR) identifier for the organization.",
                     "examples": [
                       "https://ror.org/01xq5f0"
                     ],
@@ -249,8 +279,7 @@
                   }
                 },
                 "required": [
-                  "name",
-                  "address"
+                  "name"
                 ],
                 "title": "Organization",
                 "type": "object"
@@ -268,60 +297,37 @@
           "type": "array"
         },
         "db_xrefs": {
+          "description": "Cross-references to external databases related to this submission.",
           "items": {
+            "description": "Cross-reference to external databases.\nThis class represents a reference to an entry in an external database,\nincluding the database name, accession ID, and the relationship type between the current record and the external entry.\nDatabase names use prefixes from https://registry.identifiers.org/registry.",
             "properties": {
               "db": {
+                "description": "The name of the external database using prefixes from https://registry.identifiers.org/registry where available.",
                 "enum": [
-                  "BioProject",
-                  "BioSample",
-                  "DRA",
-                  "ENA",
-                  "GenBank",
-                  "RefSeq"
+                  "bioproject",
+                  "biosample",
+                  "insdc.sra",
+                  "jga",
+                  "gea",
+                  "insdc.gca",
+                  "insdc",
+                  "metabobank",
+                  "taxonomy",
+                  "geo"
                 ],
                 "examples": [
-                  "BioProject"
+                  "bioproject"
                 ],
                 "title": "Db",
                 "type": "string"
               },
               "id": {
-                "description": "The accession number of the database.",
+                "description": "The accession number or identifier in the external database.",
                 "examples": [
                   "PRJDB999999"
                 ],
                 "title": "Id",
                 "type": "string"
-              },
-              "relation_type": {
-                "anyOf": [
-                  {
-                    "enum": [
-                      "is_part_of",
-                      "has_part",
-                      "is_derived_from",
-                      "is_associated_with",
-                      "represents",
-                      "replaces",
-                      "is_replaced_by",
-                      "is_equivalent_to",
-                      "was_used_by",
-                      "is_version_of",
-                      "is_metadata_for",
-                      "is_input_of",
-                      "is_output_of"
-                    ],
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "default": null,
-                "examples": [
-                  "is_part_of"
-                ],
-                "title": "Relation Type"
               }
             },
             "required": [
@@ -335,9 +341,12 @@
           "type": "array"
         },
         "references": {
+          "description": "List of publications or references associated with this submission.",
           "items": {
+            "description": "Bibliographic reference information.\nThis class represents a scientific publication or reference associated with the data,\nincluding title, authors, publication status, journal information, and identifiers.",
             "properties": {
               "title": {
+                "description": "The title of the publication or reference.",
                 "examples": [
                   "Sequence and analysis of mouse ch.8"
                 ],
@@ -345,9 +354,12 @@
                 "type": "string"
               },
               "authors": {
+                "description": "The list of authors who contributed to the publication.",
                 "items": {
+                  "description": "Individual person information.",
                   "properties": {
                     "name": {
+                      "description": "The full name of the person.",
                       "examples": [
                         "Hanako Mishima"
                       ],
@@ -364,12 +376,14 @@
                         }
                       ],
                       "default": null,
+                      "description": "The abbreviated name of the person.",
                       "examples": [
                         "Mishima,H."
                       ],
                       "title": "Abbreviation"
                     },
                     "email": {
+                      "description": "The email address of the person.",
                       "examples": [
                         "mishima@ddbj.nig.ac.jp"
                       ],
@@ -386,14 +400,17 @@
                         }
                       ],
                       "default": null,
+                      "description": "The ORCID identifier for the person.",
                       "examples": [
                         "0000-0000-0000-0000"
                       ],
                       "title": "Orcid"
                     },
                     "organization": {
+                      "description": "Organization information.",
                       "properties": {
                         "name": {
+                          "description": "The full name of the organization.",
                           "examples": [
                             "National Institute of Genetics"
                           ],
@@ -410,6 +427,7 @@
                             }
                           ],
                           "default": null,
+                          "description": "The abbreviated name of the organization.",
                           "examples": [
                             "NIG"
                           ],
@@ -425,6 +443,7 @@
                             }
                           ],
                           "default": null,
+                          "description": "The URL of the organization's website.",
                           "examples": [
                             "http://www.ddbj.nig.ac.jp"
                           ],
@@ -440,6 +459,7 @@
                             }
                           ],
                           "default": null,
+                          "description": "The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
                           "examples": [
                             "owner"
                           ],
@@ -463,6 +483,7 @@
                             }
                           ],
                           "default": null,
+                          "description": "The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
                           "examples": [
                             "institution"
                           ],
@@ -471,8 +492,10 @@
                         "address": {
                           "anyOf": [
                             {
+                              "description": "Postal address of an organization or person.",
                               "properties": {
                                 "country": {
+                                  "description": "The country of the address.",
                                   "examples": [
                                     "Japan"
                                   ],
@@ -489,12 +512,14 @@
                                     }
                                   ],
                                   "default": null,
+                                  "description": "The state or region of the address.",
                                   "examples": [
                                     "Shizuoka"
                                   ],
                                   "title": "State"
                                 },
                                 "city": {
+                                  "description": "The city of the address.",
                                   "examples": [
                                     "Mishima"
                                   ],
@@ -511,6 +536,7 @@
                                     }
                                   ],
                                   "default": null,
+                                  "description": "The street address.",
                                   "examples": [
                                     "Yata 1111"
                                   ],
@@ -526,6 +552,7 @@
                                     }
                                   ],
                                   "default": null,
+                                  "description": "The postal or ZIP code.",
                                   "examples": [
                                     "411-8540"
                                   ],
@@ -542,7 +569,9 @@
                             {
                               "type": "null"
                             }
-                          ]
+                          ],
+                          "default": null,
+                          "description": "The postal address of the organization."
                         },
                         "ror_id": {
                           "anyOf": [
@@ -554,6 +583,7 @@
                             }
                           ],
                           "default": null,
+                          "description": "The Research Organization Registry (ROR) identifier for the organization.",
                           "examples": [
                             "https://ror.org/01xq5f0"
                           ],
@@ -561,8 +591,7 @@
                         }
                       },
                       "required": [
-                        "name",
-                        "address"
+                        "name"
                       ],
                       "title": "Organization",
                       "type": "object"
@@ -580,198 +609,223 @@
                 "type": "array"
               },
               "consortiums": {
-                "items": {
-                  "properties": {
-                    "name": {
-                      "examples": [
-                        "National Institute of Genetics"
-                      ],
-                      "title": "Name",
-                      "type": "string"
-                    },
-                    "abbreviation": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "NIG"
-                      ],
-                      "title": "Abbreviation"
-                    },
-                    "url": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "http://www.ddbj.nig.ac.jp"
-                      ],
-                      "title": "Url"
-                    },
-                    "role": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "owner"
-                      ],
-                      "title": "Role"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "enum": [
-                            "institution",
-                            "company",
-                            "government",
-                            "non-profit",
-                            "consortium",
-                            "other"
+                "anyOf": [
+                  {
+                    "items": {
+                      "description": "Organization information.",
+                      "properties": {
+                        "name": {
+                          "description": "The full name of the organization.",
+                          "examples": [
+                            "National Institute of Genetics"
                           ],
+                          "title": "Name",
                           "type": "string"
                         },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "institution"
-                      ],
-                      "title": "Type"
-                    },
-                    "address": {
-                      "anyOf": [
-                        {
-                          "properties": {
-                            "country": {
-                              "examples": [
-                                "Japan"
-                              ],
-                              "title": "Country",
+                        "abbreviation": {
+                          "anyOf": [
+                            {
                               "type": "string"
                             },
-                            "state": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "default": null,
-                              "examples": [
-                                "Shizuoka"
-                              ],
-                              "title": "State"
-                            },
-                            "city": {
-                              "examples": [
-                                "Mishima"
-                              ],
-                              "title": "City",
-                              "type": "string"
-                            },
-                            "street": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "default": null,
-                              "examples": [
-                                "Yata 1111"
-                              ],
-                              "title": "Street"
-                            },
-                            "postal_code": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "default": null,
-                              "examples": [
-                                "411-8540"
-                              ],
-                              "title": "Postal Code"
+                            {
+                              "type": "null"
                             }
-                          },
-                          "required": [
-                            "country",
-                            "city"
                           ],
-                          "title": "Address",
-                          "type": "object"
+                          "default": null,
+                          "description": "The abbreviated name of the organization.",
+                          "examples": [
+                            "NIG"
+                          ],
+                          "title": "Abbreviation"
                         },
-                        {
-                          "type": "null"
+                        "url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The URL of the organization's website.",
+                          "examples": [
+                            "http://www.ddbj.nig.ac.jp"
+                          ],
+                          "title": "Url"
+                        },
+                        "role": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
+                          "examples": [
+                            "owner"
+                          ],
+                          "title": "Role"
+                        },
+                        "type": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "institution",
+                                "company",
+                                "government",
+                                "non-profit",
+                                "consortium",
+                                "other"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
+                          "examples": [
+                            "institution"
+                          ],
+                          "title": "Type"
+                        },
+                        "address": {
+                          "anyOf": [
+                            {
+                              "description": "Postal address of an organization or person.",
+                              "properties": {
+                                "country": {
+                                  "description": "The country of the address.",
+                                  "examples": [
+                                    "Japan"
+                                  ],
+                                  "title": "Country",
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "The state or region of the address.",
+                                  "examples": [
+                                    "Shizuoka"
+                                  ],
+                                  "title": "State"
+                                },
+                                "city": {
+                                  "description": "The city of the address.",
+                                  "examples": [
+                                    "Mishima"
+                                  ],
+                                  "title": "City",
+                                  "type": "string"
+                                },
+                                "street": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "The street address.",
+                                  "examples": [
+                                    "Yata 1111"
+                                  ],
+                                  "title": "Street"
+                                },
+                                "postal_code": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "description": "The postal or ZIP code.",
+                                  "examples": [
+                                    "411-8540"
+                                  ],
+                                  "title": "Postal Code"
+                                }
+                              },
+                              "required": [
+                                "country",
+                                "city"
+                              ],
+                              "title": "Address",
+                              "type": "object"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The postal address of the organization."
+                        },
+                        "ror_id": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The Research Organization Registry (ROR) identifier for the organization.",
+                          "examples": [
+                            "https://ror.org/01xq5f0"
+                          ],
+                          "title": "Ror Id"
                         }
-                      ]
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "title": "Organization",
+                      "type": "object"
                     },
-                    "ror_id": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "https://ror.org/01xq5f0"
-                      ],
-                      "title": "Ror Id"
-                    }
+                    "type": "array"
                   },
-                  "required": [
-                    "name",
-                    "address"
-                  ],
-                  "title": "Organization",
-                  "type": "object"
-                },
-                "title": "Consortiums",
-                "type": "array"
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The list of consortium organizations involved in the publication.",
+                "title": "Consortiums"
               },
               "status": {
+                "description": "The publication status of the reference.",
                 "enum": [
-                  "Unpublished",
-                  "In press",
-                  "Published"
+                  "unpublished",
+                  "in-press",
+                  "published"
                 ],
                 "examples": [
-                  "Unpublished"
+                  "unpublished"
                 ],
                 "title": "Status",
                 "type": "string"
               },
               "year": {
+                "description": "The year of publication.",
                 "examples": [
                   "2025"
                 ],
@@ -788,6 +842,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The name of the journal where the article was published.",
                 "examples": [
                   "Nature"
                 ],
@@ -803,6 +858,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The volume number of the journal.",
                 "examples": [
                   "8"
                 ],
@@ -818,6 +874,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The issue number of the journal.",
                 "examples": [
                   "1"
                 ],
@@ -833,6 +890,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The starting page number of the article.",
                 "examples": [
                   "15"
                 ],
@@ -848,6 +906,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The ending page number of the article.",
                 "examples": [
                   "20"
                 ],
@@ -863,6 +922,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The date when the article was published (ISO 8601 format).",
                 "examples": [
                   "2025-01-01"
                 ],
@@ -878,6 +938,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The Digital Object Identifier (DOI) of the publication.",
                 "examples": [
                   "10.1038/nature12345"
                 ],
@@ -893,6 +954,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The URL of the publication.",
                 "examples": [
                   "https://doi.org/10.1038/nature12345"
                 ],
@@ -908,6 +970,7 @@
                   }
                 ],
                 "default": null,
+                "description": "The PubMed identifier of the publication.",
                 "examples": [
                   "12345678"
                 ],
@@ -917,7 +980,6 @@
             "required": [
               "title",
               "authors",
-              "consortiums",
               "status",
               "year"
             ],
@@ -928,6 +990,7 @@
           "type": "array"
         },
         "comments": {
+          "description": "Additional comments or notes about the submission.",
           "examples": [
             "Example comment line 1",
             "Annotated by DFAST"
@@ -941,104 +1004,96 @@
         "trad_submission_category": {
           "anyOf": [
             {
-              "enum": [
-                "WGS",
-                "GNM"
-              ],
               "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "description": "If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
+          "default": null,
+          "description": "Traditional submission category. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
           "examples": [
-            "GNM"
+            "WGS"
           ],
           "title": "Trad Submission Category"
         },
-        "submission_category": {
-          "enum": [
-            "WGS",
-            "GNM",
-            "MAG",
-            "SAG",
-            "TLS",
-            "HTG",
-            "TSA",
-            "HTC",
-            "EST"
-          ],
-          "examples": [
-            "WGS"
-          ],
-          "title": "Submission Category",
-          "type": "string"
-        },
         "datatype": {
-          "enum": [
-            "WGS",
-            "TLS",
-            "TPA",
-            "TPA-WGS"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
+          "default": null,
+          "description": "The data type of the submission. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
           "examples": [
             "WGS"
           ],
-          "title": "Datatype",
-          "type": "string"
+          "title": "Datatype"
         },
         "division": {
-          "enum": [
-            "CON",
-            "ENV",
-            "EST",
-            "GSS",
-            "HTC",
-            "HTG",
-            "STS",
-            "SYN",
-            "TSA"
-          ],
+          "default": null,
+          "description": "The GenBank division code for the submission.",
           "examples": [
-            "EST"
+            "BCT"
           ],
           "title": "Division",
-          "type": "string"
+          "type": "null"
         },
         "locus_tag_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The prefix used for locus tags in the submission.",
           "examples": [
             "PLH"
           ],
-          "title": "Locus Tag Prefix",
-          "type": "string"
+          "title": "Locus Tag Prefix"
         },
         "hold_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The date until which the submission should be held before public release (ISO 8601 format).",
           "examples": [
             "2025-01-01"
           ],
-          "title": "Hold Date",
-          "type": "string"
+          "title": "Hold Date"
         }
       },
       "required": [
-        "submitters",
-        "db_xrefs",
-        "references",
-        "comments",
-        "trad_submission_category",
-        "submission_category",
-        "datatype",
-        "division",
-        "locus_tag_prefix",
-        "hold_date"
+        "submitters"
       ],
       "title": "Submission",
       "type": "object"
     },
     "experiments": {
+      "description": "List of experimental information associated with this submission.",
       "items": {
+        "description": "Experiment element from JGA experiment schema (subset).\nAn Experiment specifies what will be sequenced and how the sequencing will be performed.",
         "properties": {
+          "id": {
+            "description": "The unique identifier for this experiment.",
+            "examples": [
+              "exp1"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
           "title": {
             "anyOf": [
               {
@@ -1049,26 +1104,30 @@
               }
             ],
             "default": null,
+            "description": "Short text that can be used to call out experiment records in searches or displays.",
             "examples": [
-              "Genome Assembly of Mmus_1.0"
+              "RNA-seq experiment"
             ],
             "title": "Title"
           },
           "design": {
-            "properties": {
-              "design_description": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Design Description"
-              },
-              "descriptor": {
+            "anyOf": [
+              {
+                "description": "DESIGN element from JGA experiment schema (LibraryType).",
                 "properties": {
+                  "design_description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Goal and setup of the individual library.",
+                    "title": "Design Description"
+                  },
                   "library_name": {
                     "anyOf": [
                       {
@@ -1078,36 +1137,162 @@
                         "type": "null"
                       }
                     ],
+                    "default": null,
+                    "description": "The submitter's name for this library.",
+                    "examples": [
+                      "lib1"
+                    ],
                     "title": "Library Name"
                   },
                   "library_strategy": {
-                    "examples": [
-                      "WGS",
-                      "RNA-Seq",
-                      "ChIP-Seq",
-                      "ATAC-Seq"
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "WGS",
+                          "WGA",
+                          "WXS",
+                          "RNA-Seq",
+                          "ssRNA-seq",
+                          "miRNA-Seq",
+                          "ncRNA-Seq",
+                          "WCS",
+                          "RAD-Seq",
+                          "CLONE",
+                          "POOLCLONE",
+                          "AMPLICON",
+                          "CLONEEND",
+                          "FINISHING",
+                          "ChIP-Seq",
+                          "MNase-Seq",
+                          "DNase-Hypersensitivity",
+                          "Bisulfite-Seq",
+                          "EST",
+                          "Hi-C",
+                          "ATAC-seq",
+                          "FL-cDNA",
+                          "CTS",
+                          "MRE-Seq",
+                          "MeDIP-Seq",
+                          "MBD-Seq",
+                          "Tn-Seq",
+                          "VALIDATION",
+                          "FAIRE-seq",
+                          "SELEX",
+                          "NOMe-Seq",
+                          "RIP-Seq",
+                          "ChIA-PET",
+                          "Synthetic-Long-Read",
+                          "Targeted-Capture",
+                          "Tethered Chromatin Conformation Capture",
+                          "OTHER",
+                          "Genotyping by array",
+                          "Transcription profiling by array",
+                          "microRNA profiling by array",
+                          "ChIP-chip by array"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
                     ],
-                    "title": "Library Strategy",
-                    "type": "string"
+                    "default": null,
+                    "description": "Sequencing technique intended for this library.",
+                    "examples": [
+                      "RNA-Seq"
+                    ],
+                    "title": "Library Strategy"
                   },
                   "library_source": {
-                    "title": "Library Source",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "GENOMIC",
+                          "GENOMIC SINGLE CELL",
+                          "TRANSCRIPTOMIC",
+                          "TRANSCRIPTOMIC SINGLE CELL",
+                          "METAGENOMIC",
+                          "METATRANSCRIPTOMIC",
+                          "SYNTHETIC",
+                          "VIRAL RNA",
+                          "OTHER"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The type of source material that is being sequenced.",
+                    "examples": [
+                      "TRANSCRIPTOMIC"
+                    ],
+                    "title": "Library Source"
                   },
                   "library_selection": {
-                    "title": "Library Selection",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "RANDOM",
+                          "PCR",
+                          "RANDOM PCR",
+                          "RT-PCR",
+                          "HMPR",
+                          "MF",
+                          "repeat fractionation",
+                          "size fractionation",
+                          "MSLL",
+                          "cDNA",
+                          "cDNA_randomPriming",
+                          "cDNA_oligo_dT",
+                          "PolyA",
+                          "Oligo-dT",
+                          "Inverse rRNA",
+                          "ChIP",
+                          "MNase",
+                          "DNase",
+                          "Hybrid Selection",
+                          "Reduced Representation",
+                          "DNA shearing",
+                          "Restriction Digest",
+                          "5-methylcytidine antibody",
+                          "MBD2 protein methyl-CpG binding domain",
+                          "CAGE",
+                          "RACE",
+                          "MDA",
+                          "padlock probes capture method",
+                          "other",
+                          "unspecified"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Method used to enrich the target in the sequence library preparation.",
+                    "examples": [
+                      "PolyA"
+                    ],
+                    "title": "Library Selection"
                   },
                   "library_layout": {
                     "anyOf": [
                       {
+                        "description": "LIBRARY_LAYOUT specifies whether to expect single, paired, or other configuration of reads.",
                         "properties": {
-                          "type": {
+                          "layout_type": {
+                            "description": "Specifies whether to expect single or paired reads.",
                             "enum": [
                               "SINGLE",
                               "PAIRED"
                             ],
-                            "title": "Type",
+                            "examples": [
+                              "PAIRED"
+                            ],
+                            "title": "Layout Type",
                             "type": "string"
                           },
                           "nominal_length": {
@@ -1118,6 +1303,11 @@
                               {
                                 "type": "null"
                               }
+                            ],
+                            "default": null,
+                            "description": "Expected insert size for paired reads.",
+                            "examples": [
+                              300
                             ],
                             "title": "Nominal Length"
                           },
@@ -1130,13 +1320,16 @@
                                 "type": "null"
                               }
                             ],
+                            "default": null,
+                            "description": "Standard deviation of the insert size for paired reads.",
+                            "examples": [
+                              50.0
+                            ],
                             "title": "Nominal Sdev"
                           }
                         },
                         "required": [
-                          "type",
-                          "nominal_length",
-                          "nominal_sdev"
+                          "layout_type"
                         ],
                         "title": "LibraryLayout",
                         "type": "object"
@@ -1144,13 +1337,53 @@
                       {
                         "type": "null"
                       }
-                    ]
+                    ],
+                    "default": null,
+                    "description": "Specifies whether to expect single, paired, or other configuration of reads."
                   },
                   "targeted_loci": {
                     "anyOf": [
                       {
                         "items": {
-                          "type": "string"
+                          "description": "TARGETED_LOCI from JGA experiment schema.",
+                          "properties": {
+                            "locus_name": {
+                              "description": "The name of the targeted locus.",
+                              "enum": [
+                                "16S rRNA",
+                                "18S rRNA",
+                                "RBCL",
+                                "matK",
+                                "COX1",
+                                "ITS1-5.8S-ITS2",
+                                "exome",
+                                "other"
+                              ],
+                              "examples": [
+                                "16S rRNA"
+                              ],
+                              "title": "Locus Name",
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "description": "Submitter supplied description of alternate locus and auxiliary information.",
+                              "title": "Description"
+                            }
+                          },
+                          "required": [
+                            "locus_name"
+                          ],
+                          "title": "TargetedLocus",
+                          "type": "object"
                         },
                         "type": "array"
                       },
@@ -1158,7 +1391,22 @@
                         "type": "null"
                       }
                     ],
+                    "default": null,
+                    "description": "Names the gene(s) or locus(loci) or other genomic feature(s) targeted by the sequence.",
                     "title": "Targeted Loci"
+                  },
+                  "pooling_strategy": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The optional pooling strategy indicates how the library or libraries are organized if multiple samples are involved.",
+                    "title": "Pooling Strategy"
                   },
                   "library_construction_protocol": {
                     "anyOf": [
@@ -1169,191 +1417,86 @@
                         "type": "null"
                       }
                     ],
+                    "default": null,
+                    "description": "Free form text describing the protocol by which the sequencing library was constructed.",
                     "title": "Library Construction Protocol"
                   }
                 },
-                "required": [
-                  "library_name",
-                  "library_strategy",
-                  "library_source",
-                  "library_selection",
-                  "library_layout",
-                  "targeted_loci",
-                  "library_construction_protocol"
-                ],
-                "title": "LibraryDescriptor",
+                "title": "Design",
                 "type": "object"
+              },
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "design_description",
-              "descriptor"
             ],
-            "title": "Library",
-            "type": "object"
+            "default": null,
+            "description": "Library design information."
           },
           "platform": {
             "anyOf": [
               {
+                "description": "PLATFORM element from JGA experiment schema.\nSimplified to just store platform information as strings.",
                 "properties": {
-                  "sequencing": {
+                  "platform_type": {
                     "anyOf": [
                       {
-                        "properties": {
-                          "instrument_model": {
-                            "examples": [
-                              "PacBio RS II",
-                              "Illumina HiSeq 2500"
-                            ],
-                            "title": "Instrument Model",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "instrument_model"
-                        ],
-                        "title": "SequencingPlatform",
-                        "type": "object"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
-                    ]
+                    ],
+                    "default": null,
+                    "description": "The type of platform used (sequencing or array).",
+                    "examples": [
+                      "ILLUMINA"
+                    ],
+                    "title": "Platform Type"
                   },
-                  "array": {
+                  "instrument_model": {
                     "anyOf": [
                       {
-                        "properties": {
-                          "model": {
-                            "examples": [
-                              "Affymetrix GeneChip Mouse Genome 430 2.0 Array"
-                            ],
-                            "title": "Model",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "model"
-                        ],
-                        "title": "ArrayPlatform",
-                        "type": "object"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
-                    ]
+                    ],
+                    "default": null,
+                    "description": "The specific instrument model used.",
+                    "examples": [
+                      "Illumina HiSeq 2500"
+                    ],
+                    "title": "Instrument Model"
                   }
                 },
-                "required": [
-                  "sequencing",
-                  "array"
-                ],
-                "title": "ExperimentPlatform",
+                "title": "Platform",
                 "type": "object"
               },
               {
                 "type": "null"
               }
-            ]
-          },
-          "experiment_links": {
-            "anyOf": [
-              {
-                "items": {
-                  "properties": {
-                    "label": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "title": "Label"
-                    },
-                    "url": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "title": "Url"
-                    }
-                  },
-                  "required": [
-                    "label",
-                    "url"
-                  ],
-                  "title": "ExperimentLink",
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Experiment Links"
+            "default": null,
+            "description": "The sequencing or array platform information."
           },
           "experiment_attributes": {
-            "anyOf": [
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Experiment attributes as key-value pairs. This is a simplified version of EXPERIMENT_ATTRIBUTES, where each attribute is represented as a key-value pair.",
+            "examples": [
               {
-                "items": {
-                  "properties": {
-                    "tag": {
-                      "examples": [
-                        "assembly_method",
-                        "genome_coverage"
-                      ],
-                      "title": "Tag",
-                      "type": "string"
-                    },
-                    "value": {
-                      "examples": [
-                        "HGAP v. x.x.x",
-                        "100x"
-                      ],
-                      "title": "Value",
-                      "type": "string"
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "title": "Description"
-                    }
-                  },
-                  "required": [
-                    "tag",
-                    "value",
-                    "description"
-                  ],
-                  "title": "ExperimentAttribute",
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
+                "assembly_method": "HGAP v. x.x",
+                "genome_coverage": "60x"
               }
             ],
-            "title": "Experiment Attributes"
+            "title": "Experiment Attributes",
+            "type": "object"
           }
         },
         "required": [
-          "design",
-          "platform",
-          "experiment_links",
-          "experiment_attributes"
+          "id"
         ],
         "title": "Experiment",
         "type": "object"
@@ -1362,10 +1505,13 @@
       "type": "array"
     },
     "sequences": {
+      "description": "Collection of sequence entries with common source information.\nThis class contains a common source that applies to all entries unless overridden\nby individual entry-specific source information.",
       "properties": {
         "common_source": {
+          "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
           "properties": {
             "organism": {
+              "description": "The scientific name or higher-level classification of the organism or agent that provided the sequenced genetic material.",
               "examples": [
                 "Paucilactobacillus hokkaidonensis"
               ],
@@ -1373,6 +1519,7 @@
               "type": "string"
             },
             "mol_type": {
+              "description": "The type of molecule sequenced",
               "examples": [
                 "genomic DNA"
               ],
@@ -1383,6 +1530,7 @@
               "additionalProperties": {
                 "items": {
                   "additionalProperties": true,
+                  "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                   "properties": {
                     "id": {
                       "anyOf": [
@@ -1394,48 +1542,22 @@
                         }
                       ],
                       "default": null,
+                      "description": "The unique identifier for this qualifier.",
                       "examples": [
                         "qualifier_1"
                       ],
                       "title": "Id"
                     },
                     "value": {
+                      "description": "        The value of the qualifier.\n        Can be text, numbers, or boolean-like values. All values are represented as strings.\n        For qualifiers with 'none' value_format (e.g., circular_RNA which appears as '/circular_RNA' without a value), this field stores 'true' when the qualifier is present.\n        ",
                       "examples": [
                         "Paucilactobacillus hokkaidonensis",
-                        "genomic DNA"
+                        "genomic DNA",
+                        "1",
+                        "true"
                       ],
                       "title": "Value",
                       "type": "string"
-                    },
-                    "note": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "This is a note for the qualifier."
-                      ],
-                      "title": "Note"
-                    },
-                    "ontology_term": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "examples": [
-                        "NCIT:C12345"
-                      ],
-                      "title": "Ontology Term"
                     }
                   },
                   "required": [
@@ -1446,23 +1568,25 @@
                 },
                 "type": "array"
               },
+              "description": "Additional qualifiers. Key is the qualifier name.",
               "title": "Qualifiers",
               "type": "object"
             }
           },
           "required": [
             "organism",
-            "mol_type",
-            "qualifiers"
+            "mol_type"
           ],
           "title": "Source",
           "type": "object"
         },
         "entries": {
+          "description": "List of individual sequence entries, each with its own metadata and optional sequence data.",
           "items": {
+            "description": "Individual sequence entry information.\nThis class represents a single sequence entry with its metadata.\nEach entry can have its own source information that overrides the common source when specified.",
             "properties": {
               "id": {
-                "description": " fasta \u306e header \u306e ID, \u767b\u9332\u8005\u306e local ID, submitter sequence ID",
+                "description": "The unique identifier for this sequence entry, typically used as FASTA header ID or submitter sequence ID.",
                 "examples": [
                   "chromosome"
                 ],
@@ -1492,7 +1616,7 @@
                 "type": "string"
               },
               "topology": {
-                "description": "The topology of the sequence (e.g., linear, circular).",
+                "description": "The topology of the sequence (circular or linear).",
                 "enum": [
                   "circular",
                   "linear"
@@ -1513,12 +1637,14 @@
                   }
                 ],
                 "default": null,
+                "description": "The nucleotide sequence data. Optional field that may be omitted for large sequences.",
                 "examples": [
                   "atgc..."
                 ],
                 "title": "Sequence"
               },
               "location": {
+                "description": "The location range of the sequence in INSDC format.",
                 "examples": [
                   "1..2277985"
                 ],
@@ -1528,8 +1654,10 @@
               "source": {
                 "anyOf": [
                   {
+                    "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
                     "properties": {
                       "organism": {
+                        "description": "The scientific name or higher-level classification of the organism or agent that provided the sequenced genetic material.",
                         "examples": [
                           "Paucilactobacillus hokkaidonensis"
                         ],
@@ -1537,6 +1665,7 @@
                         "type": "string"
                       },
                       "mol_type": {
+                        "description": "The type of molecule sequenced",
                         "examples": [
                           "genomic DNA"
                         ],
@@ -1547,6 +1676,7 @@
                         "additionalProperties": {
                           "items": {
                             "additionalProperties": true,
+                            "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                             "properties": {
                               "id": {
                                 "anyOf": [
@@ -1558,48 +1688,22 @@
                                   }
                                 ],
                                 "default": null,
+                                "description": "The unique identifier for this qualifier.",
                                 "examples": [
                                   "qualifier_1"
                                 ],
                                 "title": "Id"
                               },
                               "value": {
+                                "description": "        The value of the qualifier.\n        Can be text, numbers, or boolean-like values. All values are represented as strings.\n        For qualifiers with 'none' value_format (e.g., circular_RNA which appears as '/circular_RNA' without a value), this field stores 'true' when the qualifier is present.\n        ",
                                 "examples": [
                                   "Paucilactobacillus hokkaidonensis",
-                                  "genomic DNA"
+                                  "genomic DNA",
+                                  "1",
+                                  "true"
                                 ],
                                 "title": "Value",
                                 "type": "string"
-                              },
-                              "note": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "default": null,
-                                "examples": [
-                                  "This is a note for the qualifier."
-                                ],
-                                "title": "Note"
-                              },
-                              "ontology_term": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "default": null,
-                                "examples": [
-                                  "NCIT:C12345"
-                                ],
-                                "title": "Ontology Term"
                               }
                             },
                             "required": [
@@ -1610,14 +1714,14 @@
                           },
                           "type": "array"
                         },
+                        "description": "Additional qualifiers. Key is the qualifier name.",
                         "title": "Qualifiers",
                         "type": "object"
                       }
                     },
                     "required": [
                       "organism",
-                      "mol_type",
-                      "qualifiers"
+                      "mol_type"
                     ],
                     "title": "Source",
                     "type": "object"
@@ -1627,7 +1731,7 @@
                   }
                 ],
                 "default": null,
-                "description": "Optional, \u500b\u5225\u306b\u66f8\u3044\u305f\u5834\u5408\u3001\u3053\u306e source \u304c common_source \u3092\u4e0a\u66f8\u304d\u3059\u308b"
+                "description": "Optional source information specific to this entry. When specified, this overrides the common_source."
               },
               "definition": {
                 "anyOf": [
@@ -1641,6 +1745,8 @@
                     "type": "null"
                   }
                 ],
+                "default": null,
+                "description": "Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
                 "title": "Definition"
               }
             },
@@ -1649,8 +1755,7 @@
               "name",
               "type",
               "topology",
-              "location",
-              "definition"
+              "location"
             ],
             "title": "Entry",
             "type": "object"
@@ -1667,9 +1772,12 @@
       "type": "object"
     },
     "features": {
+      "description": "List of feature annotations associated with the sequences.",
       "items": {
+        "description": "INSDC feature annotation information.\nThis class represents a single feature annotation on a sequence, including its type,\nlocation, and associated qualifiers that provide detailed biological information.",
         "properties": {
           "id": {
+            "description": "The unique identifier for this feature.",
             "examples": [
               "feature_8"
             ],
@@ -1677,6 +1785,7 @@
             "type": "string"
           },
           "type": {
+            "description": "The type of the feature (e.g., CDS, gene, rRNA, tRNA).",
             "examples": [
               "CDS"
             ],
@@ -1684,6 +1793,7 @@
             "type": "string"
           },
           "location": {
+            "description": "The location of the feature on the sequence in INSDC format.",
             "examples": [
               "1..2277985"
             ],
@@ -1691,7 +1801,7 @@
             "type": "string"
           },
           "sequence_id": {
-            "description": "The ID of the sequence to which this feature belongs.",
+            "description": "The ID of the sequence entry to which this feature belongs.",
             "examples": [
               "chromosome"
             ],
@@ -1702,6 +1812,7 @@
             "additionalProperties": {
               "items": {
                 "additionalProperties": true,
+                "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                 "properties": {
                   "id": {
                     "anyOf": [
@@ -1713,48 +1824,22 @@
                       }
                     ],
                     "default": null,
+                    "description": "The unique identifier for this qualifier.",
                     "examples": [
                       "qualifier_1"
                     ],
                     "title": "Id"
                   },
                   "value": {
+                    "description": "        The value of the qualifier.\n        Can be text, numbers, or boolean-like values. All values are represented as strings.\n        For qualifiers with 'none' value_format (e.g., circular_RNA which appears as '/circular_RNA' without a value), this field stores 'true' when the qualifier is present.\n        ",
                     "examples": [
                       "Paucilactobacillus hokkaidonensis",
-                      "genomic DNA"
+                      "genomic DNA",
+                      "1",
+                      "true"
                     ],
                     "title": "Value",
                     "type": "string"
-                  },
-                  "note": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "examples": [
-                      "This is a note for the qualifier."
-                    ],
-                    "title": "Note"
-                  },
-                  "ontology_term": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "examples": [
-                      "NCIT:C12345"
-                    ],
-                    "title": "Ontology Term"
                   }
                 },
                 "required": [
@@ -1765,7 +1850,7 @@
               },
               "type": "array"
             },
-            "description": "In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
+            "description": "Qualifiers that provide additional information about this feature. Key is the qualifier name.",
             "title": "Qualifiers",
             "type": "object"
           }
@@ -1774,8 +1859,7 @@
           "id",
           "type",
           "location",
-          "sequence_id",
-          "qualifiers"
+          "sequence_id"
         ],
         "title": "Feature",
         "type": "object"
@@ -1788,9 +1872,7 @@
     "schema_version",
     "provenance",
     "submission",
-    "experiments",
-    "sequences",
-    "features"
+    "sequences"
   ],
   "title": "DdbjRecord",
   "type": "object"
