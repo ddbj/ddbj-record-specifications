@@ -1,12 +1,7 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ddbj-record-validator:latest
-    container_name: ddbj-record-validator
-    volumes:
-      - ${PWD}:/app
+    image: ghcr.io/ddbj/ddbj-record-specifications:0.1.0
+    container_name: ddbj-record-specifications
     working_dir: /app
     command: [ "sleep", "infinity" ]
     init: true

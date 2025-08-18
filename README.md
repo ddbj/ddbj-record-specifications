@@ -3,6 +3,17 @@
 DDBJ における登録用 JSON フォーマット (DDBJ Record) の仕様を定義するリポジトリ。
 この仕様は、DFAST などの自動アノテーションツールや、Repository API により利用されることを想定している。
 
+## Installation
+
+```bash
+python3 -m pip install git+https://github.com/ddbj/ddbj-record-specifications.git@main
+# OR (version specify)
+python3 -m pip install git+https://github.com/ddbj/ddbj-record-specifications.git@0.1.0
+
+# Then, check the installation
+python3 -c "import ddbj_record"
+```
+
 ## 概要
 
 本リポジトリでは、以下の内容を取り扱う:
@@ -95,8 +106,8 @@ ddbj_record_converter --from v1 --to v2 --input ./tests/ddbj_record_v1_trimmed.j
 開発環境として、docker を用いている
 
 ```bash
-docker compose up -d --build
-docker compose exec app bash
+docker compose -f compose.dev.yml up -d --build
+docker compose -f compose.dev.yml exec app bash
 ```
 
 また、docker では、`python 3.12` を用いているが、`python 3.9` 以上であればおそらく動くはず。
@@ -132,6 +143,12 @@ INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/fe
 - `qualifiers.json`: 各 Qualifier の値の形式・制約 (例: フリーテキスト、列挙値、正規表現など)
 
 これらの json を `ddbj_record/feature_table` ディレクトリ以下に格納する。
+
+### Release
+
+```bash
+bash ./release.sh <new_version>
+```
 
 ## License
 
