@@ -91,6 +91,6 @@ jobs:
           name: wheel
 
       - name: Release
-        run: gh release --repo ${{ github.repository }} create ${{ github.ref_name }} --title ${{ github.ref_name }} --generate-notes ddbj-record-${{ github.ref_name }}.tar.gz ddbj-record-${{ github.ref_name }}-py3-none-any.whl
+        run: gh release --repo ${{ github.repository }} create ${{ github.ref_name }} --title ${{ github.ref_name }} --generate-notes ddbj_record-${{ github.ref_name }}.tar.gz ddbj_record-${{ github.ref_name }}-py3-none-any.whl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
