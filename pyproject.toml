@@ -30,10 +30,15 @@ tests = [
 parse_feature_table = "ddbj_record.feature_table.parse_feature_table:main"
 dump_json_schema = "ddbj_record.schema.cli:main"
 ddbj_record_validator = "ddbj_record.validator:main"
-ddbj_record_converter = "ddbj_record.converter:main"
+ddbj_record_converter = "ddbj_record.converter.cli:main"
 
 [tool.setuptools]
-packages = ["ddbj_record", "ddbj_record.feature_table", "ddbj_record.schema"]
+packages = [
+    "ddbj_record",
+    "ddbj_record.feature_table",
+    "ddbj_record.schema",
+    "ddbj_record.converter",
+]
 
 [tool.mypy]
 files = ["./ddbj_record/**/*.py", "./tests/**/*.py"]

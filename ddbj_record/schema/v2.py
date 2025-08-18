@@ -111,7 +111,7 @@ class Person(BaseModel):
         examples=["Mishima,H."],
         description="The abbreviated name of the person.",
     )
-    email: str = Field(
+    email: Optional[str] = Field(
         ...,
         examples=["mishima@ddbj.nig.ac.jp"],
         description="The email address of the person.",
@@ -121,7 +121,7 @@ class Person(BaseModel):
         examples=["0000-0000-0000-0000"],
         description="The ORCID identifier for the person.",
     )
-    organization: Organization = Field(
+    organization: Optional[Organization] = Field(
         ...,
         description="The organization that the person is affiliated with.",
     )
@@ -263,11 +263,6 @@ class Submission(BaseModel):
         None,
         examples=["WGS"],
         description="Traditional submission category. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
-    )
-    datatype: Optional[str] = Field(
-        None,
-        examples=["WGS"],
-        description="The data type of the submission. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
     )
     division: Optional[str] = Field(
         None,

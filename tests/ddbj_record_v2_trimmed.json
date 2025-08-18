@@ -72,7 +72,6 @@
       "Annotated by DFAST https://dfast.ddbj.nig.ac.jp/"
     ],
     "trad_submission_category": "GNM",
-    "datatype": "WGS",
     "division": "BCT",
     "locus_tag_prefix": "PLH",
     "hold_date": "2025-03-31"
@@ -81,6 +80,7 @@
     {
       "id": "experiment_1",
       "platform": {
+        "platform_type": "Illumina MiSeq; PacBio RSII",
         "instrument_model": "Illumina MiSeq; PacBio RSII"
       },
       "experiment_attributes": {

@@ -79,7 +79,7 @@ class CommonSource(BaseModel):
     collection_date: Optional[str] = Field(None, examples=["2012-04-01"])
     culture_collection: Optional[str] = Field(None, examples=["JCM:18460"])
     isolation_source: Optional[str] = Field(None, examples=["silage"])
-    geo_loc_name: str = Field(examples=["Japan:Hokkaido"])
+    geo_loc_name: Optional[str] = Field(examples=["Japan:Hokkaido"])
 
 
 class CommonMeta(BaseModel):

@@ -83,6 +83,9 @@ $ ddbj_record_validator -v v1 --input ./tests/ddbj_record_v1_trimmed.json
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input input.json --output output
+
+# Example: Convert v1 to v2
+ddbj_record_converter --from v1 --to v2 --input ./tests/ddbj_record_v1_trimmed.json --output ./tests/ddbj_record_v2_trimmed.converted.json
 ```
 
 ## Development

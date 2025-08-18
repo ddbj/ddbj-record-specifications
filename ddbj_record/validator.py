@@ -6,23 +6,28 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ValidationError
 
 from ddbj_record.schema import LATEST_VERSION, SCHEMA_VERSIONS
 from ddbj_record.utils import resolve_record_model
 
+# === Type Definitions for Validation ===
+
 
 class ErrorDetail(BaseModel):
     type: str
-    loc: List[str | int]
+    loc: List[Union[str, int]]
     msg: str
 
 
 class ValidationResult(BaseModel):
     valid: bool
     errors: Optional[List[ErrorDetail]] = None
+
+
+# =======================================
 
 
 class Args(BaseModel):
@@ -50,7 +55,6 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
         "--input",
         type=Path,
         required=True,
-        dest="json_file",
         help="Path to JSON file to validate"
     )
 
@@ -61,12 +65,12 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
     if parsed_args.version not in SCHEMA_VERSIONS:
         parser.error(f"Invalid schema version: {parsed_args.version}. "
                      f"Supported versions are: {', '.join(SCHEMA_VERSIONS)}")
-    if not parsed_args.json_file.exists():
-        parser.error(f"JSON file does not exist: {parsed_args.json_file}")
+    if not parsed_args.input.exists():
+        parser.error(f"JSON file does not exist: {parsed_args.input}")
 
     return Args(
         version=parsed_args.version,
-        input=parsed_args.json_file,
+        input=parsed_args.input,
     )
 
 
@@ -89,6 +93,15 @@ def validate_schema(json_data: Dict[str, Any], schema_version: str) -> Validatio
         return ValidationResult(valid=False, errors=errors)
 
 
+def validate_json_data(json_data: Dict[str, Any], schema_version: str) -> ValidationResult:
+    # Validate against schema
+    validation_result = validate_schema(json_data, schema_version)
+
+    # TODO: Impl. validate against feature / qualifier tables
+
+    return validation_result
+
+
 def main() -> None:
     try:
         args = parse_args(sys.argv[1:])
@@ -99,11 +112,8 @@ def main() -> None:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON file {args.input}: {e}") from e
 
-        # Validate against schema
-        validation_result = validate_schema(json_data, args.version)
+        validation_result = validate_json_data(json_data, args.version)
         print(validation_result.model_dump_json(indent=2))
-
-        # TODO: Impl. validate against feature / qualifier tables
 
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
