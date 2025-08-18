@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "ddbj_record_validator/**"
+      - "ddbj_record/**"
   workflow_dispatch: {}
 
 jobs:

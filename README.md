@@ -1,35 +1,44 @@
 # DDBJ Record Specifications
 
-DDBJ における登録用 JSON フォーマット (DDBJ Record) の仕様を定義するリポジトリです。
-この仕様は、DFAST などの自動アノテーションツールや、Repository API により利用されることを想定しています。
+DDBJ における登録用 JSON フォーマット (DDBJ Record) の仕様を定義するリポジトリ。
+この仕様は、DFAST などの自動アノテーションツールや、Repository API により利用されることを想定している。
 
 ## 概要
 
-本リポジトリでは、以下の内容を取り扱います:
+本リポジトリでは、以下の内容を取り扱う:
 
-- DDBJ Record の JSON Schema による定義
-- Feature / Qualifier の仕様とバリデーションルール
-- スキーマレベルを超えた追加的なバリデーションロジック
-- バリデーションユーティリティのための補助 JSON 定義
+- Python の pydantic による schema 定義
+  - これを master file として、JSON Schema を生成する
+  - Python の型定義として、周辺ツールなどで使用されることを想定している
+- DDBJ Record の validator
+  - JSON file を入力とする
+  - 基本的に schema level の validation
+  - Feature / Qualifier の仕様に基づく validation も実装予定 (現状、コード断片しか存在しない)
+  - スキーマレベルを超えた追加的なバリデーションロジックも書けるようにする予定
+- DDBJ Record の converter
+  - 例えば、v1 から v2 へ変換するための converter
 
-DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換可能であり、[dr_tools](https://github.com/ddbj/dr_tools) と連携することでファイル生成が可能です。
+DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換可能であり、[dr_tools](https://github.com/ddbj/dr_tools) と連携することでファイル生成が可能となる。
 
 ## スキーマ仕様
 
-現在、以下の 2 つのバージョンが存在します。
+現状、以下の 2 つのバージョンが存在する
 
-- **v1**: 現在運用中のスキーマ
-- **v2**: 次期バージョンとして検討中のスキーマ
+- **v1**
+  -
+
+- **v2**
+  - 次期バージョンとして検討中のスキーマ
 
 各バージョンの JSON Schema は [./schemas](./schemas) ディレクトリ以下に格納されています。
 
 ## JSON Schema の生成方法
 
 ```
-# ./ddbj_record_validator/schema_v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
+# ./ddbj_record/schema_v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
 dump_v1_schema
 
-# ./ddbj_record_validator/schema_v2.py より、./schemas/v1/ddbj_record.schema.json を生成する
+# ./ddbj_record/schema_v2.py より、./schemas/v1/ddbj_record.schema.json を生成する
 dump_v2_schema
 ```
 
@@ -72,7 +81,7 @@ validate_record v2 --json ./tests/ddbj_record_v2_trimmed.json
 
 ## ユーティリティスクリプト
 
-- ddbj_record_validator/feature_table/parse_feature_table.py: INSDC HTML 仕様から `features.json` / `qualifiers.json` を自動生成
+- ddbj_record/feature_table/parse_feature_table.py: INSDC HTML 仕様から `features.json` / `qualifiers.json` を自動生成
 - その他、スキーマの生成や変換に関わる補助スクリプトを随時追加予定
 
 ## 今後の展望
