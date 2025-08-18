@@ -36,13 +36,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sdist
-          path: dist/ddbj-record-${{ github.ref_name }}.tar.gz
+          path: dist/ddbj_record-${{ github.ref_name }}.tar.gz
 
       - name: Upload wheel as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: wheel
-          path: dist/ddbj-record-${{ github.ref_name }}-py3-none-any.whl
+          path: dist/ddbj_record-${{ github.ref_name }}-py3-none-any.whl
 
   deploy_ghcr:
     runs-on: ubuntu-24.04
