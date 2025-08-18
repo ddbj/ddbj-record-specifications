@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "ddbj_record/**"
+      - "ddbj_record/schema/**"
   workflow_dispatch: {}
 
 jobs:
@@ -27,16 +27,16 @@ jobs:
 
       - name: Dump schema
         run: |
-          dump_v1_schema
-          dump_v2_schema
+          dump_json_schema --version v1
+          dump_json_schema --version v2
 
       - name: Commit and push if schema changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if ! git diff --quiet schemas/v1/ddbj_record.schema.json schemas/v2/ddbj_record.schema.json; then
-            git add schemas/v1/ddbj_record.schema.json schemas/v2/ddbj_record.schema.json
+          if ! git diff --quiet ./schemas; then
+            git add ./schemas
             git commit -m "Update JSON Schema files"
             git push origin main
           else
