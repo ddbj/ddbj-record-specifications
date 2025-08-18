@@ -1,7 +1,10 @@
+import importlib
 import json
 from pathlib import Path
+from typing import Type
 
 import jsonref  # type: ignore[import-untyped]
+from pydantic import BaseModel
 from pydantic.json_schema import JsonSchemaValue
 
 
@@ -30,3 +33,20 @@ def deref_schema(schema: JsonSchemaValue) -> JsonSchemaValue:
     resolved_schema_dict = dict(resolved_schema)
     del resolved_schema_dict["$defs"]
     return resolved_schema_dict
+
+
+def resolve_record_model(version: str) -> Type[BaseModel]:
+    try:
+        module = importlib.import_module(f"ddbj_record.schema.{version}")
+    except ImportError as e:
+        raise Exception(f"Failed to import schema module for version {version}: {e}") from e
+
+    try:
+        model = getattr(module, "DdbjRecord")
+    except AttributeError as e:
+        raise Exception(f"Module {version} does not contain DdbjRecord model: {e}") from e
+
+    if not issubclass(model, BaseModel):
+        raise TypeError(f"DdbjRecord in {version} must be a subclass of Pydantic BaseModel")
+
+    return model  # type: ignore

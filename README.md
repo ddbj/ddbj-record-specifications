@@ -48,14 +48,34 @@ ddbj_record_validator --version v2 --input input.json
 validation 結果の出力は、以下のような json となる:
 
 ```json
+$ ddbj_record_validator -v v1 --input ./tests/ddbj_record_v1_trimmed.failed.json 
 {
   "valid": false,
   "errors": [
     {
-      "path": "features[3].qualifiers.organism",
-      "message": "Qualifier 'organism' is required for feature 'source'"
+      "type": "missing",
+      "loc": [
+        "COMMON",
+        "DBLINK",
+        "project"
+      ],
+      "msg": "Field required"
+    },
+    {
+      "type": "missing",
+      "loc": [
+        "COMMON",
+        "DBLINK",
+        "biosample"
+      ],
+      "msg": "Field required"
     }
   ]
+}
+$ ddbj_record_validator -v v1 --input ./tests/ddbj_record_v1_trimmed.json
+{
+  "valid": true,
+  "errors": null
 }
 ```
 

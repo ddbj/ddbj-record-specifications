@@ -1,14 +1,13 @@
 import argparse
-import importlib
 import json
 import sys
-from typing import Optional, Type
+from typing import Optional
 
-import jsonref  # type: ignore[import-untyped]
 from pydantic import BaseModel
 
 from ddbj_record.schema import SCHEMA_VERSIONS
-from ddbj_record.utils import get_schema_dir_path
+from ddbj_record.utils import (deref_schema, get_schema_dir_path,
+                               resolve_record_model)
 
 
 class Args(BaseModel):
@@ -42,46 +41,28 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
     )
 
 
-def resolve_record_model(version: str) -> Type[BaseModel]:
-    try:
-        module = importlib.import_module(f"ddbj_record.schema.{version}")
-    except ImportError as e:
-        raise Exception(f"Failed to import schema module for version {version}: {e}") from e
-
-    try:
-        model = getattr(module, "DdbjRecord")
-    except AttributeError as e:
-        raise Exception(f"Module {version} does not contain DdbjRecord model: {e}") from e
-
-    if not issubclass(model, BaseModel):
-        raise TypeError(f"DdbjRecord in {version} must be a subclass of Pydantic BaseModel")
-
-    return model  # type: ignore
-
-
 def main() -> None:
-    args = parse_args(sys.argv[1:])
-    print(f"Dumping schema for version: {args.version}")
+    try:
+        args = parse_args(sys.argv[1:])
+        print(f"Dumping schema for version: {args.version}")
 
-    DdbjRecord = resolve_record_model(args.version)
+        DdbjRecord = resolve_record_model(args.version)
 
-    schema_dir_path = get_schema_dir_path()
-    schema_path = schema_dir_path.joinpath(f"{args.version}/ddbj_record.schema.json")
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
+        schema_dir_path = get_schema_dir_path()
+        schema_path = schema_dir_path.joinpath(f"{args.version}/ddbj_record.schema.json")
+        schema_path.parent.mkdir(parents=True, exist_ok=True)
 
-    schema_dict = DdbjRecord.model_json_schema()
-    resolved_schema = jsonref.loads(json.dumps(schema_dict))
-    resolved_schema_dict = dict(resolved_schema)
-    del resolved_schema_dict["$defs"]
+        schema_dict = DdbjRecord.model_json_schema()
+        resolved_schema_dict = deref_schema(schema_dict)
 
-    with schema_path.open("w", encoding="utf-8") as f:
-        f.write(json.dumps(resolved_schema_dict, indent=2))
+        with schema_path.open("w", encoding="utf-8") as f:
+            f.write(json.dumps(resolved_schema_dict, indent=2))
 
-    print(f"Wrote schema to: {schema_path}")
+        print(f"Wrote schema to: {schema_path}")
 
-
-if __name__ == "__main__":
-    main()
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

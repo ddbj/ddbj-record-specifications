@@ -3,16 +3,6 @@ from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 
-class Datatype(BaseModel):
-    type: Literal["WGS", "GNM"] = Field(
-        description="if the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
-    )
-
-
-class Keyword(BaseModel):
-    keyword: List[str]
-
-
 class Dblink(BaseModel):
     project: str = Field(examples=["PRJDB999999"])
     biosample: str = Field(examples=["SAMD999999"])
@@ -69,8 +59,6 @@ class Date(BaseModel):
 
 
 class Common(BaseModel):
-    DATATYPE: Datatype
-    KEYWORD: Keyword
     DBLINK: Dblink
     SUBMITTER: Submitter
     REFERENCE: List[Reference]
