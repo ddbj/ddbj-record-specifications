@@ -25,47 +25,27 @@ DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換�
 現状、以下の 2 つのバージョンが存在する
 
 - **v1**
-  -
-
+  - Python 定義: <https://github.com/ddbj/ddbj-record-specifications/blob/main/ddbj_record/schema/v1.py>
+  - JSON Schema: <https://github.com/ddbj/ddbj-record-specifications/blob/main/schemas/v1/ddbj_record.schema.json>
 - **v2**
-  - 次期バージョンとして検討中のスキーマ
+  - Python 定義: <https://github.com/ddbj/ddbj-record-specifications/blob/main/ddbj_record/schema/v2.py>
+  - JSON Schema: <https://github.com/ddbj/ddbj-record-specifications/blob/main/schemas/v2/ddbj_record.schema.json>
 
-各バージョンの JSON Schema は [./schemas](./schemas) ディレクトリ以下に格納されています。
+## Validator
 
-## JSON Schema の生成方法
+2段階でのバリデーションを想定している:
 
-```
-# ./ddbj_record/schema_v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
-dump_v1_schema
+- **JSON schema level の validation**
+  - 型チェックや必須フィールドのチェックなど
+- **スキーマを超えたロジックレベルでの validation**
+  - 必須 feature / qualifier のチェック
+  - 特定組み合わせの制約など
 
-# ./ddbj_record/schema_v2.py より、./schemas/v1/ddbj_record.schema.json を生成する
-dump_v2_schema
-```
-
-## Feature / Qualifier 定義
-
-INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/feature-table)) に準拠しつつ、以下の形式で補助情報を定義します:
-
-- `features.json`: 各 Feature が必須/任意で持つ Qualifier の一覧
-- `qualifiers.json`: 各 Qualifier の値の形式・制約 (例: フリーテキスト、列挙値、正規表現など)
-
-これらは `feature_table/` ディレクトリに格納されています。
-
-## バリデーション
-
-本リポジトリでは、以下の2段階でのバリデーションを想定しています：
-
-1. **JSON Schema による構造的検証**
-2. **スキーマを超えたロジックレベルでの検証** (例: 必須 qualifier の存在チェック、特定組み合わせの制約など)
-
-追加のバリデーションは、`features.json` / `qualifiers.json` の情報を用いて、バリデータツール (将来的には API または CLI) で実行されます。
-
-```
-validate_record v1 --json ./tests/ddbj_record_v1_trimmed.json
-validate_record v2 --json ./tests/ddbj_record_v2_trimmed.json
+```bash
+ddbj_record_validator --version v2 --input input.json
 ```
 
-### バリデーション出力形式 (案)
+validation 結果の出力は、以下のような json となる:
 
 ```json
 {
@@ -79,23 +59,56 @@ validate_record v2 --json ./tests/ddbj_record_v2_trimmed.json
 }
 ```
 
-## ユーティリティスクリプト
+## Converter
 
-- ddbj_record/feature_table/parse_feature_table.py: INSDC HTML 仕様から `features.json` / `qualifiers.json` を自動生成
-- その他、スキーマの生成や変換に関わる補助スクリプトを随時追加予定
-
-## 今後の展望
-
-- v0.2 スキーマの確定と公開
-- 単体 CLI バリデータの提供 (単一バイナリまたは Python CLI)
-- API Server 形式でのバリデーションサービスの提供
+```bash
+ddbj_record_converter --from v1 --to v2 --input input.json --output output
+```
 
 ## Development
+
+### 開発環境
+
+開発環境として、docker を用いている
 
 ```bash
 docker compose up -d --build
 docker compose exec app bash
 ```
+
+また、docker では、`python 3.12` を用いているが、`python 3.9` 以上であればおそらく動くはず。
+
+```bash
+python -m pip install -e .[tests]
+```
+
+### 新たな schema の追加・開発
+
+- Semantic Versioning は基本的に行わない
+- 共通の編集点として、`draft.py` のようなファイルを latest (e.g., `v2.py`) からコピーして、編集を行う
+  - つまり、v2 の minor version を上げるのではなく、draft を編集して、新たな major version (e.g., v3) を release する
+  - Converter の存在から、なるべく、version 間の互換性を保つようにする
+- schema の version と python package としての version は別物として扱う
+
+### JSON Schema の生成方法
+
+```bash
+# ./ddbj_record/schema/v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
+dump_json_schema --version v1
+dump_json_schema --version v2
+dump_json_schema --version draft
+```
+
+### Feature / Qualifier 定義
+
+**まだ実験的に実装中**
+
+INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/feature-table)) に準拠しつつ、以下の形式で補助情報を定義する:
+
+- `features.json`: 各 Feature が必須/任意で持つ Qualifier の一覧
+- `qualifiers.json`: 各 Qualifier の値の形式・制約 (例: フリーテキスト、列挙値、正規表現など)
+
+これらの json を `ddbj_record/feature_table` ディレクトリ以下に格納する。
 
 ## License
 

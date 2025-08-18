@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Optional
 import jsonref  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field
 
-from ddbj_record_validator.utils import get_schema_dir_path
+from ddbj_record.utils import get_schema_dir_path
 
 
 class Provenance(BaseModel):

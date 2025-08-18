@@ -13,8 +13,8 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ValidationError
 
-from ddbj_record_validator.schema.v1 import DdbjRecord as DdbjRecordV1
-from ddbj_record_validator.schema.v2 import DdbjRecord as DdbjRecordV2
+from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
+from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 
 
 class SchemaVersion(str, Enum):

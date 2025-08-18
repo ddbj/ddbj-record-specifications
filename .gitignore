@@ -185,4 +185,4 @@ cython_debug/
 
 # === Our definitions ===
 
-feature_table/meta/source.html
+ddbj_record/feature_table/spec/meta/source.html

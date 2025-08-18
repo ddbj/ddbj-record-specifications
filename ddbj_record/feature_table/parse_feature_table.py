@@ -13,7 +13,7 @@ import httpx
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 
-from ddbj_record_validator.utils import get_feature_table_dir_path
+from ddbj_record.utils import get_feature_table_dir_path
 
 INSDC_FEATURE_TABLE_URL = "https://www.insdc.org/submitting-standards/feature-table/"
 INSDC_FEATURE_TABLE_HTML_NAME = "meta/source.html"

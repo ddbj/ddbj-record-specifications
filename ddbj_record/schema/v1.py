@@ -3,7 +3,7 @@ from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from ddbj_record_validator.utils import deref_schema, get_schema_dir_path
+from ddbj_record.utils import deref_schema, get_schema_dir_path
 
 
 class Datatype(BaseModel):

@@ -9,7 +9,7 @@ __author__ = "Bioinformatics and DDBJ Center"
 __email__ = "trace@ddbj.nig.ac.jp"
 __license__ = "Apache-2.0"
 
-from ddbj_record_validator.validator import SchemaVersion, validate_json_data
+from ddbj_record.validator import SchemaVersion, validate_json_data
 
 __all__ = [
     "SchemaVersion",
