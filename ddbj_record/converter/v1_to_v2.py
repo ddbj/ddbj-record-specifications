@@ -33,7 +33,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     organization = Organization(
         name=v1_obj.COMMON.SUBMITTER.institute,
         abbreviation=None,
-        url=None,
+        url=v1_obj.COMMON.SUBMITTER.url,
         role=None,
         type=None,
         address=Address(
@@ -47,7 +47,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     )
     for i, ab_name in enumerate(v1_obj.COMMON.SUBMITTER.ab_name):
         submitters.append(Person(
-            name=ab_name,
+            name=v1_obj.COMMON.SUBMITTER.contact if i == 0 else "",
             abbreviation=ab_name,
             email=v1_obj.COMMON.SUBMITTER.email if i == 0 else None,
             orcid=None,

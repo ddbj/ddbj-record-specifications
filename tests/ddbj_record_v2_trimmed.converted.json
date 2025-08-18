@@ -6,14 +6,14 @@
   "submission": {
     "submitters": [
       {
-        "name": "Mishima,H.",
+        "name": "Hanako Mishima",
         "abbreviation": "Mishima,H.",
         "email": "mishima@ddbj.nig.ac.jp",
         "orcid": null,
         "organization": {
           "name": "National Institute of Genetics",
           "abbreviation": null,
-          "url": null,
+          "url": "https://ddbj.nig.ac.jp",
           "role": null,
           "type": null,
           "address": {
@@ -27,14 +27,14 @@
         }
       },
       {
-        "name": "Tanizawa,Y.",
+        "name": "",
         "abbreviation": "Tanizawa,Y.",
         "email": null,
         "orcid": null,
         "organization": null
       },
       {
-        "name": "Nakamura,Y.",
+        "name": "",
         "abbreviation": "Nakamura,Y.",
         "email": null,
         "orcid": null,
