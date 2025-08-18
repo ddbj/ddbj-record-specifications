@@ -1,9 +1,6 @@
-import json
 from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
-
-from ddbj_record.utils import deref_schema, get_schema_dir_path
 
 
 class Datatype(BaseModel):
@@ -144,19 +141,3 @@ class DdbjRecord(BaseModel):
         description="Metadata that DFAST internally handles"
     )
     ENTRIES: List[Entry]
-
-
-# === CLI ===
-
-def main() -> None:
-    schema_dir_path = get_schema_dir_path()
-    schema_path = schema_dir_path.joinpath("v1/ddbj_record.schema.json")
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
-    schema_dict = DdbjRecord.model_json_schema()
-    deref_schema_dict = deref_schema(schema_dict)
-    with schema_path.open("w", encoding="utf-8") as f:
-        f.write(json.dumps(deref_schema_dict, indent=2))
-
-
-if __name__ == "__main__":
-    main()

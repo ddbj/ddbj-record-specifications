@@ -8,7 +8,7 @@ DDBJ における登録用 JSON フォーマット (DDBJ Record) の仕様を定
 本リポジトリでは、以下の内容を取り扱う:
 
 - Python の pydantic による schema 定義
-  - これを master file として、JSON Schema を生成する
+  - これを main file として、JSON Schema を生成する
   - Python の型定義として、周辺ツールなどで使用されることを想定している
 - DDBJ Record の validator
   - JSON file を入力とする

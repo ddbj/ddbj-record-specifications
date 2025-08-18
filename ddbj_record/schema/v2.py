@@ -1,10 +1,6 @@
-import json
 from typing import Dict, List, Literal, Optional
 
-import jsonref  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field
-
-from ddbj_record.utils import get_schema_dir_path
 
 
 class Provenance(BaseModel):
@@ -630,22 +626,3 @@ class DdbjRecord(BaseModel):
         default_factory=list,
         description="List of feature annotations associated with the sequences.",
     )
-
-
-# === CLI ===
-
-
-def main() -> None:
-    schema_dir_path = get_schema_dir_path()
-    schema_path = schema_dir_path.joinpath("v2/ddbj_record.schema.json")
-    schema_path.parent.mkdir(parents=True, exist_ok=True)
-    schema_dict = DdbjRecord.model_json_schema()
-    resolved_schema = jsonref.loads(json.dumps(schema_dict))
-    resolved_schema_dict = dict(resolved_schema)
-    del resolved_schema_dict["$defs"]
-    with schema_path.open("w", encoding="utf-8") as f:
-        f.write(json.dumps(resolved_schema_dict, indent=2))
-
-
-if __name__ == "__main__":
-    main()
