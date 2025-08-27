@@ -56,6 +56,9 @@ class Address(BaseModel):
         description="The postal or ZIP code.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Organization(BaseModel):
     """
@@ -96,13 +99,16 @@ class Organization(BaseModel):
         description="The Research Organization Registry (ROR) identifier for the organization.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Person(BaseModel):
     """
     Individual person information.
     """
-    name: str = Field(
-        ...,
+    name: Optional[str] = Field(
+        None,
         examples=["Hanako Mishima"],
         description="The full name of the person."
     )
@@ -112,7 +118,7 @@ class Person(BaseModel):
         description="The abbreviated name of the person.",
     )
     email: Optional[str] = Field(
-        ...,
+        None,
         examples=["mishima@ddbj.nig.ac.jp"],
         description="The email address of the person.",
     )
@@ -122,9 +128,12 @@ class Person(BaseModel):
         description="The ORCID identifier for the person.",
     )
     organization: Optional[Organization] = Field(
-        ...,
+        None,
         description="The organization that the person is affiliated with.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Xref(BaseModel):
@@ -156,6 +165,9 @@ class Xref(BaseModel):
         description="The accession number or identifier in the external database.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Reference(BaseModel):
     """
@@ -169,7 +181,7 @@ class Reference(BaseModel):
         description="The title of the publication or reference.",
     )
     authors: List[Person] = Field(
-        ...,
+        default_factory=list,
         description="The list of authors who contributed to the publication.",
     )
     consortiums: Optional[List[Organization]] = Field(
@@ -232,6 +244,9 @@ class Reference(BaseModel):
         description="The PubMed identifier of the publication.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Submission(BaseModel):
     """
@@ -240,7 +255,7 @@ class Submission(BaseModel):
     publication references, and submission-specific parameters such as data type and hold date.
     """
     submitters: List[Person] = Field(
-        ...,
+        default_factory=list,
         description="The list of people who are submitting the data.",
     )
     db_xrefs: List[Xref] = Field(
@@ -280,6 +295,9 @@ class Submission(BaseModel):
         description="The date until which the submission should be held before public release (ISO 8601 format).",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 # === Experiment (JGA experiment schema subset) ===
 
@@ -304,6 +322,9 @@ class LibraryLayout(BaseModel):
         description="Standard deviation of the insert size for paired reads.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class TargetedLocus(BaseModel):
     """
@@ -321,6 +342,9 @@ class TargetedLocus(BaseModel):
         None,
         description="Submitter supplied description of alternate locus and auxiliary information.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Design(BaseModel):
@@ -392,6 +416,9 @@ class Design(BaseModel):
         description="Free form text describing the protocol by which the sequencing library was constructed.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Platform(BaseModel):
     """
@@ -408,6 +435,9 @@ class Platform(BaseModel):
         examples=["Illumina HiSeq 2500"],
         description="The specific instrument model used.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Experiment(BaseModel):
@@ -439,6 +469,9 @@ class Experiment(BaseModel):
         description="Experiment attributes as key-value pairs. This is a simplified version of EXPERIMENT_ATTRIBUTES, where each attribute is represented as a key-value pair.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 # === Sequences ===
 
@@ -465,7 +498,7 @@ class Qualifier(BaseModel):
     )
 
     # extra field
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
 
 class Source(BaseModel):
@@ -488,6 +521,9 @@ class Source(BaseModel):
         default_factory=dict,
         description="Additional qualifiers. Key is the qualifier name.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Entry(BaseModel):
@@ -535,6 +571,9 @@ class Entry(BaseModel):
         description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Sequences(BaseModel):
     """
@@ -547,9 +586,12 @@ class Sequences(BaseModel):
         description="The common source information that applies to all sequence entries unless overridden by individual entry sources.",
     )
     entries: List[Entry] = Field(
-        ...,
+        default_factory=list,
         description="List of individual sequence entries, each with its own metadata and optional sequence data.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 # === Feature ===
@@ -586,6 +628,9 @@ class Feature(BaseModel):
         description="Qualifiers that provide additional information about this feature. Key is the qualifier name.",
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 # === DDBJ Record ===
 
@@ -621,3 +666,6 @@ class DdbjRecord(BaseModel):
         default_factory=list,
         description="List of feature annotations associated with the sequences.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")

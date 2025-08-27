@@ -22,9 +22,7 @@ def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
 
 def _create_provenance() -> Provenance:
     """Create provenance metadata for v2."""
-    return Provenance(
-        source_format=None,
-    )
+    return Provenance()
 
 
 def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
@@ -32,10 +30,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     submitters: List[Person] = []
     organization = Organization(
         name=v1_obj.COMMON.SUBMITTER.institute,
-        abbreviation=None,
         url=v1_obj.COMMON.SUBMITTER.url,
-        role=None,
-        type=None,
         address=Address(
             country=v1_obj.COMMON.SUBMITTER.country,
             state=v1_obj.COMMON.SUBMITTER.state,
@@ -43,14 +38,12 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
             street=v1_obj.COMMON.SUBMITTER.street,
             postal_code=v1_obj.COMMON.SUBMITTER.zip
         ),
-        ror_id=None,
     )
     for i, ab_name in enumerate(v1_obj.COMMON.SUBMITTER.ab_name):
         submitters.append(Person(
-            name=v1_obj.COMMON.SUBMITTER.contact if i == 0 else "",
+            name=v1_obj.COMMON.SUBMITTER.contact if i == 0 else None,
             abbreviation=ab_name,
             email=v1_obj.COMMON.SUBMITTER.email if i == 0 else None,
-            orcid=None,
             organization=organization if i == 0 else None,
         ))
 
@@ -78,25 +71,9 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     for ref in v1_obj.COMMON.REFERENCE:
         references.append(Reference(
             title=ref.title,
-            authors=[Person(
-                name=ab_name,
-                abbreviation=ab_name,
-                email=None,
-                orcid=None,
-                organization=None,
-            ) for ab_name in ref.ab_name],
-            consortiums=None,
-            status=ref.status.lower(),  # type: ignore
+            authors=[Person(abbreviation=ab_name) for ab_name in ref.ab_name],
+            status=ref.status.lower(),
             year=ref.year,
-            journal=None,
-            volume=None,
-            issue=None,
-            start_page=None,
-            end_page=None,
-            date_published=None,
-            doi=None,
-            url=None,
-            pubmed_id=None,
         ))
 
     # === comments ===
@@ -119,12 +96,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
 def _convert_experiments(v1_obj: DdbjRecordV1) -> List[Experiment]:
     return [Experiment(
         id="experiment_1",
-        title=None,
-        design=None,
-        platform=Platform(
-            platform_type=v1_obj.COMMON.ST_COMMENT.sequencing_technology,
-            instrument_model=v1_obj.COMMON.ST_COMMENT.sequencing_technology,
-        ),
+        platform=Platform(platform_type=v1_obj.COMMON.ST_COMMENT.sequencing_technology),
         experiment_attributes={
             "tagset_id": v1_obj.COMMON.ST_COMMENT.tagset_id,
             "assembly_method": v1_obj.COMMON.ST_COMMENT.assembly_method,
@@ -143,10 +115,7 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
         if key in ("organism", "mol_type"):
             continue
         if value is not None:
-            common_source.qualifiers[key] = [Qualifier(
-                id=None,
-                value=value,
-            )]
+            common_source.qualifiers[key] = [Qualifier(value=value,)]
 
     entries: List[Entry] = []
     for entry in v1_obj.ENTRIES:
@@ -167,10 +136,7 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
             for key, value in source_feature.qualifiers.items():
                 if key in ("organism", "mol_type"):
                     continue
-                entry_source.qualifiers[key] = [Qualifier(
-                    id=None,
-                    value=v,
-                ) for v in value]
+                entry_source.qualifiers[key] = [Qualifier(value=v) for v in value]
         entry_definition = None  # definition for each entry
         if "ff_definition" in source_feature.qualifiers:
             entry_definition = source_feature.qualifiers["ff_definition"]
@@ -205,7 +171,7 @@ def _convert_features(v1_obj: DdbjRecordV1) -> List[Feature]:
                 location=feature.location,
                 sequence_id=entry.id,
                 qualifiers={
-                    key: [Qualifier(id=None, value=v) for v in value]
+                    key: [Qualifier(value=v) for v in value]
                     for key, value in feature.qualifiers.items()
                 },
             ))

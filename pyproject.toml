@@ -51,6 +51,7 @@ sapporo = [
 files = ["./ddbj_record/**/*.py", "./tests/**/*.py"]
 follow_imports = "silent"
 strict = true
+plugins = ["pydantic.mypy"]
 
 [tool.pylint.messages_control]
 disable = [

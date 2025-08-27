@@ -91,7 +91,7 @@ def convert_json_data(json_data: Dict[str, Any], from_: str, to: str) -> Dict[st
         return json_data
     elif from_ == "v1" and to == "v2":
         v1_obj = FromDdbjRecord.model_validate(json_data)
-        return v1_to_v2(v1_obj).model_dump()  # type: ignore
+        return v1_to_v2(v1_obj).model_dump(exclude_none=True)  # type: ignore
     elif from_ == "v2" and to == "v1":
         raise NotImplementedError("Conversion from v2 to v1 is not implemented yet.")
     elif from_ == "v2" and to == "v2":
