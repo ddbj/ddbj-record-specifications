@@ -42,7 +42,8 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-sapporo = [
+ddbj_record = [
+    "py.typed",
     "feature_table/spec/features.json",
     "feature_table/spec/qualifiers.json",
 ]
