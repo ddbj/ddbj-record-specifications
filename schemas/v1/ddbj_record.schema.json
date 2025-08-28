@@ -1,4 +1,5 @@
 {
+  "additionalProperties": false,
   "properties": {
     "schema_version": {
       "examples": [
@@ -8,84 +9,61 @@
       "type": "string"
     },
     "COMMON": {
+      "additionalProperties": false,
       "properties": {
-        "DATATYPE": {
-          "properties": {
-            "type": {
-              "description": "if the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
-              "enum": [
-                "WGS",
-                "GNM"
-              ],
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "title": "Datatype",
-          "type": "object"
-        },
-        "KEYWORD": {
-          "properties": {
-            "keyword": {
-              "items": {
-                "type": "string"
-              },
-              "title": "Keyword",
-              "type": "array"
-            }
-          },
-          "required": [
-            "keyword"
-          ],
-          "title": "Keyword",
-          "type": "object"
-        },
         "DBLINK": {
-          "properties": {
-            "project": {
-              "examples": [
-                "PRJDB999999"
-              ],
-              "title": "Project",
-              "type": "string"
-            },
-            "biosample": {
-              "examples": [
-                "SAMD999999"
-              ],
-              "title": "Biosample",
-              "type": "string"
-            },
-            "sequence read archive": {
-              "anyOf": [
-                {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "project": {
+                  "examples": [
+                    "PRJDB999999"
+                  ],
+                  "title": "Project",
+                  "type": "string"
                 },
-                {
-                  "type": "null"
+                "biosample": {
+                  "examples": [
+                    "SAMD999999"
+                  ],
+                  "title": "Biosample",
+                  "type": "string"
+                },
+                "sequence read archive": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "examples": [
+                    "DRA999999"
+                  ],
+                  "title": "Sequence Read Archive"
                 }
+              },
+              "required": [
+                "project",
+                "biosample"
               ],
-              "default": null,
-              "examples": [
-                "DRA999999"
-              ],
-              "title": "Sequence Read Archive"
+              "title": "Dblink",
+              "type": "object"
+            },
+            {
+              "type": "null"
             }
-          },
-          "required": [
-            "project",
-            "biosample"
           ],
-          "title": "Dblink",
-          "type": "object"
+          "default": null
         },
         "SUBMITTER": {
+          "additionalProperties": false,
           "properties": {
             "ab_name": {
               "examples": [
@@ -148,6 +126,21 @@
               ],
               "title": "Department"
             },
+            "consrtm": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "Example Consortium"
+              ],
+              "title": "Consrtm"
+            },
             "country": {
               "examples": [
                 "Japan"
@@ -207,6 +200,7 @@
         },
         "REFERENCE": {
           "items": {
+            "additionalProperties": false,
             "properties": {
               "title": {
                 "examples": [
@@ -254,6 +248,7 @@
         },
         "COMMENT": {
           "items": {
+            "additionalProperties": false,
             "properties": {
               "line": {
                 "examples": [
@@ -277,6 +272,7 @@
           "type": "array"
         },
         "ST_COMMENT": {
+          "additionalProperties": false,
           "properties": {
             "tagset_id": {
               "examples": [
@@ -292,12 +288,35 @@
               "title": "Assembly Method",
               "type": "string"
             },
-            "Genome Coverage": {
+            "Coverage": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "examples": [
                 "100x"
               ],
-              "title": "Genome Coverage",
-              "type": "string"
+              "title": "Coverage"
+            },
+            "Genome Coverage": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "examples": [
+                "100x"
+              ],
+              "title": "Genome Coverage"
             },
             "Sequencing Technology": {
               "examples": [
@@ -310,7 +329,6 @@
           "required": [
             "tagset_id",
             "Assembly Method",
-            "Genome Coverage",
             "Sequencing Technology"
           ],
           "title": "StComment",
@@ -319,6 +337,7 @@
         "DATE": {
           "anyOf": [
             {
+              "additionalProperties": false,
               "properties": {
                 "hold_date": {
                   "examples": [
@@ -354,9 +373,6 @@
         }
       },
       "required": [
-        "DATATYPE",
-        "KEYWORD",
-        "DBLINK",
         "SUBMITTER",
         "REFERENCE",
         "COMMENT",
@@ -367,6 +383,7 @@
       "type": "object"
     },
     "COMMON_SOURCE": {
+      "additionalProperties": true,
       "properties": {
         "organism": {
           "examples": [
@@ -375,105 +392,23 @@
           "title": "Organism",
           "type": "string"
         },
-        "strain": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "examples": [
-            "LOOC260"
-          ],
-          "title": "Strain"
-        },
         "mol_type": {
           "examples": [
             "genomic DNA"
           ],
           "title": "Mol Type",
           "type": "string"
-        },
-        "type_material": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "examples": [
-            "type strain"
-          ],
-          "title": "Type Material"
-        },
-        "collection_date": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "examples": [
-            "2012-04-01"
-          ],
-          "title": "Collection Date"
-        },
-        "culture_collection": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "examples": [
-            "JCM:18460"
-          ],
-          "title": "Culture Collection"
-        },
-        "isolation_source": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "examples": [
-            "silage"
-          ],
-          "title": "Isolation Source"
-        },
-        "geo_loc_name": {
-          "examples": [
-            "Japan:Hokkaido"
-          ],
-          "title": "Geo Loc Name",
-          "type": "string"
         }
       },
       "required": [
         "organism",
-        "mol_type",
-        "geo_loc_name"
+        "mol_type"
       ],
       "title": "CommonSource",
       "type": "object"
     },
     "COMMON_META": {
+      "additionalProperties": false,
       "properties": {
         "division": {
           "examples": [
@@ -483,22 +418,45 @@
           "type": "string"
         },
         "locus_tag_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "examples": [
             "PLH"
           ],
-          "title": "Locus Tag Prefix",
-          "type": "string"
+          "title": "Locus Tag Prefix"
+        },
+        "dfast_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "examples": [
+            "1.2.18"
+          ],
+          "title": "Dfast Version"
         }
       },
       "required": [
-        "division",
-        "locus_tag_prefix"
+        "division"
       ],
       "title": "CommonMeta",
       "type": "object"
     },
     "ENTRIES": {
       "items": {
+        "additionalProperties": false,
         "properties": {
           "id": {
             "examples": [
@@ -558,6 +516,7 @@
           "features": {
             "description": "The list of annotated biological features.",
             "items": {
+              "additionalProperties": false,
               "properties": {
                 "id": {
                   "examples": [
@@ -583,7 +542,14 @@
                 "qualifiers": {
                   "additionalProperties": {
                     "items": {
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
                     },
                     "type": "array"
                   },
@@ -610,8 +576,7 @@
               "required": [
                 "id",
                 "type",
-                "location",
-                "qualifiers"
+                "location"
               ],
               "title": "Feature",
               "type": "object"
@@ -625,8 +590,7 @@
           "name",
           "type",
           "topology",
-          "sequence",
-          "features"
+          "sequence"
         ],
         "title": "Entry",
         "type": "object"

@@ -1,4 +1,5 @@
 {
+  "additionalProperties": false,
   "description": "Complete DDBJ record structure.\nThis is the root class that contains all information for a DDBJ data submission,\nincluding metadata, sequences, features, and experimental information.",
   "properties": {
     "schema_version": {
@@ -39,20 +40,30 @@
       "type": "object"
     },
     "submission": {
+      "additionalProperties": false,
       "description": "Submission metadata for data deposit to DDBJ.\nThis class contains information about the submitters, cross-references to external databases,\npublication references, and submission-specific parameters such as data type and hold date.",
       "properties": {
         "submitters": {
           "description": "The list of people who are submitting the data.",
           "items": {
+            "additionalProperties": false,
             "description": "Individual person information.",
             "properties": {
               "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
                 "description": "The full name of the person.",
                 "examples": [
                   "Hanako Mishima"
                 ],
-                "title": "Name",
-                "type": "string"
+                "title": "Name"
               },
               "abbreviation": {
                 "anyOf": [
@@ -71,12 +82,20 @@
                 "title": "Abbreviation"
               },
               "email": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
                 "description": "The email address of the person.",
                 "examples": [
                   "mishima@ddbj.nig.ac.jp"
                 ],
-                "title": "Email",
-                "type": "string"
+                "title": "Email"
               },
               "orcid": {
                 "anyOf": [
@@ -95,318 +114,10 @@
                 "title": "Orcid"
               },
               "organization": {
-                "description": "Organization information.",
-                "properties": {
-                  "name": {
-                    "description": "The full name of the organization.",
-                    "examples": [
-                      "National Institute of Genetics"
-                    ],
-                    "title": "Name",
-                    "type": "string"
-                  },
-                  "abbreviation": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The abbreviated name of the organization.",
-                    "examples": [
-                      "NIG"
-                    ],
-                    "title": "Abbreviation"
-                  },
-                  "url": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The URL of the organization's website.",
-                    "examples": [
-                      "http://www.ddbj.nig.ac.jp"
-                    ],
-                    "title": "Url"
-                  },
-                  "role": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
-                    "examples": [
-                      "owner"
-                    ],
-                    "title": "Role"
-                  },
-                  "type": {
-                    "anyOf": [
-                      {
-                        "enum": [
-                          "institution",
-                          "company",
-                          "government",
-                          "non-profit",
-                          "consortium",
-                          "other"
-                        ],
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
-                    "examples": [
-                      "institution"
-                    ],
-                    "title": "Type"
-                  },
-                  "address": {
-                    "anyOf": [
-                      {
-                        "description": "Postal address of an organization or person.",
-                        "properties": {
-                          "country": {
-                            "description": "The country of the address.",
-                            "examples": [
-                              "Japan"
-                            ],
-                            "title": "Country",
-                            "type": "string"
-                          },
-                          "state": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "default": null,
-                            "description": "The state or region of the address.",
-                            "examples": [
-                              "Shizuoka"
-                            ],
-                            "title": "State"
-                          },
-                          "city": {
-                            "description": "The city of the address.",
-                            "examples": [
-                              "Mishima"
-                            ],
-                            "title": "City",
-                            "type": "string"
-                          },
-                          "street": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "default": null,
-                            "description": "The street address.",
-                            "examples": [
-                              "Yata 1111"
-                            ],
-                            "title": "Street"
-                          },
-                          "postal_code": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ],
-                            "default": null,
-                            "description": "The postal or ZIP code.",
-                            "examples": [
-                              "411-8540"
-                            ],
-                            "title": "Postal Code"
-                          }
-                        },
-                        "required": [
-                          "country",
-                          "city"
-                        ],
-                        "title": "Address",
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The postal address of the organization."
-                  },
-                  "ror_id": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "description": "The Research Organization Registry (ROR) identifier for the organization.",
-                    "examples": [
-                      "https://ror.org/01xq5f0"
-                    ],
-                    "title": "Ror Id"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "title": "Organization",
-                "type": "object"
-              }
-            },
-            "required": [
-              "name",
-              "email",
-              "organization"
-            ],
-            "title": "Person",
-            "type": "object"
-          },
-          "title": "Submitters",
-          "type": "array"
-        },
-        "db_xrefs": {
-          "description": "Cross-references to external databases related to this submission.",
-          "items": {
-            "description": "Cross-reference to external databases.\nThis class represents a reference to an entry in an external database,\nincluding the database name, accession ID, and the relationship type between the current record and the external entry.\nDatabase names use prefixes from https://registry.identifiers.org/registry.",
-            "properties": {
-              "db": {
-                "description": "The name of the external database using prefixes from https://registry.identifiers.org/registry where available.",
-                "enum": [
-                  "bioproject",
-                  "biosample",
-                  "insdc.sra",
-                  "jga",
-                  "gea",
-                  "insdc.gca",
-                  "insdc",
-                  "metabobank",
-                  "taxonomy",
-                  "geo"
-                ],
-                "examples": [
-                  "bioproject"
-                ],
-                "title": "Db",
-                "type": "string"
-              },
-              "id": {
-                "description": "The accession number or identifier in the external database.",
-                "examples": [
-                  "PRJDB999999"
-                ],
-                "title": "Id",
-                "type": "string"
-              }
-            },
-            "required": [
-              "db",
-              "id"
-            ],
-            "title": "Xref",
-            "type": "object"
-          },
-          "title": "Db Xrefs",
-          "type": "array"
-        },
-        "references": {
-          "description": "List of publications or references associated with this submission.",
-          "items": {
-            "description": "Bibliographic reference information.\nThis class represents a scientific publication or reference associated with the data,\nincluding title, authors, publication status, journal information, and identifiers.",
-            "properties": {
-              "title": {
-                "description": "The title of the publication or reference.",
-                "examples": [
-                  "Sequence and analysis of mouse ch.8"
-                ],
-                "title": "Title",
-                "type": "string"
-              },
-              "authors": {
-                "description": "The list of authors who contributed to the publication.",
-                "items": {
-                  "description": "Individual person information.",
-                  "properties": {
-                    "name": {
-                      "description": "The full name of the person.",
-                      "examples": [
-                        "Hanako Mishima"
-                      ],
-                      "title": "Name",
-                      "type": "string"
-                    },
-                    "abbreviation": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "description": "The abbreviated name of the person.",
-                      "examples": [
-                        "Mishima,H."
-                      ],
-                      "title": "Abbreviation"
-                    },
-                    "email": {
-                      "description": "The email address of the person.",
-                      "examples": [
-                        "mishima@ddbj.nig.ac.jp"
-                      ],
-                      "title": "Email",
-                      "type": "string"
-                    },
-                    "orcid": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "description": "The ORCID identifier for the person.",
-                      "examples": [
-                        "0000-0000-0000-0000"
-                      ],
-                      "title": "Orcid"
-                    },
-                    "organization": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "additionalProperties": false,
                       "description": "Organization information.",
                       "properties": {
                         "name": {
@@ -489,9 +200,26 @@
                           ],
                           "title": "Type"
                         },
+                        "department": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The department within the organization.",
+                          "examples": [
+                            "DNA Data Bank of Japan"
+                          ],
+                          "title": "Department"
+                        },
                         "address": {
                           "anyOf": [
                             {
+                              "additionalProperties": false,
                               "description": "Postal address of an organization or person.",
                               "properties": {
                                 "country": {
@@ -595,13 +323,375 @@
                       ],
                       "title": "Organization",
                       "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The organization that the person is affiliated with.",
+                "title": "Organization"
+              }
+            },
+            "title": "Person",
+            "type": "object"
+          },
+          "title": "Submitters",
+          "type": "array"
+        },
+        "db_xrefs": {
+          "description": "Cross-references to external databases related to this submission.",
+          "items": {
+            "additionalProperties": false,
+            "description": "Cross-reference to external databases.\nThis class represents a reference to an entry in an external database,\nincluding the database name, accession ID, and the relationship type between the current record and the external entry.\nDatabase names use prefixes from https://registry.identifiers.org/registry.",
+            "properties": {
+              "db": {
+                "description": "The name of the external database using prefixes from https://registry.identifiers.org/registry where available.",
+                "enum": [
+                  "bioproject",
+                  "biosample",
+                  "insdc.sra",
+                  "jga",
+                  "gea",
+                  "insdc.gca",
+                  "insdc",
+                  "metabobank",
+                  "taxonomy",
+                  "geo"
+                ],
+                "examples": [
+                  "bioproject"
+                ],
+                "title": "Db",
+                "type": "string"
+              },
+              "id": {
+                "description": "The accession number or identifier in the external database.",
+                "examples": [
+                  "PRJDB999999"
+                ],
+                "title": "Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "db",
+              "id"
+            ],
+            "title": "Xref",
+            "type": "object"
+          },
+          "title": "Db Xrefs",
+          "type": "array"
+        },
+        "references": {
+          "description": "List of publications or references associated with this submission.",
+          "items": {
+            "additionalProperties": false,
+            "description": "Bibliographic reference information.\nThis class represents a scientific publication or reference associated with the data,\nincluding title, authors, publication status, journal information, and identifiers.",
+            "properties": {
+              "title": {
+                "description": "The title of the publication or reference.",
+                "examples": [
+                  "Sequence and analysis of mouse ch.8"
+                ],
+                "title": "Title",
+                "type": "string"
+              },
+              "authors": {
+                "description": "The list of authors who contributed to the publication.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "Individual person information.",
+                  "properties": {
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The full name of the person.",
+                      "examples": [
+                        "Hanako Mishima"
+                      ],
+                      "title": "Name"
+                    },
+                    "abbreviation": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The abbreviated name of the person.",
+                      "examples": [
+                        "Mishima,H."
+                      ],
+                      "title": "Abbreviation"
+                    },
+                    "email": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The email address of the person.",
+                      "examples": [
+                        "mishima@ddbj.nig.ac.jp"
+                      ],
+                      "title": "Email"
+                    },
+                    "orcid": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The ORCID identifier for the person.",
+                      "examples": [
+                        "0000-0000-0000-0000"
+                      ],
+                      "title": "Orcid"
+                    },
+                    "organization": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": false,
+                            "description": "Organization information.",
+                            "properties": {
+                              "name": {
+                                "description": "The full name of the organization.",
+                                "examples": [
+                                  "National Institute of Genetics"
+                                ],
+                                "title": "Name",
+                                "type": "string"
+                              },
+                              "abbreviation": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The abbreviated name of the organization.",
+                                "examples": [
+                                  "NIG"
+                                ],
+                                "title": "Abbreviation"
+                              },
+                              "url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The URL of the organization's website.",
+                                "examples": [
+                                  "http://www.ddbj.nig.ac.jp"
+                                ],
+                                "title": "Url"
+                              },
+                              "role": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
+                                "examples": [
+                                  "owner"
+                                ],
+                                "title": "Role"
+                              },
+                              "type": {
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "institution",
+                                      "company",
+                                      "government",
+                                      "non-profit",
+                                      "consortium",
+                                      "other"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
+                                "examples": [
+                                  "institution"
+                                ],
+                                "title": "Type"
+                              },
+                              "department": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The department within the organization.",
+                                "examples": [
+                                  "DNA Data Bank of Japan"
+                                ],
+                                "title": "Department"
+                              },
+                              "address": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "description": "Postal address of an organization or person.",
+                                    "properties": {
+                                      "country": {
+                                        "description": "The country of the address.",
+                                        "examples": [
+                                          "Japan"
+                                        ],
+                                        "title": "Country",
+                                        "type": "string"
+                                      },
+                                      "state": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null,
+                                        "description": "The state or region of the address.",
+                                        "examples": [
+                                          "Shizuoka"
+                                        ],
+                                        "title": "State"
+                                      },
+                                      "city": {
+                                        "description": "The city of the address.",
+                                        "examples": [
+                                          "Mishima"
+                                        ],
+                                        "title": "City",
+                                        "type": "string"
+                                      },
+                                      "street": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null,
+                                        "description": "The street address.",
+                                        "examples": [
+                                          "Yata 1111"
+                                        ],
+                                        "title": "Street"
+                                      },
+                                      "postal_code": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null,
+                                        "description": "The postal or ZIP code.",
+                                        "examples": [
+                                          "411-8540"
+                                        ],
+                                        "title": "Postal Code"
+                                      }
+                                    },
+                                    "required": [
+                                      "country",
+                                      "city"
+                                    ],
+                                    "title": "Address",
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The postal address of the organization."
+                              },
+                              "ror_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "default": null,
+                                "description": "The Research Organization Registry (ROR) identifier for the organization.",
+                                "examples": [
+                                  "https://ror.org/01xq5f0"
+                                ],
+                                "title": "Ror Id"
+                              }
+                            },
+                            "required": [
+                              "name"
+                            ],
+                            "title": "Organization",
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The organization that the person is affiliated with.",
+                      "title": "Organization"
                     }
                   },
-                  "required": [
-                    "name",
-                    "email",
-                    "organization"
-                  ],
                   "title": "Person",
                   "type": "object"
                 },
@@ -612,6 +702,7 @@
                 "anyOf": [
                   {
                     "items": {
+                      "additionalProperties": false,
                       "description": "Organization information.",
                       "properties": {
                         "name": {
@@ -694,9 +785,26 @@
                           ],
                           "title": "Type"
                         },
+                        "department": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The department within the organization.",
+                          "examples": [
+                            "DNA Data Bank of Japan"
+                          ],
+                          "title": "Department"
+                        },
                         "address": {
                           "anyOf": [
                             {
+                              "additionalProperties": false,
                               "description": "Postal address of an organization or person.",
                               "properties": {
                                 "country": {
@@ -979,7 +1087,6 @@
             },
             "required": [
               "title",
-              "authors",
               "status",
               "year"
             ],
@@ -1016,22 +1123,6 @@
             "WGS"
           ],
           "title": "Trad Submission Category"
-        },
-        "datatype": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The data type of the submission. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
-          "examples": [
-            "WGS"
-          ],
-          "title": "Datatype"
         },
         "division": {
           "anyOf": [
@@ -1082,15 +1173,13 @@
           "title": "Hold Date"
         }
       },
-      "required": [
-        "submitters"
-      ],
       "title": "Submission",
       "type": "object"
     },
     "experiments": {
       "description": "List of experimental information associated with this submission.",
       "items": {
+        "additionalProperties": false,
         "description": "Experiment element from JGA experiment schema (subset).\nAn Experiment specifies what will be sequenced and how the sequencing will be performed.",
         "properties": {
           "id": {
@@ -1120,6 +1209,7 @@
           "design": {
             "anyOf": [
               {
+                "additionalProperties": false,
                 "description": "DESIGN element from JGA experiment schema (LibraryType).",
                 "properties": {
                   "design_description": {
@@ -1288,6 +1378,7 @@
                   "library_layout": {
                     "anyOf": [
                       {
+                        "additionalProperties": false,
                         "description": "LIBRARY_LAYOUT specifies whether to expect single, paired, or other configuration of reads.",
                         "properties": {
                           "layout_type": {
@@ -1352,6 +1443,7 @@
                     "anyOf": [
                       {
                         "items": {
+                          "additionalProperties": false,
                           "description": "TARGETED_LOCI from JGA experiment schema.",
                           "properties": {
                             "locus_name": {
@@ -1442,6 +1534,7 @@
           "platform": {
             "anyOf": [
               {
+                "additionalProperties": false,
                 "description": "PLATFORM element from JGA experiment schema.\nSimplified to just store platform information as strings.",
                 "properties": {
                   "platform_type": {
@@ -1512,9 +1605,11 @@
       "type": "array"
     },
     "sequences": {
+      "additionalProperties": false,
       "description": "Collection of sequence entries with common source information.\nThis class contains a common source that applies to all entries unless overridden\nby individual entry-specific source information.",
       "properties": {
         "common_source": {
+          "additionalProperties": false,
           "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
           "properties": {
             "organism": {
@@ -1536,7 +1631,7 @@
             "qualifiers": {
               "additionalProperties": {
                 "items": {
-                  "additionalProperties": true,
+                  "additionalProperties": false,
                   "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                   "properties": {
                     "id": {
@@ -1590,6 +1685,7 @@
         "entries": {
           "description": "List of individual sequence entries, each with its own metadata and optional sequence data.",
           "items": {
+            "additionalProperties": false,
             "description": "Individual sequence entry information.\nThis class represents a single sequence entry with its metadata.\nEach entry can have its own source information that overrides the common source when specified.",
             "properties": {
               "id": {
@@ -1661,6 +1757,7 @@
               "source": {
                 "anyOf": [
                   {
+                    "additionalProperties": false,
                     "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
                     "properties": {
                       "organism": {
@@ -1682,7 +1779,7 @@
                       "qualifiers": {
                         "additionalProperties": {
                           "items": {
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                             "properties": {
                               "id": {
@@ -1772,8 +1869,7 @@
         }
       },
       "required": [
-        "common_source",
-        "entries"
+        "common_source"
       ],
       "title": "Sequences",
       "type": "object"
@@ -1781,6 +1877,7 @@
     "features": {
       "description": "List of feature annotations associated with the sequences.",
       "items": {
+        "additionalProperties": false,
         "description": "INSDC feature annotation information.\nThis class represents a single feature annotation on a sequence, including its type,\nlocation, and associated qualifiers that provide detailed biological information.",
         "properties": {
           "id": {
@@ -1818,7 +1915,7 @@
           "qualifiers": {
             "additionalProperties": {
               "items": {
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
                 "properties": {
                   "id": {
@@ -1860,6 +1957,22 @@
             "description": "Qualifiers that provide additional information about this feature. Key is the qualifier name.",
             "title": "Qualifiers",
             "type": "object"
+          },
+          "locus_tag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The locus tag identifier associated with this feature, if applicable. The source feature does not have a locus tag and this field.",
+            "examples": [
+              "00010"
+            ],
+            "title": "Locus Tag Id"
           }
         },
         "required": [
