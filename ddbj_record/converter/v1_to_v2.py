@@ -12,7 +12,7 @@ from ddbj_record.schema.v2 import (Entry, Experiment, Feature, Organization,
 def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
     return DdbjRecordV2(
         schema_version="v2",
-        provenance=_create_provenance(),
+        provenance=_create_provenance(v1_obj),
         submission=_convert_submission(v1_obj),
         experiments=_convert_experiments(v1_obj),
         sequences=_convert_sequences(v1_obj),
@@ -20,17 +20,27 @@ def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
     )
 
 
-def _create_provenance() -> Provenance:
+def _qualifier_value_to_str(value: str | bool) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return value
+
+
+def _create_provenance(v1_obj: DdbjRecordV1) -> Provenance:
     """Create provenance metadata for v2."""
-    return Provenance()
+    return Provenance(
+        dfast_version=v1_obj.COMMON_META.dfast_version,
+    )
 
 
 def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     # === submitters ===
     submitters: List[Person] = []
-    organization = Organization(
+    institution = Organization(
         name=v1_obj.COMMON.SUBMITTER.institute,
         url=v1_obj.COMMON.SUBMITTER.url,
+        department=v1_obj.COMMON.SUBMITTER.department,
+        type="institution",
         address=Address(
             country=v1_obj.COMMON.SUBMITTER.country,
             state=v1_obj.COMMON.SUBMITTER.state,
@@ -40,31 +50,39 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         ),
     )
     for i, ab_name in enumerate(v1_obj.COMMON.SUBMITTER.ab_name):
-        submitters.append(Person(
-            name=v1_obj.COMMON.SUBMITTER.contact if i == 0 else None,
-            abbreviation=ab_name,
-            email=v1_obj.COMMON.SUBMITTER.email if i == 0 else None,
-            organization=organization if i == 0 else None,
-        ))
+        person = Person(
+            abbreviation=ab_name
+        )
+        if i == 0:  # first author
+            person.name = v1_obj.COMMON.SUBMITTER.contact
+            person.email = v1_obj.COMMON.SUBMITTER.email
+            person.organization = [institution]
+            if v1_obj.COMMON.SUBMITTER.consrtm:
+                consortium = Organization(
+                    name=v1_obj.COMMON.SUBMITTER.consrtm,
+                    type="consortium"
+                )
+                person.organization.append(consortium)
+        submitters.append(person)
 
     # === db_xrefs ===
-    db_xrefs: List[Xref] = [
-        Xref(
+    db_xrefs: List[Xref] = []
+    if v1_obj.COMMON.DBLINK:
+        db_xrefs.append(Xref(
             db="bioproject",
             id=v1_obj.COMMON.DBLINK.project,
-        ),
-        Xref(
+        ))
+        db_xrefs.append(Xref(
             db="biosample",
             id=v1_obj.COMMON.DBLINK.biosample,
-        )
-    ]
-    for sra_id in v1_obj.COMMON.DBLINK.sequence_read_archive or []:
-        db_xrefs.append(
-            Xref(
-                db="insdc.sra",
-                id=sra_id,
+        ))
+        for sra_id in v1_obj.COMMON.DBLINK.sequence_read_archive or []:
+            db_xrefs.append(
+                Xref(
+                    db="insdc.sra",
+                    id=sra_id,
+                )
             )
-        )
 
     # === references ===
     references: List[Reference] = []
@@ -72,7 +90,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         references.append(Reference(
             title=ref.title,
             authors=[Person(abbreviation=ab_name) for ab_name in ref.ab_name],
-            status=ref.status.lower(),
+            status="-".join(ref.status.lower().split(" ")),
             year=ref.year,
         ))
 
@@ -94,15 +112,20 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
 
 
 def _convert_experiments(v1_obj: DdbjRecordV1) -> List[Experiment]:
-    return [Experiment(
-        id="experiment_1",
+    experiment = Experiment(
+        id="st_comment_experiment",
         platform=Platform(platform_type=v1_obj.COMMON.ST_COMMENT.sequencing_technology),
         experiment_attributes={
             "tagset_id": v1_obj.COMMON.ST_COMMENT.tagset_id,
             "assembly_method": v1_obj.COMMON.ST_COMMENT.assembly_method,
-            "genome_coverage": v1_obj.COMMON.ST_COMMENT.genome_coverage,
         }
-    )]
+    )
+    if v1_obj.COMMON.ST_COMMENT.coverage:
+        experiment.experiment_attributes["coverage"] = v1_obj.COMMON.ST_COMMENT.coverage
+    if v1_obj.COMMON.ST_COMMENT.genome_coverage:
+        experiment.experiment_attributes["genome_coverage"] = v1_obj.COMMON.ST_COMMENT.genome_coverage
+
+    return [experiment]
 
 
 def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
@@ -115,7 +138,7 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
         if key in ("organism", "mol_type"):
             continue
         if value is not None:
-            common_source.qualifiers[key] = [Qualifier(value=value,)]
+            common_source.qualifiers[key] = [Qualifier(value=_qualifier_value_to_str(value))]
 
     entries: List[Entry] = []
     for entry in v1_obj.ENTRIES:
@@ -136,7 +159,7 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
             for key, value in source_feature.qualifiers.items():
                 if key in ("organism", "mol_type"):
                     continue
-                entry_source.qualifiers[key] = [Qualifier(value=v) for v in value]
+                entry_source.qualifiers[key] = [Qualifier(value=_qualifier_value_to_str(v)) for v in value]
         entry_definition = None  # definition for each entry
         if "ff_definition" in source_feature.qualifiers:
             entry_definition = source_feature.qualifiers["ff_definition"]
@@ -171,9 +194,10 @@ def _convert_features(v1_obj: DdbjRecordV1) -> List[Feature]:
                 location=feature.location,
                 sequence_id=entry.id,
                 qualifiers={
-                    key: [Qualifier(value=v) for v in value]
+                    key: [Qualifier(value=_qualifier_value_to_str(v)) for v in value]
                     for key, value in feature.qualifiers.items()
                 },
+                locus_tag_id=feature.locus_tag_id,
             ))
 
     return features

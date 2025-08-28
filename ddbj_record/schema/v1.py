@@ -1,6 +1,6 @@
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Dblink(BaseModel):
@@ -12,6 +12,9 @@ class Dblink(BaseModel):
         examples=["DRA999999"],
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Submitter(BaseModel):
     ab_name: List[str] = Field(examples=["Hiro,S."])
@@ -20,11 +23,15 @@ class Submitter(BaseModel):
     url: Optional[str] = Field(None, examples=["http://example.com"])
     institute: str = Field(examples=["Example University"])
     department: Optional[str] = Field(None, examples=["Example Department"])
+    consrtm: Optional[str] = Field(None, examples=["Example Consortium"])
     country: str = Field(examples=["Japan"])
     state: Optional[str] = Field(None, examples=["Tokyo"])
     city: str = Field(examples=["Shinjuku"])
     street: str = Field(examples=["1-2-3 Example Street"])
     zip: str = Field(examples=["123-4567"])
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Reference(BaseModel):
@@ -33,9 +40,15 @@ class Reference(BaseModel):
     status: str = Field(examples=["Unpublished"])
     year: str = Field(examples=["2025"])
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Comment(BaseModel):
     line: List[str] = Field(examples=["Example comment line 1", "Annotated by DFAST"])
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class StComment(BaseModel):
@@ -44,7 +57,13 @@ class StComment(BaseModel):
         alias="Assembly Method",
         examples=["HGAP v. x.x.x"],
     )
-    genome_coverage: str = Field(
+    coverage: Optional[str] = Field(
+        None,
+        alias="Coverage",
+        examples=["100x"],
+    )
+    genome_coverage: Optional[str] = Field(
+        None,
         alias="Genome Coverage",
         examples=["100x"],
     )
@@ -53,13 +72,19 @@ class StComment(BaseModel):
         examples=["PacBio RS II"],
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Date(BaseModel):
     hold_date: str = Field(examples=["2025-01-01"])
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class Common(BaseModel):
-    DBLINK: Dblink
+    DBLINK: Optional[Dblink] = Field(None)
     SUBMITTER: Submitter
     REFERENCE: List[Reference]
     COMMENT: List[Comment]
@@ -70,31 +95,39 @@ class Common(BaseModel):
         examples=["GNM"],
     )
 
+    # extra field
+    model_config = ConfigDict(extra="forbid")
+
 
 class CommonSource(BaseModel):
     organism: str = Field(examples=["Paucilactobacillus hokkaidonensis"])
-    strain: Optional[str] = Field(None, examples=["LOOC260"])
     mol_type: str = Field(examples=["genomic DNA"])
-    type_material: Optional[str] = Field(None, examples=["type strain"])
-    collection_date: Optional[str] = Field(None, examples=["2012-04-01"])
-    culture_collection: Optional[str] = Field(None, examples=["JCM:18460"])
-    isolation_source: Optional[str] = Field(None, examples=["silage"])
-    geo_loc_name: Optional[str] = Field(examples=["Japan:Hokkaido"])
+
+    # extra field
+    model_config = ConfigDict(extra="allow")
 
 
 class CommonMeta(BaseModel):
     division: str = Field(examples=["BCT"])
-    locus_tag_prefix: str = Field(examples=["PLH"])
+    locus_tag_prefix: Optional[str] = Field(None, examples=["PLH"])
+    dfast_version: Optional[str] = Field(None, examples=["1.2.18"])
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Feature(BaseModel):
     id: str = Field(examples=["feature_8"])
     type: str = Field(examples=["source"])
     location: str = Field(examples=["1..2277985"])
-    qualifiers: Dict[str, List[str]] = Field(
+    qualifiers: Dict[str, List[Union[str, bool]]] = Field(
+        default_factory=dict,
         description="In addition to the information described in COMMON_SOURCE, information unique to each entry is described.",
     )
     locus_tag_id: Optional[str] = Field(None, examples=["00010"])
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Entry(BaseModel):
@@ -113,8 +146,12 @@ class Entry(BaseModel):
     )
     sequence: Optional[str] = Field(examples=["atgc..."])
     features: List[Feature] = Field(
+        default_factory=list,
         description="The list of annotated biological features.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class DdbjRecord(BaseModel):
@@ -129,3 +166,6 @@ class DdbjRecord(BaseModel):
         description="Metadata that DFAST internally handles"
     )
     ENTRIES: List[Entry]
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")

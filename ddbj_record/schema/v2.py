@@ -89,6 +89,11 @@ class Organization(BaseModel):
         examples=["institution"],
         description="The type of organization (e.g., institution, company, government, non-profit, consortium, other)."
     )
+    department: Optional[str] = Field(
+        None,
+        examples=["DNA Data Bank of Japan"],
+        description="The department within the organization.",
+    )
     address: Optional[Address] = Field(
         None,
         description="The postal address of the organization."
@@ -127,7 +132,7 @@ class Person(BaseModel):
         examples=["0000-0000-0000-0000"],
         description="The ORCID identifier for the person.",
     )
-    organization: Optional[Organization] = Field(
+    organization: Optional[List[Organization]] = Field(
         None,
         description="The organization that the person is affiliated with.",
     )
@@ -626,6 +631,11 @@ class Feature(BaseModel):
     qualifiers: Dict[str, List[Qualifier]] = Field(
         default_factory=dict,
         description="Qualifiers that provide additional information about this feature. Key is the qualifier name.",
+    )
+    locus_tag_id: Optional[str] = Field(
+        None,
+        examples=["00010"],
+        description="The locus tag identifier associated with this feature, if applicable. The source feature does not have a locus tag and this field.",
     )
 
     # extra field

@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel
 
 from ddbj_record.converter.v1_to_v2 import v1_to_v2
+from ddbj_record.converter.v2_to_v1 import v2_to_v1
 from ddbj_record.schema import SCHEMA_VERSIONS
 from ddbj_record.utils import resolve_record_model
 from ddbj_record.validator import validate_json_data
@@ -44,12 +45,14 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
         help="Schema version to convert to (e.g., 'v1' or 'v2')"
     )
     parser.add_argument(
+        "-i",
         "--input",
         type=Path,
         required=True,
         help="Path to the input JSON file to convert"
     )
     parser.add_argument(
+        "-o",
         "--output",
         type=Path,
         required=True,
@@ -68,9 +71,6 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
                      f"Supported versions are: {', '.join(SCHEMA_VERSIONS)}")
     if not parsed_args.input.exists():
         parser.error(f"Input JSON file does not exist: {parsed_args.input}")
-    if parsed_args.output.exists():
-        parser.error(f"Output file already exists: {parsed_args.output}. "
-                     "Please specify a different output file or remove the existing one.")
 
     return Args(
         from_=parsed_args.from_,
@@ -91,9 +91,10 @@ def convert_json_data(json_data: Dict[str, Any], from_: str, to: str) -> Dict[st
         return json_data
     elif from_ == "v1" and to == "v2":
         v1_obj = FromDdbjRecord.model_validate(json_data)
-        return v1_to_v2(v1_obj).model_dump(exclude_none=True)  # type: ignore
+        return v1_to_v2(v1_obj).model_dump(exclude_none=True, by_alias=True)  # type: ignore
     elif from_ == "v2" and to == "v1":
-        raise NotImplementedError("Conversion from v2 to v1 is not implemented yet.")
+        v2_obj = FromDdbjRecord.model_validate(json_data)
+        return v2_to_v1(v2_obj).model_dump(exclude_none=True, by_alias=True)  # type: ignore
     elif from_ == "v2" and to == "v2":
         return json_data
     else:
