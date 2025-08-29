@@ -294,6 +294,11 @@ class Submission(BaseModel):
         examples=["PLH"],
         description="The prefix used for locus tags in the submission.",
     )
+    seq_prefix: Optional[str] = Field(
+        None,
+        examples=["sequence", "contig"],
+        description="Prefix for sequence names. It is used when the data is WGS.",
+    )
     hold_date: Optional[str] = Field(
         None,
         examples=["2025-01-01"],

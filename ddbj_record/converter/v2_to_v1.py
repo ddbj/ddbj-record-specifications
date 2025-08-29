@@ -143,15 +143,17 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
 
 
 def _convert_common_source(v2_obj: DdbjRecordV2) -> CommonSource:
-    common_source_obj: Dict[str, Union[str, bool]] = {
+    common_source_obj: Dict[str, Union[Union[str, bool], List[Union[str, bool]]]] = {
         "organism": v2_obj.sequences.common_source.organism,
         "mol_type": v2_obj.sequences.common_source.mol_type,
     }
     for key, q_objs in v2_obj.sequences.common_source.qualifiers.items():
         if key in ("organism", "mol_type"):
             continue
-        if len(q_objs) >= 1:
+        if len(q_objs) == 1:
             common_source_obj[key] = _qualifier_value_to_union(q_objs[0].value)
+        if len(q_objs) > 1:  # if key is 'note', value is List[str]
+            common_source_obj[key] = [_qualifier_value_to_union(q_obj.value) for q_obj in q_objs]
 
     return CommonSource.model_construct(**common_source_obj)  # type: ignore
 
@@ -161,6 +163,7 @@ def _convert_common_meta(v2_obj: DdbjRecordV2) -> CommonMeta:
         division=v2_obj.submission.division or "BCT",
         locus_tag_prefix=v2_obj.submission.locus_tag_prefix,
         dfast_version=getattr(v2_obj.provenance, "dfast_version", None),
+        seq_prefix=v2_obj.submission.seq_prefix,
     )
 
 

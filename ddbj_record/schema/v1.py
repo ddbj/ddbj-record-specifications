@@ -111,6 +111,11 @@ class CommonMeta(BaseModel):
     division: str = Field(examples=["BCT"])
     locus_tag_prefix: Optional[str] = Field(None, examples=["PLH"])
     dfast_version: Optional[str] = Field(None, examples=["1.2.18"])
+    seq_prefix: Optional[str] = Field(
+        None,
+        examples=["sequence", "contig"],
+        description="Prefix for sequence names. It is used when the data is WGS."
+    )
 
     # extra field
     model_config = ConfigDict(extra="forbid")

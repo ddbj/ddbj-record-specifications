@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import Address
@@ -107,6 +107,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         trad_submission_category=v1_obj.COMMON.trad_submission_category,
         division=v1_obj.COMMON_META.division,
         locus_tag_prefix=v1_obj.COMMON_META.locus_tag_prefix,
+        seq_prefix=v1_obj.COMMON_META.seq_prefix,
         hold_date=v1_obj.COMMON.DATE.hold_date if v1_obj.COMMON.DATE else None,
     )
 
@@ -134,11 +135,16 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
         mol_type=v1_obj.COMMON_SOURCE.mol_type,
         qualifiers={}
     )
-    for key, value in v1_obj.COMMON_SOURCE.model_dump().items():
+    value_from_cs: Union[str, List[str]]  # if key is 'note', value is List[str]
+    for key, value_from_cs in v1_obj.COMMON_SOURCE.model_dump().items():
         if key in ("organism", "mol_type"):
             continue
-        if value is not None:
-            common_source.qualifiers[key] = [Qualifier(value=_qualifier_value_to_str(value))]
+        if value_from_cs is not None:
+            arr_value = value_from_cs if isinstance(value_from_cs, list) else [value_from_cs]
+            common_source.qualifiers[key] = [
+                Qualifier(value=_qualifier_value_to_str(v))
+                for v in arr_value
+            ]
 
     entries: List[Entry] = []
     for entry in v1_obj.ENTRIES:
