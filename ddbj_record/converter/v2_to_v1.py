@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from ddbj_record.schema.v1 import (Comment, Common, CommonMeta, CommonSource,
                                    Date, Dblink)
@@ -6,6 +6,7 @@ from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v1 import (Entry, Feature, Reference, StComment,
                                    Submitter)
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
+from ddbj_record.schema.v2 import Person as V2Person
 
 
 def v2_to_v1(v2_obj: DdbjRecordV2) -> DdbjRecordV1:
@@ -53,18 +54,42 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
         "url": None,
         "institute": "",
         "department": None,
+        "consrtm": None,
         "country": "",
         "state": "",
         "city": "",
         "street": "",
         "zip": "",
     }
-    if v2_obj.submission.submitters:
-        first_submitter = v2_obj.submission.submitters[0]
-        submitter_obj["contact"] = first_submitter.name or ""
-        submitter_obj["email"] = first_submitter.email or ""
-        if first_submitter.organization:
-            for organization_obj in first_submitter.organization:
+
+    for submitter in v2_obj.submission.submitters:
+        if submitter.abbreviation:
+            submitter_obj["ab_name"].append(submitter.abbreviation)  # type: ignore
+
+    def _pick_contact_person(submitters: List[V2Person]) -> Optional[V2Person]:
+        if not submitters:
+            return None
+        # name and email
+        both = [s for s in submitters if s.name and s.email]
+        if both:
+            return both[0]
+        # with email
+        with_email = [s for s in submitters if s.email]
+        if with_email:
+            return with_email[0]
+        # organization
+        with_org = [s for s in submitters if s.organization]
+        if with_org:
+            return with_org[0]
+        # first one (fallback)
+        return submitters[0]
+
+    contact_person = _pick_contact_person(v2_obj.submission.submitters)
+    if contact_person:
+        submitter_obj["contact"] = contact_person.name or ""
+        submitter_obj["email"] = contact_person.email or ""
+        if contact_person.organization:
+            for organization_obj in contact_person.organization:
                 if organization_obj.type == "institution":
                     submitter_obj["institute"] = organization_obj.name
                     submitter_obj["url"] = organization_obj.url
@@ -77,9 +102,7 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
                         submitter_obj["zip"] = organization_obj.address.postal_code or ""
                 elif organization_obj.type == "consortium":
                     submitter_obj["consrtm"] = organization_obj.name
-        for submitter in v2_obj.submission.submitters:
-            if submitter.abbreviation:
-                submitter_obj["ab_name"].append(submitter.abbreviation)  # type: ignore
+
     submitter = Submitter.model_construct(**submitter_obj)  # type: ignore
 
     # REFERENCE

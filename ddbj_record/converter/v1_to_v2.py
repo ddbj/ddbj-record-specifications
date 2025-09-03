@@ -1,4 +1,5 @@
-from typing import List, Optional, Union
+import re
+from typing import List, Optional, Set, Union
 
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v1 import Feature as FeatureV1
@@ -34,6 +35,52 @@ def _create_provenance(v1_obj: DdbjRecordV1) -> Provenance:
     )
 
 
+def _normalize_abbr(abbr: str) -> str:
+    return re.sub(r"[.\-\s]", "", abbr).lower()
+
+
+def _abbr_candidates_from_fullname(fullname: str) -> Set[str]:
+    name = fullname.strip()
+    candidates: Set[str] = set()
+
+    def _add_candidate(last: str, initials: str) -> None:
+        # fullname: "John A. Doe"
+        # last: "Doe", initials: "JA"
+        if initials:
+            candidates.add(f"{last},{initials}.")  # "Doe,JA."
+            candidates.add(f"{last},{initials}")  # "Doe,JA"
+            candidates.add(f"{last},{initials[0]}.")  # "Doe,J."
+            candidates.add(f"{last},{initials[0]}")  # "Doe,J"
+            candidates.add(f"{last},{'.'.join(list(initials))}.")  # "Doe,J.A."
+            candidates.add(f"{last},{'.'.join(list(initials))}")  # "Doe,J.A"
+        candidates.add(f"{last},")  # "Doe,"
+        candidates.add(f"{last}")  # "Doe"
+
+    # has Comma: "Last, First Middle"
+    if "," in name:  # e.g., "Doe, John A."
+        last, rest = [x.strip() for x in name.split(",", 1)]  # ["Doe", "John A."]
+        rest_parts = [p for p in re.split(r"\s+", rest) if p]  # ["John", "A."]
+        initials = "".join([p[0] for p in rest_parts if p])  # "JA"
+        _add_candidate(last, initials)
+    else:  # no Comma: "First Middle Last"
+        parts = [p for p in re.split(r"\s+", name) if p]
+        if len(parts) == 1:
+            candidates.add(parts[0])
+        else:
+            first, last = parts[0], parts[-1]
+            mids = parts[1:-1]
+            initials = first[0] + "".join([m[0] for m in mids if m])  # "JA"
+            _add_candidate(last, initials)
+
+            # for asian names, e.g., "Yamada Taro"
+            last, first = parts[-1], parts[0]
+            mids = parts[1:-1]
+            initials = first[0] + "".join([m[0] for m in mids if m])
+            _add_candidate(last, initials)
+
+    return {_normalize_abbr(c) for c in candidates if c}
+
+
 def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     # === submitters ===
     submitters: List[Person] = []
@@ -50,20 +97,38 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
             postal_code=v1_obj.COMMON.SUBMITTER.zip
         ),
     )
+
+    contact_index: Optional[int] = None
+    if v1_obj.COMMON.SUBMITTER.contact:
+        contact_candidates = _abbr_candidates_from_fullname(v1_obj.COMMON.SUBMITTER.contact)
+        for i, ab_name in enumerate(v1_obj.COMMON.SUBMITTER.ab_name):
+            if _normalize_abbr(ab_name) in contact_candidates:
+                contact_index = i
+                break
+
     for i, ab_name in enumerate(v1_obj.COMMON.SUBMITTER.ab_name):
-        person = Person(
-            abbreviation=ab_name
-        )
-        if i == 0:  # first author
+        person = Person(abbreviation=ab_name)
+        if contact_index is not None and i == contact_index:
             person.name = v1_obj.COMMON.SUBMITTER.contact
             person.email = v1_obj.COMMON.SUBMITTER.email
             person.organization = [institution]
             if v1_obj.COMMON.SUBMITTER.consrtm:
-                consortium = Organization(
+                person.organization.append(Organization(
                     name=v1_obj.COMMON.SUBMITTER.consrtm,
                     type="consortium"
-                )
-                person.organization.append(consortium)
+                ))
+        submitters.append(person)
+
+    if contact_index is None:
+        person = Person(abbreviation=None)
+        person.name = v1_obj.COMMON.SUBMITTER.contact
+        person.email = v1_obj.COMMON.SUBMITTER.email
+        person.organization = [institution]
+        if v1_obj.COMMON.SUBMITTER.consrtm:
+            person.organization.append(Organization(
+                name=v1_obj.COMMON.SUBMITTER.consrtm,
+                type="consortium"
+            ))
         submitters.append(person)
 
     # === db_xrefs ===
