@@ -1099,11 +1099,16 @@
         "comments": {
           "description": "Additional comments or notes about the submission.",
           "examples": [
-            "Example comment line 1",
-            "Annotated by DFAST"
+            [
+              "Example comment line 1",
+              "Annotated by DFAST"
+            ]
           ],
           "items": {
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "title": "Comments",
           "type": "array"
@@ -1155,6 +1160,23 @@
             "PLH"
           ],
           "title": "Locus Tag Prefix"
+        },
+        "seq_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Prefix for sequence names. It is used when the data is WGS.",
+          "examples": [
+            "sequence",
+            "contig"
+          ],
+          "title": "Seq Prefix"
         },
         "hold_date": {
           "anyOf": [
@@ -1746,102 +1768,14 @@
                 ],
                 "title": "Sequence"
               },
-              "location": {
-                "description": "The location range of the sequence in INSDC format.",
-                "examples": [
-                  "1..2277985"
-                ],
-                "title": "Location",
-                "type": "string"
-              },
-              "source": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
-                    "properties": {
-                      "organism": {
-                        "description": "The scientific name or higher-level classification of the organism or agent that provided the sequenced genetic material.",
-                        "examples": [
-                          "Paucilactobacillus hokkaidonensis"
-                        ],
-                        "title": "Organism",
-                        "type": "string"
-                      },
-                      "mol_type": {
-                        "description": "The type of molecule sequenced",
-                        "examples": [
-                          "genomic DNA"
-                        ],
-                        "title": "Mol Type",
-                        "type": "string"
-                      },
-                      "qualifiers": {
-                        "additionalProperties": {
-                          "items": {
-                            "additionalProperties": false,
-                            "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
-                            "properties": {
-                              "id": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "default": null,
-                                "description": "The unique identifier for this qualifier.",
-                                "examples": [
-                                  "qualifier_1"
-                                ],
-                                "title": "Id"
-                              },
-                              "value": {
-                                "description": "        The value of the qualifier.\n        Can be text, numbers, or boolean-like values. All values are represented as strings.\n        For qualifiers with 'none' value_format (e.g., circular_RNA which appears as '/circular_RNA' without a value), this field stores 'true' when the qualifier is present.\n        ",
-                                "examples": [
-                                  "Paucilactobacillus hokkaidonensis",
-                                  "genomic DNA",
-                                  "1",
-                                  "true"
-                                ],
-                                "title": "Value",
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "value"
-                            ],
-                            "title": "Qualifier",
-                            "type": "object"
-                          },
-                          "type": "array"
-                        },
-                        "description": "Additional qualifiers. Key is the qualifier name.",
-                        "title": "Qualifiers",
-                        "type": "object"
-                      }
-                    },
-                    "required": [
-                      "organism",
-                      "mol_type"
-                    ],
-                    "title": "Source",
-                    "type": "object"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "default": null,
-                "description": "Optional source information specific to this entry. When specified, this overrides the common_source."
-              },
-              "definition": {
+              "comments": {
                 "anyOf": [
                   {
                     "items": {
-                      "type": "string"
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
                     },
                     "type": "array"
                   },
@@ -1850,16 +1784,146 @@
                   }
                 ],
                 "default": null,
-                "description": "Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
-                "title": "Definition"
+                "description": "Comments specific to this entry.",
+                "title": "Comments"
+              },
+              "source_features": {
+                "description": "List of source features associated with this entry. Multiple source features can exist in a single entry.",
+                "items": {
+                  "description": "Class representing the source feature itself.\nThese pieces of information are not written directly to Entry but held as List[SourceFeature]\nbecause multiple source features can exist in a sequence entry.",
+                  "properties": {
+                    "id": {
+                      "description": "The unique identifier for this source feature.",
+                      "examples": [
+                        "feature_8"
+                      ],
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "location": {
+                      "description": "The location range of the sequence in INSDC format.",
+                      "examples": [
+                        "1..2277985"
+                      ],
+                      "title": "Location",
+                      "type": "string"
+                    },
+                    "source": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "INSDC source feature information.\nThis class represents the source feature in INSDC feature tables, which describes\nthe biological source of the sequence including organism and molecule type.",
+                          "properties": {
+                            "organism": {
+                              "description": "The scientific name or higher-level classification of the organism or agent that provided the sequenced genetic material.",
+                              "examples": [
+                                "Paucilactobacillus hokkaidonensis"
+                              ],
+                              "title": "Organism",
+                              "type": "string"
+                            },
+                            "mol_type": {
+                              "description": "The type of molecule sequenced",
+                              "examples": [
+                                "genomic DNA"
+                              ],
+                              "title": "Mol Type",
+                              "type": "string"
+                            },
+                            "qualifiers": {
+                              "additionalProperties": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "description": "Qualifier information for sequence features.\nThis class represents key-value pairs that provide additional information about sequence features,\nsuch as gene names, product descriptions, or other annotations.",
+                                  "properties": {
+                                    "id": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "default": null,
+                                      "description": "The unique identifier for this qualifier.",
+                                      "examples": [
+                                        "qualifier_1"
+                                      ],
+                                      "title": "Id"
+                                    },
+                                    "value": {
+                                      "description": "        The value of the qualifier.\n        Can be text, numbers, or boolean-like values. All values are represented as strings.\n        For qualifiers with 'none' value_format (e.g., circular_RNA which appears as '/circular_RNA' without a value), this field stores 'true' when the qualifier is present.\n        ",
+                                      "examples": [
+                                        "Paucilactobacillus hokkaidonensis",
+                                        "genomic DNA",
+                                        "1",
+                                        "true"
+                                      ],
+                                      "title": "Value",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "title": "Qualifier",
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "description": "Additional qualifiers. Key is the qualifier name.",
+                              "title": "Qualifiers",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "organism",
+                            "mol_type"
+                          ],
+                          "title": "Source",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Optional source information specific to this entry. When specified, this overrides the common_source."
+                    },
+                    "definition": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
+                      "title": "Definition"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "location"
+                  ],
+                  "title": "SourceFeature",
+                  "type": "object"
+                },
+                "title": "Source Features",
+                "type": "array"
               }
             },
             "required": [
               "id",
               "name",
               "type",
-              "topology",
-              "location"
+              "topology"
             ],
             "title": "Entry",
             "type": "object"

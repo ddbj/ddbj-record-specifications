@@ -446,6 +446,23 @@
             "1.2.18"
           ],
           "title": "Dfast Version"
+        },
+        "seq_prefix": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Prefix for sequence names. It is used when the data is WGS.",
+          "examples": [
+            "sequence",
+            "contig"
+          ],
+          "title": "Seq Prefix"
         }
       },
       "required": [
