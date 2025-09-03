@@ -99,7 +99,8 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     # COMMENT
     comments = []
     if v2_obj.submission.comments:
-        comments.append(Comment.model_construct(line=v2_obj.submission.comments))
+        for line in v2_obj.submission.comments:
+            comments.append(Comment.model_construct(line=line))
 
     # ST_COMMENT
     st_comment_obj = {
@@ -180,41 +181,36 @@ def _convert_entries(v2_obj: DdbjRecordV2) -> List[Entry]:
         )
 
         # Add source feature from v2 entry
-        source_feature = Feature(
-            id=f"{v2_entry.id}_source_feature",
-            type="source",
-            location=v2_entry.location,
-            qualifiers={},
-            locus_tag_id=None,  # source feature does not have locus_tag_id
-        )
-        if v2_entry.source:
-            source_feature.qualifiers["organism"] = [v2_entry.source.organism]
-            source_feature.qualifiers["mol_type"] = [v2_entry.source.mol_type]
-            for key, q_objs in v2_entry.source.qualifiers.items():
-                if key in ("organism", "mol_type"):
-                    continue
-                source_feature.qualifiers[key] = []
-                for q_obj in q_objs:
-                    source_feature.qualifiers[key].append(_qualifier_value_to_union(q_obj.value))
-        if v2_entry.definition:
-            source_feature.qualifiers["ff_definition"] = v2_entry.definition  # type: ignore
-        v1_entry.features.append(source_feature)  # pylint: disable=no-member
-
-        for v2_feature in v2_obj.features:
-            if v2_entry.id != v2_feature.sequence_id:
-                continue
-            v1_feature = Feature(
-                id=v2_feature.id,
-                type=v2_feature.type,
-                location=v2_feature.location,
+        for v2_sf in v2_entry.source_features:
+            source_feature = Feature(
+                id=v2_sf.id,
+                type="source",
+                location=v2_sf.location,
                 qualifiers={},
-                locus_tag_id=v2_feature.locus_tag_id,
+                locus_tag_id=None,  # source feature does not have locus_tag_id
             )
-            for key, q_objs in v2_feature.qualifiers.items():
-                v1_feature.qualifiers[key] = []
-                for q_obj in q_objs:
-                    v1_feature.qualifiers[key].append(_qualifier_value_to_union(q_obj.value))
-            v1_entry.features.append(v1_feature)  # pylint: disable=no-member
+            if v2_sf.source:
+                source_feature.qualifiers["organism"] = [v2_sf.source.organism]
+                source_feature.qualifiers["mol_type"] = [v2_sf.source.mol_type]
+                for key, q_objs in v2_sf.source.qualifiers.items():
+                    if key in ("organism", "mol_type"):
+                        continue
+                    source_feature.qualifiers[key] = []
+                    for q_obj in q_objs:
+                        source_feature.qualifiers[key].append(_qualifier_value_to_union(q_obj.value))
+            if v2_sf.definition:
+                source_feature.qualifiers["ff_definition"] = v2_sf.definition  # type: ignore
+            v1_entry.features.append(source_feature)  # pylint: disable=no-member
+
+        # Add COMMENT feature from v2 entry
+        if v2_entry.comments:
+            for i, line in enumerate(v2_entry.comments):
+                v1_entry.features.append(Feature(  # pylint: disable=no-member
+                    id=f"{v2_entry.id}_comment_{i+1}",
+                    type="comment",
+                    location="",
+                    qualifiers={"line": line},
+                ))
 
         entries.append(v1_entry)
 

@@ -1,12 +1,13 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
+from ddbj_record.schema.v1 import Feature as FeatureV1
 from ddbj_record.schema.v2 import Address
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 from ddbj_record.schema.v2 import (Entry, Experiment, Feature, Organization,
                                    Person, Platform, Provenance, Qualifier,
-                                   Reference, Sequences, Source, Submission,
-                                   Xref)
+                                   Reference, Sequences, Source, SourceFeature,
+                                   Submission, Xref)
 
 
 def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
@@ -95,9 +96,9 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         ))
 
     # === comments ===
-    comments = []
+    comments: List[List[str]] = []
     for comment in v1_obj.COMMON.COMMENT:
-        comments.extend(comment.line)
+        comments.append(comment.line)
 
     return Submission(
         submitters=submitters,
@@ -148,27 +149,42 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
 
     entries: List[Entry] = []
     for entry in v1_obj.ENTRIES:
-        source_feature = None
+        # The source feature can be multiple in one entry.
+        v1_source_features: List[FeatureV1] = []
+        comments: Optional[List[List[str]]] = []  # comments for each entry
         for feature in entry.features:
             if feature.type == "source":
-                source_feature = feature
-                break
-        if source_feature is None:
-            continue
-        entry_source = None  # source for each entry
-        if "organism" in source_feature.qualifiers and "mol_type" in source_feature.qualifiers:
-            entry_source = Source(
-                organism=source_feature.qualifiers["organism"][0],
-                mol_type=source_feature.qualifiers["mol_type"][0],
-                qualifiers={}
+                v1_source_features.append(feature)
+            if feature.type == "COMMENT":
+                comments.append(feature.qualifiers.get("line", []))  # type: ignore
+
+        # Remove empty lists from comments
+        comments = [c for c in comments if c] if comments else None
+
+        v2_source_features: List[SourceFeature] = []
+        for v1_sf in v1_source_features:
+            v2_sf_source = None  # source for each source feature
+            if "organism" in v1_sf.qualifiers and "mol_type" in v1_sf.qualifiers:
+                v2_sf_source = Source(
+                    organism=v1_sf.qualifiers["organism"][0],
+                    mol_type=v1_sf.qualifiers["mol_type"][0],
+                    qualifiers={}
+                )
+                for key, value in v1_sf.qualifiers.items():
+                    if key in ("organism", "mol_type", "ff_definition"):
+                        continue
+                    v2_sf_source.qualifiers[key] = [Qualifier(value=_qualifier_value_to_str(v)) for v in value]
+            v2_sf_definition = None  # definition for each source feature
+            if "ff_definition" in v1_sf.qualifiers:
+                v2_sf_definition = v1_sf.qualifiers["ff_definition"]
+
+            v2_sf = SourceFeature(
+                id=v1_sf.id,
+                location=v1_sf.location,
+                source=v2_sf_source,
+                definition=v2_sf_definition,
             )
-            for key, value in source_feature.qualifiers.items():
-                if key in ("organism", "mol_type"):
-                    continue
-                entry_source.qualifiers[key] = [Qualifier(value=_qualifier_value_to_str(v)) for v in value]
-        entry_definition = None  # definition for each entry
-        if "ff_definition" in source_feature.qualifiers:
-            entry_definition = source_feature.qualifiers["ff_definition"]
+            v2_source_features.append(v2_sf)
 
         entries.append(Entry(
             id=entry.id,
@@ -176,9 +192,8 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
             type=entry.type,
             topology=entry.topology,
             sequence=entry.sequence,
-            location=source_feature.location,
-            source=entry_source,
-            definition=entry_definition,
+            source_features=v2_source_features,
+            comments=comments,
         ))
 
     return Sequences(

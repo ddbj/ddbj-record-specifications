@@ -271,9 +271,9 @@ class Submission(BaseModel):
         default_factory=list,
         description="List of publications or references associated with this submission.",
     )
-    comments: List[str] = Field(
+    comments: List[List[str]] = Field(
         default_factory=list,
-        examples=["Example comment line 1", "Annotated by DFAST"],
+        examples=[["Example comment line 1", "Annotated by DFAST"]],
         description="Additional comments or notes about the submission.",
     )
 
@@ -536,6 +536,32 @@ class Source(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class SourceFeature(BaseModel):
+    """
+    Class representing the source feature itself.
+    These pieces of information are not written directly to Entry but held as List[SourceFeature]
+    because multiple source features can exist in a sequence entry.
+    """
+    id: str = Field(
+        ...,
+        examples=["feature_8"],
+        description="The unique identifier for this source feature.",
+    )
+    location: str = Field(
+        ...,
+        examples=["1..2277985"],
+        description="The location range of the sequence in INSDC format.",
+    )
+    source: Optional[Source] = Field(
+        None,
+        description="Optional source information specific to this entry. When specified, this overrides the common_source.",
+    )
+    definition: Optional[List[str]] = Field(
+        None,
+        description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
+    )
+
+
 class Entry(BaseModel):
     """
     Individual sequence entry information.
@@ -567,18 +593,13 @@ class Entry(BaseModel):
         examples=["atgc..."],
         description="The nucleotide sequence data. Optional field that may be omitted for large sequences.",
     )
-    location: str = Field(
-        ...,
-        examples=["1..2277985"],
-        description="The location range of the sequence in INSDC format.",
-    )
-    source: Optional[Source] = Field(
+    comments: Optional[List[List[str]]] = Field(
         None,
-        description="Optional source information specific to this entry. When specified, this overrides the common_source.",
+        description="Comments specific to this entry.",
     )
-    definition: Optional[List[str]] = Field(
-        None,
-        description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
+    source_features: List[SourceFeature] = Field(
+        default_factory=list,
+        description="List of source features associated with this entry. Multiple source features can exist in a single entry.",
     )
 
     # extra field
