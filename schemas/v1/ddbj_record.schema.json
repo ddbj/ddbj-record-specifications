@@ -9,12 +9,10 @@
       "type": "string"
     },
     "COMMON": {
-      "additionalProperties": false,
       "properties": {
         "DBLINK": {
           "anyOf": [
             {
-              "additionalProperties": false,
               "properties": {
                 "project": {
                   "examples": [
@@ -63,7 +61,6 @@
           "default": null
         },
         "SUBMITTER": {
-          "additionalProperties": false,
           "properties": {
             "ab_name": {
               "examples": [
@@ -186,7 +183,6 @@
             }
           },
           "required": [
-            "ab_name",
             "contact",
             "email",
             "institute",
@@ -200,7 +196,6 @@
         },
         "REFERENCE": {
           "items": {
-            "additionalProperties": false,
             "properties": {
               "title": {
                 "examples": [
@@ -248,7 +243,6 @@
         },
         "COMMENT": {
           "items": {
-            "additionalProperties": false,
             "properties": {
               "line": {
                 "examples": [
@@ -262,9 +256,6 @@
                 "type": "array"
               }
             },
-            "required": [
-              "line"
-            ],
             "title": "Comment",
             "type": "object"
           },
@@ -272,7 +263,6 @@
           "type": "array"
         },
         "ST_COMMENT": {
-          "additionalProperties": false,
           "properties": {
             "tagset_id": {
               "examples": [
@@ -337,7 +327,6 @@
         "DATE": {
           "anyOf": [
             {
-              "additionalProperties": false,
               "properties": {
                 "hold_date": {
                   "examples": [
@@ -374,8 +363,6 @@
       },
       "required": [
         "SUBMITTER",
-        "REFERENCE",
-        "COMMENT",
         "ST_COMMENT",
         "trad_submission_category"
       ],
@@ -408,7 +395,6 @@
       "type": "object"
     },
     "COMMON_META": {
-      "additionalProperties": false,
       "properties": {
         "division": {
           "examples": [
@@ -533,7 +519,6 @@
           "features": {
             "description": "The list of annotated biological features.",
             "items": {
-              "additionalProperties": false,
               "properties": {
                 "id": {
                   "examples": [
@@ -620,8 +605,7 @@
     "schema_version",
     "COMMON",
     "COMMON_SOURCE",
-    "COMMON_META",
-    "ENTRIES"
+    "COMMON_META"
   ],
   "title": "DdbjRecord",
   "type": "object"
