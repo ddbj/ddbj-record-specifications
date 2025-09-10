@@ -13,11 +13,11 @@ class Dblink(BaseModel):
     )
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Submitter(BaseModel):
-    ab_name: List[str] = Field(examples=["Hiro,S."])
+    ab_name: List[str] = Field(default_factory=list, examples=["Hiro,S."])
     contact: str = Field(examples=["Hiro Sue"])
     email: str = Field(examples=["hsue@example.com"])
     url: Optional[str] = Field(None, examples=["http://example.com"])
@@ -31,7 +31,7 @@ class Submitter(BaseModel):
     zip: str = Field(examples=["123-4567"])
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Reference(BaseModel):
@@ -41,14 +41,14 @@ class Reference(BaseModel):
     year: str = Field(examples=["2025"])
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Comment(BaseModel):
-    line: List[str] = Field(examples=["Example comment line 1", "Annotated by DFAST"])
+    line: List[str] = Field(default_factory=list, examples=["Example comment line 1", "Annotated by DFAST"])
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class StComment(BaseModel):
@@ -73,21 +73,21 @@ class StComment(BaseModel):
     )
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Date(BaseModel):
     hold_date: str = Field(examples=["2025-01-01"])
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Common(BaseModel):
     DBLINK: Optional[Dblink] = Field(None)
     SUBMITTER: Submitter
-    REFERENCE: List[Reference]
-    COMMENT: List[Comment]
+    REFERENCE: List[Reference] = Field(default_factory=list)
+    COMMENT: List[Comment] = Field(default_factory=list)
     ST_COMMENT: StComment
     DATE: Optional[Date] = Field(None)
     trad_submission_category: Literal["WGS", "GNM"] = Field(
@@ -96,7 +96,7 @@ class Common(BaseModel):
     )
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class CommonSource(BaseModel):
@@ -118,7 +118,7 @@ class CommonMeta(BaseModel):
     )
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Feature(BaseModel):
@@ -132,7 +132,7 @@ class Feature(BaseModel):
     locus_tag_id: Optional[str] = Field(None, examples=["00010"])
 
     # extra field
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
 
 class Entry(BaseModel):
@@ -170,7 +170,7 @@ class DdbjRecord(BaseModel):
     COMMON_META: CommonMeta = Field(
         description="Metadata that DFAST internally handles"
     )
-    ENTRIES: List[Entry]
+    ENTRIES: List[Entry] = Field(default_factory=list)
 
     # extra field
     model_config = ConfigDict(extra="forbid")
