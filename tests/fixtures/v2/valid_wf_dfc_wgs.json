@@ -1,0 +1,665 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {
+    "dfast_version": "1.3.8"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "abbreviation": ""
+      },
+      {
+        "abbreviation": ""
+      },
+      {
+        "abbreviation": ""
+      },
+      {
+        "name": "",
+        "email": "",
+        "organization": [
+          {
+            "name": "",
+            "type": "institution",
+            "address": {
+              "country": "",
+              "city": "",
+              "street": "",
+              "postal_code": ""
+            }
+          }
+        ]
+      }
+    ],
+    "db_xrefs": [
+      {
+        "db": "bioproject",
+        "id": ""
+      },
+      {
+        "db": "biosample",
+        "id": ""
+      }
+    ],
+    "references": [
+      {
+        "title": "",
+        "authors": [
+          {
+            "abbreviation": ""
+          },
+          {
+            "abbreviation": ""
+          },
+          {
+            "abbreviation": ""
+          }
+        ],
+        "status": "unpublished",
+        "year": ""
+      }
+    ],
+    "comments": [
+      [
+        "Annotated by DFAST v.1.3.8 (https://dfast.ddbj.nig.ac.jp)"
+      ]
+    ],
+    "trad_submission_category": "WGS",
+    "division": "BCT",
+    "locus_tag_prefix": "LOCUS",
+    "seq_prefix": "sequence"
+  },
+  "experiments": [
+    {
+      "id": "st_comment_experiment",
+      "platform": {
+        "platform_type": ""
+      },
+      "experiment_attributes": {
+        "tagset_id": "Genome-Assembly-Data",
+        "assembly_method": ""
+      }
+    }
+  ],
+  "sequences": {
+    "common_source": {
+      "organism": "",
+      "mol_type": "genomic DNA",
+      "qualifiers": {
+        "geo_loc_name": [
+          {
+            "value": ".*"
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "id": "sequence1",
+        "name": "sequence1",
+        "type": "other",
+        "topology": "linear",
+        "sequence": "AGCTTTTCATTCTGACTGCAATGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTCTCTGACAGCAGCTTCTGAACTGGTTACCTGCCGTGAGTAAAT",
+        "source_features": [
+          {
+            "id": "feature_9",
+            "location": "1..5697240",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sequence2",
+        "name": "sequence2",
+        "type": "other",
+        "topology": "linear",
+        "sequence": "ATGAAATCTAATGCTTTTGACGTCATGGGGAAGGTTGCATGGCTATGGGCCTGTTCTCCTCTGCATAAAAAATGGCCATTATCTGTTTTTGCTATTAATG",
+        "source_features": [
+          {
+            "id": "feature_5698",
+            "location": "1..85167",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sequence3",
+        "name": "sequence3",
+        "type": "other",
+        "topology": "linear",
+        "sequence": "GTGACTGATCTTCAACAAACGTATTACCGCCAGGTAAAGAACCCGAATCCGGTGTTTACACCCCGTAAAGGTGCCGGAACGCTGAAGTTCTGCGAAAAAC",
+        "source_features": [
+          {
+            "id": "feature_5791",
+            "location": "1..63365",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feature_10",
+      "type": "CDS",
+      "location": "337..2799",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "bifunctional aspartate kinase/homoserine dehydrogenase I"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_001264698.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "thrA"
+          }
+        ]
+      },
+      "locus_tag_id": "00010"
+    },
+    {
+      "id": "feature_11",
+      "type": "CDS",
+      "location": "2801..3733",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "homoserine kinase"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000241660.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "thrB"
+          }
+        ]
+      },
+      "locus_tag_id": "00020"
+    },
+    {
+      "id": "feature_12",
+      "type": "CDS",
+      "location": "3734..5020",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "threonine synthase"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000781063.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "thrC"
+          }
+        ]
+      },
+      "locus_tag_id": "00030"
+    },
+    {
+      "id": "feature_13",
+      "type": "CDS",
+      "location": "5373..5534",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "00040"
+    },
+    {
+      "id": "feature_14",
+      "type": "CDS",
+      "location": "complement(5683..6459)",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "peroxide stress protein YaaA"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000906203.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "yaaA"
+          }
+        ]
+      },
+      "locus_tag_id": "00050"
+    },
+    {
+      "id": "feature_5699",
+      "type": "CDS",
+      "location": "1..516",
+      "sequence_id": "sequence2",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "enterohemolysin-activating lysine-acyltransferase EhxC"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000520917.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ehxC"
+          }
+        ]
+      },
+      "locus_tag_id": "55600"
+    },
+    {
+      "id": "feature_5700",
+      "type": "CDS",
+      "location": "518..3514",
+      "sequence_id": "sequence2",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "enterohemolysin EhxA"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000217739.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ehxA"
+          }
+        ]
+      },
+      "locus_tag_id": "55610"
+    },
+    {
+      "id": "feature_5701",
+      "type": "CDS",
+      "location": "3564..5684",
+      "sequence_id": "sequence2",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "enterohemolysin T1SS ABC transporter permease/ATPase EhxB"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000987091.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ehxB"
+          }
+        ]
+      },
+      "locus_tag_id": "55620"
+    },
+    {
+      "id": "feature_5702",
+      "type": "CDS",
+      "location": "5688..7127",
+      "sequence_id": "sequence2",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "enterohemolysin T1SS ABC transporter subunit EhxD"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_001213545.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ehxD"
+          }
+        ]
+      },
+      "locus_tag_id": "55630"
+    },
+    {
+      "id": "feature_5703",
+      "type": "CDS",
+      "location": "7194..7532",
+      "sequence_id": "sequence2",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "55640"
+    },
+    {
+      "id": "feature_5792",
+      "type": "CDS",
+      "location": "52..858",
+      "sequence_id": "sequence3",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "incFII family plasmid replication initiator RepA"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000130945.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "repA"
+          }
+        ]
+      },
+      "locus_tag_id": "56520"
+    },
+    {
+      "id": "feature_5793",
+      "type": "CDS",
+      "location": "complement(1952..3151)",
+      "sequence_id": "sequence3",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "IS91 family transposase"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000947175.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "56530"
+    },
+    {
+      "id": "feature_5794",
+      "type": "CDS",
+      "location": "complement(3161..3349)",
+      "sequence_id": "sequence3",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_000957853.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "56540"
+    },
+    {
+      "id": "feature_5795",
+      "type": "CDS",
+      "location": "3706..4521",
+      "sequence_id": "sequence3",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "aminoglycoside 3'-phosphotransferase"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_010970345.1"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "56550"
+    },
+    {
+      "id": "feature_5796",
+      "type": "CDS",
+      "location": "complement(4525..4881)",
+      "sequence_id": "sequence3",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "56560"
+    }
+  ]
+}

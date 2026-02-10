@@ -1,0 +1,93 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {
+    "submitters": [
+      {
+        "abbreviation": ""
+      },
+      {
+        "abbreviation": ""
+      },
+      {
+        "abbreviation": ""
+      },
+      {
+        "name": "",
+        "email": "",
+        "organization": [
+          {
+            "name": "",
+            "type": "institution",
+            "address": {
+              "country": "",
+              "city": "",
+              "street": "",
+              "postal_code": ""
+            }
+          }
+        ]
+      }
+    ],
+    "references": [
+      {
+        "title": "",
+        "authors": [
+          {
+            "abbreviation": ""
+          },
+          {
+            "abbreviation": ""
+          },
+          {
+            "abbreviation": ""
+          }
+        ],
+        "status": "unpublished",
+        "year": ""
+      }
+    ]
+  },
+  "sequences": {
+    "common_source": {
+      "organism": "",
+      "mol_type": "genomic RNA",
+      "qualifiers": {
+        "collection_date": [
+          {
+            "value": ""
+          }
+        ],
+        "geo_loc_name": [
+          {
+            "value": ""
+          }
+        ],
+        "host": [
+          {
+            "value": ""
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "id": "k101_0",
+        "name": "k101_0",
+        "type": "chromosome",
+        "topology": "linear",
+        "sequence": "tcaaccacgttcccgaaggtgtgacttccatgccaatgcgcgacattccgaagaagcctcggcaaaaacgtactgccaccttactaccagacaaccttag",
+        "source_features": [
+          {
+            "id": "source_k101_0",
+            "location": "1..30011",
+            "definition": [
+              "@@[organism]@@ @@[isolate]@@ RNA, partial genome"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "features": []
+}

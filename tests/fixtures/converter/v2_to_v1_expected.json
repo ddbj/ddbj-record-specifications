@@ -1,0 +1,138 @@
+{
+  "schema_version": "v1.0",
+  "COMMON": {
+    "DBLINK": {
+      "project": "PRJDB99999",
+      "biosample": "SAMD999999",
+      "sequence read archive": [
+        "DRR999990"
+      ]
+    },
+    "SUBMITTER": {
+      "ab_name": [
+        "Mishima,H.",
+        "Tanizawa,Y.",
+        "Nakamura,Y."
+      ],
+      "contact": "Hanako Mishima",
+      "email": "mishima@ddbj.nig.ac.jp",
+      "url": "https://ddbj.nig.ac.jp",
+      "institute": "National Institute of Genetics",
+      "department": "DNA Data Bank of Japan",
+      "country": "Japan",
+      "state": "Shizuoka",
+      "city": "Mishima",
+      "street": "Yata 1111",
+      "zip": "411-8540"
+    },
+    "REFERENCE": [
+      {
+        "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
+        "ab_name": [
+          "Mishima,H.",
+          "Tanizawa,Y.",
+          "Nakamura,Y."
+        ],
+        "status": "Unpublished",
+        "year": "2023"
+      }
+    ],
+    "COMMENT": [
+      {
+        "line": [
+          "Comment line1",
+          "line2"
+        ]
+      },
+      {
+        "line": [
+          "Annotated by DFAST 1.3.4 https://dfast.ddbj.nig.ac.jp/"
+        ]
+      }
+    ],
+    "ST_COMMENT": {
+      "tagset_id": "Genome-Assembly-Data",
+      "Assembly Method": "HGAP v. x.x",
+      "Genome Coverage": "60x",
+      "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
+    },
+    "DATE": {
+      "hold_date": "20250331"
+    },
+    "trad_submission_category": "GNM"
+  },
+  "COMMON_SOURCE": {
+    "organism": "Paucilactobacillus hokkaidonensis",
+    "mol_type": "genomic DNA",
+    "strain": "LOOC260",
+    "type_material": "type strain",
+    "collection_date": "2012-04-01",
+    "culture_collection": "JCM:18460",
+    "isolation_source": "silage",
+    "geo_loc_name": "Japan:Hokkaido"
+  },
+  "COMMON_META": {
+    "division": "BCT",
+    "locus_tag_prefix": "PLH",
+    "dfast_version": "1.3.4"
+  },
+  "ENTRIES": [
+    {
+      "id": "chromosome",
+      "name": "chromosome",
+      "type": "chromosome",
+      "topology": "circular",
+      "sequence": "ttatccacaattaaaccaaaacaatccacagcgttgtttctttcctgtggattcaatttaagttttcaactgctttttccccgtgttacgaacaaaagaa",
+      "features": [
+        {
+          "id": "feature_8",
+          "type": "source",
+          "location": "1..2277985",
+          "qualifiers": {
+            "ff_definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, complete genome"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pPLH-1",
+      "name": "pPLH-1",
+      "type": "plasmid",
+      "topology": "circular",
+      "sequence": "atgtatgattttaagacaattcaagacgcgcaaagactggtattacacgattcattacatacatataaagttaaaaatagtagttctaatattgccggac",
+      "features": [
+        {
+          "id": "feature_2270",
+          "type": "source",
+          "location": "1..81630",
+          "qualifiers": {
+            "ff_definition": [
+              "@@[organism]@@ @@[strain]@@ plasmid @@[plasmid]@@ DNA, complete sequence"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pPLH-2",
+      "name": "pPLH-2",
+      "type": "plasmid",
+      "topology": "linear",
+      "sequence": "atgacaaaatcaacaaatttcaattactatgaagccgataacgtatatggagccttatttttccaatttcctaaagtattaatgtatggcgatcaataca",
+      "features": [
+        {
+          "id": "feature_2374",
+          "type": "source",
+          "location": "1..40971",
+          "qualifiers": {
+            "ff_definition": [
+              "@@[organism]@@ @@[strain]@@ plasmid @@[plasmid]@@ DNA, complete sequence"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

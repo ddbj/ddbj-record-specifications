@@ -1,0 +1,94 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {},
+  "sequences": {
+    "common_source": {
+      "organism": "Paucilactobacillus hokkaidonensis",
+      "mol_type": "genomic DNA"
+    },
+    "entries": [
+      {
+        "id": "seq1",
+        "name": "seq1",
+        "type": "chromosome",
+        "topology": "linear",
+        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc"
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feat_join",
+      "type": "CDS",
+      "location": "join(1..30,40..60)",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feat_complement_join",
+      "type": "CDS",
+      "location": "complement(join(10..30,50..70))",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "reverse protein"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feat_order",
+      "type": "gene",
+      "location": "order(1..20,40..60,80..99)",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "gene": [
+          {
+            "value": "geneA"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feat_fuzzy",
+      "type": "gene",
+      "location": "<1..>99",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "gene": [
+          {
+            "value": "geneB"
+          }
+        ]
+      }
+    }
+  ]
+}

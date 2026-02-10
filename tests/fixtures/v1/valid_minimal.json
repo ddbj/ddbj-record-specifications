@@ -1,0 +1,30 @@
+{
+  "schema_version": "v1.0",
+  "COMMON": {
+    "SUBMITTER": {
+      "ab_name": [
+        "Mishima,H."
+      ],
+      "contact": "Hanako Mishima",
+      "email": "mishima@ddbj.nig.ac.jp",
+      "institute": "National Institute of Genetics",
+      "country": "Japan",
+      "city": "Mishima",
+      "street": "Yata 1111",
+      "zip": "411-8540"
+    },
+    "ST_COMMENT": {
+      "tagset_id": "Genome-Assembly-Data",
+      "Assembly Method": "HGAP v. x.x",
+      "Sequencing Technology": "Illumina MiSeq"
+    },
+    "trad_submission_category": "GNM"
+  },
+  "COMMON_SOURCE": {
+    "organism": "Paucilactobacillus hokkaidonensis",
+    "mol_type": "genomic DNA"
+  },
+  "COMMON_META": {
+    "division": "BCT"
+  }
+}

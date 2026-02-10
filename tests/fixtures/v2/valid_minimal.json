@@ -1,0 +1,11 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {},
+  "sequences": {
+    "common_source": {
+      "organism": "Paucilactobacillus hokkaidonensis",
+      "mol_type": "genomic DNA"
+    }
+  }
+}

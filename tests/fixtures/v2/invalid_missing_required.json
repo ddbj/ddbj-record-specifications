@@ -1,0 +1,10 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {},
+  "sequences": {
+    "common_source": {
+      "mol_type": "genomic DNA"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1.0",
+  "COMMON": {
+    "ST_COMMENT": {
+      "tagset_id": "Genome-Assembly-Data",
+      "Assembly Method": "HGAP v. x.x",
+      "Sequencing Technology": "Illumina MiSeq"
+    },
+    "trad_submission_category": "GNM"
+  },
+  "COMMON_SOURCE": {
+    "organism": "Paucilactobacillus hokkaidonensis",
+    "mol_type": "genomic DNA"
+  },
+  "COMMON_META": {
+    "division": "BCT"
+  }
+}

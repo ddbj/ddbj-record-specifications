@@ -1,0 +1,239 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {
+    "submitters": [
+      {
+        "abbreviation": "Fujisawa,T."
+      },
+      {
+        "abbreviation": "Tanizawa,Y."
+      },
+      {
+        "abbreviation": "Suzuki,Y."
+      },
+      {
+        "abbreviation": "Tanaka,M."
+      },
+      {
+        "name": "Masanori Arita",
+        "email": "mss@ddbj.nig.ac.jp",
+        "organization": [
+          {
+            "name": "National Institute of Genetics",
+            "url": "https://ddbj.nig.ac.jp",
+            "type": "institution",
+            "department": "DNA Data Bank of Japan",
+            "address": {
+              "country": "Japan",
+              "state": "Shizuoka",
+              "city": "Mishima",
+              "street": "1111 Yata",
+              "postal_code": "411-8540"
+            }
+          },
+          {
+            "name": "Shizuoka Pref. Consortium for Covid19",
+            "type": "consortium"
+          }
+        ]
+      }
+    ],
+    "db_xrefs": [],
+    "references": [
+      {
+        "title": "Complete genome sequence of Severe acute respiratory syndrome coronavirus 2 isolate XXXXXX",
+        "authors": [
+          {
+            "abbreviation": "Tanizawa,Y."
+          },
+          {
+            "abbreviation": "Suzuki,Y."
+          },
+          {
+            "abbreviation": "Tanaka,M."
+          }
+        ],
+        "status": "unpublished",
+        "year": "2021"
+      }
+    ],
+    "comments": [
+      [
+        "Sequenced and annotated at NIG"
+      ]
+    ],
+    "trad_submission_category": "GNM",
+    "division": "UNK"
+  },
+  "experiments": [
+    {
+      "id": "st_comment_experiment",
+      "platform": {
+        "platform_type": "Illumina MiSeq"
+      },
+      "experiment_attributes": {
+        "tagset_id": "Genome-Assembly-Data",
+        "assembly_method": "META_VRL v0.0.1",
+        "genome_coverage": "2000x"
+      }
+    }
+  ],
+  "sequences": {
+    "common_source": {
+      "organism": "Severe acute respiratory syndrome coronavirus 2",
+      "mol_type": "genomic RNA",
+      "qualifiers": {
+        "isolate": [
+          {
+            "value": "hCov-19/Japan/SZ-NIG-12345/2021"
+          }
+        ],
+        "isolation_source": [
+          {
+            "value": "pharyngeal swab"
+          }
+        ],
+        "host": [
+          {
+            "value": "Homo sapiens"
+          }
+        ],
+        "collection_date": [
+          {
+            "value": "2021-03-20"
+          }
+        ],
+        "geo_loc_name": [
+          {
+            "value": ""
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "id": "SZ-NIG-Y21135",
+        "name": "SZ-NIG-Y21135",
+        "type": "chromosome",
+        "topology": "linear",
+        "sequence": "cttcccaggtaacaaaccaaccaactttcgatctcttgtagatctgttctctaaacgaactttaaaatctgtgtggctgtcactcggctgcatgcttagt",
+        "source_features": [
+          {
+            "id": "feature_5",
+            "location": "1..29795",
+            "definition": [
+              "@@[organism]@@ @@[isolate]@@ RNA, complete genome"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feature_6",
+      "type": "5'UTR",
+      "location": "1..250",
+      "sequence_id": "SZ-NIG-Y21135",
+      "qualifiers": {}
+    },
+    {
+      "id": "feature_7",
+      "type": "CDS",
+      "location": "join(251..13444,13444..21531)",
+      "sequence_id": "SZ-NIG-Y21135",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "ORF1ab polyprotein"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ORF1ab"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "1"
+          }
+        ],
+        "ribosomal_slippage": [
+          {
+            "value": "true"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feature_8",
+      "type": "CDS",
+      "location": "251..13459",
+      "sequence_id": "SZ-NIG-Y21135",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "ORF1a polyprotein"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ORF1ab"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feature_9",
+      "type": "mat_peptide",
+      "location": "251..790",
+      "sequence_id": "SZ-NIG-Y21135",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "leader protein"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ORF1ab"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feature_10",
+      "type": "mat_peptide",
+      "location": "791..2704",
+      "sequence_id": "SZ-NIG-Y21135",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "nsp2"
+          }
+        ],
+        "gene": [
+          {
+            "value": "ORF1ab"
+          }
+        ]
+      }
+    }
+  ]
+}

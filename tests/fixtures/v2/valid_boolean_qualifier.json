@@ -1,0 +1,78 @@
+{
+  "schema_version": "v2.0",
+  "provenance": {},
+  "submission": {},
+  "sequences": {
+    "common_source": {
+      "organism": "Paucilactobacillus hokkaidonensis",
+      "mol_type": "genomic DNA"
+    },
+    "entries": [
+      {
+        "id": "seq1",
+        "name": "seq1",
+        "type": "chromosome",
+        "topology": "linear",
+        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc"
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feat_pseudo",
+      "type": "CDS",
+      "location": "1..30",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "pseudo protein"
+          }
+        ],
+        "pseudo": [
+          {
+            "value": "true"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "feat_trans_splicing",
+      "type": "CDS",
+      "location": "join(1..20,30..51)",
+      "sequence_id": "seq1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "trans-spliced protein"
+          }
+        ],
+        "trans_splicing": [
+          {
+            "value": "true"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      }
+    }
+  ]
+}
