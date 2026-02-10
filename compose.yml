@@ -5,8 +5,13 @@ services:
       dockerfile: Dockerfile
     image: ddbj-record-specifications
     container_name: ddbj-record-specifications
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - .:/app
+      - app-venv:/app/.venv:rw
     working_dir: /app
     command: ["sleep", "infinity"]
     init: true
+
+volumes:
+  app-venv:

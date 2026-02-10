@@ -11,7 +11,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 COPY . .
-RUN uv sync --extra tests
+RUN uv sync --extra tests && \
+    chmod -R a+rwX .venv
+
+# Writable home for arbitrary UID
+ENV HOME=/home/app
+RUN mkdir -p /home/app && chmod 777 /home/app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
