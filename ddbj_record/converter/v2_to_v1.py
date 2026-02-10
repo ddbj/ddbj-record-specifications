@@ -11,7 +11,7 @@ from ddbj_record.schema.v2 import Person as V2Person
 
 def v2_to_v1(v2_obj: DdbjRecordV2) -> DdbjRecordV1:
     return DdbjRecordV1(
-        schema_version="v1",
+        schema_version="v1.0",
         COMMON=_convert_common(v2_obj),
         COMMON_SOURCE=_convert_common_source(v2_obj),
         COMMON_META=_convert_common_meta(v2_obj),

@@ -13,7 +13,7 @@ from ddbj_record.schema.v2 import (Entry, Experiment, Feature, Organization,
 
 def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
     return DdbjRecordV2(
-        schema_version="v2",
+        schema_version="v2.0",
         provenance=_create_provenance(v1_obj),
         submission=_convert_submission(v1_obj),
         experiments=_convert_experiments(v1_obj),

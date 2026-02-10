@@ -1,6 +1,8 @@
 from typing import Dict, List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from ddbj_record.schema import LEGACY_SCHEMA_VERSION_MAP
 
 
 class Provenance(BaseModel):
@@ -679,9 +681,15 @@ class DdbjRecord(BaseModel):
     """
     schema_version: str = Field(
         ...,
-        examples=["v2"],
+        examples=["v2.0"],
         description="The version of the DDBJ record schema used for this data.",
     )
+
+    @field_validator("schema_version", mode="before")
+    @classmethod
+    def normalize_schema_version(cls, v: str) -> str:
+        return LEGACY_SCHEMA_VERSION_MAP.get(v, v)
+
     provenance: Provenance = Field(
         ...,
         description="Metadata that records the origin and transformation history of the data, including conversion software, timestamps, and input sources.",

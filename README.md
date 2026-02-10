@@ -1,133 +1,123 @@
 # DDBJ Record Specifications
 
 DDBJ における登録用 JSON フォーマット (DDBJ Record) の仕様を定義するリポジトリ。
-この仕様は、DFAST などの自動アノテーションツールや、Repository API により利用されることを想定している。
+DFAST などの自動アノテーションツールや、Repository API により利用されることを想定している。
+
+本リポジトリでは、以下の機能を提供する:
+
+- **スキーマ定義**: Python (Pydantic) によるスキーマ定義と JSON Schema の生成
+- **バリデーション**: DDBJ Record JSON ファイルのスキーマレベルでの検証
+- **バージョン変換**: スキーマバージョン間の双方向変換 (e.g., v1↔v2)
+
+DDBJ Record は [dr_tools](https://github.com/ddbj/dr_tools) と連携することで `ann` / `gbk` / `fasta` などへの変換が可能となる。
 
 ## Installation
 
 ```bash
-python3 -m pip install git+https://github.com/ddbj/ddbj-record-specifications.git@main
+pip install git+https://github.com/ddbj/ddbj-record-specifications.git@main
 # OR (version specify)
-python3 -m pip install git+https://github.com/ddbj/ddbj-record-specifications.git@0.1.0
-
-# Then, check the installation
-python3 -c "import ddbj_record"
+pip install git+https://github.com/ddbj/ddbj-record-specifications.git@0.1.5
 ```
 
-## 概要
+## バージョニング
 
-本リポジトリでは、以下の内容を取り扱う:
+本リポジトリでは、**Specification version** と **Application version** を独立して管理する。
 
-- Python の pydantic による schema 定義
-  - これを main file として、JSON Schema を生成する
-  - Python の型定義として、周辺ツールなどで使用されることを想定している
-- DDBJ Record の validator
-  - JSON file を入力とする
-  - 基本的に schema level の validation
-  - Feature / Qualifier の仕様に基づく validation も実装予定 (現状、コード断片しか存在しない)
-  - スキーマレベルを超えた追加的なバリデーションロジックも書けるようにする予定
-- DDBJ Record の converter
-  - 例えば、v1 から v2 へ変換するための converter
+### Specification version (スキーマ仕様のバージョン)
 
-DDBJ Record は、`ann` / `gbk` / `fasta` などのフォーマットへ変換可能であり、[dr_tools](https://github.com/ddbj/dr_tools) と連携することでファイル生成が可能となる。
+DDBJ Record のスキーマ仕様自体のバージョン。JSON の `schema_version` フィールドに記録する。
+
+- 形式: `v{major}.{minor}` (e.g., `v1.0`, `v2.0`, `v2.1`)
+- major: スキーマ構造の根本的な再設計。新しいスキーマファイル (e.g., `v3.py`) を作成する
+- minor: 同じ設計思想の範囲内での変更 (フィールドの追加・削除・名称変更、型の調整など)。既存スキーマファイル内で更新する
+  - minor の変更は後方互換とは限らない。変更内容は CHANGELOG.md に記録する
+
+CLI やモジュール名では major 部分のみ使用する (e.g., `--version v2`, `ddbj_record.schema.v2`)。
+JSON の `schema_version` フィールドには minor を含めた完全な表記 (e.g., `"v2.0"`) を記録する。
+
+旧表記 (`"0.1"`, `"v1"`, `"0.2"`, `"v2"`) は非推奨。読み込み時の互換性は維持するが、新規データでは使用しない。
+
+### Application version (Python パッケージのバージョン)
+
+Python パッケージ `ddbj-record` としてのバージョン。[Semantic Versioning](https://semver.org/) に従う。
+
+- 形式: `MAJOR.MINOR.PATCH` (e.g., `0.1.5`, `1.0.0`)
+- Specification version とは独立して管理する
+- 各リリースにおける変更内容は CHANGELOG.md に記録する
 
 ## スキーマ仕様
 
-現状、以下の 2 つのバージョンが存在する
+現状、以下の spec version が存在する:
 
-- **v1**
-  - Python 定義: <https://github.com/ddbj/ddbj-record-specifications/blob/main/ddbj_record/schema/v1.py>
-  - JSON Schema: <https://github.com/ddbj/ddbj-record-specifications/blob/main/schemas/v1/ddbj_record.schema.json>
-- **v2**
-  - Python 定義: <https://github.com/ddbj/ddbj-record-specifications/blob/main/ddbj_record/schema/v2.py>
-  - JSON Schema: <https://github.com/ddbj/ddbj-record-specifications/blob/main/schemas/v2/ddbj_record.schema.json>
+- **v1.0**: DFAST 互換のレガシー形式
+  - Python 定義: [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py)
+  - JSON Schema: [`schemas/v1/ddbj_record.schema.json`](./schemas/v1/ddbj_record.schema.json)
+- **v2.0**: 構造化された現行形式
+  - Python 定義: [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py)
+  - JSON Schema: [`schemas/v2/ddbj_record.schema.json`](./schemas/v2/ddbj_record.schema.json)
 
 ## Validator
 
-2段階でのバリデーションを想定している:
-
-- **JSON schema level の validation**
-  - 型チェックや必須フィールドのチェックなど
-- **スキーマを超えたロジックレベルでの validation**
-  - 必須 feature / qualifier のチェック
-  - 特定組み合わせの制約など
+スキーマに基づくバリデーションを行う。
 
 ```bash
 ddbj_record_validator --version v2 --input input.json
 ```
 
-validation 結果の出力は、以下のような json となる:
+出力例:
 
-```bash
-$ ddbj_record_validator -v v1 --input ./tests/ddbj_record_v1_trimmed.failed.json 
-{
-  "valid": false,
-  "errors": [
-    {
-      "type": "missing",
-      "loc": [
-        "COMMON",
-        "DBLINK",
-        "project"
-      ],
-      "msg": "Field required"
-    },
-    {
-      "type": "missing",
-      "loc": [
-        "COMMON",
-        "DBLINK",
-        "biosample"
-      ],
-      "msg": "Field required"
-    }
-  ]
-}
-$ ddbj_record_validator -v v1 --input ./tests/ddbj_record_v1_trimmed.json
+```json
 {
   "valid": true,
   "errors": null
 }
 ```
 
+```json
+{
+  "valid": false,
+  "errors": [
+    {
+      "type": "missing",
+      "loc": ["COMMON", "DBLINK", "project"],
+      "msg": "Field required"
+    }
+  ]
+}
+```
+
 ## Converter
 
-```bash
-ddbj_record_converter --from v1 --to v2 --input input.json --output output
+スキーマバージョン間の変換を行う。
 
-# Example: Convert v1 to v2
-ddbj_record_converter --from v1 --to v2 --input ./tests/ddbj_record_v1_trimmed.json --output ./tests/ddbj_record_v2_trimmed.converted.json
+```bash
+ddbj_record_converter --from v1 --to v2 --input input.json --output output.json
 ```
 
 ## Development
 
 ### 開発環境
 
-開発環境として、docker を用いている
-
 ```bash
+# Docker
 docker compose -f compose.dev.yml up -d --build
 docker compose -f compose.dev.yml exec app bash
+
+# ローカル (Python 3.9+)
+pip install -e .[tests]
 ```
 
-また、docker では、`python 3.12` を用いているが、`python 3.9` 以上であればおそらく動くはず。
+### 新たなスキーマの開発
+
+- 新しい spec major version (e.g., v3) を開発する場合は、latest (e.g., `v2.py`) を `draft.py` としてコピーして編集する
+- Converter の存在から、なるべく version 間の互換性を保つ
+- バージョニングの詳細は [バージョニング](#バージョニング) を参照
+
+### JSON Schema の生成
+
+Pydantic モデルから JSON Schema を生成する。GitHub Actions ([`dump_schema.yml`](./.github/workflows/dump_schema.yml)) により main push 時に自動生成される。
 
 ```bash
-python -m pip install -e .[tests]
-```
-
-### 新たな schema の追加・開発
-
-- Semantic Versioning は基本的に行わない
-- 共通の編集点として、`draft.py` のようなファイルを latest (e.g., `v2.py`) からコピーして、編集を行う
-  - つまり、v2 の minor version を上げるのではなく、draft を編集して、新たな major version (e.g., v3) を release する
-  - Converter の存在から、なるべく、version 間の互換性を保つようにする
-- schema の version と python package としての version は別物として扱う
-
-### JSON Schema の生成方法
-
-```bash
-# ./ddbj_record/schema/v1.py より、./schemas/v1/ddbj_record.schema.json を生成する
 dump_json_schema --version v1
 dump_json_schema --version v2
 dump_json_schema --version draft
@@ -135,14 +125,12 @@ dump_json_schema --version draft
 
 ### Feature / Qualifier 定義
 
-**まだ実験的に実装中**
+**実験的実装。**
 
-INSDC の定義 ([公式リンク](https://www.insdc.org/submitting-standards/feature-table)) に準拠しつつ、以下の形式で補助情報を定義する:
+INSDC の [Feature Table Definition](https://www.insdc.org/submitting-standards/feature-table) に準拠した定義を `ddbj_record/feature_table/spec/` に格納する。
 
 - `features.json`: 各 Feature が必須/任意で持つ Qualifier の一覧
-- `qualifiers.json`: 各 Qualifier の値の形式・制約 (例: フリーテキスト、列挙値、正規表現など)
-
-これらの json を `ddbj_record/feature_table` ディレクトリ以下に格納する。
+- `qualifiers.json`: 各 Qualifier の値の形式・制約
 
 ### Release
 
@@ -152,5 +140,4 @@ bash ./release.sh <new_version>
 
 ## License
 
-This project is licensed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
-See the [LICENSE](./LICENSE) file for details.
+[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). See [LICENSE](./LICENSE).
