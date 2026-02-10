@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-record"
@@ -8,9 +8,9 @@ authors = [{ name = "Bioinformatics and DDBJ Center" }]
 description = "The ddbj-record package provides tools for parsing, validating, and converting DDBJ record specifications."
 readme = { file = "README.md", content-type = "text/markdown" }
 version = "0.1.5"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
-dependencies = ["beautifulsoup4", "pydantic", "httpx", "lxml", "jsonref"]
+dependencies = ["pydantic", "jsonref"]
 
 [project.urls]
 Homepage = "https://github.com/ddbj/ddbj-record-specifications"
@@ -18,57 +18,66 @@ Documentation = "https://github.com/ddbj/ddbj-record-specifications/blob/main/RE
 Repository = "https://github.com/ddbj/ddbj-record-specifications.git"
 
 [project.optional-dependencies]
-tests = [
-    "isort",
-    "mypy",
-    "pylint",
-    "pytest-mock",
-    "pytest",
-    "types-beautifulsoup4",
-]
+tests = ["mypy", "pytest", "pytest-mock", "ruff"]
 
 [project.scripts]
-parse_feature_table = "ddbj_record.feature_table.parse_feature_table:main"
 dump_json_schema = "ddbj_record.schema.cli:main"
 ddbj_record_validator = "ddbj_record.validator:main"
 ddbj_record_converter = "ddbj_record.converter.cli:main"
 
-[tool.setuptools]
-packages = [
-    "ddbj_record",
-    "ddbj_record.feature_table",
-    "ddbj_record.schema",
-    "ddbj_record.converter",
-]
+[tool.hatch.build.targets.wheel]
+packages = ["ddbj_record"]
 
-[tool.setuptools.package-data]
-ddbj_record = [
-    "py.typed",
-    "feature_table/spec/features.json",
-    "feature_table/spec/qualifiers.json",
-]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.mypy]
-files = ["./ddbj_record/**/*.py", "./tests/**/*.py"]
-follow_imports = "silent"
+files = ["./ddbj_record/**/*.py"]
+follow_imports = "normal"
 strict = true
 plugins = ["pydantic.mypy"]
+mypy_path = "."
+explicit_package_bases = true
+warn_unreachable = true
 
-[tool.pylint.messages_control]
-disable = [
-    "C0114", # Missing module docstring
-    "C0115", # Missing class docstring
-    "C0116", # Missing function or method docstring
-    "C0301", # Line too long
-    "R0801", # Similar lines in 2 files
-    "R0903", # Too few public methods
-    "R0911", # Too many return statements
-    "R0912", # Too many branches
-    "R0913", # Too many arguments
-    "R0914", # Too many local variables
-    "R1705", # Unnecessary "else" after "return"
-    "W0511", # Fixme
-    "W0718", # Broad exception caught
-    "W0719", # Exception type of Exception
-    "I1101", # c-extension-no-member
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+src = ["ddbj_record", "tests"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",       # pydocstyle (後回し)
+    "ANN",     # flake8-annotations (mypy strict で代替)
+    "COM812",  # trailing comma missing (ruff format と競合)
+    "ISC001",  # implicit string concat (ruff format と競合)
+    "E501",    # line length (line-length + ruff format で処理)
+    "FIX",     # fixme (TODO/FIXME 検出は不要)
+    "TD",      # flake8-todo (TODO/FIXME 検出は不要)
+    "FBT",     # flake8-boolean-trap
+    "EM",      # flake8-errmsg (例外メッセージの書式)
+    "TRY003",  # long exception messages
+    "RET504",  # unnecessary assignment before return
+    "RET505",  # unnecessary else after return
+    "C901",    # mccabe complexity
+    "PLR0912", # too many branches
+    "PLR0915", # too many statements
+    "TC",      # flake8-type-checking (TYPE_CHECKING block 不使用の方針)
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"ddbj_record/schema/cli.py" = ["T201", "BLE001"]
+"ddbj_record/validator.py" = ["T201", "BLE001"]
+"ddbj_record/converter/cli.py" = ["T201", "BLE001"]
+"tests/**/*.py" = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ddbj_record"]

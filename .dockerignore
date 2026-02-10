@@ -2,8 +2,9 @@
 **
 
 !ddbj_record
-!feature_table
 !LICENSE
 !pyproject.toml
+!uv.lock
+!.python-version
 !README.md
 !schemas

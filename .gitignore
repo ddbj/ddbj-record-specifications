@@ -184,5 +184,3 @@ cython_debug/
 .cursorindexingignore
 
 # === Our definitions ===
-
-ddbj_record/feature_table/spec/meta/source.html

@@ -1,7 +1,12 @@
 services:
   app:
-    image: ghcr.io/ddbj/ddbj-record-specifications:0.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ddbj-record-specifications
     container_name: ddbj-record-specifications
+    volumes:
+      - .:/app
     working_dir: /app
-    command: [ "sleep", "infinity" ]
+    command: ["sleep", "infinity"]
     init: true

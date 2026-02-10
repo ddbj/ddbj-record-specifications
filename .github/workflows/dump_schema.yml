@@ -17,18 +17,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install
 
       - name: Install package
-        run: python3 -m pip install -e .
+        run: uv sync
 
       - name: Dump schema
         run: |
-          dump_json_schema --version v1
-          dump_json_schema --version v2
+          uv run dump_json_schema --version v1
+          uv run dump_json_schema --version v2
 
       - name: Commit and push if schema changed
         run: |

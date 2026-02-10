@@ -15,22 +15,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
 
-      - name: Install Python Build Module and Twine
-        run: |
-          python3 -m pip install --progress-bar off -U pip
-          python3 -m pip install build twine
+      - name: Set up Python
+        run: uv python install
 
       - name: Build Binary Wheel and Source Tarball
-        run: |
-          python3 -m build
+        run: uv build
 
       - name: Check Distribution Validity with Twine
-        run: twine check dist/*
+        run: uvx twine check dist/*
 
       - name: Upload sdist as Artifact
         uses: actions/upload-artifact@v4

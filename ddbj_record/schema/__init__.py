@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 SCHEMA_VERSIONS = [
     "v1",
     "v2",

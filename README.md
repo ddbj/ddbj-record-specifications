@@ -123,15 +123,6 @@ dump_json_schema --version v2
 dump_json_schema --version draft
 ```
 
-### Feature / Qualifier 定義
-
-**実験的実装。**
-
-INSDC の [Feature Table Definition](https://www.insdc.org/submitting-standards/feature-table) に準拠した定義を `ddbj_record/feature_table/spec/` に格納する。
-
-- `features.json`: 各 Feature が必須/任意で持つ Qualifier の一覧
-- `qualifiers.json`: 各 Qualifier の値の形式・制約
-
 ### Release
 
 ```bash

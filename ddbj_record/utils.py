@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import importlib
 import json
 from pathlib import Path
-from typing import Type
+from typing import Any, cast
 
 import jsonref  # type: ignore[import-untyped]
 from pydantic import BaseModel
@@ -21,10 +23,6 @@ def get_schema_dir_path() -> Path:
     return get_root_path().joinpath("schemas")
 
 
-def get_feature_table_dir_path() -> Path:
-    return get_root_path().joinpath("ddbj_record/feature_table/spec")
-
-
 def deref_schema(schema: JsonSchemaValue) -> JsonSchemaValue:
     """
     Dereference a JSON schema by resolving $ref references.
@@ -35,18 +33,18 @@ def deref_schema(schema: JsonSchemaValue) -> JsonSchemaValue:
     return resolved_schema_dict
 
 
-def resolve_record_model(version: str) -> Type[BaseModel]:
+def resolve_record_model(version: str) -> type[BaseModel]:
     try:
         module = importlib.import_module(f"ddbj_record.schema.{version}")
     except ImportError as e:
-        raise Exception(f"Failed to import schema module for version {version}: {e}") from e
+        raise ImportError(f"Failed to import schema module for version {version}: {e}") from e
 
     try:
-        model = getattr(module, "DdbjRecord")
+        model: Any = module.DdbjRecord
     except AttributeError as e:
-        raise Exception(f"Module {version} does not contain DdbjRecord model: {e}") from e
+        raise AttributeError(f"Module {version} does not contain DdbjRecord model: {e}") from e
 
     if not issubclass(model, BaseModel):
         raise TypeError(f"DdbjRecord in {version} must be a subclass of Pydantic BaseModel")
 
-    return model  # type: ignore
+    return cast("type[BaseModel]", model)

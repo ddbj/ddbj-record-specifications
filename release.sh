@@ -25,11 +25,10 @@ fi
 
 echo "Rewrite files."
 sed -i "s/version=\"$PREV_VERSION\"/version=\"$NEW_VERSION\"/g" Dockerfile
-sed -i "s/ddbj-record:$PREV_VERSION/ddbj-record:$NEW_VERSION/g" compose.yml
 sed -i "s/version = \"$PREV_VERSION\"/version = \"$NEW_VERSION\"/g" pyproject.toml
 
 echo "Commit and push."
-git add Dockerfile compose.yml pyproject.toml
+git add Dockerfile pyproject.toml
 git commit -m "Update version to $NEW_VERSION"
 git push origin main
 

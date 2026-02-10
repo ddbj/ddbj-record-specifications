@@ -1,31 +1,27 @@
+from __future__ import annotations
+
 import argparse
 import json
 import sys
-from typing import Optional
 
 from pydantic import BaseModel
 
 from ddbj_record.schema import SCHEMA_VERSIONS
-from ddbj_record.utils import (deref_schema, get_schema_dir_path,
-                               resolve_record_model)
+from ddbj_record.utils import deref_schema, get_schema_dir_path, resolve_record_model
 
 
 class Args(BaseModel):
     version: str
 
 
-def parse_args(args: Optional[list[str]] = None) -> Args:
+def parse_args(args: list[str] | None = None) -> Args:
     parser = argparse.ArgumentParser(
         description="DDBJ Record - dump JSON schema from pydantic models",
         epilog="Example: %(prog)s --version v2",
     )
 
     parser.add_argument(
-        "-v",
-        "--version",
-        type=str,
-        required=True,
-        help=f"Schema version to dump ({', '.join(SCHEMA_VERSIONS)})"
+        "-v", "--version", type=str, required=True, help=f"Schema version to dump ({', '.join(SCHEMA_VERSIONS)})"
     )
 
     if args is None:
@@ -33,8 +29,9 @@ def parse_args(args: Optional[list[str]] = None) -> Args:
 
     parsed_args = parser.parse_args(args)
     if parsed_args.version not in SCHEMA_VERSIONS:
-        parser.error(f"Invalid schema version: {parsed_args.version}. "
-                     f"Supported versions are: {', '.join(SCHEMA_VERSIONS)}")
+        parser.error(
+            f"Invalid schema version: {parsed_args.version}. Supported versions are: {', '.join(SCHEMA_VERSIONS)}"
+        )
 
     return Args(
         version=parsed_args.version,
@@ -46,13 +43,13 @@ def main() -> None:
         args = parse_args(sys.argv[1:])
         print(f"Dumping schema for version: {args.version}")
 
-        DdbjRecord = resolve_record_model(args.version)
+        record_model = resolve_record_model(args.version)
 
         schema_dir_path = get_schema_dir_path()
         schema_path = schema_dir_path.joinpath(f"{args.version}/ddbj_record.schema.json")
         schema_path.parent.mkdir(parents=True, exist_ok=True)
 
-        schema_dict = DdbjRecord.model_json_schema()
+        schema_dict = record_model.model_json_schema()
         resolved_schema_dict = deref_schema(schema_dict)
 
         with schema_path.open("w", encoding="utf-8") as f:

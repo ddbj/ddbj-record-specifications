@@ -1,4 +1,6 @@
-from typing import Dict, List, Literal, Optional
+from __future__ import annotations
+
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -15,7 +17,8 @@ class Provenance(BaseModel):
     This flexibility ensures that all relevant provenance information can be included to support
     traceability and reproducibility of the dataset.
     """
-    source_format: Optional[Literal["GFF", "ST26", "TradAnnotation"]] = Field(
+
+    source_format: Literal["GFF", "ST26", "TradAnnotation"] | None = Field(
         None,
         examples=["GFF3"],
         description="The original format of the input data, e.g., GFF, ST26, TradAnnotation, etc.",
@@ -32,27 +35,24 @@ class Address(BaseModel):
     """
     Postal address of an organization or person.
     """
+
     country: str = Field(
         ...,
         examples=["Japan"],
         description="The country of the address.",
     )
-    state: Optional[str] = Field(
+    state: str | None = Field(
         None,
         examples=["Shizuoka"],
         description="The state or region of the address.",
     )
-    city: str = Field(
-        ...,
-        examples=["Mishima"],
-        description="The city of the address."
-    )
-    street: Optional[str] = Field(
+    city: str = Field(..., examples=["Mishima"], description="The city of the address.")
+    street: str | None = Field(
         None,
         examples=["Yata 1111"],
         description="The street address.",
     )
-    postal_code: Optional[str] = Field(
+    postal_code: str | None = Field(
         None,
         examples=["411-8540"],
         description="The postal or ZIP code.",
@@ -66,41 +66,39 @@ class Organization(BaseModel):
     """
     Organization information.
     """
+
     name: str = Field(
         ...,
         examples=["National Institute of Genetics"],
         description="The full name of the organization.",
     )
-    abbreviation: Optional[str] = Field(
+    abbreviation: str | None = Field(
         None,
         examples=["NIG"],
         description="The abbreviated name of the organization.",
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         examples=["http://www.ddbj.nig.ac.jp"],
         description="The URL of the organization's website.",
     )
-    role: Optional[str] = Field(
+    role: str | None = Field(
         None,
         examples=["owner"],
-        description="The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions."
+        description="The role of the organization in the submission (e.g., owner, participant). This corresponds to roles in BioProject and BioSample submissions.",
     )
-    type: Optional[Literal["institution", "company", "government", "non-profit", "consortium", "other"]] = Field(
+    type: Literal["institution", "company", "government", "non-profit", "consortium", "other"] | None = Field(
         None,
         examples=["institution"],
-        description="The type of organization (e.g., institution, company, government, non-profit, consortium, other)."
+        description="The type of organization (e.g., institution, company, government, non-profit, consortium, other).",
     )
-    department: Optional[str] = Field(
+    department: str | None = Field(
         None,
         examples=["DNA Data Bank of Japan"],
         description="The department within the organization.",
     )
-    address: Optional[Address] = Field(
-        None,
-        description="The postal address of the organization."
-    )
-    ror_id: Optional[str] = Field(
+    address: Address | None = Field(None, description="The postal address of the organization.")
+    ror_id: str | None = Field(
         None,
         examples=["https://ror.org/01xq5f0"],
         description="The Research Organization Registry (ROR) identifier for the organization.",
@@ -114,27 +112,24 @@ class Person(BaseModel):
     """
     Individual person information.
     """
-    name: Optional[str] = Field(
-        None,
-        examples=["Hanako Mishima"],
-        description="The full name of the person."
-    )
-    abbreviation: Optional[str] = Field(
+
+    name: str | None = Field(None, examples=["Hanako Mishima"], description="The full name of the person.")
+    abbreviation: str | None = Field(
         None,
         examples=["Mishima,H."],
         description="The abbreviated name of the person.",
     )
-    email: Optional[str] = Field(
+    email: str | None = Field(
         None,
         examples=["mishima@ddbj.nig.ac.jp"],
         description="The email address of the person.",
     )
-    orcid: Optional[str] = Field(
+    orcid: str | None = Field(
         None,
         examples=["0000-0000-0000-0000"],
         description="The ORCID identifier for the person.",
     )
-    organization: Optional[List[Organization]] = Field(
+    organization: list[Organization] | None = Field(
         None,
         description="The organization that the person is affiliated with.",
     )
@@ -150,6 +145,7 @@ class Xref(BaseModel):
     including the database name, accession ID, and the relationship type between the current record and the external entry.
     Database names use prefixes from https://registry.identifiers.org/registry.
     """
+
     db: Literal[
         "bioproject",  # https://registry.identifiers.org/registry/bioproject
         "biosample",  # https://registry.identifiers.org/registry/biosample
@@ -182,16 +178,17 @@ class Reference(BaseModel):
     This class represents a scientific publication or reference associated with the data,
     including title, authors, publication status, journal information, and identifiers.
     """
+
     title: str = Field(
         ...,
         examples=["Sequence and analysis of mouse ch.8"],
         description="The title of the publication or reference.",
     )
-    authors: List[Person] = Field(
+    authors: list[Person] = Field(
         default_factory=list,
         description="The list of authors who contributed to the publication.",
     )
-    consortiums: Optional[List[Organization]] = Field(
+    consortiums: list[Organization] | None = Field(
         None,
         description="The list of consortium organizations involved in the publication.",
     )
@@ -205,47 +202,47 @@ class Reference(BaseModel):
         examples=["2025"],
         description="The year of publication.",
     )
-    journal: Optional[str] = Field(
+    journal: str | None = Field(
         None,
         examples=["Nature"],
         description="The name of the journal where the article was published.",
     )
-    volume: Optional[str] = Field(
+    volume: str | None = Field(
         None,
         examples=["8"],
         description="The volume number of the journal.",
     )
-    issue: Optional[str] = Field(
+    issue: str | None = Field(
         None,
         examples=["1"],
         description="The issue number of the journal.",
     )
-    start_page: Optional[str] = Field(
+    start_page: str | None = Field(
         None,
         examples=["15"],
         description="The starting page number of the article.",
     )
-    end_page: Optional[str] = Field(
+    end_page: str | None = Field(
         None,
         examples=["20"],
         description="The ending page number of the article.",
     )
-    date_published: Optional[str] = Field(
+    date_published: str | None = Field(
         None,
         examples=["2025-01-01"],
         description="The date when the article was published (ISO 8601 format).",
     )
-    doi: Optional[str] = Field(
+    doi: str | None = Field(
         None,
         examples=["10.1038/nature12345"],
         description="The Digital Object Identifier (DOI) of the publication.",
     )
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         examples=["https://doi.org/10.1038/nature12345"],
         description="The URL of the publication.",
     )
-    pubmed_id: Optional[str] = Field(
+    pubmed_id: str | None = Field(
         None,
         examples=["12345678"],
         description="The PubMed identifier of the publication.",
@@ -261,19 +258,20 @@ class Submission(BaseModel):
     This class contains information about the submitters, cross-references to external databases,
     publication references, and submission-specific parameters such as data type and hold date.
     """
-    submitters: List[Person] = Field(
+
+    submitters: list[Person] = Field(
         default_factory=list,
         description="The list of people who are submitting the data.",
     )
-    db_xrefs: List[Xref] = Field(
+    db_xrefs: list[Xref] = Field(
         default_factory=list,
         description="Cross-references to external databases related to this submission.",
     )
-    references: List[Reference] = Field(
+    references: list[Reference] = Field(
         default_factory=list,
         description="List of publications or references associated with this submission.",
     )
-    comments: List[List[str]] = Field(
+    comments: list[list[str]] = Field(
         default_factory=list,
         examples=[["Example comment line 1", "Annotated by DFAST"]],
         description="Additional comments or notes about the submission.",
@@ -281,27 +279,27 @@ class Submission(BaseModel):
 
     # TODO: These fields originated from GenBank format and are used by DFAST.
     # They require more structured enumeration, but the original definitions need further clarification.
-    trad_submission_category: Optional[str] = Field(
+    trad_submission_category: str | None = Field(
         None,
         examples=["WGS"],
         description="Traditional submission category. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
     )
-    division: Optional[str] = Field(
+    division: str | None = Field(
         None,
         examples=["BCT"],
         description="The GenBank division code for the submission.",
     )
-    locus_tag_prefix: Optional[str] = Field(
+    locus_tag_prefix: str | None = Field(
         None,
         examples=["PLH"],
         description="The prefix used for locus tags in the submission.",
     )
-    seq_prefix: Optional[str] = Field(
+    seq_prefix: str | None = Field(
         None,
         examples=["sequence", "contig"],
         description="Prefix for sequence names. It is used when the data is WGS.",
     )
-    hold_date: Optional[str] = Field(
+    hold_date: str | None = Field(
         None,
         examples=["2025-01-01"],
         description="The date until which the submission should be held before public release (ISO 8601 format).",
@@ -318,17 +316,18 @@ class LibraryLayout(BaseModel):
     """
     LIBRARY_LAYOUT specifies whether to expect single, paired, or other configuration of reads.
     """
+
     layout_type: Literal["SINGLE", "PAIRED"] = Field(
         ...,
         examples=["PAIRED"],
         description="Specifies whether to expect single or paired reads.",
     )
-    nominal_length: Optional[int] = Field(
+    nominal_length: int | None = Field(
         None,
         examples=[300],
         description="Expected insert size for paired reads.",
     )
-    nominal_sdev: Optional[float] = Field(
+    nominal_sdev: float | None = Field(
         None,
         examples=[50.0],
         description="Standard deviation of the insert size for paired reads.",
@@ -342,15 +341,13 @@ class TargetedLocus(BaseModel):
     """
     TARGETED_LOCI from JGA experiment schema.
     """
-    locus_name: Literal[
-        "16S rRNA", "18S rRNA", "RBCL", "matK", "COX1",
-        "ITS1-5.8S-ITS2", "exome", "other"
-    ] = Field(
+
+    locus_name: Literal["16S rRNA", "18S rRNA", "RBCL", "matK", "COX1", "ITS1-5.8S-ITS2", "exome", "other"] = Field(
         ...,
         examples=["16S rRNA"],
         description="The name of the targeted locus.",
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         description="Submitter supplied description of alternate locus and auxiliary information.",
     )
@@ -363,67 +360,140 @@ class Design(BaseModel):
     """
     DESIGN element from JGA experiment schema (LibraryType).
     """
-    design_description: Optional[str] = Field(
+
+    design_description: str | None = Field(
         None,
         description="Goal and setup of the individual library.",
     )
-    library_name: Optional[str] = Field(
+    library_name: str | None = Field(
         None,
         examples=["lib1"],
         description="The submitter's name for this library.",  # from JGA experiment schema
     )
-    library_strategy: Optional[Literal[
-        # From SEQUENCING_LIBRARY_STRATEGY
-        "WGS", "WGA", "WXS", "RNA-Seq", "ssRNA-seq", "miRNA-Seq", "ncRNA-Seq",
-        "WCS", "RAD-Seq", "CLONE", "POOLCLONE", "AMPLICON", "CLONEEND", "FINISHING",
-        "ChIP-Seq", "MNase-Seq", "DNase-Hypersensitivity", "Bisulfite-Seq", "EST",
-        "Hi-C", "ATAC-seq", "FL-cDNA", "CTS", "MRE-Seq", "MeDIP-Seq", "MBD-Seq",
-        "Tn-Seq", "VALIDATION", "FAIRE-seq", "SELEX", "NOMe-Seq", "RIP-Seq",
-        "ChIA-PET", "Synthetic-Long-Read", "Targeted-Capture",
-        "Tethered Chromatin Conformation Capture", "OTHER",
-        # From ARRAY_LIBRARY_STRATEGY
-        "Genotyping by array", "Transcription profiling by array",
-        "microRNA profiling by array", "ChIP-chip by array"
-    ]] = Field(
+    library_strategy: (
+        Literal[
+            # From SEQUENCING_LIBRARY_STRATEGY
+            "WGS",
+            "WGA",
+            "WXS",
+            "RNA-Seq",
+            "ssRNA-seq",
+            "miRNA-Seq",
+            "ncRNA-Seq",
+            "WCS",
+            "RAD-Seq",
+            "CLONE",
+            "POOLCLONE",
+            "AMPLICON",
+            "CLONEEND",
+            "FINISHING",
+            "ChIP-Seq",
+            "MNase-Seq",
+            "DNase-Hypersensitivity",
+            "Bisulfite-Seq",
+            "EST",
+            "Hi-C",
+            "ATAC-seq",
+            "FL-cDNA",
+            "CTS",
+            "MRE-Seq",
+            "MeDIP-Seq",
+            "MBD-Seq",
+            "Tn-Seq",
+            "VALIDATION",
+            "FAIRE-seq",
+            "SELEX",
+            "NOMe-Seq",
+            "RIP-Seq",
+            "ChIA-PET",
+            "Synthetic-Long-Read",
+            "Targeted-Capture",
+            "Tethered Chromatin Conformation Capture",
+            "OTHER",
+            # From ARRAY_LIBRARY_STRATEGY
+            "Genotyping by array",
+            "Transcription profiling by array",
+            "microRNA profiling by array",
+            "ChIP-chip by array",
+        ]
+        | None
+    ) = Field(
         None,
         examples=["RNA-Seq"],
         description="Sequencing technique intended for this library.",
     )
-    library_source: Optional[Literal[
-        "GENOMIC", "GENOMIC SINGLE CELL", "TRANSCRIPTOMIC", "TRANSCRIPTOMIC SINGLE CELL",
-        "METAGENOMIC", "METATRANSCRIPTOMIC", "SYNTHETIC", "VIRAL RNA", "OTHER"
-    ]] = Field(
+    library_source: (
+        Literal[
+            "GENOMIC",
+            "GENOMIC SINGLE CELL",
+            "TRANSCRIPTOMIC",
+            "TRANSCRIPTOMIC SINGLE CELL",
+            "METAGENOMIC",
+            "METATRANSCRIPTOMIC",
+            "SYNTHETIC",
+            "VIRAL RNA",
+            "OTHER",
+        ]
+        | None
+    ) = Field(
         None,
         examples=["TRANSCRIPTOMIC"],
         description="The type of source material that is being sequenced.",
     )
-    library_selection: Optional[Literal[
-        "RANDOM", "PCR", "RANDOM PCR", "RT-PCR", "HMPR", "MF", "repeat fractionation",
-        "size fractionation", "MSLL", "cDNA", "cDNA_randomPriming", "cDNA_oligo_dT",
-        "PolyA", "Oligo-dT", "Inverse rRNA", "ChIP", "MNase", "DNase", "Hybrid Selection",
-        "Reduced Representation", "DNA shearing", "Restriction Digest",
-        "5-methylcytidine antibody", "MBD2 protein methyl-CpG binding domain",
-        "CAGE", "RACE", "MDA", "padlock probes capture method", "other", "unspecified"
-    ]] = Field(
+    library_selection: (
+        Literal[
+            "RANDOM",
+            "PCR",
+            "RANDOM PCR",
+            "RT-PCR",
+            "HMPR",
+            "MF",
+            "repeat fractionation",
+            "size fractionation",
+            "MSLL",
+            "cDNA",
+            "cDNA_randomPriming",
+            "cDNA_oligo_dT",
+            "PolyA",
+            "Oligo-dT",
+            "Inverse rRNA",
+            "ChIP",
+            "MNase",
+            "DNase",
+            "Hybrid Selection",
+            "Reduced Representation",
+            "DNA shearing",
+            "Restriction Digest",
+            "5-methylcytidine antibody",
+            "MBD2 protein methyl-CpG binding domain",
+            "CAGE",
+            "RACE",
+            "MDA",
+            "padlock probes capture method",
+            "other",
+            "unspecified",
+        ]
+        | None
+    ) = Field(
         None,
         examples=["PolyA"],
         description="Method used to enrich the target in the sequence library preparation.",
     )
-    library_layout: Optional[LibraryLayout] = Field(
+    library_layout: LibraryLayout | None = Field(
         None,
         description="Specifies whether to expect single, paired, or other configuration of reads.",
     )
 
     # === Optional? ===
-    targeted_loci: Optional[List[TargetedLocus]] = Field(
+    targeted_loci: list[TargetedLocus] | None = Field(
         None,
         description="Names the gene(s) or locus(loci) or other genomic feature(s) targeted by the sequence.",
     )
-    pooling_strategy: Optional[str] = Field(
+    pooling_strategy: str | None = Field(
         None,
         description="The optional pooling strategy indicates how the library or libraries are organized if multiple samples are involved.",
     )
-    library_construction_protocol: Optional[str] = Field(
+    library_construction_protocol: str | None = Field(
         None,
         description="Free form text describing the protocol by which the sequencing library was constructed.",
     )
@@ -437,12 +507,13 @@ class Platform(BaseModel):
     PLATFORM element from JGA experiment schema.
     Simplified to just store platform information as strings.
     """
-    platform_type: Optional[str] = Field(
+
+    platform_type: str | None = Field(
         None,
         examples=["ILLUMINA"],
         description="The type of platform used (sequencing or array).",
     )
-    instrument_model: Optional[str] = Field(
+    instrument_model: str | None = Field(
         None,
         examples=["Illumina HiSeq 2500"],
         description="The specific instrument model used.",
@@ -457,25 +528,26 @@ class Experiment(BaseModel):
     Experiment element from JGA experiment schema (subset).
     An Experiment specifies what will be sequenced and how the sequencing will be performed.
     """
+
     id: str = Field(
         ...,
         examples=["exp1"],
         description="The unique identifier for this experiment.",
     )
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         examples=["RNA-seq experiment"],
         description="Short text that can be used to call out experiment records in searches or displays.",
     )
-    design: Optional[Design] = Field(
+    design: Design | None = Field(
         None,
         description="Library design information.",
     )
-    platform: Optional[Platform] = Field(
+    platform: Platform | None = Field(
         None,
         description="The sequencing or array platform information.",
     )
-    experiment_attributes: Dict[str, str] = Field(
+    experiment_attributes: dict[str, str] = Field(
         default_factory=dict,
         examples=[{"assembly_method": "HGAP v. x.x", "genome_coverage": "60x"}],
         description="Experiment attributes as key-value pairs. This is a simplified version of EXPERIMENT_ATTRIBUTES, where each attribute is represented as a key-value pair.",
@@ -494,7 +566,8 @@ class Qualifier(BaseModel):
     This class represents key-value pairs that provide additional information about sequence features,
     such as gene names, product descriptions, or other annotations.
     """
-    id: Optional[str] = Field(
+
+    id: str | None = Field(
         None,
         examples=["qualifier_1"],
         description="The unique identifier for this qualifier.",
@@ -519,6 +592,7 @@ class Source(BaseModel):
     This class represents the source feature in INSDC feature tables, which describes
     the biological source of the sequence including organism and molecule type.
     """
+
     organism: str = Field(
         ...,
         examples=["Paucilactobacillus hokkaidonensis"],
@@ -529,7 +603,7 @@ class Source(BaseModel):
         examples=["genomic DNA"],
         description="The type of molecule sequenced",
     )  # mol_type are defined in INSDC specifications, but enumerating them would require schema updates every time they change, so we intentionally avoid enumeration here.
-    qualifiers: Dict[str, List[Qualifier]] = Field(
+    qualifiers: dict[str, list[Qualifier]] = Field(
         default_factory=dict,
         description="Additional qualifiers. Key is the qualifier name.",
     )
@@ -544,6 +618,7 @@ class SourceFeature(BaseModel):
     These pieces of information are not written directly to Entry but held as List[SourceFeature]
     because multiple source features can exist in a sequence entry.
     """
+
     id: str = Field(
         ...,
         examples=["feature_8"],
@@ -554,11 +629,11 @@ class SourceFeature(BaseModel):
         examples=["1..2277985"],
         description="The location range of the sequence in INSDC format.",
     )
-    source: Optional[Source] = Field(
+    source: Source | None = Field(
         None,
         description="Optional source information specific to this entry. When specified, this overrides the common_source.",
     )
-    definition: Optional[List[str]] = Field(
+    definition: list[str] | None = Field(
         None,
         description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
     )
@@ -570,6 +645,7 @@ class Entry(BaseModel):
     This class represents a single sequence entry with its metadata.
     Each entry can have its own source information that overrides the common source when specified.
     """
+
     id: str = Field(
         ...,
         examples=["chromosome"],
@@ -590,16 +666,16 @@ class Entry(BaseModel):
         examples=["circular"],
         description="The topology of the sequence (circular or linear).",
     )
-    sequence: Optional[str] = Field(
+    sequence: str | None = Field(
         None,
         examples=["atgc..."],
         description="The nucleotide sequence data. Optional field that may be omitted for large sequences.",
     )
-    comments: Optional[List[List[str]]] = Field(
+    comments: list[list[str]] | None = Field(
         None,
         description="Comments specific to this entry.",
     )
-    source_features: List[SourceFeature] = Field(
+    source_features: list[SourceFeature] = Field(
         default_factory=list,
         description="List of source features associated with this entry. Multiple source features can exist in a single entry.",
     )
@@ -614,11 +690,12 @@ class Sequences(BaseModel):
     This class contains a common source that applies to all entries unless overridden
     by individual entry-specific source information.
     """
+
     common_source: Source = Field(
         ...,
         description="The common source information that applies to all sequence entries unless overridden by individual entry sources.",
     )
-    entries: List[Entry] = Field(
+    entries: list[Entry] = Field(
         default_factory=list,
         description="List of individual sequence entries, each with its own metadata and optional sequence data.",
     )
@@ -636,6 +713,7 @@ class Feature(BaseModel):
     This class represents a single feature annotation on a sequence, including its type,
     location, and associated qualifiers that provide detailed biological information.
     """
+
     id: str = Field(
         ...,
         examples=["feature_8"],
@@ -656,11 +734,11 @@ class Feature(BaseModel):
         examples=["chromosome"],
         description="The ID of the sequence entry to which this feature belongs.",
     )
-    qualifiers: Dict[str, List[Qualifier]] = Field(
+    qualifiers: dict[str, list[Qualifier]] = Field(
         default_factory=dict,
         description="Qualifiers that provide additional information about this feature. Key is the qualifier name.",
     )
-    locus_tag_id: Optional[str] = Field(
+    locus_tag_id: str | None = Field(
         None,
         examples=["00010"],
         description="The locus tag identifier associated with this feature, if applicable. The source feature does not have a locus tag and this field.",
@@ -679,6 +757,7 @@ class DdbjRecord(BaseModel):
     This is the root class that contains all information for a DDBJ data submission,
     including metadata, sequences, features, and experimental information.
     """
+
     schema_version: str = Field(
         ...,
         examples=["v2.0"],
@@ -698,7 +777,7 @@ class DdbjRecord(BaseModel):
         ...,
         description="Submission metadata including submitters, cross-references, and submission parameters.",
     )
-    experiments: List[Experiment] = Field(
+    experiments: list[Experiment] = Field(
         default_factory=list,
         description="List of experimental information associated with this submission.",
     )
@@ -706,7 +785,7 @@ class DdbjRecord(BaseModel):
         ...,
         description="Collection of sequence entries with their metadata and optional sequence data.",
     )
-    features: List[Feature] = Field(
+    features: list[Feature] = Field(
         default_factory=list,
         description="List of feature annotations associated with the sequences.",
     )
