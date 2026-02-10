@@ -129,6 +129,22 @@ dump_json_schema --version draft
 bash ./release.sh <new_version>
 ```
 
+## Known Limitations / Future Improvements
+
+v2 スキーマにおける既知の設計課題と将来の改善候補を以下に記録する。
+
+### Submission モデルの責務過多
+
+`Submission` に登録メタデータ (submitters, references, comments, hold_date)、データ分類 (trad_submission_category, division)、命名規則 (locus_tag_prefix, seq_prefix) が混在している。将来の major version では以下のような分離を検討する:
+
+- **Submission**: submitters, references, comments, hold_date
+- **DataClassification** (または Sequences に統合): trad_submission_category, division
+- **NamingConvention** (または Sequences に統合): locus_tag_prefix, seq_prefix
+
+### Assembly 情報と Experiment の混在
+
+v1 の `ST_COMMENT` (Assembly Method, Coverage, Sequencing Technology) を v2 では `Experiment` に格納しているが、Assembly 情報 (どうアセンブルしたか) と Experiment (何をどうシーケンスしたか) は本質的に異なる概念である。現在のコンバーターは `id: "st_comment_experiment"` というマジックストリングで Assembly 用の Experiment を判別しており、暗黙の規約に依存している。将来の major version では Assembly を独立したモデルとして分離することを検討する。
+
 ## License
 
 [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). See [LICENSE](./LICENSE).

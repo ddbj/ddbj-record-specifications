@@ -20,7 +20,7 @@ class Provenance(BaseModel):
 
     source_format: Literal["GFF", "ST26", "TradAnnotation"] | None = Field(
         None,
-        examples=["GFF3"],
+        examples=["GFF"],
         description="The original format of the input data, e.g., GFF, ST26, TradAnnotation, etc.",
     )
 
@@ -146,21 +146,14 @@ class Xref(BaseModel):
     Database names use prefixes from https://registry.identifiers.org/registry.
     """
 
-    db: Literal[
-        "bioproject",  # https://registry.identifiers.org/registry/bioproject
-        "biosample",  # https://registry.identifiers.org/registry/biosample
-        "insdc.sra",  # https://registry.identifiers.org/registry/insdc.sra
-        "jga",  # Japanese Genotype-phenotype Archive, https://www.ddbj.nig.ac.jp/jga/index.html
-        "gea",  # Genomic Expression Archive, https://www.ddbj.nig.ac.jp/gea/index.html
-        "insdc.gca",  # https://registry.identifiers.org/registry/insdc.gca
-        "insdc",  # https://registry.identifiers.org/registry/insdc
-        "metabobank",  # MetaboBank, https://www.ddbj.nig.ac.jp/metabobank/index.html
-        "taxonomy",  # https://registry.identifiers.org/registry/taxonomy
-        "geo",  # https://registry.identifiers.org/registry/geo
-    ] = Field(
+    db: str = Field(
         ...,
         examples=["bioproject"],
-        description="The name of the external database using prefixes from https://registry.identifiers.org/registry where available.",
+        description="""\
+        The name of the external database using prefixes from https://registry.identifiers.org/registry where available.
+        Known databases: bioproject, biosample, insdc.sra, jga, gea, insdc.gca, insdc, metabobank, taxonomy, geo.
+        Other database names are also accepted.
+        """,
     )
     id: str = Field(
         ...,
@@ -570,7 +563,7 @@ class Qualifier(BaseModel):
     id: str | None = Field(
         None,
         examples=["qualifier_1"],
-        description="The unique identifier for this qualifier.",
+        description="Optional unique identifier for this qualifier. Reserved for future use by downstream tools (e.g., editing UI, diff tracking).",
     )
     value: str = Field(
         ...,
@@ -635,8 +628,11 @@ class SourceFeature(BaseModel):
     )
     definition: list[str] | None = Field(
         None,
-        description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
+        description="Definition lines for the sequence entry. This field contains the content of ff_definition as-is. May contain template variables in @@[qualifier_name]@@ format (e.g., @@[organism]@@, @@[strain]@@) that are expanded by downstream tools such as dr_tools.",
     )
+
+    # extra field
+    model_config = ConfigDict(extra="forbid")
 
 
 class Entry(BaseModel):
@@ -732,7 +728,7 @@ class Feature(BaseModel):
     sequence_id: str = Field(
         ...,
         examples=["chromosome"],
-        description="The ID of the sequence entry to which this feature belongs.",
+        description="The ID of the sequence entry to which this feature belongs. Must match one of sequences.entries[].id.",
     )
     qualifiers: dict[str, list[Qualifier]] = Field(
         default_factory=dict,
@@ -756,12 +752,16 @@ class DdbjRecord(BaseModel):
     Complete DDBJ record structure.
     This is the root class that contains all information for a DDBJ data submission,
     including metadata, sequences, features, and experimental information.
+
+    Referential integrity constraints (validated by ddbj_record_validator, not enforced at model level):
+    - Each features[].sequence_id must match one of sequences.entries[].id.
+    - Each sequences.entries[].id should be unique within the record.
     """
 
     schema_version: str = Field(
         ...,
         examples=["v2.0"],
-        description="The version of the DDBJ record schema used for this data.",
+        description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are accepted but deprecated.",
     )
 
     @field_validator("schema_version", mode="before")

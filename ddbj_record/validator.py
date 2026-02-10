@@ -92,11 +92,52 @@ def validate_schema(json_data: dict[str, Any], schema_version: str) -> Validatio
         return ValidationResult(valid=False, errors=errors)
 
 
+def _validate_referential_integrity(json_data: dict[str, Any]) -> list[ErrorDetail]:
+    """Validate cross-field referential integrity constraints."""
+    errors: list[ErrorDetail] = []
+
+    # Collect entry IDs
+    sequences = json_data.get("sequences", {})
+    entries = sequences.get("entries", [])
+    entry_ids: set[str] = set()
+    for i, entry in enumerate(entries):
+        entry_id = entry.get("id", "")
+        if entry_id in entry_ids:
+            errors.append(ErrorDetail(
+                type="duplicate_entry_id",
+                loc=["sequences", "entries", i, "id"],
+                msg=f"Duplicate entry id: '{entry_id}'",
+            ))
+        entry_ids.add(entry_id)
+
+    # Validate feature.sequence_id references
+    features = json_data.get("features", [])
+    for i, feature in enumerate(features):
+        seq_id = feature.get("sequence_id", "")
+        if seq_id and seq_id not in entry_ids:
+            errors.append(ErrorDetail(
+                type="invalid_sequence_id_reference",
+                loc=["features", i, "sequence_id"],
+                msg=f"sequence_id '{seq_id}' does not match any sequences.entries[].id",
+            ))
+
+    return errors
+
+
 def validate_json_data(json_data: dict[str, Any], schema_version: str) -> ValidationResult:
     # Validate against schema
     validation_result = validate_schema(json_data, schema_version)
+    if not validation_result.valid:
+        return validation_result
 
-    # TODO: Impl. validate against feature / qualifier tables
+    # Validate referential integrity
+    ref_errors = _validate_referential_integrity(json_data)
+    if ref_errors:
+        return ValidationResult(valid=False, errors=ref_errors)
+
+    # TODO: Validate that json_data["schema_version"] is consistent with the specified schema_version.
+    #   e.g., when schema_version="v2", json_data["schema_version"] should match "v2.x" pattern.
+    # TODO: Validate against INSDC feature / qualifier tables.
 
     return validation_result
 

@@ -1,11 +1,11 @@
 {
   "additionalProperties": false,
-  "description": "Complete DDBJ record structure.\nThis is the root class that contains all information for a DDBJ data submission,\nincluding metadata, sequences, features, and experimental information.",
+  "description": "Complete DDBJ record structure.\nThis is the root class that contains all information for a DDBJ data submission,\nincluding metadata, sequences, features, and experimental information.\n\nReferential integrity constraints (validated by ddbj_record_validator, not enforced at model level):\n- Each features[].sequence_id must match one of sequences.entries[].id.\n- Each sequences.entries[].id should be unique within the record.",
   "properties": {
     "schema_version": {
-      "description": "The version of the DDBJ record schema used for this data.",
+      "description": "The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are accepted but deprecated.",
       "examples": [
-        "v2"
+        "v2.0"
       ],
       "title": "Schema Version",
       "type": "string"
@@ -31,7 +31,7 @@
           "default": null,
           "description": "The original format of the input data, e.g., GFF, ST26, TradAnnotation, etc.",
           "examples": [
-            "GFF3"
+            "GFF"
           ],
           "title": "Source Format"
         }
@@ -348,19 +348,7 @@
             "description": "Cross-reference to external databases.\nThis class represents a reference to an entry in an external database,\nincluding the database name, accession ID, and the relationship type between the current record and the external entry.\nDatabase names use prefixes from https://registry.identifiers.org/registry.",
             "properties": {
               "db": {
-                "description": "The name of the external database using prefixes from https://registry.identifiers.org/registry where available.",
-                "enum": [
-                  "bioproject",
-                  "biosample",
-                  "insdc.sra",
-                  "jga",
-                  "gea",
-                  "insdc.gca",
-                  "insdc",
-                  "metabobank",
-                  "taxonomy",
-                  "geo"
-                ],
+                "description": "        The name of the external database using prefixes from https://registry.identifiers.org/registry where available.\n        Known databases: bioproject, biosample, insdc.sra, jga, gea, insdc.gca, insdc, metabobank, taxonomy, geo.\n        Other database names are also accepted.\n        ",
                 "examples": [
                   "bioproject"
                 ],
@@ -1666,7 +1654,7 @@
                         }
                       ],
                       "default": null,
-                      "description": "The unique identifier for this qualifier.",
+                      "description": "Optional unique identifier for this qualifier. Reserved for future use by downstream tools (e.g., editing UI, diff tracking).",
                       "examples": [
                         "qualifier_1"
                       ],
@@ -1790,6 +1778,7 @@
               "source_features": {
                 "description": "List of source features associated with this entry. Multiple source features can exist in a single entry.",
                 "items": {
+                  "additionalProperties": false,
                   "description": "Class representing the source feature itself.\nThese pieces of information are not written directly to Entry but held as List[SourceFeature]\nbecause multiple source features can exist in a sequence entry.",
                   "properties": {
                     "id": {
@@ -1846,7 +1835,7 @@
                                         }
                                       ],
                                       "default": null,
-                                      "description": "The unique identifier for this qualifier.",
+                                      "description": "Optional unique identifier for this qualifier. Reserved for future use by downstream tools (e.g., editing UI, diff tracking).",
                                       "examples": [
                                         "qualifier_1"
                                       ],
@@ -1904,7 +1893,7 @@
                         }
                       ],
                       "default": null,
-                      "description": "Definition lines for the sequence entry. This field contains the content of ff_definition as-is.",
+                      "description": "Definition lines for the sequence entry. This field contains the content of ff_definition as-is. May contain template variables in @@[qualifier_name]@@ format (e.g., @@[organism]@@, @@[strain]@@) that are expanded by downstream tools such as dr_tools.",
                       "title": "Definition"
                     }
                   },
@@ -1969,7 +1958,7 @@
             "type": "string"
           },
           "sequence_id": {
-            "description": "The ID of the sequence entry to which this feature belongs.",
+            "description": "The ID of the sequence entry to which this feature belongs. Must match one of sequences.entries[].id.",
             "examples": [
               "chromosome"
             ],
@@ -1992,7 +1981,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "The unique identifier for this qualifier.",
+                    "description": "Optional unique identifier for this qualifier. Reserved for future use by downstream tools (e.g., editing UI, diff tracking).",
                     "examples": [
                       "qualifier_1"
                     ],

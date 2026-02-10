@@ -215,6 +215,21 @@ def _convert_common_meta(v2_obj: DdbjRecordV2) -> CommonMeta:
 
 
 def _convert_entries(v2_obj: DdbjRecordV2) -> list[Entry]:
+    # Build a mapping from sequence_id to v2 features (CDS, gene, rRNA, etc.)
+    features_by_seq_id: dict[str, list[Feature]] = {}
+    for v2_feat in v2_obj.features:
+        v1_feat = Feature(
+            id=v2_feat.id,
+            type=v2_feat.type,
+            location=v2_feat.location,
+            qualifiers={
+                key: [_qualifier_value_to_union(q_obj.value) for q_obj in q_objs]
+                for key, q_objs in v2_feat.qualifiers.items()
+            },
+            locus_tag_id=v2_feat.locus_tag_id,
+        )
+        features_by_seq_id.setdefault(v2_feat.sequence_id, []).append(v1_feat)
+
     entries: list[Entry] = []
     for v2_entry in v2_obj.sequences.entries:
         v1_entry = Entry(
@@ -246,6 +261,9 @@ def _convert_entries(v2_obj: DdbjRecordV2) -> list[Entry]:
                 locus_tag_id=None,
             )
             v1_entry.features.append(source_feature)
+
+        # Add annotation features (CDS, gene, rRNA, etc.) from v2 top-level features
+        v1_entry.features.extend(features_by_seq_id.get(v2_entry.id, []))
 
         # Add COMMENT feature from v2 entry
         if v2_entry.comments:
