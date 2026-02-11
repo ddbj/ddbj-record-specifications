@@ -4,20 +4,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from ddbj_record.insdc.models import CrossConstraint
+from ddbj_record.insdc.models import MutualExclusionConstraint
 from ddbj_record.insdc.validator import (
     _check_single_constraint,
     validate_insdc_v1,
     validate_insdc_v2,
 )
 
-# === 2a: exclusion routes to mutual_exclusion (no dead code) ===
+# === 2a: mutual_exclusion constraint dispatch ===
 
 
-def test_exclusion_constraint_type_works_same_as_mutual_exclusion() -> None:
-    """The 'exclusion' constraint type should behave identically to 'mutual_exclusion'."""
-    constraint = CrossConstraint(
-        type="exclusion",
+def test_mutual_exclusion_constraint_detects_violation() -> None:
+    """MutualExclusionConstraint should detect conflicting qualifiers."""
+    constraint = MutualExclusionConstraint(
         qualifiers=["qual_a", "qual_b"],
         message="qual_a and qual_b are exclusive",
     )
@@ -30,9 +29,8 @@ def test_exclusion_constraint_type_works_same_as_mutual_exclusion() -> None:
     assert errors[0].type == "constraint_violation"
 
 
-def test_exclusion_no_violation_with_one_qualifier() -> None:
-    constraint = CrossConstraint(
-        type="exclusion",
+def test_mutual_exclusion_no_violation_with_one_qualifier() -> None:
+    constraint = MutualExclusionConstraint(
         qualifiers=["qual_a", "qual_b"],
         message="qual_a and qual_b are exclusive",
     )

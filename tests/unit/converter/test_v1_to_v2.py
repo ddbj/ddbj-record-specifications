@@ -32,7 +32,7 @@ def test_v1_to_v2_fixture_matches_expected(
 def test_v1_to_v2_output_schema_version(v1_to_v2_input: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
     result = v1_to_v2(v1_obj)
-    assert result.schema_version == "v2.0"
+    assert result.schema_version == "v2.1"
 
 
 def test_v1_to_v2_output_is_valid_v2(v1_to_v2_input: dict[str, Any]) -> None:
@@ -213,7 +213,7 @@ def test_convert_submission_reference_status_in_press() -> None:
 def test_convert_submission_hold_date() -> None:
     v1_obj = _make_v1_minimal({"COMMON.DATE": {"hold_date": "20250331"}})
     submission = _convert_submission(v1_obj)
-    assert submission.hold_date == "20250331"
+    assert submission.hold_date == "2025-03-31"
 
 
 def test_convert_submission_consortium() -> None:

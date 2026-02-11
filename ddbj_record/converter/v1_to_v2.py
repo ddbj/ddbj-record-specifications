@@ -43,6 +43,17 @@ def _qualifier_value_to_str(value: str | bool) -> str:
     return value
 
 
+_YYYYMMDD_LENGTH = 8
+
+
+def _convert_hold_date(v1_hold_date: str) -> str:
+    """Convert v1 hold_date format (YYYYMMDD) to v2 format (YYYY-MM-DD)."""
+    if len(v1_hold_date) == _YYYYMMDD_LENGTH and v1_hold_date.isdigit():
+        return f"{v1_hold_date[:4]}-{v1_hold_date[4:6]}-{v1_hold_date[6:8]}"
+
+    return v1_hold_date
+
+
 def _create_provenance(v1_obj: DdbjRecordV1) -> Provenance:
     """Create provenance metadata for v2."""
     return Provenance(
@@ -196,7 +207,7 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         division=v1_obj.COMMON_META.division,
         locus_tag_prefix=v1_obj.COMMON_META.locus_tag_prefix,
         seq_prefix=v1_obj.COMMON_META.seq_prefix,
-        hold_date=v1_obj.COMMON.DATE.hold_date if v1_obj.COMMON.DATE else None,
+        hold_date=_convert_hold_date(v1_obj.COMMON.DATE.hold_date) if v1_obj.COMMON.DATE else None,
     )
 
 

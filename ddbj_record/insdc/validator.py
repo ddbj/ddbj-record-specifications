@@ -6,7 +6,15 @@ import re
 from typing import Any
 
 from ddbj_record.insdc import load_insdc_definition
-from ddbj_record.insdc.models import CrossConstraint, FeatureDefinition, InsdcDefinition
+from ddbj_record.insdc.models import (
+    ConditionalMandatoryConstraint,
+    CrossConstraint,
+    DependencyConstraint,
+    FeatureDefinition,
+    InsdcDefinition,
+    MutualExclusionConstraint,
+)
+from ddbj_record.schema.v2 import Source
 from ddbj_record.validator import ErrorDetail
 
 # === Phase 1: Feature Key Validation ===
@@ -30,6 +38,7 @@ def _validate_feature_key(
             loc=[*loc_prefix, "type"],
             msg=f"Unknown feature key: '{feature_type}'",
             severity=severity,
+            stage="insdc",
         )
     ]
 
@@ -61,6 +70,7 @@ def _validate_qualifier_keys(
                     loc=[*loc_prefix, "qualifiers", qual_name],
                     msg=f"Qualifier '/{qual_name}' is not valid for feature '{feature_type}'",
                     severity=severity,
+                    stage="insdc",
                 )
             )
 
@@ -71,9 +81,10 @@ def _validate_qualifier_keys(
             errors.append(
                 ErrorDetail(
                     type="missing_mandatory_qualifier",
-                    loc=[*loc_prefix, "qualifiers"],
+                    loc=[*loc_prefix, "qualifiers", qual_name],
                     msg=f"Mandatory qualifier '/{qual_name}' is missing for feature '{feature_type}'",
                     severity=severity,
+                    stage="insdc",
                 )
             )
 
@@ -82,12 +93,19 @@ def _validate_qualifier_keys(
         if qual_name in definition.qualifiers:
             qual_def = definition.qualifiers[qual_name]
             if qual_def.deprecated is not None:
+                context = (
+                    {"replacement": qual_def.deprecated.replacement}
+                    if qual_def.deprecated.replacement
+                    else None
+                )
                 errors.append(
                     ErrorDetail(
                         type="deprecated_qualifier",
                         loc=[*loc_prefix, "qualifiers", qual_name],
                         msg=qual_def.deprecated.message,
                         severity="warning",
+                        context=context,
+                        stage="insdc",
                     )
                 )
 
@@ -132,6 +150,11 @@ def _validate_qualifier_values(
                             loc=loc,
                             msg=f"Value '{value}' is not in the controlled vocabulary for '/{qual_name}'",
                             severity="error",
+                            context={
+                                "allowed_values": qual_def.controlled_vocabulary,
+                                "current_value": value,
+                            },
+                            stage="insdc",
                         )
                     )
 
@@ -142,6 +165,7 @@ def _validate_qualifier_values(
                         loc=loc,
                         msg=f"Boolean qualifier '/{qual_name}' must have value 'true', got '{value}'",
                         severity="error",
+                        stage="insdc",
                     )
                 )
 
@@ -152,6 +176,7 @@ def _validate_qualifier_values(
                         loc=loc,
                         msg=f"Value '{value}' does not match expected pattern for '/{qual_name}'",
                         severity="error",
+                        stage="insdc",
                     )
                 )
 
@@ -195,24 +220,19 @@ def _check_single_constraint(
     feature_type: str,
     loc_prefix: list[str | int],
 ) -> list[ErrorDetail]:
-    if constraint.type == "mutual_exclusion":
+    if isinstance(constraint, MutualExclusionConstraint):
         return _check_mutual_exclusion(constraint, qual_keys, loc_prefix)
-    if constraint.type == "dependency":
+    if isinstance(constraint, DependencyConstraint):
         return _check_dependency(constraint, qual_keys, loc_prefix)
-    if constraint.type == "exclusion":
-        return _check_mutual_exclusion(constraint, qual_keys, loc_prefix)
 
     return _check_conditional_mandatory(constraint, qual_keys, qualifiers, feature_type, loc_prefix)
 
 
 def _check_mutual_exclusion(
-    constraint: CrossConstraint,
+    constraint: MutualExclusionConstraint,
     qual_keys: set[str],
     loc_prefix: list[str | int],
 ) -> list[ErrorDetail]:
-    if constraint.qualifiers is None:
-        return []
-
     present = [q for q in constraint.qualifiers if q in qual_keys]
     if len(present) > 1:
         return [
@@ -221,6 +241,8 @@ def _check_mutual_exclusion(
                 loc=[*loc_prefix, "qualifiers"],
                 msg=constraint.message,
                 severity="error",
+                context={"conflicting_qualifiers": present},
+                stage="insdc",
             )
         ]
 
@@ -228,13 +250,10 @@ def _check_mutual_exclusion(
 
 
 def _check_dependency(
-    constraint: CrossConstraint,
+    constraint: DependencyConstraint,
     qual_keys: set[str],
     loc_prefix: list[str | int],
 ) -> list[ErrorDetail]:
-    if constraint.qualifier is None or constraint.requires is None:
-        return []
-
     if constraint.qualifier not in qual_keys:
         return []
 
@@ -248,21 +267,20 @@ def _check_dependency(
             loc=[*loc_prefix, "qualifiers", constraint.qualifier],
             msg=constraint.message,
             severity="error",
+            stage="insdc",
         )
     ]
 
 
 
 def _check_conditional_mandatory(
-    constraint: CrossConstraint,
+    constraint: ConditionalMandatoryConstraint,
     qual_keys: set[str],
     qualifiers: dict[str, Any],
     feature_type: str,
     loc_prefix: list[str | int],
 ) -> list[ErrorDetail]:
     if constraint.feature is not None and constraint.feature != feature_type:
-        return []
-    if constraint.condition is None or constraint.then_mandatory is None:
         return []
 
     condition_met = _evaluate_condition(constraint.condition, qual_keys, qualifiers)
@@ -272,9 +290,10 @@ def _check_conditional_mandatory(
     return [
         ErrorDetail(
             type="missing_mandatory_qualifier",
-            loc=[*loc_prefix, "qualifiers"],
+            loc=[*loc_prefix, "qualifiers", qual_name],
             msg=constraint.message,
             severity="error",
+            stage="insdc",
         )
         for qual_name in constraint.then_mandatory
         if qual_name not in qual_keys
@@ -377,7 +396,7 @@ def _validate_source_qualifiers_v2(
     source_def = definition.features["source"]
 
     # In v2, organism and mol_type are required fields on Source model (not in qualifiers dict)
-    v2_source_satisfied = {"organism", "mol_type"}
+    v2_source_satisfied = {name for name in Source.model_fields if name != "qualifiers"}
 
     # Validate common_source.qualifiers
     sequences = json_data.get("sequences", {})

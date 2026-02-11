@@ -173,7 +173,7 @@ def test_pbt_normalize_abbr_idempotent(abbr: str) -> None:
 def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
-    assert v2_obj.schema_version == "v2.0"
+    assert v2_obj.schema_version == "v2.1"
 
 
 @given(record_data=st_v2_record())

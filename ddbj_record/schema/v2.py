@@ -190,8 +190,9 @@ class Reference(BaseModel):
     )
     year: str = Field(
         ...,
+        pattern=r"^(\d{4})?$",
         examples=["2025"],
-        description="The year of publication.",
+        description="The year of publication. Empty string is allowed for unpublished references.",
     )
     journal: str | None = Field(
         None,
@@ -220,6 +221,7 @@ class Reference(BaseModel):
     )
     date_published: str | None = Field(
         None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
         examples=["2025-01-01"],
         description="The date when the article was published (ISO 8601 format).",
     )
@@ -268,9 +270,7 @@ class Submission(BaseModel):
         description="Additional comments or notes about the submission.",
     )
 
-    # TODO: These fields originated from GenBank format and are used by DFAST.
-    # They require more structured enumeration, but the original definitions need further clarification.
-    trad_submission_category: str | None = Field(
+    trad_submission_category: Literal["WGS", "GNM"] | None = Field(
         None,
         examples=["WGS"],
         description="Traditional submission category. If the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
@@ -292,6 +292,7 @@ class Submission(BaseModel):
     )
     hold_date: str | None = Field(
         None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
         examples=["2025-01-01"],
         description="The date until which the submission should be held before public release (ISO 8601 format).",
     )
@@ -642,6 +643,7 @@ class Entry(BaseModel):
 
     id: str = Field(
         ...,
+        pattern=r"^[a-zA-Z0-9_.\-]{1,32}$",
         examples=["chromosome"],
         description="The unique identifier for this sequence entry, typically used as FASTA header ID or submitter sequence ID.",
     )
@@ -758,6 +760,7 @@ class DdbjRecord(BaseModel):
 
     schema_version: str = Field(
         ...,
+        pattern=r"^v\d+\.\d+$",
         examples=["v2.0"],
         description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are accepted but deprecated.",
     )

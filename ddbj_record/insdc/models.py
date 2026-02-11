@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Discriminator
 
 
 class DeprecatedInfo(BaseModel):
@@ -25,15 +25,34 @@ class FeatureDefinition(BaseModel):
     qualifiers: dict[str, Literal["mandatory", "optional"]]
 
 
-class CrossConstraint(BaseModel):
-    type: Literal["mutual_exclusion", "dependency", "exclusion", "conditional_mandatory"]
-    qualifiers: list[str] | None = None
-    qualifier: str | None = None
-    requires: str | list[str] | None = None
-    feature: str | None = None
-    condition: str | None = None
-    then_mandatory: list[str] | None = None
+# === Cross-Constraint Discriminated Union ===
+
+
+class MutualExclusionConstraint(BaseModel):
+    type: Literal["mutual_exclusion"] = "mutual_exclusion"
+    qualifiers: list[str]
     message: str
+
+
+class DependencyConstraint(BaseModel):
+    type: Literal["dependency"] = "dependency"
+    qualifier: str
+    requires: str | list[str]
+    message: str
+
+
+class ConditionalMandatoryConstraint(BaseModel):
+    type: Literal["conditional_mandatory"] = "conditional_mandatory"
+    feature: str | None = None
+    condition: str
+    then_mandatory: list[str]
+    message: str
+
+
+CrossConstraint = Annotated[
+    MutualExclusionConstraint | DependencyConstraint | ConditionalMandatoryConstraint,
+    Discriminator("type"),
+]
 
 
 class Meta(BaseModel):

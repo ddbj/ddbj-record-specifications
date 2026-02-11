@@ -933,57 +933,6 @@ def test_qualifier_boolean_roundtrip() -> None:
     assert v2_back.sequences.common_source.qualifiers["focus"][0].value == "true"
 
 
-# === invalid trad_submission_category ===
-
-
-def test_convert_common_trad_category_invalid_defaults_gnm() -> None:
-    v2_obj = _make_v2_minimal(
-        {
-            "submission": {
-                "submitters": [
-                    {
-                        "name": "T",
-                        "abbreviation": "T,T.",
-                        "email": "t@t.com",
-                        "organization": [
-                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
-                        ],
-                    }
-                ],
-                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
-                "trad_submission_category": "INVALID",
-            }
-        }
-    )
-    with pytest.warns(UserWarning, match="trad_submission_category"):
-        common = _convert_common(v2_obj)
-    assert common.trad_submission_category == "GNM"
-
-
-def test_v2_to_v1_invalid_trad_category_no_crash() -> None:
-    v2_obj = _make_v2_minimal(
-        {
-            "submission": {
-                "submitters": [
-                    {
-                        "name": "T",
-                        "abbreviation": "T,T.",
-                        "email": "t@t.com",
-                        "organization": [
-                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
-                        ],
-                    }
-                ],
-                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
-                "trad_submission_category": "VRL",
-            }
-        }
-    )
-    with pytest.warns(UserWarning, match="trad_submission_category"):
-        v1_obj = v2_to_v1(v2_obj)
-    assert v1_obj.COMMON.trad_submission_category == "GNM"
-
-
 # === negative tests ===
 
 

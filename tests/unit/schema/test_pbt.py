@@ -39,7 +39,7 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
     mol_type = draw(st_mol_type)
     entry_type = draw(st_entry_type)
     topology = draw(st_topology)
-    entry_id = draw(st.text(min_size=1, max_size=30).filter(lambda s: s.strip() != ""))
+    entry_id = draw(st.from_regex(r"[a-zA-Z0-9_.\-]{1,32}", fullmatch=True))
 
     return {
         "schema_version": "v2.0",

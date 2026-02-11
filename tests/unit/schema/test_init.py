@@ -45,7 +45,7 @@ def test_latest_minor_versions_v1() -> None:
 
 
 def test_latest_minor_versions_v2() -> None:
-    assert LATEST_MINOR_VERSIONS["v2"] == "v2.0"
+    assert LATEST_MINOR_VERSIONS["v2"] == "v2.1"
 
 
 # === normalize_cli_version ===

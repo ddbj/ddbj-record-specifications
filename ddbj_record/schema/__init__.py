@@ -13,7 +13,7 @@ LATEST_VERSION = "v2"
 # Used by converters to set schema_version in output data.
 LATEST_MINOR_VERSIONS: dict[str, str] = {
     "v1": "v1.0",
-    "v2": "v2.0",
+    "v2": "v2.1",
 }
 
 # Deprecated schema_version values.
