@@ -950,5 +950,5 @@ def test_v2_to_v1_no_st_comment_experiment_warns() -> None:
     )
     with pytest.warns(UserWarning, match="custom_only"):
         v1_obj = v2_to_v1(v2_obj)
-    # ST_COMMENT should have empty defaults since no st_comment_experiment was found
-    assert v1_obj.COMMON.ST_COMMENT.sequencing_technology == ""
+    # ST_COMMENT should be None since no st_comment_experiment was found
+    assert v1_obj.COMMON.ST_COMMENT is None

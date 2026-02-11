@@ -208,13 +208,14 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     )
 
     # ST_COMMENT
-    tagset_id = ""
-    assembly_method = ""
-    coverage: str | None = None
-    genome_coverage: str | None = None
-    sequencing_technology = ""
+    st_comment: StComment | None = None
     for exp in v2_obj.experiments:
         if exp.id == "st_comment_experiment":
+            tagset_id = ""
+            assembly_method = ""
+            coverage: str | None = None
+            genome_coverage: str | None = None
+            sequencing_technology = ""
             if exp.platform and exp.platform.platform_type:
                 sequencing_technology = exp.platform.platform_type
             if "tagset_id" in exp.experiment_attributes:
@@ -229,18 +230,18 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
                 _warn_data_loss("experiment title ignored during v2 to v1 conversion")
             if exp.design:
                 _warn_data_loss("experiment design ignored during v2 to v1 conversion")
+            st_comment_kwargs: dict[str, str] = {
+                "tagset_id": tagset_id,
+                "Assembly Method": assembly_method,
+                "Sequencing Technology": sequencing_technology,
+            }
+            if coverage is not None:
+                st_comment_kwargs["Coverage"] = coverage
+            if genome_coverage is not None:
+                st_comment_kwargs["Genome Coverage"] = genome_coverage
+            st_comment = StComment(**st_comment_kwargs)
         else:
             _warn_data_loss(f"experiment '{exp.id}' ignored during v2 to v1 conversion (only st_comment_experiment)")
-    st_comment_kwargs: dict[str, str] = {
-        "tagset_id": tagset_id,
-        "Assembly Method": assembly_method,
-        "Sequencing Technology": sequencing_technology,
-    }
-    if coverage is not None:
-        st_comment_kwargs["Coverage"] = coverage
-    if genome_coverage is not None:
-        st_comment_kwargs["Genome Coverage"] = genome_coverage
-    st_comment = StComment(**st_comment_kwargs)
 
     # DATE
     date = None

@@ -212,6 +212,8 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
 
 
 def _convert_experiments(v1_obj: DdbjRecordV1) -> list[Experiment]:
+    if v1_obj.COMMON.ST_COMMENT is None:
+        return []
     experiment = Experiment(
         id="st_comment_experiment",
         platform=Platform(platform_type=v1_obj.COMMON.ST_COMMENT.sequencing_technology),

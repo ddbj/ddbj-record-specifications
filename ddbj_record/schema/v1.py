@@ -90,7 +90,7 @@ class Common(BaseModel):
     SUBMITTER: Submitter
     REFERENCE: list[Reference] = Field(default_factory=list)
     COMMENT: list[Comment] = Field(default_factory=list)
-    ST_COMMENT: StComment
+    ST_COMMENT: StComment | None = Field(None)
     DATE: Date | None = Field(None)
     trad_submission_category: Literal["WGS", "GNM"] = Field(
         description="if the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
