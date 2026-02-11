@@ -15,7 +15,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ValidationError, computed_field
 
-from ddbj_record.schema import LATEST_VERSION, LEGACY_SCHEMA_VERSION_MAP, SCHEMA_VERSIONS, normalize_cli_version
+from ddbj_record.schema import LATEST_VERSION, SCHEMA_VERSIONS, normalize_cli_version, normalize_schema_version
 from ddbj_record.utils import resolve_record_model
 
 # === Type Definitions for Validation ===
@@ -262,8 +262,18 @@ def _validate_schema_version_consistency(json_data: dict[str, Any], schema_versi
     if raw_version is None:
         return []
 
-    normalized = LEGACY_SCHEMA_VERSION_MAP.get(raw_version, raw_version)
-    # Write back normalized value so Pydantic doesn't see the legacy value
+    normalized = normalize_schema_version(raw_version)
+    if normalized is None:
+        return [
+            ErrorDetail(
+                type="schema_version_mismatch",
+                loc=["schema_version"],
+                msg=f"schema_version '{raw_version}' is not recognized",
+                stage="schema_version",
+            )
+        ]
+
+    # Write back normalized value so Pydantic sees the canonical form
     json_data["schema_version"] = normalized
 
     prefix = f"{schema_version}."

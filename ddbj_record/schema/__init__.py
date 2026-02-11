@@ -16,15 +16,30 @@ LATEST_MINOR_VERSIONS: dict[str, str] = {
     "v2": "v2.1",
 }
 
-# Deprecated schema_version values.
-# Maintained for backward compatibility during the transition to v{major}.{minor} format.
-# New data should use "v1.0", "v2.0", etc.
-LEGACY_SCHEMA_VERSION_MAP = {
-    "0.1": "v1.0",
-    "v1": "v1.0",
-    "0.2": "v2.0",
-    "v2": "v2.0",
+# Mapping from legacy schema_version values to their major version.
+_LEGACY_TO_MAJOR: dict[str, str] = {
+    "0.1": "v1",
+    "v1": "v1",
+    "0.2": "v2",
+    "v2": "v2",
 }
+
+
+def normalize_schema_version(raw: str) -> str | None:
+    """Normalize a schema_version value to the latest minor version.
+
+    Accepts legacy values ("0.1", "v1", "0.2", "v2") and canonical values
+    ("v1.0", "v2.0", "v2.1") and returns the latest minor version for that
+    major version (e.g., "v2.1"). Returns None if the input is unrecognized.
+    """
+    if raw in _LEGACY_TO_MAJOR:
+        major = _LEGACY_TO_MAJOR[raw]
+        return LATEST_MINOR_VERSIONS.get(major)
+    match = re.fullmatch(r"(v\d+)\.\d+", raw)
+    if match:
+        major = match.group(1)
+        return LATEST_MINOR_VERSIONS.get(major)
+    return None
 
 
 def normalize_cli_version(raw: str) -> str | None:

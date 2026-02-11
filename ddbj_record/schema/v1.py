@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from ddbj_record.schema import normalize_schema_version
 
 
 class Dblink(BaseModel):
@@ -162,7 +164,21 @@ class Entry(BaseModel):
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str = Field(examples=["v1.0"])
+    schema_version: str = Field(
+        ...,
+        pattern=r"^(v\d+\.\d+|v\d+|\d+\.\d+)$",
+        examples=["v1.0"],
+        description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v1.0'). Legacy values ('v1', '0.1') are also accepted and normalized to the latest minor version.",
+    )
+
+    @field_validator("schema_version")
+    @classmethod
+    def _normalize_schema_version(cls, v: str) -> str:
+        normalized = normalize_schema_version(v)
+        if normalized is None:
+            msg = f"Unknown schema_version: '{v}'"
+            raise ValueError(msg)
+        return normalized
 
     COMMON: Common = Field(
         description="Corresponds to the COMMON section of the registered file (metadata common to all arrays, such as registrant information)"

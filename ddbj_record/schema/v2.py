@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from ddbj_record.schema import normalize_schema_version
 
 
 class Provenance(BaseModel):
@@ -760,10 +762,19 @@ class DdbjRecord(BaseModel):
 
     schema_version: str = Field(
         ...,
-        pattern=r"^v\d+\.\d+$",
+        pattern=r"^(v\d+\.\d+|v\d+|\d+\.\d+)$",
         examples=["v2.0"],
-        description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are accepted but deprecated.",
+        description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are also accepted and normalized to the latest minor version.",
     )
+
+    @field_validator("schema_version")
+    @classmethod
+    def _normalize_schema_version(cls, v: str) -> str:
+        normalized = normalize_schema_version(v)
+        if normalized is None:
+            msg = f"Unknown schema_version: '{v}'"
+            raise ValueError(msg)
+        return normalized
 
     provenance: Provenance = Field(
         ...,

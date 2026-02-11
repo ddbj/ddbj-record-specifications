@@ -3,9 +3,9 @@ import pytest
 from ddbj_record.schema import (
     LATEST_MINOR_VERSIONS,
     LATEST_VERSION,
-    LEGACY_SCHEMA_VERSION_MAP,
     SCHEMA_VERSIONS,
     normalize_cli_version,
+    normalize_schema_version,
 )
 
 
@@ -25,18 +25,6 @@ def test_latest_version_is_v2() -> None:
     assert LATEST_VERSION == "v2"
 
 
-def test_legacy_map_01_to_v10() -> None:
-    assert LEGACY_SCHEMA_VERSION_MAP["0.1"] == "v1.0"
-
-
-def test_legacy_map_v1_to_v10() -> None:
-    assert LEGACY_SCHEMA_VERSION_MAP["v1"] == "v1.0"
-
-
-def test_legacy_map_02_to_v20() -> None:
-    assert LEGACY_SCHEMA_VERSION_MAP["0.2"] == "v2.0"
-
-
 # === LATEST_MINOR_VERSIONS ===
 
 
@@ -46,6 +34,41 @@ def test_latest_minor_versions_v1() -> None:
 
 def test_latest_minor_versions_v2() -> None:
     assert LATEST_MINOR_VERSIONS["v2"] == "v2.1"
+
+
+# === normalize_schema_version ===
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("0.1", "v1.0"),
+        ("v1", "v1.0"),
+        ("v1.0", "v1.0"),
+        ("0.2", "v2.1"),
+        ("v2", "v2.1"),
+        ("v2.0", "v2.1"),
+        ("v2.1", "v2.1"),
+    ],
+)
+def test_normalize_schema_version_valid(raw: str, expected: str) -> None:
+    assert normalize_schema_version(raw) == expected
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "v999.0",
+        "v3.0",
+        "invalid",
+        "",
+        "v",
+        "v2.",
+        "2.0",
+    ],
+)
+def test_normalize_schema_version_invalid_returns_none(raw: str) -> None:
+    assert normalize_schema_version(raw) is None
 
 
 # === normalize_cli_version ===

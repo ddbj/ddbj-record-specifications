@@ -1,7 +1,7 @@
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from ddbj_record.schema import LEGACY_SCHEMA_VERSION_MAP
+from ddbj_record.schema import _LEGACY_TO_MAJOR, normalize_schema_version
 from ddbj_record.schema.v2 import (
     DdbjRecord,
     Qualifier,
@@ -69,7 +69,7 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
 @settings(max_examples=100)
 def test_pbt_v2_minimal_record_validates(record_data: dict) -> None:
     record = DdbjRecord.model_validate(record_data)
-    assert record.schema_version == "v2.0"
+    assert record.schema_version == "v2.1"
 
 
 @given(record_data=st_v2_record_with_entry())
@@ -98,9 +98,10 @@ def test_pbt_model_dump_validate_roundtrip(record_data: dict) -> None:
     assert record1.sequences.common_source.mol_type == record2.sequences.common_source.mol_type
 
 
-@given(legacy_key=st.sampled_from(list(LEGACY_SCHEMA_VERSION_MAP.keys())))
-def test_pbt_legacy_version_map_values_are_versioned(legacy_key: str) -> None:
-    value = LEGACY_SCHEMA_VERSION_MAP[legacy_key]
+@given(legacy_key=st.sampled_from(list(_LEGACY_TO_MAJOR.keys())))
+def test_pbt_legacy_version_normalizes_to_latest_minor(legacy_key: str) -> None:
+    value = normalize_schema_version(legacy_key)
+    assert value is not None
     assert value.startswith("v")
     assert "." in value
 

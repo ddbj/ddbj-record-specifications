@@ -303,8 +303,8 @@ def test_validate_json_data_normalizes_legacy_value_before_pydantic() -> None:
         "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
     }
     validate_json_data(data, "v2")
-    # After validation, the dict should have normalized value
-    assert data["schema_version"] == "v2.0"
+    # After validation, the dict should have normalized value (latest minor)
+    assert data["schema_version"] == "v2.1"
 
 
 # === parse_args ===
@@ -818,10 +818,11 @@ def test_entry_id_with_space_rejected() -> None:
 # --- schema_version ---
 
 
-def test_schema_version_without_minor_rejected() -> None:
-    data = _make_v2_data({"schema_version": "v2"})
+@pytest.mark.parametrize("version", ["v2.0", "v2.1", "v2", "0.2"])
+def test_schema_version_valid_values_accepted(version: str) -> None:
+    data = _make_v2_data({"schema_version": version})
     result = validate_schema(data, "v2")
-    assert result.valid is False
+    assert result.valid is True
 
 
 def test_schema_version_without_v_prefix_rejected() -> None:
@@ -830,10 +831,10 @@ def test_schema_version_without_v_prefix_rejected() -> None:
     assert result.valid is False
 
 
-def test_schema_version_valid_format_accepted() -> None:
-    data = _make_v2_data({"schema_version": "v2.0"})
+def test_schema_version_completely_invalid_rejected() -> None:
+    data = _make_v2_data({"schema_version": "invalid"})
     result = validate_schema(data, "v2")
-    assert result.valid is True
+    assert result.valid is False
 
 
 # === Date validity tests ===
