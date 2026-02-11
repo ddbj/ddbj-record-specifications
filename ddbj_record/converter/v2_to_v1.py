@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import warnings
+
+from ddbj_record.schema import LATEST_MINOR_VERSIONS
 from ddbj_record.schema.v1 import (
     Comment,
     Common,
@@ -18,9 +21,13 @@ from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 from ddbj_record.schema.v2 import Person as V2Person
 
 
+def _warn_data_loss(msg: str) -> None:
+    warnings.warn(msg, UserWarning, stacklevel=3)
+
+
 def v2_to_v1(v2_obj: DdbjRecordV2) -> DdbjRecordV1:
     return DdbjRecordV1(
-        schema_version="v1.0",
+        schema_version=LATEST_MINOR_VERSIONS["v1"],
         COMMON=_convert_common(v2_obj),
         COMMON_SOURCE=_convert_common_source(v2_obj),
         COMMON_META=_convert_common_meta(v2_obj),
@@ -49,16 +56,26 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
             dblink_biosample = xref.id
         elif xref.db == "insdc.sra":
             dblink_sra.append(xref.id)
+        else:
+            _warn_data_loss(f"db_xref with db='{xref.db}' ignored during v2 to v1 conversion")
     dblink: Dblink | None = None
     if dblink_project or dblink_biosample or dblink_sra:
-        dblink = Dblink.model_construct(
+        dblink = Dblink(
             project=dblink_project,
             biosample=dblink_biosample,
-            sequence_read_archive=dblink_sra or None,
+            **{"sequence read archive": dblink_sra or None},
         )
 
     # SUBMITTER
     ab_names: list[str] = [s.abbreviation for s in v2_obj.submission.submitters if s.abbreviation]
+
+    # Warn for submitters without abbreviation
+    for s in v2_obj.submission.submitters:
+        if not s.abbreviation and s.name:
+            _warn_data_loss(f"submitter name without abbreviation will not appear in v1 ab_name: '{s.name}'")
+        if s.orcid:
+            _warn_data_loss(f"orcid '{s.orcid}' ignored during v2 to v1 conversion")
+
     contact = ""
     email = ""
     url: str | None = None
@@ -95,21 +112,45 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
         contact = contact_person.name or ""
         email = contact_person.email or ""
         if contact_person.organization:
+            institution_count = 0
+            consortium_count = 0
             for organization_obj in contact_person.organization:
                 if organization_obj.type == "institution":
-                    institute = organization_obj.name
-                    url = organization_obj.url
-                    department = organization_obj.department
-                    if organization_obj.address:
-                        country = organization_obj.address.country
-                        state = organization_obj.address.state or ""
-                        city = organization_obj.address.city
-                        street = organization_obj.address.street or ""
-                        zip_code = organization_obj.address.postal_code or ""
+                    institution_count += 1
+                    if institution_count == 1:
+                        institute = organization_obj.name
+                        url = organization_obj.url
+                        department = organization_obj.department
+                        if organization_obj.address:
+                            country = organization_obj.address.country
+                            state = organization_obj.address.state or ""
+                            city = organization_obj.address.city
+                            street = organization_obj.address.street or ""
+                            zip_code = organization_obj.address.postal_code or ""
+                    else:
+                        _warn_data_loss(
+                            f"additional institution '{organization_obj.name}' ignored during v2 to v1 conversion"
+                        )
                 elif organization_obj.type == "consortium":
+                    consortium_count += 1
                     consrtm = organization_obj.name
+                    if consortium_count > 1:
+                        _warn_data_loss(
+                            f"additional consortium '{organization_obj.name}' ignored; "
+                            "only last consortium is preserved in v1"
+                        )
+                if organization_obj.ror_id:
+                    _warn_data_loss(f"ror_id '{organization_obj.ror_id}' ignored during v2 to v1 conversion")
 
-    submitter = Submitter.model_construct(
+    # Warn for non-contact submitter organizations
+    for _i, s in enumerate(v2_obj.submission.submitters):
+        if s != contact_person and s.organization:
+            _warn_data_loss(
+                f"organization info from non-contact submitter '{s.abbreviation or s.name}' "
+                "ignored during v2 to v1 conversion"
+            )
+
+    submitter = Submitter(
         ab_name=ab_names,
         contact=contact,
         email=email,
@@ -125,11 +166,35 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     )
 
     # REFERENCE
+    ignored_ref_fields = (
+        "journal",
+        "volume",
+        "issue",
+        "start_page",
+        "end_page",
+        "date_published",
+        "doi",
+        "url",
+        "pubmed_id",
+    )
     references: list[Reference] = []
     for ref in v2_obj.submission.references:
-        ref_ab_names: list[str] = [author.abbreviation for author in ref.authors if author.abbreviation]
+        ref_ab_names: list[str] = []
+        for author in ref.authors:
+            if author.abbreviation:
+                ref_ab_names.append(author.abbreviation)
+            if author.name or author.email or author.orcid or author.organization:
+                _warn_data_loss(
+                    "author name/email/orcid/organization ignored during v2 to v1 conversion "
+                    "(only abbreviation is preserved)"
+                )
+        if ref.consortiums:
+            _warn_data_loss("reference consortiums ignored during v2 to v1 conversion")
+        for field_name in ignored_ref_fields:
+            if getattr(ref, field_name, None) is not None:
+                _warn_data_loss(f"reference field '{field_name}' ignored during v2 to v1 conversion")
         references.append(
-            Reference.model_construct(
+            Reference(
                 title=ref.title,
                 ab_name=ref_ab_names,
                 status=" ".join(ref.status.split("-")).title(),
@@ -139,9 +204,7 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
 
     # COMMENT
     comments: list[Comment] = (
-        [Comment.model_construct(line=line) for line in v2_obj.submission.comments]
-        if v2_obj.submission.comments
-        else []
+        [Comment(line=line) for line in v2_obj.submission.comments] if v2_obj.submission.comments else []
     )
 
     # ST_COMMENT
@@ -162,21 +225,33 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
                 coverage = exp.experiment_attributes["coverage"]
             if "genome_coverage" in exp.experiment_attributes:
                 genome_coverage = exp.experiment_attributes["genome_coverage"]
-    st_comment = StComment.model_construct(
-        tagset_id=tagset_id,
-        assembly_method=assembly_method,
-        coverage=coverage,
-        genome_coverage=genome_coverage,
-        sequencing_technology=sequencing_technology,
-    )
+            if exp.title:
+                _warn_data_loss("experiment title ignored during v2 to v1 conversion")
+            if exp.design:
+                _warn_data_loss("experiment design ignored during v2 to v1 conversion")
+        else:
+            _warn_data_loss(f"experiment '{exp.id}' ignored during v2 to v1 conversion (only st_comment_experiment)")
+    st_comment_kwargs: dict[str, str] = {
+        "tagset_id": tagset_id,
+        "Assembly Method": assembly_method,
+        "Sequencing Technology": sequencing_technology,
+    }
+    if coverage is not None:
+        st_comment_kwargs["Coverage"] = coverage
+    if genome_coverage is not None:
+        st_comment_kwargs["Genome Coverage"] = genome_coverage
+    st_comment = StComment(**st_comment_kwargs)
 
     # DATE
     date = None
     if v2_obj.submission.hold_date:
-        date = Date.model_construct(hold_date=v2_obj.submission.hold_date)
+        date = Date(hold_date=v2_obj.submission.hold_date)
 
     # trad_submission_category
-    trad_submission_category = v2_obj.submission.trad_submission_category or "GNM"
+    trad_submission_category = v2_obj.submission.trad_submission_category
+    if trad_submission_category is None:
+        _warn_data_loss("trad_submission_category is None, defaulting to 'GNM'")
+        trad_submission_category = "GNM"
 
     return Common(
         DBLINK=dblink,
@@ -197,6 +272,9 @@ def _convert_common_source(v2_obj: DdbjRecordV2) -> CommonSource:
     for key, q_objs in v2_obj.sequences.common_source.qualifiers.items():
         if key in ("organism", "mol_type"):
             continue
+        for q_obj in q_objs:
+            if q_obj.id is not None:
+                _warn_data_loss(f"qualifier id '{q_obj.id}' ignored during v2 to v1 conversion")
         if len(q_objs) == 1:
             common_source_obj[key] = _qualifier_value_to_union(q_objs[0].value)
         if len(q_objs) > 1:  # if key is 'note', value is List[str]
@@ -206,8 +284,20 @@ def _convert_common_source(v2_obj: DdbjRecordV2) -> CommonSource:
 
 
 def _convert_common_meta(v2_obj: DdbjRecordV2) -> CommonMeta:
+    division = v2_obj.submission.division
+    if division is None:
+        _warn_data_loss("division is None, defaulting to 'BCT'")
+        division = "BCT"
+
+    # Warn for provenance fields other than dfast_version
+    if v2_obj.provenance.source_format is not None:
+        _warn_data_loss("provenance field 'source_format' ignored during v2 to v1 conversion")
+    for extra_key in v2_obj.provenance.model_extra or {}:
+        if extra_key != "dfast_version":
+            _warn_data_loss(f"provenance field '{extra_key}' ignored during v2 to v1 conversion")
+
     return CommonMeta(
-        division=v2_obj.submission.division or "BCT",
+        division=division,
         locus_tag_prefix=v2_obj.submission.locus_tag_prefix,
         dfast_version=getattr(v2_obj.provenance, "dfast_version", None),
         seq_prefix=v2_obj.submission.seq_prefix,
@@ -218,6 +308,11 @@ def _convert_entries(v2_obj: DdbjRecordV2) -> list[Entry]:
     # Build a mapping from sequence_id to v2 features (CDS, gene, rRNA, etc.)
     features_by_seq_id: dict[str, list[Feature]] = {}
     for v2_feat in v2_obj.features:
+        # Warn for qualifier IDs
+        for q_objs in v2_feat.qualifiers.values():
+            for q_obj in q_objs:
+                if q_obj.id is not None:
+                    _warn_data_loss(f"qualifier id '{q_obj.id}' ignored during v2 to v1 conversion")
         v1_feat = Feature(
             id=v2_feat.id,
             type=v2_feat.type,
@@ -271,7 +366,7 @@ def _convert_entries(v2_obj: DdbjRecordV2) -> list[Entry]:
                 v1_entry.features.append(
                     Feature(
                         id=f"{v2_entry.id}_comment_{i + 1}",
-                        type="comment",
+                        type="COMMENT",
                         location="",
                         qualifiers={"line": line},
                     )

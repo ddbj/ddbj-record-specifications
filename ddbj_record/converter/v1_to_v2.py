@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import re
+import warnings
 
+from ddbj_record.schema import LATEST_MINOR_VERSIONS
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v1 import Feature as FeatureV1
 from ddbj_record.schema.v2 import (
@@ -26,7 +28,7 @@ from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 
 def v1_to_v2(v1_obj: DdbjRecordV1) -> DdbjRecordV2:
     return DdbjRecordV2(
-        schema_version="v2.0",
+        schema_version=LATEST_MINOR_VERSIONS["v2"],
         provenance=_create_provenance(v1_obj),
         submission=_convert_submission(v1_obj),
         experiments=_convert_experiments(v1_obj),
@@ -84,8 +86,8 @@ def _abbr_candidates_from_fullname(fullname: str) -> set[str]:
             initials = first[0] + "".join([m[0] for m in mids if m])  # "JA"
             _add_candidate(last, initials)
 
-            # for asian names, e.g., "Yamada Taro"
-            last, first = parts[-1], parts[0]
+            # for asian names, e.g., "Yamada Taro" -> Last=Yamada, First=Taro
+            last, first = parts[0], parts[-1]
             mids = parts[1:-1]
             initials = first[0] + "".join([m[0] for m in mids if m])
             _add_candidate(last, initials)
@@ -129,6 +131,13 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         submitters.append(person)
 
     if contact_index is None:
+        if v1_obj.COMMON.SUBMITTER.contact:
+            warnings.warn(
+                f"contact '{v1_obj.COMMON.SUBMITTER.contact}' did not match any ab_name; "
+                "adding as separate Person with abbreviation=None",
+                UserWarning,
+                stacklevel=2,
+            )
         person = Person(abbreviation=None)
         person.name = v1_obj.COMMON.SUBMITTER.contact
         person.email = v1_obj.COMMON.SUBMITTER.email
@@ -140,19 +149,13 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     # === db_xrefs ===
     db_xrefs: list[Xref] = []
     if v1_obj.COMMON.DBLINK:
-        db_xrefs.append(
-            Xref(
-                db="bioproject",
-                id=v1_obj.COMMON.DBLINK.project,
-            )
+        if v1_obj.COMMON.DBLINK.project:
+            db_xrefs.append(Xref(db="bioproject", id=v1_obj.COMMON.DBLINK.project))
+        if v1_obj.COMMON.DBLINK.biosample:
+            db_xrefs.append(Xref(db="biosample", id=v1_obj.COMMON.DBLINK.biosample))
+        db_xrefs.extend(
+            Xref(db="insdc.sra", id=sra_id) for sra_id in v1_obj.COMMON.DBLINK.sequence_read_archive or [] if sra_id
         )
-        db_xrefs.append(
-            Xref(
-                db="biosample",
-                id=v1_obj.COMMON.DBLINK.biosample,
-            )
-        )
-        db_xrefs.extend(Xref(db="insdc.sra", id=sra_id) for sra_id in v1_obj.COMMON.DBLINK.sequence_read_archive or [])
 
     # === references ===
     references: list[Reference] = [
@@ -270,7 +273,7 @@ def _convert_features(v1_obj: DdbjRecordV1) -> list[Feature]:
 
     for entry in v1_obj.ENTRIES:
         for feature in entry.features:
-            if feature.type == "source":
+            if feature.type in ("source", "COMMENT"):
                 continue
             features.append(
                 Feature(

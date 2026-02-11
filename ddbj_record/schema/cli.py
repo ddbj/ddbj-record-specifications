@@ -6,7 +6,7 @@ import sys
 
 from pydantic import BaseModel
 
-from ddbj_record.schema import SCHEMA_VERSIONS
+from ddbj_record.schema import SCHEMA_VERSIONS, normalize_cli_version
 from ddbj_record.utils import deref_schema, get_schema_dir_path, resolve_record_model
 
 
@@ -28,13 +28,14 @@ def parse_args(args: list[str] | None = None) -> Args:
         args = sys.argv[1:]
 
     parsed_args = parser.parse_args(args)
-    if parsed_args.version not in SCHEMA_VERSIONS:
+    normalized_version = normalize_cli_version(parsed_args.version)
+    if normalized_version is None:
         parser.error(
             f"Invalid schema version: {parsed_args.version}. Supported versions are: {', '.join(SCHEMA_VERSIONS)}"
         )
 
     return Args(
-        version=parsed_args.version,
+        version=normalized_version,
     )
 
 

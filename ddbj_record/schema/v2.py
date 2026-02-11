@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from ddbj_record.schema import LEGACY_SCHEMA_VERSION_MAP
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Provenance(BaseModel):
@@ -763,11 +761,6 @@ class DdbjRecord(BaseModel):
         examples=["v2.0"],
         description="The version of the DDBJ record schema used for this data. Expected format: 'v{major}.{minor}' (e.g., 'v2.0', 'v2.1'). Legacy values ('v2', '0.2') are accepted but deprecated.",
     )
-
-    @field_validator("schema_version", mode="before")
-    @classmethod
-    def normalize_schema_version(cls, v: str) -> str:
-        return LEGACY_SCHEMA_VERSION_MAP.get(v, v)
 
     provenance: Provenance = Field(
         ...,

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from ddbj_record.schema import LEGACY_SCHEMA_VERSION_MAP
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Dblink(BaseModel):
@@ -165,11 +163,6 @@ class Entry(BaseModel):
 
 class DdbjRecord(BaseModel):
     schema_version: str = Field(examples=["v1.0"])
-
-    @field_validator("schema_version", mode="before")
-    @classmethod
-    def normalize_schema_version(cls, v: str) -> str:
-        return LEGACY_SCHEMA_VERSION_MAP.get(v, v)
 
     COMMON: Common = Field(
         description="Corresponds to the COMMON section of the registered file (metadata common to all arrays, such as registrant information)"

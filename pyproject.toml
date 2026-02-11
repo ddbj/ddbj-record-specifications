@@ -18,7 +18,7 @@ Documentation = "https://github.com/ddbj/ddbj-record-specifications/blob/main/RE
 Repository = "https://github.com/ddbj/ddbj-record-specifications.git"
 
 [project.optional-dependencies]
-tests = ["mypy", "pytest", "pytest-mock", "ruff"]
+tests = ["hypothesis", "mypy", "pytest", "pytest-mock", "ruff"]
 
 [project.scripts]
 dump_json_schema = "ddbj_record.schema.cli:main"
@@ -29,7 +29,7 @@ ddbj_record_converter = "ddbj_record.converter.cli:main"
 packages = ["ddbj_record"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests/unit"]
 
 [tool.mypy]
 files = ["./ddbj_record/**/*.py"]
@@ -77,7 +77,8 @@ ignore = [
 "ddbj_record/schema/cli.py" = ["T201", "BLE001"]
 "ddbj_record/validator.py" = ["T201", "BLE001"]
 "ddbj_record/converter/cli.py" = ["T201", "BLE001"]
-"tests/**/*.py" = ["S101"]
+"tests/unit/converter/test_cli.py" = ["S603", "S607"]
+"tests/**/*.py" = ["S101", "PLR2004"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ddbj_record"]

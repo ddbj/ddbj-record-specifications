@@ -1,5 +1,26 @@
 # Tests
 
+```bash
+uv run pytest
+```
+
+## テストファイル
+
+| テスト | 対象 | 仕様書 |
+|---|---|---|
+| `unit/schema/test_v1.py` | v1 スキーマ (Pydantic モデル) | - |
+| `unit/schema/test_v2.py` | v2 スキーマ (Pydantic モデル) | - |
+| `unit/schema/test_init.py` | バージョン定数・正規化 | - |
+| `unit/schema/test_cli.py` | `dump_json_schema` CLI | - |
+| `unit/schema/test_pbt.py` | スキーマの PBT (hypothesis) | - |
+| `unit/test_validator.py` | バリデーション | [validator-spec.md](../docs/validator-spec.md) |
+| `unit/converter/test_v1_to_v2.py` | v1->v2 変換 | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/converter/test_v2_to_v1.py` | v2->v1 変換 | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/converter/test_roundtrip.py` | ラウンドトリップ変換 | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/converter/test_cli.py` | `ddbj_record_converter` CLI | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/converter/test_pbt.py` | コンバーターの PBT (hypothesis) | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/test_utils.py` | ユーティリティ関数 | - |
+
 ## テストデータの方針
 
 テストデータは以下の 2 種類に分類する。

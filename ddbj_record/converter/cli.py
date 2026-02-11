@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from ddbj_record.converter.v1_to_v2 import v1_to_v2
 from ddbj_record.converter.v2_to_v1 import v2_to_v1
-from ddbj_record.schema import SCHEMA_VERSIONS
+from ddbj_record.schema import SCHEMA_VERSIONS, normalize_cli_version
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 from ddbj_record.utils import resolve_record_model
@@ -52,19 +52,21 @@ def parse_args(args: list[str] | None = None) -> Args:
         args = sys.argv[1:]
 
     parsed_args = parser.parse_args(args)
-    if parsed_args.from_ not in SCHEMA_VERSIONS:
+    normalized_from = normalize_cli_version(parsed_args.from_)
+    if normalized_from is None:
         parser.error(
             f"Invalid schema version for 'from': {parsed_args.from_}. "
             f"Supported versions are: {', '.join(SCHEMA_VERSIONS)}"
         )
-    if parsed_args.to not in SCHEMA_VERSIONS:
+    normalized_to = normalize_cli_version(parsed_args.to)
+    if normalized_to is None:
         parser.error(
             f"Invalid schema version for 'to': {parsed_args.to}. Supported versions are: {', '.join(SCHEMA_VERSIONS)}"
         )
     if not parsed_args.input.exists():
         parser.error(f"Input JSON file does not exist: {parsed_args.input}")
 
-    return Args(from_=parsed_args.from_, to=parsed_args.to, input=parsed_args.input, output=parsed_args.output)
+    return Args(from_=normalized_from, to=normalized_to, input=parsed_args.input, output=parsed_args.output)
 
 
 def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[str, Any]:
@@ -72,20 +74,36 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
     # もう少しかっこよく出来る気もしているが、増えてきてから考える
     # schema の class に変換系の method を持たせるのは可読性が落ちそうなため、やめておく
 
+    input_result = validate_json_data(json_data, from_)
+    if not input_result.valid:
+        raise ValueError(
+            f"Input validation failed for schema {from_}: "
+            f"{[e.model_dump() for e in input_result.errors]}"
+        )
+
+    if from_ == to:
+
+        return json_data
+
     from_record_model = resolve_record_model(from_)
 
-    if from_ == "v1" and to == "v1":
-        return json_data
-    elif from_ == "v1" and to == "v2":
+    if from_ == "v1" and to == "v2":
         v1_obj = cast("DdbjRecordV1", from_record_model.model_validate(json_data))
-        return v1_to_v2(v1_obj).model_dump(exclude_none=True, by_alias=True)
+        result = v1_to_v2(v1_obj).model_dump(exclude_none=True, by_alias=True)
     elif from_ == "v2" and to == "v1":
         v2_obj = cast("DdbjRecordV2", from_record_model.model_validate(json_data))
-        return v2_to_v1(v2_obj).model_dump(exclude_none=True, by_alias=True)
-    elif from_ == "v2" and to == "v2":
-        return json_data
+        result = v2_to_v1(v2_obj).model_dump(exclude_none=True, by_alias=True)
     else:
         raise ValueError(f"Unsupported conversion from {from_} to {to}")
+
+    output_result = validate_json_data(result, to)
+    if not output_result.valid:
+        raise ValueError(
+            f"Output validation failed for schema {to}: "
+            f"{[e.model_dump() for e in output_result.errors]}"
+        )
+
+    return result
 
 
 def main() -> None:
@@ -98,16 +116,8 @@ def main() -> None:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON file {args.input}: {e}") from e
 
-        validation_result = validate_json_data(input_json_data, args.from_)
-        if not validation_result.valid:
-            print(
-                f"Validation failed for input file {args.input} using schema {args.from_}. "
-                f"Errors: {validation_result.errors}",
-                file=sys.stderr,
-            )
-            sys.exit(1)
-
         converted_data = convert_json_data(input_json_data, args.from_, args.to)
+
         with args.output.open("w", encoding="utf-8") as f:
             json.dump(converted_data, f, indent=2, ensure_ascii=False)
 

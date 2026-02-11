@@ -13,7 +13,13 @@
         "name": "seq1",
         "type": "chromosome",
         "topology": "linear",
-        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc"
+        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc",
+        "source_features": [
+          {
+            "id": "sf_seq1",
+            "location": "1..51"
+          }
+        ]
       }
     ]
   },

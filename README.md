@@ -7,7 +7,7 @@ DFAST などの自動アノテーションツールや、Repository API によ�
 
 - **スキーマ定義**: Python (Pydantic) によるスキーマ定義と JSON Schema の生成
 - **バリデーション**: DDBJ Record JSON ファイルのスキーマレベルでの検証
-- **バージョン変換**: スキーマバージョン間の双方向変換 (e.g., v1↔v2)
+- **バージョン変換**: スキーマバージョン間の双方向変換 (e.g., v1<->v2)
 
 DDBJ Record は [dr_tools](https://github.com/ddbj/dr_tools) と連携することで `ann` / `gbk` / `fasta` などへの変換が可能となる。
 
@@ -49,46 +49,22 @@ Python パッケージ `ddbj-record` としてのバージョン。[Semantic Ver
 
 現状、以下の spec version が存在する:
 
-- **v1.0**: DFAST 互換のレガシー形式
-  - Python 定義: [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py)
-  - JSON Schema: [`schemas/v1/ddbj_record.schema.json`](./schemas/v1/ddbj_record.schema.json)
-- **v2.0**: 構造化された現行形式
-  - Python 定義: [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py)
-  - JSON Schema: [`schemas/v2/ddbj_record.schema.json`](./schemas/v2/ddbj_record.schema.json)
+| Version | 概要 | Python 定義 | JSON Schema |
+|---|---|---|---|
+| v1.0 | DFAST 互換のレガシー形式 | [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py) | [`schemas/v1/ddbj_record.schema.json`](./schemas/v1/ddbj_record.schema.json) |
+| v2.0 | 構造化された現行形式 | [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py) | [`schemas/v2/ddbj_record.schema.json`](./schemas/v2/ddbj_record.schema.json) |
 
 ## Validator
 
-スキーマに基づくバリデーションを行う。
+スキーマに基づくバリデーションを行う。詳細は [Validator 機能仕様](./docs/validator-spec.md) を参照。
 
 ```bash
 ddbj_record_validator --version v2 --input input.json
 ```
 
-出力例:
-
-```json
-{
-  "valid": true,
-  "errors": null
-}
-```
-
-```json
-{
-  "valid": false,
-  "errors": [
-    {
-      "type": "missing",
-      "loc": ["COMMON", "DBLINK", "project"],
-      "msg": "Field required"
-    }
-  ]
-}
-```
-
 ## Converter
 
-スキーマバージョン間の変換を行う。
+スキーマバージョン間の変換を行う。詳細は [Converter 機能仕様](./docs/converter-spec.md) を参照。
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input input.json --output output.json
@@ -100,11 +76,19 @@ ddbj_record_converter --from v1 --to v2 --input input.json --output output.json
 
 ```bash
 # Docker
-docker compose -f compose.dev.yml up -d --build
-docker compose -f compose.dev.yml exec app bash
+docker compose up -d --build
+docker compose exec app bash
 
-# ローカル (Python 3.9+)
-pip install -e .[tests]
+# ローカル (Python 3.10+)
+uv sync --extra tests
+```
+
+### テスト
+
+テストの構成・テストデータの方針については [tests/README.md](./tests/README.md) を参照。
+
+```bash
+uv run pytest
 ```
 
 ### 新たなスキーマの開発
