@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,7 +7,7 @@ name = "ddbj-record"
 authors = [{ name = "Bioinformatics and DDBJ Center" }]
 description = "The ddbj-record package provides tools for parsing, validating, and converting DDBJ record specifications."
 readme = { file = "README.md", content-type = "text/markdown" }
-version = "0.1.5"
+dynamic = ["version"]
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 dependencies = ["pydantic", "jsonref", "pyyaml"]
@@ -25,6 +25,13 @@ scripts = ["beautifulsoup4", "pyyaml"]
 dump_json_schema = "ddbj_record.schema.cli:main"
 ddbj_record_validator = "ddbj_record.validator:main"
 ddbj_record_converter = "ddbj_record.converter.cli:main"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "ddbj_record/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ddbj_record"]

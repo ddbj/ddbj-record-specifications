@@ -16,7 +16,7 @@ DDBJ Record は [dr_tools](https://github.com/ddbj/dr_tools) と連携するこ�
 ```bash
 pip install git+https://github.com/ddbj/ddbj-record-specifications.git@main
 # OR (version specify)
-pip install git+https://github.com/ddbj/ddbj-record-specifications.git@0.1.5
+pip install git+https://github.com/ddbj/ddbj-record-specifications.git@0.2.0
 ```
 
 ## バージョニング
@@ -41,7 +41,8 @@ JSON の `schema_version` フィールドには minor を含めた完全な表�
 
 Python パッケージ `ddbj-record` としてのバージョン。[Semantic Versioning](https://semver.org/) に従う。
 
-- 形式: `MAJOR.MINOR.PATCH` (e.g., `0.1.5`, `1.0.0`)
+- 形式: `MAJOR.MINOR.PATCH` (e.g., `0.2.0`, `1.0.0`)
+- git tag が single source of truth (hatch-vcs により自動解決)
 - Specification version とは独立して管理する
 - 各リリースにおける変更内容は CHANGELOG.md に記録する
 
@@ -49,10 +50,12 @@ Python パッケージ `ddbj-record` としてのバージョン。[Semantic Ver
 
 現状、以下の spec version が存在する:
 
-| Version | 概要 | Python 定義 | JSON Schema |
-|---|---|---|---|
-| v1.0 | DFAST 互換のレガシー形式 | [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py) | [`schemas/v1/ddbj_record.schema.json`](./schemas/v1/ddbj_record.schema.json) |
-| v2.0 | 構造化された現行形式 | [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py) | [`schemas/v2/ddbj_record.schema.json`](./schemas/v2/ddbj_record.schema.json) |
+| Version | 概要 | Python 定義 |
+|---|---|---|
+| v1.0 | DFAST 互換のレガシー形式 | [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py) |
+| v2.0 | 構造化された現行形式 | [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py) |
+
+JSON Schema は [GitHub Release](https://github.com/ddbj/ddbj-record-specifications/releases) からダウンロードするか、ローカルで `uv run dump_json_schema --version v1` / `--version v2` で生成する。
 
 ## Validator
 
@@ -99,19 +102,30 @@ uv run pytest
 
 ### JSON Schema の生成
 
-Pydantic モデルから JSON Schema を生成する。GitHub Actions ([`dump_schema.yml`](./.github/workflows/dump_schema.yml)) により main push 時に自動生成される。
+Pydantic モデルから JSON Schema を生成する。
 
 ```bash
-dump_json_schema --version v1
-dump_json_schema --version v2
-dump_json_schema --version draft
+uv run dump_json_schema --version v1
+uv run dump_json_schema --version v2
+uv run dump_json_schema --version draft
 ```
 
 ### Release
 
+1. 必要に応じて `ddbj_record/schema/` 内の `schema_version` を変更する
+2. CHANGELOG.md を更新する
+3. タグを打って push する:
+
 ```bash
-bash ./release.sh <new_version>
+git tag 0.2.0 && git push origin 0.2.0
 ```
+
+CI が以下を自動実行する:
+
+- wheel / sdist のビルド
+- Docker イメージのビルドと ghcr.io への push
+- JSON Schema の生成
+- GitHub Release の作成 (wheel, sdist, JSON Schema を添付)
 
 ## Known Limitations / Future Improvements
 

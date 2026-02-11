@@ -184,3 +184,5 @@ cython_debug/
 .cursorindexingignore
 
 # === Our definitions ===
+schemas/
+ddbj_record/_version.py

@@ -1,61 +1,57 @@
-name: release
+name: Release
 
 on:
   push:
     tags:
       - "*.*.*"
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
-  build_and_deploy_wheel:
+  build:
     runs-on: ubuntu-24.04
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv python install
+      - run: uv sync
 
-      - name: Set up Python
-        run: uv python install
+      - name: Verify version consistency
+        run: |
+          PKG_VERSION=$(uv run python -c "from importlib.metadata import version; print(version('ddbj-record'))")
+          echo "Tag: ${GITHUB_REF_NAME}, Package: ${PKG_VERSION}"
+          if [ "${GITHUB_REF_NAME}" != "${PKG_VERSION}" ]; then
+            echo "::error::Version mismatch: tag=${GITHUB_REF_NAME}, package=${PKG_VERSION}"
+            exit 1
+          fi
 
-      - name: Build Binary Wheel and Source Tarball
-        run: uv build
+      - run: uv build
+      - run: uvx twine check dist/*
 
-      - name: Check Distribution Validity with Twine
-        run: uvx twine check dist/*
+      - name: Generate JSON Schema
+        run: |
+          uv run dump_json_schema --version v1
+          uv run dump_json_schema --version v2
 
-      - name: Upload sdist as Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: sdist
-          path: dist/ddbj_record-${{ github.ref_name }}.tar.gz
+          name: dist
+          path: |
+            dist/
+            schemas/
 
-      - name: Upload wheel as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel
-          path: dist/ddbj_record-${{ github.ref_name }}-py3-none-any.whl
-
-  deploy_ghcr:
+  docker:
     runs-on: ubuntu-24.04
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -67,25 +63,34 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            VERSION=${{ github.ref_name }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/ddbj-record-specifications:${{ github.ref_name }}
             ghcr.io/${{ github.repository_owner }}/ddbj-record-specifications:latest
 
-  create_release:
-    needs: [build_and_deploy_wheel]
+  release:
+    needs: [build]
     runs-on: ubuntu-24.04
     steps:
-      - name: Download sdist
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: sdist
+          name: dist
 
-      - name: Download wheel
-        uses: actions/download-artifact@v4
-        with:
-          name: wheel
+      - name: Rename schema files to avoid name collision
+        run: |
+          mv schemas/v1/ddbj_record.schema.json ddbj_record.v1.schema.json
+          mv schemas/v2/ddbj_record.schema.json ddbj_record.v2.schema.json
 
-      - name: Release
-        run: gh release --repo ${{ github.repository }} create ${{ github.ref_name }} --title ${{ github.ref_name }} --generate-notes ddbj_record-${{ github.ref_name }}.tar.gz ddbj_record-${{ github.ref_name }}-py3-none-any.whl
+      - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            dist/*.tar.gz \
+            dist/*.whl \
+            ddbj_record.v1.schema.json \
+            ddbj_record.v2.schema.json

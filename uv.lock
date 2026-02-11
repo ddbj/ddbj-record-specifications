@@ -35,7 +35,6 @@ wheels = [
 
 [[package]]
 name = "ddbj-record"
-version = "0.1.5"
 source = { editable = "." }
 dependencies = [
     { name = "jsonref" },
@@ -71,7 +70,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'tests'" },
     { name = "types-pyyaml", marker = "extra == 'tests'" },
 ]
-provides-extras = ["tests", "scripts"]
+provides-extras = ["scripts", "tests"]
 
 [[package]]
 name = "exceptiongroup"
