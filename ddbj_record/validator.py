@@ -23,6 +23,7 @@ class ErrorDetail(BaseModel):
     type: str
     loc: list[str | int]
     msg: str
+    severity: str = "error"
 
 
 class ValidationResult(BaseModel):
@@ -38,6 +39,8 @@ class Args(BaseModel):
 
     version: str
     input: Path
+    no_insdc_validation: bool = False
+    strict: bool = False
 
 
 def parse_args(args: list[str] | None = None) -> Args:
@@ -55,6 +58,8 @@ def parse_args(args: list[str] | None = None) -> Args:
     )
 
     parser.add_argument("-i", "--input", type=Path, required=True, help="Path to JSON file to validate")
+    parser.add_argument("--no-insdc-validation", action="store_true", help="Skip INSDC feature/qualifier validation")
+    parser.add_argument("--strict", action="store_true", help="Treat unknown feature/qualifier keys as errors")
 
     if args is None:
         args = sys.argv[1:]
@@ -71,6 +76,8 @@ def parse_args(args: list[str] | None = None) -> Args:
     return Args(
         version=normalized_version,
         input=parsed_args.input,
+        no_insdc_validation=parsed_args.no_insdc_validation,
+        strict=parsed_args.strict,
     )
 
 
@@ -224,7 +231,13 @@ def _validate_schema_version_consistency(json_data: dict[str, Any], schema_versi
     return []
 
 
-def validate_json_data(json_data: dict[str, Any], schema_version: str) -> ValidationResult:
+def validate_json_data(
+    json_data: dict[str, Any],
+    schema_version: str,
+    *,
+    no_insdc_validation: bool = False,
+    strict: bool = False,
+) -> ValidationResult:
     # 1. schema_version consistency check + legacy normalization
     version_errors = _validate_schema_version_consistency(json_data, schema_version)
     if version_errors:
@@ -240,9 +253,26 @@ def validate_json_data(json_data: dict[str, Any], schema_version: str) -> Valida
     if ref_errors:
         return ValidationResult(valid=False, errors=ref_errors)
 
-    # TODO: Validate against INSDC feature / qualifier tables.
+    # 4. Validate against INSDC feature / qualifier tables
+    if not no_insdc_validation:
+        insdc_errors = _validate_insdc(json_data, schema_version, strict=strict)
+        if insdc_errors:
+            has_errors = any(e.severity == "error" for e in insdc_errors)
+
+            return ValidationResult(valid=not has_errors, errors=insdc_errors)
 
     return ValidationResult(valid=True)
+
+
+def _validate_insdc(json_data: dict[str, Any], schema_version: str, *, strict: bool) -> list[ErrorDetail]:
+    from ddbj_record.insdc.validator import validate_insdc_v1, validate_insdc_v2
+
+    if schema_version == "v2":
+        return validate_insdc_v2(json_data, strict=strict)
+    if schema_version == "v1":
+        return validate_insdc_v1(json_data, strict=strict)
+
+    return []
 
 
 def main() -> None:
@@ -266,7 +296,11 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        validation_result = validate_json_data(json_data, args.version)
+        validation_result = validate_json_data(
+            json_data, args.version,
+            no_insdc_validation=args.no_insdc_validation,
+            strict=args.strict,
+        )
         print(validation_result.model_dump_json(indent=2))
         if not validation_result.valid:
             sys.exit(1)

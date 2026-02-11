@@ -92,9 +92,31 @@ v1 で `ignore` を多用する理由: レガシースキーマのため、古�
 
 各 entry の `source_features` が空リストでないこと。エラー種別: `missing_source_feature`
 
+## 第 4 段階: INSDC feature/qualifier バリデーション
+
+INSDC 公式定義に基づく feature key、qualifier key、qualifier value のバリデーション。詳細は `docs/insdc-validation-spec.md` を参照。
+
+### 検証項目
+
+- feature key の存在チェック
+- qualifier key の許可リスト・必須リストチェック
+- qualifier value の controlled vocabulary・boolean・regex チェック
+- cross-qualifier constraints（相互排他、依存関係）
+
+### strict / lenient モード
+
+- **lenient（デフォルト）**: 未知の feature/qualifier key は warning
+- **strict**: 未知は error
+
+### ErrorDetail.severity
+
+第 4 段階では `severity` フィールドを使用する。
+
+- `"error"`: `valid=false` の判定に影響する
+- `"warning"`: `valid` に影響しない（`errors` リストには含まれる）
+
 ## 未実装の検証 (将来課題)
 
-- INSDC feature/qualifier テーブルとの照合
 - location 文字列の構文検証
 - sequence 長さと location の整合性
 
@@ -106,6 +128,8 @@ v1 で `ignore` を多用する理由: レガシースキーマのため、古�
 |---|---|---|---|
 | `-v`, `--version` | No | 最新バージョン (`v2`) | スキーマバージョン |
 | `-i`, `--input` | Yes | - | 入力 JSON ファイルパス |
+| `--no-insdc-validation` | No | `false` | INSDC バリデーションをスキップ |
+| `--strict` | No | `false` | 未知の feature/qualifier を error にする |
 
 `--version` は major version (`v1`, `v2`) に加え、minor version 付き (`v1.0`, `v2.0`) も受け付ける。minor version 付きの場合は major version に正規化される (例: `v2.0` → `v2`)。
 

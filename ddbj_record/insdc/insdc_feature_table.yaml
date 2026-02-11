@@ -1,0 +1,1037 @@
+meta:
+  insdc_version: "11.3"
+  generated_at: "2026-02-11T05:39:22Z"
+  sources:
+  - https://docs.google.com/spreadsheets/d/1qosakEKo-y9JjwUO_OFcmGCUfssxhbFAm5NXUAnT3eM/
+  - https://www.ddbj.nig.ac.jp/ddbj/qualifiers.html
+  - https://www.ddbj.nig.ac.jp/ddbj/features.html
+  - https://www.insdc.org/submitting-standards/ncrna-vocabulary/
+qualifiers:
+  EC_number:
+    value_format: structured
+    description: タンパク質産物としての酵素コミッション番号
+  PCR_conditions:
+    value_format: text
+    description: PCR の条件
+  PCR_primers:
+    value_format: structured
+    description: 配列を増幅するために使用されたPCR プライマー１回のPCR反応で使用したプライマーをすべて含む
+  allele:
+    value_format: text
+    description: allele の名称
+  altitude:
+    value_format: text
+    description: サンプルを採取した場所の地理的な高度
+  anticodon:
+    value_format: structured
+    description: tRNAのアンチコドンの位置とコードするアミノ酸
+  artificial_location:
+    value_format: controlled_vocabulary
+    description: CDSまたはmRNAのlocationが frameshift または途中に出現する終止コドンを調整するために生物学的なプロセシングではない理由で補正されていることを示すフラグ
+    controlled_vocabulary:
+    - heterogeneous population sequenced
+    - low-quality sequence region
+  bio_material:
+    value_format: structured
+    description: 配列が得られた生物材料(生きている個体・系統)の保管施設と識別子識別子について参照
+  bound_moiety:
+    value_format: text
+    description: 当該 feature で示される領域に結合すると推定される分子、複合体の名称
+  cell_line:
+    value_format: text
+    description: 配列の得られた cell line の名称
+  cell_type:
+    value_format: text
+    description: 配列の得られた細胞のタイプ
+  chromosome:
+    value_format: text
+    description: 配列の得られた染色体番号, あるいは, 染色体名
+  circular_RNA:
+    value_format: none
+    description: その feature が circular RNA 形成を経て backsplicing によって生じた RNA 転写産物であることを示します。
+  clone:
+    value_format: text
+    description: 配列の得られた clone の名称識別子について参照
+  codon_start:
+    value_format: controlled_vocabulary
+    description: タンパク質のコード領域がスタートコドンで始まらない場合に読み枠の開始位置を 1, 2, 3 の中から選択します。
+    controlled_vocabulary:
+    - "1"
+    - "2"
+    - "3"
+  collected_by:
+    value_format: text
+    description: '標本個体を採集した人物、または、団体の名称。
+
+      フルネーム記載を推奨。'
+  collection_date:
+    value_format: structured
+    description: 標本を採取した日付日時の幅を示す場合は、２つの値を slash “/” で区切って記載してください。採取した時刻を記載する場合、日付の後に “T” を付加し、続けて、時間と分を記載してください。時刻は協定世界時
+      (UTC) ・グリニジ平均時 “Zulu Time” (Z) で記載してください。何らかの理由で記載が困難な場合、missing valueで示します。
+  country:
+    value_format: structured
+    description: ''
+    deprecated:
+      message: "2024 年 6 月より /country qualifier を/geo_loc_namequalifier に名称変更しました。"
+      replacement: geo_loc_name
+  cultivar:
+    value_format: text
+    description: 配列の得られた植物の栽培品種名
+  culture_collection:
+    value_format: structured
+    description: 配列の得られた培養細胞の保管施設と ID識別子について参照
+  dev_stage:
+    value_format: text
+    description: 配列が得られた生物の発生段階
+  direction:
+    value_format: controlled_vocabulary
+    description: DNA の複製開始方向
+    controlled_vocabulary:
+    - left
+    - right
+    - both
+  ecotype:
+    value_format: text
+    description: 遺伝学的に生育環境への適応を反映した表現型特性を示す種内集団
+  environmental_sample:
+    value_format: none
+    description: PCR, DGGE, あるいは、その他の方法で直接, 分子を単離したため、生物種が同定できない大量の環境DNAサンプルに由来した配列であることを示します。詳細はEnvironmental sequence の登録を
+      ご参照ください。
+  estimated_length:
+    value_format: text
+    description: 配列内のギャップの推定長
+  exception:
+    value_format: controlled_vocabulary
+    description: アミノ酸翻訳の特殊な例外
+    controlled_vocabulary:
+    - RNA editing
+    - reasons given in citation
+    - rearrangement required for product
+    - annotated by transcript or proteomic data
+  experiment:
+    value_format: structured
+    description: feature 記載の根拠となる生物学的な実験の簡単な記述
+  focus:
+    value_format: none
+    description: 配列が複数の生物種に由来する場合に, 最も注目すべき source feature であることを示します。
+  frequency:
+    value_format: text
+    description: 当該 feature が存在する頻度
+  function:
+    value_format: text
+    description: そのfeatureで示される配列に起因する機能
+  gap_type:
+    value_format: controlled_vocabulary
+    description: genome assembly の一部において、構成要素間の連結部に位置する gap の種別
+    controlled_vocabulary:
+    - between scaffolds
+    - within scaffold
+    - telomere
+    - centromere
+    - short arm
+    - heterochromatin
+    - repeat within scaffold
+    - repeat between scaffolds
+    - contamination
+    - unknown
+  gene:
+    value_format: text
+    description: 配列に対応する遺伝子シンボル
+  gene_synonym:
+    value_format: text
+    description: 配列に対応する遺伝子シンボル, gene, または, locus_tag で使用した記載とは別な呼称
+  geo_loc_name:
+    value_format: structured
+    description: 疫学的、あるいは、個体群研究において配列サンプルを得た地域を 政治上の国、大洋、または、海の名称で示し、続けて地方・地域を示します。何らかの理由で記載が困難な場合、missing valueで示します。１つの
+      qualifier 内で複数の地点を記載することは禁止しています。同一配列が観測された場合でも、原則、地点別に複数の登録に分けてください。
+  germline:
+    value_format: none
+    description: 配列が適応的免疫反応の要素である体細胞ゲノム再編成を受けていないことを示します。親の germline から受け継がれ,再編成を受けていない配列であることを示します。
+  haplogroup:
+    value_format: text
+    description: 配列多型を共有する類似な haplotype グループの名称。haplogroup は, しばしば, 個体群移動の追跡に利用されます。
+  haplotype:
+    value_format: text
+    description: 同じ染色体上で連鎖する対立遺伝子の組み合わせの名称。組み換えがない場合それぞれのハプロタイプはひとつの単位として遺伝するので、集団の中での遺伝子流動を追うために使われます。識別子について参照
+  host:
+    value_format: text
+    description: 配列決定した分子を得た生物の(実験室ではない)自然界における宿主の学名
+  inference:
+    value_format: structured
+    description: 根拠となる生物学的な実験ではない推定の構造化された記述
+  isolate:
+    value_format: text
+    description: 配列の得られた individual isolate多くの場合、サンプル個体の識別子識別子について参照
+  isolation_source:
+    value_format: text
+    description: 配列が得られた生物学的サンプルに関する、物理的、かつまたは、環境的な由来。/dev_stage,/tissue_typeなど他の qualifier に記載すべき内容は、各 qualifier に記載してください。
+  lab_host:
+    value_format: text
+    description: 配列決定した分子を得た生物を増殖させるために実験室で使われた宿主の学名
+  lat_lon:
+    value_format: structured
+    description: 配列決定したサンプルが採取された位置の地理的座標。緯度 (latitude) と経度 (longitude)。
+  linkage_evidence:
+    value_format: controlled_vocabulary
+    description: assembly_gapで示される連鎖の証拠。assembly_gapfeature でgap_typeの値が “within scaffold”“repeat within scaffold” あるいは “contamination”
+      の場合のみ使用可能です。gap_typeの値が “contamination” の場合、/linkage_evidence の値は “unspecified” にする必要があります。
+    controlled_vocabulary:
+    - align genus
+    - align xgenus
+    - align trnscpt
+    - clone contig
+    - map
+    - paired-ends
+    - pcr
+    - proximity ligation
+    - strobe
+    - within clone
+    - unspecified
+  locus_tag:
+    value_format: text
+    description: (主としてゲノムプロジェクト用に)登録者が体系的に一定な識別子を 遺伝子とその関連 feature の検索を目的として割り当てたもの
+  macronuclear:
+    value_format: none
+    description: 繊毛虫などで配列が大核 (生殖核でない)に由来することを示します。
+  map:
+    value_format: text
+    description: その feature のゲノム上の位置情報
+  mating_type:
+    value_format: text
+    description: 配列の得られた生物の mating type を示します。原核生物, あるいは, 減数分裂による性的に二形性の配偶子を伴わない真核生物で用います (cf.sex)。
+  metagenome_source:
+    value_format: text
+    description: Metagenome Assembled Genome (MAG) として得られた配列、すなわち、metagenome から単一 taxon として assemble された場合に、その由来となった metagenome
+      を記載します。
+  mobile_element_type:
+    value_format: structured
+    description: mobile_element の名称
+  mod_base:
+    value_format: text
+    description: 修飾塩基
+  mol_type:
+    value_format: controlled_vocabulary
+    description: 生体内における分子種, 合成された分子種, あるいは予想される分子種
+    controlled_vocabulary:
+    - genomic DNA
+    - genomic RNA
+    - mRNA
+    - tRNA
+    - rRNA
+    - transcribed RNA
+    - other RNA
+    - other DNA
+    - viral cRNA
+    - unassigned DNA
+    - unassigned RNA
+  ncRNA_class:
+    value_format: controlled_vocabulary
+    description: タンパク質をコードしない RNA (ncRNA) の種別
+    controlled_vocabulary:
+    - antisense_RNA
+    - autocatalytically_spliced_intron
+    - ribozyme
+    - hammerhead_ribozyme
+    - lncRNA
+    - RNase_P_RNA
+    - RNase_MRP_RNA
+    - telomerase_RNA
+    - guide_RNA
+    - sgRNA
+    - rasiRNA
+    - scRNA
+    - scaRNA
+    - siRNA
+    - pre_miRNA
+    - miRNA
+    - piRNA
+    - snoRNA
+    - snRNA
+    - SRP_RNA
+    - vault_RNA
+    - Y_RNA
+    - circRNA
+    - other
+  note:
+    value_format: text
+    description: 自由記述の補足説明
+  number:
+    value_format: text
+    description: exon,intronの番号
+  old_locus_tag:
+    value_format: text
+    description: ゲノムプロジェクトがfeature 検索を目的として割り当てたID
+  operon:
+    value_format: text
+    description: その featureが属している operon (1つの転写物に転写される遺伝子群) の名称
+  organelle:
+    value_format: controlled_vocabulary
+    description: 配列の得られたオルガネラ
+    controlled_vocabulary:
+    - mitochondrion
+    - mitochondrion:kinetoplast
+    - hydrogenosome
+    - plastid:chloroplast
+    - plastid:apicoplast
+    - plastid:chromoplast
+    - plastid:cyanelle
+    - plastid:leucoplast
+    - plastid:proplastid
+    - plastid
+    - chromatophore
+    - nucleomorph
+  organism:
+    value_format: text
+    description: 配列決定された試料の元となる生物の学名、または、上位分類、あるいは、物質の名称。
+  plasmid:
+    value_format: text
+    description: 配列の得られた天然のプラスミドの名称 (cloning vector を意味するものではありません)
+  product:
+    value_format: text
+    description: feature に対応した遺伝子産物の名称, 例えばmRNAfeatureには mRNA の名称,CDSにはタンパク質の名称,mat_peptideには, 成熟タンパク質の名称
+  proviral:
+    value_format: none
+    description: 配列が得られたウイルス、または、ファージが別の生物のゲノム内に一体化していることを示します。
+  pseudo:
+    value_format: none
+    description: 記載されている feature が本来の機能を持たないことを示します。CDS featureに pseudo を指定するとtranslationが出力されません。
+    deprecated:
+      message: 新規登録では記載しないでください。必要な場合は /pseudogeneを記載してください。
+      replacement: pseudogene
+  pseudogene:
+    value_format: controlled_vocabulary
+    description: 記載されている feature が pseudogene であると登録者が判断したことを示します。CDS featureに pseudogene を指定するとtranslationが出力されません。
+    controlled_vocabulary:
+    - processed
+    - unprocessed
+    - unitary
+    - allelic
+    - unknown
+  rearranged:
+    value_format: none
+    description: 配列が適応的免疫反応の要素である体細胞ゲノム再編成を受けていることを示します。親の germline から受け継がれた後,再編成を受けた配列であることを示します。
+  regulatory_class:
+    value_format: controlled_vocabulary
+    description: 転写、翻訳、複製、または染色体構造に関連する調節において機能する配列領域の分類区分
+    controlled_vocabulary:
+    - attenuator
+    - CAAT_signal
+    - DNase_I_hypersensitive_site
+    - enhancer
+    - enhancer_blocking_element
+    - GC_signal
+    - imprinting_control_region
+    - insulator
+    - locus_control_region
+    - matrix_attachment_region
+    - minus_35_signal
+    - minus_10_signal
+    - polyA_signal_sequence
+    - promoter
+    - recoding_stimulatory_region
+    - recombination_enhancer
+    - replication_regulatory_region
+    - response_element
+    - ribosome_binding_site
+    - riboswitch
+    - silencer
+    - TATA_box
+    - terminator
+    - transcriptional_cis_regulatory_region
+    - uORF
+    - other
+  replace:
+    value_format: text
+    description: 比較対象の配列上でその feature の位置において置換される塩基
+  ribosomal_slippage:
+    value_format: none
+    description: 翻訳の途中で読み枠が変わるなど ribosomal slippage が起きていることを示す
+  rpt_family:
+    value_format: text
+    description: くり返し配列タイプの名称
+  rpt_type:
+    value_format: controlled_vocabulary
+    description: 配列のくり返し構造
+    controlled_vocabulary:
+    - tandem
+    - inverted
+    - flanking
+    - terminal
+    - direct
+    - dispersed
+    - nested
+    - long_terminal_repeat
+    - non_ltr_retrotransposon_polymeric_tract
+    - x_element_combinatorial_repeat
+    - y_prime_element
+    - telomeric_repeat
+    - centromeric_repeat
+    - other
+  rpt_unit_seq:
+    value_format: text
+    description: くり返し単位の配列
+  satellite:
+    value_format: structured
+    description: satellite DNA マーカーの識別子; 同一, あるいは, 関連した短い配列単位が多数, 直列に繰り返している構造を指します。
+  segment:
+    value_format: text
+    description: 配列の得られた virus または phage のセグメント
+  serotype:
+    value_format: text
+    description: 配列の得られた生物、ウイルスなどの血清学的タイプ
+  serovar:
+    value_format: text
+    description: (一般に原核生物で) 抗原特性により分類される血清学的変種
+  sex:
+    value_format: text
+    description: 配列の得られた生物の性別を示します。減数分裂と性的に二形性の配偶子を伴う真核生物において用います(cf.mating_type)。
+  specimen_voucher:
+    value_format: structured
+    description: 配列の得られた標本(動植物個体の一部 または 全体)が維持管理されている管理団体とＩＤ識別子について参照
+  strain:
+    value_format: text
+    description: 配列の得られた strain の名称多くの場合、培養細胞の株名識別子について参照
+  sub_species:
+    value_format: text
+    description: 配列の得られた生物の subspecies の名称
+    deprecated:
+      message: "2026 年廃止予定。DDBJ では新規登録への記載を禁止しています。"
+  submitter_seqid:
+    value_format: text
+    description: TSA,TLS,WGS,CONにおけるセット内で一意な識別子識別子について参照
+  tag_peptide:
+    value_format: text
+    description: タンパク質分解の標的となるtmRNAのコードするペプチドタグとその終止コドンの塩基位置
+  tissue_type:
+    value_format: text
+    description: 配列の得られた組織の名称
+  trans_splicing:
+    value_format: none
+    description: 成熟 RNA の形成の過程で異なる RNA 分子の exon が結合することを示します。
+  transgenic:
+    value_format: none
+    description: 外来 DNA が組み込まれた形質転換生物由来の配列であることを示します。
+  transl_except:
+    value_format: structured
+    description: 塩基配列上の特定の位置においてCDSの翻訳がtransl_tableで指定されたコドン暗号表に従わない場合, 翻訳例外がある場合などに入力します。
+  transl_table:
+    value_format: controlled_vocabulary
+    description: genetic code, コドン暗号表の番号
+    controlled_vocabulary:
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+    - "9"
+    - "10"
+    - "11"
+    - "12"
+    - "13"
+    - "14"
+    - "15"
+    - "16"
+    - "21"
+    - "22"
+    - "23"
+    - "24"
+    - "25"
+    - "26"
+    - "27"
+    - "28"
+    - "29"
+    - "30"
+    - "31"
+    - "33"
+  translation:
+    value_format: text
+    description: CDSのアミノ酸翻訳配列Amino Acid Codesのリストにある１文字表記を使用します。その他のアミノ酸の場合は全て X で表記されます。/exceptionqualifier が入力された場合を除き、入力されたCDS
+      feature の情報を基に自動翻訳しますので、登録の際は記載不要です。
+  variety:
+    value_format: text
+    description: 配列の得られた variety (変種 = varietas; 亜種の下位ランク) の名称
+    deprecated:
+      message: "2026 年廃止予定。DDBJ では新規登録への記載を禁止しています。"
+features:
+  "3'UTR":
+    description: "1) 成熟したmRNAのタンパク質に翻訳されない終止コドンを除く3’末端部位2) RNA ウイルスゲノムのタンパク質に翻訳されない終止コドンを除く3’末端部位"
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      trans_splicing: optional
+  "5'UTR":
+    description: "1) 成熟したmRNAのタンパク質に翻訳されない5’末端部位2) RNA ウイルスゲノムののタンパク質に翻訳されない5’末端部位"
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      trans_splicing: optional
+  CDS:
+    description: タンパク質 (ペプチド) のアミノ酸 (終止コドンを含む) をコードする配列CDS feature の解説もご一読ください。
+    qualifiers:
+      EC_number: optional
+      allele: optional
+      artificial_location: optional
+      circular_RNA: optional
+      codon_start: optional
+      exception: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+      ribosomal_slippage: optional
+      trans_splicing: optional
+      transl_except: optional
+      transl_table: optional
+      translation: optional
+  C_region:
+    description: 免疫グロブリン重・軽鎖, T-cell receptor アルファ・ベータ・ガンマ鎖の定常部位
+    qualifiers:
+      allele: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  D-loop:
+    description: displacement loop; ミトコンドリアDNA内の２本鎖の一方に相同な配列の１本鎖が対合をなす領域。 RecA タンパク質に触媒される反応において外来の１本鎖によって２本鎖DNAの一方が置換する部位の記述にも用いる。
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+  D_segment:
+    description: 免疫グロブリン重鎖, T-cell receptor ベータ鎖の多様性セグメント
+    qualifiers:
+      allele: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  J_segment:
+    description: 免疫グロブリン重・軽鎖, T-cell receptor アルファ・ベータ・ガンマ鎖の接合セグメント
+    qualifiers:
+      allele: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  V_region:
+    description: 免疫グロブリン重鎖・軽鎖, T-cell receptor アルファ・ベータ・ガンマ鎖の可変部位 V_segment, D_segment, N_region, J_segment からなる
+    qualifiers:
+      allele: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  V_segment:
+    description: 免疫グロブリン重鎖・軽鎖, T-cell receptor アルファ・ベータ・ガンマ鎖の可変セグメント V_region のほとんどとリーダーペプチドの最後の数個のアミノ酸からなる]
+    qualifiers:
+      allele: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  assembly_gap:
+    description: genomeまたはtranscriptomeassembly の一部において、2つの構成要素の間に位置する sequencing gap
+    qualifiers:
+      estimated_length: mandatory
+      gap_type: mandatory
+      linkage_evidence: optional
+  centromere:
+    description: 生物学的な観点から実験的に centromere と同定された領域
+    qualifiers:
+      experiment: optional
+      inference: optional
+      note: optional
+  exon:
+    description: エクソン; RNAスプライシング後のmRNA,rRNA, または,tRNAをコードする部位
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      number: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  gap:
+    description: sequencing gap
+    qualifiers:
+      estimated_length: mandatory
+      experiment: optional
+      note: optional
+  intron:
+    description: イントロン;exonと隣接しRNAに転写されるが, スプライシングによって除かれるセグメント
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      number: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  mRNA:
+    description: 成熟した messenger RNA;5’UTR,CDS,exon,3’UTRなどが含まれるが、intronは含まれない
+    qualifiers:
+      allele: optional
+      artificial_location: optional
+      circular_RNA: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  mat_peptide:
+    description: 翻訳後修飾を受けて成熟したペプチド, あるいは, タンパク質の最終産物をコードする配列 (CDSと違い終止コドンを含まない)
+    qualifiers:
+      EC_number: optional
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+  misc_RNA:
+    description: 下記に該当しないRNA転写産物 (internal transcribed spacer など)prim_transcript,precursor_RNA,mRNA,5’UTR,3’UTR,exon,CDS,sig_peptide,transit_peptide,mat_peptide,intron,polyA_site,ncRNA,rRNA,tRNA,tmRNA
+    qualifiers:
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  misc_binding:
+    description: primer_bind,protein_bindに該当しない結合サイト
+    qualifiers:
+      bound_moiety: mandatory
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+  misc_difference:
+    description: 下記に該当しない当該エントリーと異なる配列 (人工的な変異など)variation,modified_base
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      replace: optional
+  misc_feature:
+    description: 他の feature に該当しない生物学的に重要な部位
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+  misc_structure:
+    description: stem_loop,D-loopに該当しない核酸の二次構造, 三次構造, コンフォメーション
+    qualifiers:
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+  mobile_element:
+    description: mobile_element を含むゲノム配列部位
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      mobile_element_type: mandatory
+      note: optional
+      rpt_family: optional
+      rpt_type: optional
+  modified_base:
+    description: 修飾されるヌクレオチドの位置を示す (置換される塩基は qualifier で示す)
+    qualifiers:
+      experiment: optional
+      frequency: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      mod_base: mandatory
+      note: optional
+  ncRNA:
+    description: rRNA,tRNAを除いたタンパク質をコードしないRNA転写産物としての機能性分子
+    qualifiers:
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      ncRNA_class: mandatory
+      note: optional
+      operon: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  operon:
+    description: 同じ生物学的経路に属し、同じ調節配列・promoter の制御下にある遺伝子クラスターを含む多シストロン性転写産物とその調節配列を含む領域
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      inference: optional
+      note: optional
+      operon: mandatory
+      pseudo: optional
+      pseudogene: optional
+  oriT:
+    description: 伝達開始点; 接合, または, 移動の過程において伝達の開始されるＤＮＡ分子の部位
+    qualifiers:
+      bound_moiety: optional
+      direction: optional
+      experiment: optional
+      inference: optional
+      note: optional
+      rpt_family: optional
+      rpt_type: optional
+      rpt_unit_seq: optional
+  precursor_RNA:
+    description: RNA前駆体; あらゆる未成熟なRNA産物を示す
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      trans_splicing: optional
+  primer_bind:
+    description: 複製, 転写, あるいは逆転写の開始のためのプライマー結合サイト
+    qualifiers:
+      PCR_conditions: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+  propeptide:
+    description: propeptide をコードする配列; 成熟タンパク質産物を形成するために切断される proprotein のドメインをコードする配列
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+  protein_bind:
+    description: タンパク質結合サイト
+    qualifiers:
+      bound_moiety: mandatory
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+      operon: optional
+  rRNA:
+    description: 成熟したリボソーマルRNA; リボソームのRNA成分
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+  regulatory:
+    description: 転写、または、翻訳の調節において機能する配列領域
+    qualifiers:
+      allele: optional
+      artificial_location: optional
+      bound_moiety: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      operon: optional
+      pseudo: optional
+      pseudogene: optional
+      regulatory_class: mandatory
+  rep_origin:
+    description: 複製開始点
+    qualifiers:
+      direction: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+  repeat_region:
+    description: 繰り返し配列を含むゲノム上の部位
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+      rpt_family: optional
+      rpt_type: optional
+      rpt_unit_seq: optional
+      satellite: optional
+  sig_peptide:
+    description: シグナルペプチドをコードする配列 (リーダー配列) ; 分泌タンパク質のアミノ末端ドメインをコードする配列。新生ペプチドが膜に吸着する際に関与するドメイン。
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  source:
+    description: 配列の生物学的な由来を示す
+    qualifiers:
+      PCR_primers: optional
+      altitude: optional
+      bio_material: optional
+      cell_line: optional
+      cell_type: optional
+      chromosome: optional
+      clone: optional
+      collected_by: optional
+      collection_date: mandatory
+      country: optional
+      cultivar: optional
+      culture_collection: optional
+      dev_stage: optional
+      ecotype: optional
+      environmental_sample: optional
+      focus: optional
+      geo_loc_name: mandatory
+      germline: optional
+      haplogroup: optional
+      haplotype: optional
+      host: optional
+      isolate: optional
+      isolation_source: optional
+      lab_host: optional
+      lat_lon: optional
+      macronuclear: optional
+      map: optional
+      mating_type: optional
+      metagenome_source: optional
+      mol_type: mandatory
+      note: optional
+      organelle: optional
+      organism: mandatory
+      plasmid: optional
+      proviral: optional
+      rearranged: optional
+      segment: optional
+      serotype: optional
+      serovar: optional
+      sex: optional
+      specimen_voucher: optional
+      strain: optional
+      sub_species: optional
+      submitter_seqid: optional
+      tissue_type: optional
+      transgenic: optional
+      variety: optional
+  stem_loop:
+    description: hairpin; １本鎖のDNA, または, RNAが近隣の相補性のある配列間で対合することによって二重らせんを形成する部位
+    qualifiers:
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      note: optional
+      operon: optional
+  tRNA:
+    description: 成熟したトランスファーRNA; 75～85 bpの小さいRNA分子でアミノ酸翻訳を媒介する
+    qualifiers:
+      anticodon: optional
+      circular_RNA: optional
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+      trans_splicing: optional
+  telomere:
+    description: 生物学的な観点から実験的に telomere と同定された領域
+    qualifiers:
+      experiment: optional
+      inference: optional
+      note: optional
+      rpt_type: optional
+      rpt_unit_seq: optional
+  tmRNA:
+    description: transfer messenger RNA; tmRNA は最初に tRNA として作用し, 次にペプチドタグをコードする mRNA としてはたらく。この mRNA 様領域がリボソームで転写され翻訳終結しないタンパク質のカルボキシル末端にペプチドタグを付加する。タグを付加されたタンパク質は,
+      その後, 分解される。
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      product: optional
+      pseudo: optional
+      pseudogene: optional
+      tag_peptide: optional
+  transit_peptide:
+    description: 細胞内輸送のシグナルとなるペプチドをコードする配列。核にコードされるオルガネラのタンパク質のアミノ末端ドメインをコードする配列。このドメインは翻訳後にタンパク質がオルガネラ内へ輸送される過程に関与する。
+    qualifiers:
+      allele: optional
+      experiment: optional
+      function: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      pseudo: optional
+      pseudogene: optional
+  unsure:
+    description: 通常 10 塩基以下の長さの小さい領域で、塩基同定の信頼度が低い部位
+    qualifiers:
+      experiment: optional
+      gene: optional
+      gene_synonym: optional
+      locus_tag: optional
+      note: optional
+      replace: optional
+  variation:
+    description: 関連する系統において安定な変異により異なる配列が存在する部位
+    qualifiers:
+      allele: optional
+      experiment: optional
+      frequency: optional
+      gene: optional
+      gene_synonym: optional
+      inference: optional
+      locus_tag: optional
+      note: optional
+      replace: optional
+cross_constraints:
+- type: mutual_exclusion
+  qualifiers:
+  - germline
+  - rearranged
+  message: /germline and /rearranged are mutually exclusive
+- type: mutual_exclusion
+  qualifiers:
+  - pseudo
+  - pseudogene
+  message: /pseudo and /pseudogene are mutually exclusive
+- type: dependency
+  qualifier: metagenome_source
+  requires: environmental_sample
+  message: /metagenome_source requires /environmental_sample
+- type: dependency
+  qualifier: gene_synonym
+  requires:
+  - gene
+  - locus_tag
+  message: /gene_synonym requires /gene or /locus_tag
+- type: conditional_mandatory
+  feature: CDS
+  condition: absent:pseudo,pseudogene
+  then_mandatory:
+  - product
+  message: CDS requires /product unless /pseudo or /pseudogene is present
+- type: conditional_mandatory
+  feature: assembly_gap
+  condition: value:gap_type=within scaffold,repeat within scaffold
+  then_mandatory:
+  - linkage_evidence
+  message: "assembly_gap requires /linkage_evidence when /gap_type is 'within scaffold' or 'repeat within scaffold'"

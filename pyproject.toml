@@ -10,7 +10,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 version = "0.1.5"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
-dependencies = ["pydantic", "jsonref"]
+dependencies = ["pydantic", "jsonref", "pyyaml"]
 
 [project.urls]
 Homepage = "https://github.com/ddbj/ddbj-record-specifications"
@@ -18,7 +18,8 @@ Documentation = "https://github.com/ddbj/ddbj-record-specifications/blob/main/RE
 Repository = "https://github.com/ddbj/ddbj-record-specifications.git"
 
 [project.optional-dependencies]
-tests = ["hypothesis", "mypy", "pytest", "pytest-mock", "ruff"]
+tests = ["hypothesis", "mypy", "pytest", "pytest-mock", "ruff", "types-PyYAML"]
+scripts = ["beautifulsoup4", "pyyaml"]
 
 [project.scripts]
 dump_json_schema = "ddbj_record.schema.cli:main"
@@ -75,10 +76,12 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "ddbj_record/schema/cli.py" = ["T201", "BLE001"]
-"ddbj_record/validator.py" = ["T201", "BLE001"]
+"ddbj_record/validator.py" = ["T201", "BLE001", "PLC0415"]
 "ddbj_record/converter/cli.py" = ["T201", "BLE001"]
+"ddbj_record/insdc/validator.py" = ["PLR0913"]
 "tests/unit/converter/test_cli.py" = ["S603", "S607"]
 "tests/**/*.py" = ["S101", "PLR2004"]
+"scripts/**/*.py" = ["INP001", "T201", "BLE001", "PLR2004", "PLR0911"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ddbj_record"]
