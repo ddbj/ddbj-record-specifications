@@ -34,6 +34,8 @@ def test_v2_valid_dfc_gnm_parses(v2_valid_dfc_gnm: dict[str, Any]) -> None:
 def test_v2_valid_wf_dfc_wgs_parses(v2_valid_wf_dfc_wgs: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_wf_dfc_wgs)
     assert record.submission is not None
+    assert len(record.submission.submitters) > 0
+    assert len(record.sequences.entries) > 0
 
 
 def test_v2_valid_dfv_parses(v2_valid_dfv: dict[str, Any]) -> None:
@@ -215,3 +217,51 @@ def test_v2_qualifier_value_is_always_str() -> None:
 def test_v2_qualifier_value_numeric_str() -> None:
     q = Qualifier(value="11")
     assert isinstance(q.value, str)
+
+
+# === boundary value tests ===
+
+
+def test_v2_qualifier_empty_string_value_valid() -> None:
+    q = Qualifier(value="")
+    assert q.value == ""
+
+
+def test_v2_person_all_none_fields_valid() -> None:
+    person = Person()
+    assert person.name is None
+    assert person.abbreviation is None
+    assert person.email is None
+    assert person.orcid is None
+    assert person.organization is None
+
+
+def test_v2_submission_empty_submitters_list_valid() -> None:
+    sub = Submission()
+    assert sub.submitters == []
+
+
+def test_v2_entry_comments_none_vs_empty_list() -> None:
+    entry_none = Entry(id="e1", name="e1", type="chromosome", topology="linear")
+    entry_empty = Entry(id="e2", name="e2", type="chromosome", topology="linear", comments=[])
+    assert entry_none.comments is None
+    assert entry_empty.comments == []
+
+
+# === error path detail tests ===
+
+
+def test_v2_invalid_missing_required_has_missing_type(v2_invalid_missing_required: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        DdbjRecord.model_validate(v2_invalid_missing_required)
+    errors = exc_info.value.errors()
+    assert len(errors) > 0
+    assert any(e["type"] == "missing" for e in errors)
+
+
+def test_v2_invalid_extra_field_has_extra_forbidden_type(v2_invalid_extra_field: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        DdbjRecord.model_validate(v2_invalid_extra_field)
+    errors = exc_info.value.errors()
+    assert len(errors) > 0
+    assert any(e["type"] == "extra_forbidden" for e in errors)

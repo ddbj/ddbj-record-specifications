@@ -1,3 +1,4 @@
+import warnings
 from typing import Any
 
 import pytest
@@ -565,10 +566,42 @@ def test_v1_to_v2_contact_unmatched_warns() -> None:
 def test_convert_submission_contact_empty_string() -> None:
     v1_obj = _make_v1_minimal({"COMMON.SUBMITTER.contact": ""})
     submission = _convert_submission(v1_obj)
-    # Empty contact should still produce a Person with abbreviation=None (no warning for empty contact)
-    contact_persons = [s for s in submission.submitters if s.abbreviation is None]
-    assert len(contact_persons) == 1
-    assert contact_persons[0].name == ""
+    # Empty contact + ab_name present → email/org assigned to first Person (no ghost)
+    assert all(s.abbreviation is not None for s in submission.submitters)
+    first = submission.submitters[0]
+    assert first.abbreviation == "Mishima,H."
+    assert first.email == "mishima@ddbj.nig.ac.jp"
+    assert first.organization is not None
+    assert len(first.organization) >= 1
+    assert first.organization[0].name == "NIG"
+
+
+def test_convert_submission_contact_empty_ab_name_empty_creates_fallback() -> None:
+    v1_obj = _make_v1_minimal({"COMMON.SUBMITTER.contact": "", "COMMON.SUBMITTER.ab_name": []})
+    submission = _convert_submission(v1_obj)
+    # contact empty + ab_name empty → fallback Person with abbreviation=None
+    assert len(submission.submitters) == 1
+    assert submission.submitters[0].abbreviation is None
+    assert submission.submitters[0].email == "mishima@ddbj.nig.ac.jp"
+
+
+def test_convert_submission_contact_empty_no_warning() -> None:
+    v1_obj = _make_v1_minimal({"COMMON.SUBMITTER.contact": ""})
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _convert_submission(v1_obj)
+    contact_warnings = [w for w in caught if "contact" in str(w.message).lower()]
+    assert len(contact_warnings) == 0
+
+
+def test_convert_submission_contact_empty_consortium_to_first() -> None:
+    v1_obj = _make_v1_minimal({"COMMON.SUBMITTER.contact": "", "COMMON.SUBMITTER.consrtm": "Test Consortium"})
+    submission = _convert_submission(v1_obj)
+    first = submission.submitters[0]
+    assert first.organization is not None
+    consortium_orgs = [o for o in first.organization if o.type == "consortium"]
+    assert len(consortium_orgs) == 1
+    assert consortium_orgs[0].name == "Test Consortium"
 
 
 def test_convert_submission_ab_name_empty_list() -> None:
@@ -624,3 +657,13 @@ def test_convert_sequences_source_without_mol_type_produces_none_source() -> Non
     sequences = _convert_sequences(v1_obj)
     # organism without mol_type -> source=None
     assert sequences.entries[0].source_features[0].source is None
+
+
+# === negative tests ===
+
+
+def test_v1_to_v2_empty_entries_produces_empty_features() -> None:
+    v1_obj = _make_v1_minimal({"ENTRIES": []})
+    result = v1_to_v2(v1_obj)
+    assert result.features == []
+    assert result.sequences.entries == []

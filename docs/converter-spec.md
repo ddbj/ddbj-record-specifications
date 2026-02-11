@@ -66,7 +66,9 @@ v1 は「ab_name リスト + 単一の contact 情報」というフラット構
 
 1. `SUBMITTER.contact` のフルネームから略称候補を生成し、`ab_name` リストと照合
 2. マッチした場合: その Person に name/email/organization を付与
-3. マッチしなかった場合: `abbreviation=None` の Person を末尾に追加し、警告を出力
+3. contact が空でない + マッチ失敗: `abbreviation=None` の ghost Person を末尾に追加し、警告を出力
+4. contact が空 + ab_name あり: 最初の Person に email/organization を付与 (警告なし)
+5. contact が空 + ab_name 空: フォールバックとして `abbreviation=None` の Person を生成
 
 略称マッチングはカンマ区切り名 (`"Doe, John"`)、西洋式 (`"John Doe"`)、アジア式 (`"Yamada Taro"` -> 先頭が姓) の 3 パターンに対応する。正規化 (ピリオド・ハイフン・スペース除去 + 小文字化) して比較する。
 
@@ -194,7 +196,7 @@ v2 Reference の journal, volume, doi, pubmed_id, consortiums 等は無視され
 
 - **COMMENT**: `submission.comments` を `Comment(line=...)` のリストに変換
 - **DATE**: `submission.hold_date` があれば `Date(hold_date=...)` を生成
-- **trad_submission_category**: `None` の場合はデフォルト `"GNM"` (警告出力)
+- **trad_submission_category**: `None` または `"WGS"`/`"GNM"` 以外の値の場合はデフォルト `"GNM"` (警告出力)
 - **COMMON_META.division**: `None` の場合はデフォルト `"BCT"` (警告出力)
 
 ### ENTRIES

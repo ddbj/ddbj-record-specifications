@@ -51,3 +51,31 @@ def test_main_generates_v1_schema_file(tmp_path: Path, mocker: "MockerFixture") 
     main()
     output_path = schema_dir.joinpath("v1", "ddbj_record.schema.json")
     assert output_path.exists()
+
+
+def test_main_v2_schema_has_key_properties(tmp_path: Path, mocker: "MockerFixture") -> None:
+    schema_dir = tmp_path.joinpath("schemas")
+    schema_dir.mkdir()
+    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
+    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v2"])
+    main()
+    output_path = schema_dir.joinpath("v2", "ddbj_record.schema.json")
+    with output_path.open("r", encoding="utf-8") as f:
+        schema = json.load(f)
+    props = schema["properties"]
+    for key in ("schema_version", "provenance", "submission", "sequences", "features"):
+        assert key in props, f"Missing key property: {key}"
+
+
+def test_main_v1_schema_has_key_properties(tmp_path: Path, mocker: "MockerFixture") -> None:
+    schema_dir = tmp_path.joinpath("schemas")
+    schema_dir.mkdir()
+    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
+    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v1"])
+    main()
+    output_path = schema_dir.joinpath("v1", "ddbj_record.schema.json")
+    with output_path.open("r", encoding="utf-8") as f:
+        schema = json.load(f)
+    props = schema["properties"]
+    for key in ("COMMON", "COMMON_SOURCE", "ENTRIES"):
+        assert key in props, f"Missing key property: {key}"

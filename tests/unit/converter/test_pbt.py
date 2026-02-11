@@ -111,7 +111,7 @@ def st_v2_record(draw: st.DrawFn) -> dict:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_to_v2_produces_valid_v2(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
@@ -120,7 +120,7 @@ def test_pbt_v1_to_v2_produces_valid_v2(record_data: dict) -> None:
 
 
 @given(record_data=st_v2_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v2_to_v1_produces_valid_v1(record_data: dict) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
@@ -129,7 +129,7 @@ def test_pbt_v2_to_v1_produces_valid_v1(record_data: dict) -> None:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_to_v2_preserves_organism(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
@@ -137,7 +137,7 @@ def test_pbt_v1_to_v2_preserves_organism(record_data: dict) -> None:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_to_v2_preserves_mol_type(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
@@ -145,7 +145,7 @@ def test_pbt_v1_to_v2_preserves_mol_type(record_data: dict) -> None:
 
 
 @given(record_data=st_v2_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v2_to_v1_preserves_organism(record_data: dict) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
@@ -153,7 +153,7 @@ def test_pbt_v2_to_v1_preserves_organism(record_data: dict) -> None:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_to_v2_preserves_entries_count(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
@@ -161,7 +161,7 @@ def test_pbt_v1_to_v2_preserves_entries_count(record_data: dict) -> None:
 
 
 @given(abbr=st.text(min_size=1, max_size=30))
-@settings(max_examples=50)
+@settings(max_examples=100)
 def test_pbt_normalize_abbr_idempotent(abbr: str) -> None:
     once = _normalize_abbr(abbr)
     twice = _normalize_abbr(once)
@@ -169,7 +169,7 @@ def test_pbt_normalize_abbr_idempotent(abbr: str) -> None:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
@@ -177,7 +177,7 @@ def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict) -> None:
 
 
 @given(record_data=st_v2_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v2_to_v1_output_schema_version_fixed(record_data: dict) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
@@ -190,7 +190,7 @@ st_ref_status_v1 = st.sampled_from(["Unpublished", "Published", "In Press"])
 
 
 @given(status=st_ref_status_v1)
-@settings(max_examples=20)
+@settings(max_examples=100)
 def test_pbt_reference_status_roundtrip_idempotent(status: str) -> None:
     """v1 status -> v2 normalize -> v1 denormalize is idempotent."""
     # v1->v2: space->hyphen, lower
@@ -210,7 +210,7 @@ st_qualifier_value = st.one_of(
 
 
 @given(value=st_qualifier_value)
-@settings(max_examples=50)
+@settings(max_examples=100)
 def test_pbt_qualifier_roundtrip_preserves_value(value: str) -> None:
     """v2 str -> v1 str|bool -> v2 str roundtrip preserves the original value."""
     v1_value = _qualifier_value_to_union(value)
@@ -222,7 +222,7 @@ def test_pbt_qualifier_roundtrip_preserves_value(value: str) -> None:
 
 
 @given(record_data=st_v1_record())
-@settings(max_examples=30)
+@settings(max_examples=100)
 def test_pbt_v1_roundtrip_preserves_common_source(record_data: dict) -> None:
     """v1->v2->v1 roundtrip preserves organism and mol_type in COMMON_SOURCE."""
     v1_obj = DdbjRecordV1.model_validate(record_data)
@@ -232,3 +232,39 @@ def test_pbt_v1_roundtrip_preserves_common_source(record_data: dict) -> None:
         v1_back = v2_to_v1(v2_obj)
     assert v1_back.COMMON_SOURCE.organism == v1_obj.COMMON_SOURCE.organism
     assert v1_back.COMMON_SOURCE.mol_type == v1_obj.COMMON_SOURCE.mol_type
+
+
+# === PBT: v1->v2->v1 field preservation ===
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_trad_category(record_data: dict) -> None:
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON.trad_submission_category == v1_obj.COMMON.trad_submission_category
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_ab_names(record_data: dict) -> None:
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON.SUBMITTER.ab_name == v1_obj.COMMON.SUBMITTER.ab_name
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_division(record_data: dict) -> None:
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON_META.division == v1_obj.COMMON_META.division

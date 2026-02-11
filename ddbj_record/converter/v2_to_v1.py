@@ -252,6 +252,12 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     if trad_submission_category is None:
         _warn_data_loss("trad_submission_category is None, defaulting to 'GNM'")
         trad_submission_category = "GNM"
+    elif trad_submission_category not in ("WGS", "GNM"):
+        _warn_data_loss(
+            f"trad_submission_category '{trad_submission_category}' is not a valid v1 value "
+            "(expected 'WGS' or 'GNM'), defaulting to 'GNM'"
+        )
+        trad_submission_category = "GNM"
 
     return Common(
         DBLINK=dblink,

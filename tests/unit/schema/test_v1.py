@@ -242,3 +242,65 @@ def test_v1_feature_qualifiers_contain_str_and_bool() -> None:
     )
     assert feature.qualifiers["pseudo"] == [True]
     assert feature.qualifiers["product"] == ["test protein"]
+
+
+# === boundary value tests ===
+
+
+def test_v1_submitter_empty_ab_name_list_valid() -> None:
+    submitter = Submitter(
+        ab_name=[],
+        contact="Test User",
+        email="test@example.com",
+        institute="Inst",
+        country="Japan",
+        city="Tokyo",
+        street="1-1",
+        zip="000-0000",
+    )
+    assert submitter.ab_name == []
+
+
+def test_v1_feature_empty_qualifiers_dict_valid() -> None:
+    feature = Feature(
+        id="f1",
+        type="CDS",
+        location="1..100",
+        qualifiers={},
+    )
+    assert feature.qualifiers == {}
+
+
+def test_v1_entry_sequence_none_valid() -> None:
+    entry = Entry(
+        id="test",
+        name="test",
+        type="chromosome",
+        topology="linear",
+        sequence=None,
+    )
+    assert entry.sequence is None
+
+
+# === error path detail tests ===
+
+
+def test_v1_invalid_missing_required_error_has_loc(v1_invalid_missing_required: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        DdbjRecord.model_validate(v1_invalid_missing_required)
+    errors = exc_info.value.errors()
+    assert len(errors) > 0
+    assert all("loc" in e for e in errors)
+
+
+def test_v1_entry_type_invalid_reports_literal_error() -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        Entry(
+            id="test",
+            name="test",
+            type="unknown",
+            topology="linear",
+            sequence=None,
+        )
+    errors = exc_info.value.errors()
+    assert any(e["type"] == "literal_error" for e in errors)

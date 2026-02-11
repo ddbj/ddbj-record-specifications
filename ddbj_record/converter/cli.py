@@ -76,13 +76,9 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
 
     input_result = validate_json_data(json_data, from_)
     if not input_result.valid:
-        raise ValueError(
-            f"Input validation failed for schema {from_}: "
-            f"{[e.model_dump() for e in input_result.errors]}"
-        )
+        raise ValueError(f"Input validation failed for schema {from_}: {[e.model_dump() for e in input_result.errors]}")
 
     if from_ == to:
-
         return json_data
 
     from_record_model = resolve_record_model(from_)
@@ -98,10 +94,7 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
 
     output_result = validate_json_data(result, to)
     if not output_result.valid:
-        raise ValueError(
-            f"Output validation failed for schema {to}: "
-            f"{[e.model_dump() for e in output_result.errors]}"
-        )
+        raise ValueError(f"Output validation failed for schema {to}: {[e.model_dump() for e in output_result.errors]}")
 
     return result
 

@@ -110,3 +110,60 @@ def test_converter_cli_runs_post_conversion_validation(
     assert output_file.exists()
     output_data = json.loads(output_file.read_text())
     assert output_data["schema_version"] == "v2.0"
+
+
+def test_converter_cli_v2_to_v1_subprocess(
+    tmp_path: Path,
+    v2_to_v1_input: dict[str, Any],
+) -> None:
+    input_file = tmp_path.joinpath("input.json")
+    output_file = tmp_path.joinpath("output.json")
+    input_file.write_text(json.dumps(v2_to_v1_input))
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "ddbj_record_converter",
+            "--from",
+            "v2",
+            "--to",
+            "v1",
+            "--input",
+            str(input_file),
+            "--output",
+            str(output_file),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, f"stderr: {result.stderr}"
+    assert output_file.exists()
+    output_data = json.loads(output_file.read_text())
+    assert output_data["schema_version"] == "v1.0"
+    assert "COMMON" in output_data
+
+
+def test_converter_cli_invalid_input_returns_exit_1(tmp_path: Path) -> None:
+    input_file = tmp_path.joinpath("input.json")
+    output_file = tmp_path.joinpath("output.json")
+    input_file.write_text('{"invalid": "data"}')
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "ddbj_record_converter",
+            "--from",
+            "v1",
+            "--to",
+            "v2",
+            "--input",
+            str(input_file),
+            "--output",
+            str(output_file),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 1
