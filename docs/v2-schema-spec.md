@@ -6,7 +6,7 @@ v2.1 で追加された Pydantic モデルの型制約仕様。
 
 | フィールド | 型 | 制約 |
 |---|---|---|
-| `DdbjRecord.schema_version` | `str` | `^v\d+\.\d+$` (例: `v2.0`, `v2.1`) |
+| `DdbjRecord.schema_version` | `str` | `^(v\d+\.\d+\|v\d+\|\d+\.\d+)$` (例: `v2.0`, `v2.1`, `v2`, `0.2`) |
 | `Entry.id` | `str` | `^[a-zA-Z0-9_.\-]{1,32}$` |
 | `Submission.trad_submission_category` | `Literal["WGS", "GNM"] \| None` | 列挙値のみ許可 |
 | `Submission.hold_date` | `str \| None` | `^\d{4}-\d{2}-\d{2}$` (ISO 8601 日付) |
@@ -25,7 +25,7 @@ v2.1 で追加された Pydantic モデルの型制約仕様。
 
 ## レガシー schema_version の扱い
 
-`"0.2"`, `"v2"` などのレガシー値は validator.py の Stage 1 で `"v2.0"` に正規化される。Pydantic モデルに到達する時点では `^v\d+\.\d+$` 形式になっている。
+`"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.1`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
 
 ## v2.0 との後方互換性
 

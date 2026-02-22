@@ -2,9 +2,9 @@
 
 ## 背景
 
-v2 スキーマの `schema_version` フィールドに `pattern=r"^v\d+\.\d+$"` が設定されており、`v2` や `0.2` といったレガシー値が Pydantic バリデーションで弾かれる。`description` には "Legacy values ('v2', '0.2') are accepted but deprecated" と記載されているが、実際の `pattern` と矛盾している。
+v2 スキーマの `schema_version` フィールドに `pattern=r"^v\d+\.\d+$"` が設定されていたため、`v2` や `0.2` といったレガシー値が Pydantic バリデーションで弾かれていた。`description` には "Legacy values ('v2', '0.2') are accepted but deprecated" と記載されていたが、実際の `pattern` と矛盾していた。
 
-現状の `LEGACY_SCHEMA_VERSION_MAP` は `v2` -> `v2.0` にマッピングしているが、最新 minor version は `v2.1` であり、レガシー値の正規化先も不適切。
+また、`LEGACY_SCHEMA_VERSION_MAP` は `v2` -> `v2.0` にマッピングしていたが、最新 minor version は `v2.1` であり、レガシー値の正規化先も不適切だった。この問題は commit `9ff18dc` で解決済みである。
 
 ## 設計方針
 
@@ -55,35 +55,35 @@ def normalize_schema_version(raw: str) -> str | None:
 
 ### 1. `ddbj_record/schema/__init__.py`
 
-- `LEGACY_SCHEMA_VERSION_MAP` は **削除** する (正規化関数に統合)
-- `normalize_schema_version(raw: str) -> str | None` 関数を新設する
+- `LEGACY_SCHEMA_VERSION_MAP` を **削除** した (正規化関数に統合)
+- `normalize_schema_version(raw: str) -> str | None` 関数を新設した
 
 ### 2. `ddbj_record/schema/v2.py`
 
-- `schema_version` フィールドの `pattern` を緩和:
-  - 現状: `r"^v\d+\.\d+$"` (`v2.0` のみマッチ)
-  - 変更後: `r"^(v\d+\.\d+|v\d+|\d+\.\d+)$"` (`v2.0`, `v2`, `0.2` すべてマッチ)
-- Pydantic `field_validator` を追加し、入力値を `normalize_schema_version()` で最新 minor version に正規化する
+- `schema_version` フィールドの `pattern` を緩和した:
+  - 変更前: `r"^v\d+\.\d+$"` (`v2.0` のみマッチ)
+  - 変更後 (実装済み): `r"^(v\d+\.\d+|v\d+|\d+\.\d+)$"` (`v2.0`, `v2`, `0.2` すべてマッチ)
+- Pydantic `field_validator` を追加し、入力値を `normalize_schema_version()` で最新 minor version に正規化するようにした
   - 未知の値は `ValueError` を raise する
-- `description` を更新して実態と整合させる
+- `description` を更新して実態と整合させた
 
 ### 3. `ddbj_record/schema/v1.py`
 
-- `schema_version` フィールドに `pattern` と `field_validator` を追加し、v2 と同様のレガシー値受け入れ・正規化を行う
+- `schema_version` フィールドに `pattern` と `field_validator` を追加し、v2 と同様のレガシー値受け入れ・正規化を行うようにした
 
 ### 4. `ddbj_record/validator.py`
 
-- `_validate_schema_version_consistency()` を `normalize_schema_version()` を使うように書き換える
-  - 現状 `LEGACY_SCHEMA_VERSION_MAP.get(raw_version, raw_version)` で正規化しているのを、新関数に置き換える
+- `_validate_schema_version_consistency()` を `normalize_schema_version()` を使うように書き換えた
+  - `LEGACY_SCHEMA_VERSION_MAP.get(raw_version, raw_version)` で正規化していたのを、新関数に置き換えた
   - 一貫性チェックのロジック: 正規化後の値が `{schema_version}.` で始まるかチェック -> そのまま維持
 
 ### 5. テスト
 
-- v2 スキーマのテスト: `v2`, `0.2`, `v2.0`, `v2.1` を入力したとき、すべて `v2.1` に正規化されることを確認
-- v1 スキーマのテスト: `v1`, `0.1`, `v1.0` を入力したとき、すべて `v1.0` に正規化されることを確認
+- v2 スキーマのテスト: `v2`, `0.2`, `v2.0`, `v2.1` を入力したとき、すべて `v2.1` に正規化されることを確認した
+- v1 スキーマのテスト: `v1`, `0.1`, `v1.0` を入力したとき、すべて `v1.0` に正規化されることを確認した
 - `normalize_schema_version()` の単体テスト
-- validator のレガシー値テスト: 既存テストの期待値を更新 (`v2.0` -> `v2.1`)
-- converter のテスト: 出力の `schema_version` が最新 minor version であることを確認 (既存テスト維持)
+- validator のレガシー値テスト: 既存テストの期待値を更新した (`v2.0` -> `v2.1`)
+- converter のテスト: 出力の `schema_version` が最新 minor version であることを確認した (既存テスト維持)
 
 ## 変更しないもの
 
