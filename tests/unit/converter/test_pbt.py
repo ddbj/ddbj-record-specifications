@@ -256,7 +256,7 @@ def test_pbt_v1_roundtrip_preserves_ab_names(record_data: dict) -> None:
         warnings.simplefilter("ignore", UserWarning)
         v2_obj = v1_to_v2(v1_obj)
         v1_back = v2_to_v1(v2_obj)
-    assert v1_back.COMMON.SUBMITTER.ab_name == v1_obj.COMMON.SUBMITTER.ab_name
+    assert set(v1_back.COMMON.SUBMITTER.ab_name) == set(v1_obj.COMMON.SUBMITTER.ab_name)
 
 
 @given(record_data=st_v1_record())

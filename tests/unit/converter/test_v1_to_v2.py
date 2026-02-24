@@ -667,3 +667,36 @@ def test_v1_to_v2_empty_entries_produces_empty_features() -> None:
     result = v1_to_v2(v1_obj)
     assert result.features == []
     assert result.sequences.entries == []
+
+
+# === contact person reordering ===
+
+
+def test_convert_submission_contact_reordered_to_front() -> None:
+    """Contact person が ab_name の途中にある場合、submitters[0] に移動される。"""
+    v1_obj = _make_v1_minimal(
+        {
+            "COMMON.SUBMITTER.ab_name": ["Tanizawa,Y.", "Mishima,H.", "Nakamura,Y."],
+            "COMMON.SUBMITTER.contact": "Hanako Mishima",
+        }
+    )
+    submission = _convert_submission(v1_obj)
+    assert submission.submitters[0].name == "Hanako Mishima"
+    assert submission.submitters[0].abbreviation == "Mishima,H."
+    assert submission.submitters[0].email == "mishima@ddbj.nig.ac.jp"
+    assert [s.abbreviation for s in submission.submitters] == ["Mishima,H.", "Tanizawa,Y.", "Nakamura,Y."]
+
+
+def test_convert_submission_ghost_contact_at_front() -> None:
+    """Contact name が ab_name にマッチしない場合、ghost Person が submitters[0] に追加される。"""
+    v1_obj = _make_v1_minimal(
+        {
+            "COMMON.SUBMITTER.ab_name": ["Tanizawa,Y."],
+            "COMMON.SUBMITTER.contact": "Unknown Person",
+        }
+    )
+    with pytest.warns(UserWarning, match="contact.*did not match"):
+        submission = _convert_submission(v1_obj)
+    assert submission.submitters[0].name == "Unknown Person"
+    assert submission.submitters[0].abbreviation is None
+    assert submission.submitters[1].abbreviation == "Tanizawa,Y."

@@ -256,7 +256,7 @@ class Submission(BaseModel):
 
     submitters: list[Person] = Field(
         default_factory=list,
-        description="The list of people who are submitting the data.",
+        description="The list of people who are submitting the data. The first element (index 0) is the contact person.",
     )
     db_xrefs: list[Xref] = Field(
         default_factory=list,

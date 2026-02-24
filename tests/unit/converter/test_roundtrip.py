@@ -95,9 +95,10 @@ def test_v1_to_v2_to_v1_preserves_submitter_ab_names(fixture_name: str, request:
         v2_obj = v1_to_v2(v1_obj)
         v1_back = v2_to_v1(v2_obj)
     # v2→v1 filters out empty-string abbreviations, so compare non-empty only
+    # Order may change because contact person is moved to front
     orig_non_empty = [n for n in v1_obj.COMMON.SUBMITTER.ab_name if n]
     rt_non_empty = [n for n in v1_back.COMMON.SUBMITTER.ab_name if n]
-    assert rt_non_empty == orig_non_empty
+    assert set(rt_non_empty) == set(orig_non_empty)
 
 
 @pytest.mark.parametrize(

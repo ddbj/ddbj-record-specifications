@@ -64,11 +64,12 @@ v1 は「ab_name リスト + 単一の contact 情報」というフラット構
 
 変換ロジック:
 
-1. `SUBMITTER.contact` のフルネームから略称候補を生成し、`ab_name` リストと照合
-2. マッチした場合: その Person に name/email/organization を付与
-3. contact が空でない + マッチ失敗: `abbreviation=None` の ghost Person を末尾に追加し、警告を出力
-4. contact が空 + ab_name あり: 最初の Person に email/organization を付与 (警告なし)
-5. contact が空 + ab_name 空: フォールバックとして `abbreviation=None` の Person を生成
+1. `SUBMITTER.ab_name` リストから Person リストを生成
+2. `SUBMITTER.contact` のフルネームから略称候補を生成し、ab_name リストと照合
+3. マッチした場合: その Person に name/email/organization を付与し、**submitters リストの先頭に移動**
+4. contact が空でない + マッチ失敗: `abbreviation=None` の ghost Person を**先頭に追加**し、警告を出力
+5. contact が空 + ab_name あり: 最初の Person に email/organization を付与（警告なし、既に先頭）
+6. contact が空 + ab_name 空: フォールバックとして `abbreviation=None` の Person を生成
 
 略称マッチングはカンマ区切り名 (`"Doe, John"`)、西洋式 (`"John Doe"`)、アジア式 (`"Yamada Taro"` -> 先頭が姓) の 3 パターンに対応する。正規化 (ピリオド・ハイフン・スペース除去 + 小文字化) して比較する。
 
@@ -157,14 +158,7 @@ v2 の `features[]` には COMMENT feature を含めない。コメントは `en
 
 ### SUBMITTER
 
-submitters から contact person を選択し、フラット構造に変換する。
-
-contact person の選択優先順位:
-
-1. name と email の両方を持つ最初の Person
-2. email を持つ最初の Person
-3. organization を持つ最初の Person
-4. リストの最初の Person (フォールバック)
+`submitters[0]` を contact person として使用し、フラット構造に変換する。
 
 | v1 | v2 ソース |
 |---|---|
@@ -228,7 +222,7 @@ v2 Reference の journal, volume, doi, pubmed_id, consortiums 等は無視され
 
 ### ラウンドトリップ
 
-**v1 -> v2 -> v1**: 元のデータと一致することを保証する (テストで検証)。ただし contact のフルネームが ab_name とマッチしなかった場合の差異はある。
+**v1 -> v2 -> v1**: 元のデータと一致することを保証する (テストで検証)。ただし contact のフルネームが ab_name とマッチしなかった場合の差異はある。ab_name のメンバーは保持されるが、**順序は変わる場合がある**（contact person が先頭に移動するため）。
 
 **v2 -> v1 -> v2**: データロスにより元に戻らない場合がある。一致は保証しない。
 

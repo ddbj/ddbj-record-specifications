@@ -141,37 +141,40 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
                 person.organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
         submitters.append(person)
 
-    if contact_index is None:
-        if v1_obj.COMMON.SUBMITTER.contact:
-            # contact name present but no ab_name match → ghost Person + warning
-            warnings.warn(
-                f"contact '{v1_obj.COMMON.SUBMITTER.contact}' did not match any ab_name; "
-                "adding as separate Person with abbreviation=None",
-                UserWarning,
-                stacklevel=2,
-            )
-            person = Person(abbreviation=None)
-            person.name = v1_obj.COMMON.SUBMITTER.contact
-            person.email = v1_obj.COMMON.SUBMITTER.email
-            person.organization = [institution]
-            if v1_obj.COMMON.SUBMITTER.consrtm:
-                person.organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
-            submitters.append(person)
-        elif submitters:
-            # contact empty + ab_name present → assign email/org to first Person
-            submitters[0].email = v1_obj.COMMON.SUBMITTER.email
-            submitters[0].organization = [institution]
-            if v1_obj.COMMON.SUBMITTER.consrtm:
-                submitters[0].organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
-        else:
-            # contact empty + ab_name empty → fallback ghost Person
-            person = Person(abbreviation=None)
-            person.name = v1_obj.COMMON.SUBMITTER.contact
-            person.email = v1_obj.COMMON.SUBMITTER.email
-            person.organization = [institution]
-            if v1_obj.COMMON.SUBMITTER.consrtm:
-                person.organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
-            submitters.append(person)
+    if contact_index is not None:
+        # Move contact person to front of submitters list
+        contact_person = submitters.pop(contact_index)
+        submitters.insert(0, contact_person)
+    elif v1_obj.COMMON.SUBMITTER.contact:
+        # contact name present but no ab_name match → ghost Person at front + warning
+        warnings.warn(
+            f"contact '{v1_obj.COMMON.SUBMITTER.contact}' did not match any ab_name; "
+            "adding as separate Person with abbreviation=None",
+            UserWarning,
+            stacklevel=2,
+        )
+        person = Person(abbreviation=None)
+        person.name = v1_obj.COMMON.SUBMITTER.contact
+        person.email = v1_obj.COMMON.SUBMITTER.email
+        person.organization = [institution]
+        if v1_obj.COMMON.SUBMITTER.consrtm:
+            person.organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
+        submitters.insert(0, person)
+    elif submitters:
+        # contact empty + ab_name present → assign email/org to first Person
+        submitters[0].email = v1_obj.COMMON.SUBMITTER.email
+        submitters[0].organization = [institution]
+        if v1_obj.COMMON.SUBMITTER.consrtm:
+            submitters[0].organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
+    else:
+        # contact empty + ab_name empty → fallback ghost Person
+        person = Person(abbreviation=None)
+        person.name = v1_obj.COMMON.SUBMITTER.contact
+        person.email = v1_obj.COMMON.SUBMITTER.email
+        person.organization = [institution]
+        if v1_obj.COMMON.SUBMITTER.consrtm:
+            person.organization.append(Organization(name=v1_obj.COMMON.SUBMITTER.consrtm, type="consortium"))
+        submitters.append(person)
 
     # === db_xrefs ===
     db_xrefs: list[Xref] = []

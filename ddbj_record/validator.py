@@ -206,6 +206,31 @@ def _validate_referential_integrity(json_data: dict[str, Any], schema_version: s
                     )
                 )
 
+        # v2: contact person info check
+        submitters = json_data.get("submission", {}).get("submitters", [])
+        if submitters:
+            contact = submitters[0]
+            if not contact.get("name"):
+                errors.append(
+                    ErrorDetail(
+                        type="missing_contact_person_name",
+                        loc=["submission", "submitters", 0, "name"],
+                        msg="Contact person (submitters[0]) should have a name",
+                        severity="warning",
+                        stage="referential_integrity",
+                    )
+                )
+            if not contact.get("email"):
+                errors.append(
+                    ErrorDetail(
+                        type="missing_contact_person_email",
+                        loc=["submission", "submitters", 0, "email"],
+                        msg="Contact person (submitters[0]) should have an email",
+                        severity="warning",
+                        stage="referential_integrity",
+                    )
+                )
+
     elif schema_version == "v1":
         # v1: ENTRIES[].id duplicate check
         v1_entries = json_data.get("ENTRIES", [])
@@ -362,7 +387,7 @@ def validate_json_data(
 
     ref_errors = _validate_referential_integrity(json_data, schema_version)
     all_errors.extend(ref_errors)
-    if fail_fast and ref_errors:
+    if fail_fast and any(e.severity == "error" for e in ref_errors):
         return ValidationResult(valid=False, errors=all_errors)
 
     if not no_insdc_validation:

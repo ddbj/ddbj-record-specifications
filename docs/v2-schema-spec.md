@@ -27,6 +27,12 @@ v2.1 で追加された Pydantic モデルの型制約仕様。
 
 `"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.1`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
 
+## submitters の contact person 規約
+
+`submission.submitters` リストの先頭要素 (index 0) は contact person を表す。
+contact person は DDBJ への登録データに関する問い合わせの代表者であり、
+原則として name, email, organization を持つべきである。
+
 ## v2.0 との後方互換性
 
 v2.1 の制約は v2.0 で有効だったデータの一部を拒否する破壊的変更を含む。v2.0 データも同じモデルで検証される。

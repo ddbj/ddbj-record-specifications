@@ -18,7 +18,6 @@ from ddbj_record.schema.v1 import (
 )
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
-from ddbj_record.schema.v2 import Person as V2Person
 
 
 def _warn_data_loss(msg: str) -> None:
@@ -88,26 +87,8 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     street = ""
     zip_code = ""
 
-    def _pick_contact_person(submitters: list[V2Person]) -> V2Person | None:
-        if not submitters:
-            return None
-        # name and email
-        both = [s for s in submitters if s.name and s.email]
-        if both:
-            return both[0]
-        # with email
-        with_email = [s for s in submitters if s.email]
-        if with_email:
-            return with_email[0]
-        # organization
-        with_org = [s for s in submitters if s.organization]
-        if with_org:
-            return with_org[0]
-        # first one (fallback)
-
-        return submitters[0]
-
-    contact_person = _pick_contact_person(v2_obj.submission.submitters)
+    submitters = v2_obj.submission.submitters
+    contact_person = submitters[0] if submitters else None
     if contact_person:
         contact = contact_person.name or ""
         email = contact_person.email or ""
@@ -143,8 +124,8 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
                     _warn_data_loss(f"ror_id '{organization_obj.ror_id}' ignored during v2 to v1 conversion")
 
     # Warn for non-contact submitter organizations
-    for _i, s in enumerate(v2_obj.submission.submitters):
-        if s != contact_person and s.organization:
+    for i, s in enumerate(v2_obj.submission.submitters):
+        if i != 0 and s.organization:
             _warn_data_loss(
                 f"organization info from non-contact submitter '{s.abbreviation or s.name}' "
                 "ignored during v2 to v1 conversion"

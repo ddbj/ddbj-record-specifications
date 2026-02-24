@@ -92,6 +92,16 @@ v1 で `ignore` を多用する理由: レガシースキーマのため、古�
 
 各 entry の `source_features` が空リストでないこと。エラー種別: `missing_source_feature`
 
+### contact person の情報チェック (v2 のみ)
+
+`submission.submitters` が空でない場合、先頭要素 (submitters[0]) が contact person として
+必要な情報を持っているかをチェックする。
+
+- `name` が null → warning (`missing_contact_person_name`)
+- `email` が null → warning (`missing_contact_person_email`)
+
+severity は `"warning"` とする。`valid` や `submittable` には影響しない。
+
 ## 第 4 段階: INSDC feature/qualifier バリデーション
 
 INSDC 公式定義に基づく feature key、qualifier key、qualifier value のバリデーション。詳細は `docs/insdc-validation-spec.md` を参照。

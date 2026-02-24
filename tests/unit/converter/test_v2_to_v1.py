@@ -279,78 +279,20 @@ def test_convert_common_comments() -> None:
 # === _pick_contact_person (tested via _convert_common) ===
 
 
-def test_pick_contact_person_prefers_name_and_email() -> None:
+def test_convert_common_uses_first_submitter_as_contact() -> None:
+    """submitters[0] が contact person として使用される。"""
     v2_obj = _make_v2_minimal(
         {
             "submission": {
                 "submitters": [
-                    {"abbreviation": "A,A."},
                     {
-                        "name": "Best Contact",
-                        "abbreviation": "B,B.",
-                        "email": "best@example.com",
+                        "name": "First Person",
+                        "abbreviation": "First,F.",
+                        "email": "first@example.com",
                         "organization": [
-                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
+                            {"name": "Inst", "type": "institution", "address": {"country": "JP", "city": "T"}}
                         ],
                     },
-                ],
-                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
-            }
-        }
-    )
-    common = _convert_common(v2_obj)
-    assert common.SUBMITTER.contact == "Best Contact"
-
-
-def test_pick_contact_person_fallback_to_email() -> None:
-    v2_obj = _make_v2_minimal(
-        {
-            "submission": {
-                "submitters": [
-                    {"abbreviation": "A,A."},
-                    {
-                        "abbreviation": "B,B.",
-                        "email": "b@example.com",
-                        "organization": [
-                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
-                        ],
-                    },
-                ],
-                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
-            }
-        }
-    )
-    common = _convert_common(v2_obj)
-    assert common.SUBMITTER.email == "b@example.com"
-
-
-def test_pick_contact_person_fallback_to_org() -> None:
-    v2_obj = _make_v2_minimal(
-        {
-            "submission": {
-                "submitters": [
-                    {"abbreviation": "A,A."},
-                    {
-                        "abbreviation": "B,B.",
-                        "organization": [
-                            {"name": "OrgInst", "type": "institution", "address": {"country": "JP", "city": "T"}}
-                        ],
-                    },
-                ],
-                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
-            }
-        }
-    )
-    common = _convert_common(v2_obj)
-    assert common.SUBMITTER.institute == "OrgInst"
-
-
-def test_pick_contact_person_fallback_to_first() -> None:
-    v2_obj = _make_v2_minimal(
-        {
-            "submission": {
-                "submitters": [
-                    {"abbreviation": "First,F."},
                     {"abbreviation": "Second,S."},
                 ],
                 "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
@@ -358,7 +300,9 @@ def test_pick_contact_person_fallback_to_first() -> None:
         }
     )
     common = _convert_common(v2_obj)
-    assert "First,F." in common.SUBMITTER.ab_name
+    assert common.SUBMITTER.contact == "First Person"
+    assert common.SUBMITTER.email == "first@example.com"
+    assert common.SUBMITTER.institute == "Inst"
 
 
 # === _convert_common_source ===

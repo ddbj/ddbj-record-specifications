@@ -907,3 +907,46 @@ def test_hold_date_year_0000_checked_by_fromisoformat() -> None:
     # Python's date.fromisoformat rejects year 0000 (MINYEAR=1)
     assert result.valid is False
     assert any(e.type == "invalid_date_value" for e in result.errors)
+
+
+# === contact person validation ===
+
+
+def test_validate_contact_person_missing_name_warns() -> None:
+    data = _make_v2_data({"submission.submitters": [{"email": "a@example.com"}]})
+    result = validate_json_data(data, "v2", no_insdc_validation=True)
+    assert result.valid is True
+    assert any(e.type == "missing_contact_person_name" for e in result.errors)
+    name_warn = next(e for e in result.errors if e.type == "missing_contact_person_name")
+    assert name_warn.severity == "warning"
+
+
+def test_validate_contact_person_missing_email_warns() -> None:
+    data = _make_v2_data({"submission.submitters": [{"name": "Test User"}]})
+    result = validate_json_data(data, "v2", no_insdc_validation=True)
+    assert result.valid is True
+    assert any(e.type == "missing_contact_person_email" for e in result.errors)
+    email_warn = next(e for e in result.errors if e.type == "missing_contact_person_email")
+    assert email_warn.severity == "warning"
+
+
+def test_validate_contact_person_complete_no_warning() -> None:
+    data = _make_v2_data(
+        {"submission.submitters": [{"name": "Test User", "email": "test@example.com"}]}
+    )
+    result = validate_json_data(data, "v2", no_insdc_validation=True)
+    assert result.valid is True
+    contact_warnings = [
+        e for e in result.errors if e.type in ("missing_contact_person_name", "missing_contact_person_email")
+    ]
+    assert len(contact_warnings) == 0
+
+
+def test_validate_contact_person_empty_submitters_no_warning() -> None:
+    data = _make_v2_data({"submission.submitters": []})
+    result = validate_json_data(data, "v2", no_insdc_validation=True)
+    assert result.valid is True
+    contact_warnings = [
+        e for e in result.errors if e.type in ("missing_contact_person_name", "missing_contact_person_email")
+    ]
+    assert len(contact_warnings) == 0
