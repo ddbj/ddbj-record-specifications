@@ -1,15 +1,17 @@
-# v2 Schema Type Constraints (v2.1)
+# v2 Schema Type Constraints (v2.2)
 
-v2.1 で追加された Pydantic モデルの型制約仕様。
+v2.1 で追加された Pydantic モデルの型制約仕様。v2.2 で KEYWORD/DATATYPE フィールドを追加。
 
 ## フィールド制約一覧
 
 | フィールド | 型 | 制約 |
 |---|---|---|
-| `DdbjRecord.schema_version` | `str` | `^(v\d+\.\d+\|v\d+\|\d+\.\d+)$` (例: `v2.0`, `v2.1`, `v2`, `0.2`) |
+| `DdbjRecord.schema_version` | `str` | `^(v\d+\.\d+\|v\d+\|\d+\.\d+)$` (例: `v2.0`, `v2.2`, `v2`, `0.2`) |
 | `Entry.id` | `str` | `^[a-zA-Z0-9_.\-]{1,32}$` |
 | `Submission.trad_submission_category` | `Literal["WGS", "GNM"] \| None` | 列挙値のみ許可 |
 | `Submission.hold_date` | `str \| None` | `^\d{4}-\d{2}-\d{2}$` (ISO 8601 日付) |
+| `Submission.keywords` | `list[str] \| None` | WGS キーワード (例: `["WGS", "STANDARD_DRAFT"]`) |
+| `Submission.datatype` | `str \| None` | データタイプ (例: `"WGS"`) |
 | `Reference.year` | `str` | `^(\d{4})?$` (空文字許可、unpublished 等) |
 | `Reference.date_published` | `str \| None` | `^\d{4}-\d{2}-\d{2}$` (ISO 8601 日付) |
 
@@ -25,7 +27,7 @@ v2.1 で追加された Pydantic モデルの型制約仕様。
 
 ## レガシー schema_version の扱い
 
-`"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.1`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
+`"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.2`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
 
 ## submitters の contact person 規約
 

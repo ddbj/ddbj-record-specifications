@@ -23,7 +23,7 @@ from ddbj_record.validator import validate_json_data
 
 def test_v2_valid_minimal_parses(v2_valid_minimal: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_minimal)
-    assert record.schema_version == "v2.1"
+    assert record.schema_version == "v2.2"
 
 
 def test_v2_valid_dfc_gnm_parses(v2_valid_dfc_gnm: dict[str, Any]) -> None:
@@ -40,12 +40,12 @@ def test_v2_valid_wf_dfc_wgs_parses(v2_valid_wf_dfc_wgs: dict[str, Any]) -> None
 
 def test_v2_valid_dfv_parses(v2_valid_dfv: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_dfv)
-    assert record.schema_version == "v2.1"
+    assert record.schema_version == "v2.2"
 
 
 def test_v2_valid_wf_dfv_parses(v2_valid_wf_dfv: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_wf_dfv)
-    assert record.schema_version == "v2.1"
+    assert record.schema_version == "v2.2"
 
 
 def test_v2_valid_boolean_qualifier_parses(v2_valid_boolean_qualifier: dict[str, Any]) -> None:
@@ -92,7 +92,7 @@ def test_v2_invalid_extra_field_raises(v2_invalid_extra_field: dict[str, Any]) -
 def test_v2_legacy_schema_version_normalized(v2_legacy_schema_version: dict[str, Any]) -> None:
     result = validate_json_data(v2_legacy_schema_version, "v2")
     assert result.valid is True
-    assert v2_legacy_schema_version["schema_version"] == "v2.1"
+    assert v2_legacy_schema_version["schema_version"] == "v2.2"
 
 
 def test_v2_schema_version_02_normalized() -> None:
@@ -104,7 +104,7 @@ def test_v2_schema_version_02_normalized() -> None:
     }
     result = validate_json_data(data, "v2")
     assert result.valid is True
-    assert data["schema_version"] == "v2.1"
+    assert data["schema_version"] == "v2.2"
 
 
 def test_v2_schema_version_v2_normalized() -> None:
@@ -116,7 +116,7 @@ def test_v2_schema_version_v2_normalized() -> None:
     }
     result = validate_json_data(data, "v2")
     assert result.valid is True
-    assert data["schema_version"] == "v2.1"
+    assert data["schema_version"] == "v2.2"
 
 
 # === Literal type boundary values ===
@@ -265,3 +265,33 @@ def test_v2_invalid_extra_field_has_extra_forbidden_type(v2_invalid_extra_field:
     errors = exc_info.value.errors()
     assert len(errors) > 0
     assert any(e["type"] == "extra_forbidden" for e in errors)
+
+
+# === KEYWORD / DATATYPE ===
+
+
+def test_v2_valid_wgs_with_keyword_parses(v2_valid_wgs_with_keyword: dict[str, Any]) -> None:
+    record = DdbjRecord.model_validate(v2_valid_wgs_with_keyword)
+    assert record.submission.keywords == ["WGS", "STANDARD_DRAFT"]
+    assert record.submission.datatype == "WGS"
+
+
+def test_v2_submission_keywords_none_by_default() -> None:
+    sub = Submission()
+    assert sub.keywords is None
+    assert sub.datatype is None
+
+
+def test_v2_submission_keywords_list() -> None:
+    sub = Submission(keywords=["WGS", "STANDARD_DRAFT"])
+    assert sub.keywords == ["WGS", "STANDARD_DRAFT"]
+
+
+def test_v2_submission_keywords_empty_list() -> None:
+    sub = Submission(keywords=[])
+    assert sub.keywords == []
+
+
+def test_v2_submission_datatype_str() -> None:
+    sub = Submission(datatype="WGS")
+    assert sub.datatype == "WGS"

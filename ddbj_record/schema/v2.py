@@ -298,6 +298,16 @@ class Submission(BaseModel):
         examples=["2025-01-01"],
         description="The date until which the submission should be held before public release (ISO 8601 format).",
     )
+    keywords: list[str] | None = Field(
+        None,
+        examples=[["WGS", "STANDARD_DRAFT"]],
+        description="Keywords for the submission (e.g., WGS keywords like STANDARD_DRAFT).",
+    )
+    datatype: str | None = Field(
+        None,
+        examples=["WGS"],
+        description="The data type of the submission (e.g., WGS).",
+    )
 
     # extra field
     model_config = ConfigDict(extra="forbid")

@@ -48,7 +48,7 @@ v1 と v2 では qualifier の値の型が異なる。
 
 ### schema_version
 
-`LATEST_MINOR_VERSIONS["v2"]` の値を設定する (現在は `"v2.0"`)。
+`LATEST_MINOR_VERSIONS["v2"]` の値を設定する (現在は `"v2.2"`)。
 
 ### provenance
 
@@ -96,6 +96,13 @@ v1 は「ab_name リスト + 単一の contact 情報」というフラット構
 #### comments
 
 `COMMENT[].line` を `list[list[str]]` にフラット化する。
+
+#### keywords / datatype
+
+| v2 | v1 ソース |
+|---|---|
+| `keywords` | `COMMON.KEYWORD.keyword` (空リストは `None` に変換) |
+| `datatype` | `COMMON.DATATYPE.type` |
 
 #### その他
 
@@ -186,6 +193,13 @@ v2 Reference の journal, volume, doi, pubmed_id, consortiums 等は無視され
 
 `experiments` から `id == "st_comment_experiment"` の Experiment を探して変換する。それ以外の experiment は無視される (データロス)。
 
+### KEYWORD / DATATYPE
+
+| v2 | v1 |
+|---|---|
+| `keywords` | `KEYWORD(keyword=...)` (None/空は `KEYWORD = None`) |
+| `datatype` | `DATATYPE(type=...)` (None は `DATATYPE = None`) |
+
 ### その他
 
 - **COMMENT**: `submission.comments` を `Comment(line=...)` のリストに変換
@@ -222,7 +236,7 @@ v2 Reference の journal, volume, doi, pubmed_id, consortiums 等は無視され
 
 ### ラウンドトリップ
 
-**v1 -> v2 -> v1**: 元のデータと一致することを保証する (テストで検証)。ただし contact のフルネームが ab_name とマッチしなかった場合の差異はある。ab_name のメンバーは保持されるが、**順序は変わる場合がある**（contact person が先頭に移動するため）。
+**v1 -> v2 -> v1**: 元のデータと一致することを保証する (テストで検証)。ただし contact のフルネームが ab_name とマッチしなかった場合の差異はある。ab_name のメンバーは保持されるが、**順序は変わる場合がある**（contact person が先頭に移動するため）。KEYWORD/DATATYPE も保持される。
 
 **v2 -> v1 -> v2**: データロスにより元に戻らない場合がある。一致は保証しない。
 

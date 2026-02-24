@@ -201,6 +201,15 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
     # === comments ===
     comments: list[list[str]] = [comment.line for comment in v1_obj.COMMON.COMMENT]
 
+    # === keywords / datatype ===
+    keywords: list[str] | None = None
+    if v1_obj.COMMON.KEYWORD and v1_obj.COMMON.KEYWORD.keyword:
+        keywords = v1_obj.COMMON.KEYWORD.keyword
+
+    datatype: str | None = None
+    if v1_obj.COMMON.DATATYPE:
+        datatype = v1_obj.COMMON.DATATYPE.type
+
     return Submission(
         submitters=submitters,
         db_xrefs=db_xrefs,
@@ -211,6 +220,8 @@ def _convert_submission(v1_obj: DdbjRecordV1) -> Submission:
         locus_tag_prefix=v1_obj.COMMON_META.locus_tag_prefix,
         seq_prefix=v1_obj.COMMON_META.seq_prefix,
         hold_date=_convert_hold_date(v1_obj.COMMON.DATE.hold_date) if v1_obj.COMMON.DATE else None,
+        keywords=keywords,
+        datatype=datatype,
     )
 
 

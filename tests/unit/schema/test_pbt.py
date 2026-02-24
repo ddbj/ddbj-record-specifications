@@ -69,7 +69,7 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
 @settings(max_examples=100)
 def test_pbt_v2_minimal_record_validates(record_data: dict) -> None:
     record = DdbjRecord.model_validate(record_data)
-    assert record.schema_version == "v2.1"
+    assert record.schema_version == "v2.2"
 
 
 @given(record_data=st_v2_record_with_entry())

@@ -896,3 +896,89 @@ def test_v2_to_v1_no_st_comment_experiment_warns() -> None:
         v1_obj = v2_to_v1(v2_obj)
     # ST_COMMENT should be None since no st_comment_experiment was found
     assert v1_obj.COMMON.ST_COMMENT is None
+
+
+# === KEYWORD / DATATYPE conversion ===
+
+
+def test_convert_common_keywords_to_keyword() -> None:
+    v2_obj = _make_v2_minimal(
+        {
+            "submission": {
+                "submitters": [
+                    {
+                        "name": "T",
+                        "abbreviation": "T,T.",
+                        "email": "t@t.com",
+                        "organization": [
+                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
+                        ],
+                    }
+                ],
+                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
+                "keywords": ["WGS", "STANDARD_DRAFT"],
+            }
+        }
+    )
+    common = _convert_common(v2_obj)
+    assert common.KEYWORD is not None
+    assert common.KEYWORD.keyword == ["WGS", "STANDARD_DRAFT"]
+
+
+def test_convert_common_keywords_none_produces_keyword_none() -> None:
+    v2_obj = _make_v2_minimal()
+    common = _convert_common(v2_obj)
+    assert common.KEYWORD is None
+
+
+def test_convert_common_keywords_empty_list_produces_keyword_none() -> None:
+    v2_obj = _make_v2_minimal(
+        {
+            "submission": {
+                "submitters": [
+                    {
+                        "name": "T",
+                        "abbreviation": "T,T.",
+                        "email": "t@t.com",
+                        "organization": [
+                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
+                        ],
+                    }
+                ],
+                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
+                "keywords": [],
+            }
+        }
+    )
+    common = _convert_common(v2_obj)
+    assert common.KEYWORD is None
+
+
+def test_convert_common_datatype_to_datatype() -> None:
+    v2_obj = _make_v2_minimal(
+        {
+            "submission": {
+                "submitters": [
+                    {
+                        "name": "T",
+                        "abbreviation": "T,T.",
+                        "email": "t@t.com",
+                        "organization": [
+                            {"name": "I", "type": "institution", "address": {"country": "JP", "city": "T"}}
+                        ],
+                    }
+                ],
+                "references": [{"title": "T", "authors": [], "status": "unpublished", "year": "2025"}],
+                "datatype": "WGS",
+            }
+        }
+    )
+    common = _convert_common(v2_obj)
+    assert common.DATATYPE is not None
+    assert common.DATATYPE.type == "WGS"
+
+
+def test_convert_common_datatype_none_produces_datatype_none() -> None:
+    v2_obj = _make_v2_minimal()
+    common = _convert_common(v2_obj)
+    assert common.DATATYPE is None

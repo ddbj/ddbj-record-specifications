@@ -8,10 +8,12 @@ from ddbj_record.schema.v1 import (
     Common,
     CommonMeta,
     CommonSource,
+    Datatype,
     Date,
     Dblink,
     Entry,
     Feature,
+    Keyword,
     Reference,
     StComment,
     Submitter,
@@ -241,6 +243,16 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
         )
         trad_submission_category = "GNM"
 
+    # KEYWORD
+    keyword: Keyword | None = None
+    if v2_obj.submission.keywords:
+        keyword = Keyword(keyword=v2_obj.submission.keywords)
+
+    # DATATYPE
+    datatype_obj: Datatype | None = None
+    if v2_obj.submission.datatype is not None:
+        datatype_obj = Datatype(type=v2_obj.submission.datatype)
+
     return Common(
         DBLINK=dblink,
         SUBMITTER=submitter,
@@ -248,6 +260,8 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
         COMMENT=comments,
         ST_COMMENT=st_comment,
         DATE=date,
+        KEYWORD=keyword,
+        DATATYPE=datatype_obj,
         trad_submission_category=trad_submission_category,
     )
 

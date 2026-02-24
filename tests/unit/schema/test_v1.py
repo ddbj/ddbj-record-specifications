@@ -7,9 +7,11 @@ from ddbj_record.schema.v1 import (
     Common,
     CommonMeta,
     CommonSource,
+    Datatype,
     DdbjRecord,
     Entry,
     Feature,
+    Keyword,
     StComment,
     Submitter,
 )
@@ -304,3 +306,69 @@ def test_v1_entry_type_invalid_reports_literal_error() -> None:
         )
     errors = exc_info.value.errors()
     assert any(e["type"] == "literal_error" for e in errors)
+
+
+# === KEYWORD / DATATYPE ===
+
+
+def test_v1_valid_wgs_with_keyword_parses(v1_valid_wgs_with_keyword: dict[str, Any]) -> None:
+    record = DdbjRecord.model_validate(v1_valid_wgs_with_keyword)
+    assert record.COMMON.KEYWORD is not None
+    assert record.COMMON.KEYWORD.keyword == ["WGS", "STANDARD_DRAFT"]
+    assert record.COMMON.DATATYPE is not None
+    assert record.COMMON.DATATYPE.type == "WGS"
+
+
+def test_v1_keyword_none_by_default() -> None:
+    common = Common(
+        SUBMITTER=Submitter.model_construct(
+            ab_name=["T,T."],
+            contact="Test",
+            email="t@t.com",
+            institute="Inst",
+            country="Japan",
+            city="City",
+            street="St",
+            zip="000",
+        ),
+        ST_COMMENT=StComment.model_construct(
+            tagset_id="Genome-Assembly-Data",
+            assembly_method="test",
+            sequencing_technology="Illumina",
+        ),
+        trad_submission_category="GNM",
+    )
+    assert common.KEYWORD is None
+    assert common.DATATYPE is None
+
+
+def test_v1_keyword_model_parses() -> None:
+    kw = Keyword(keyword=["WGS", "STANDARD_DRAFT"])
+    assert kw.keyword == ["WGS", "STANDARD_DRAFT"]
+
+
+def test_v1_keyword_empty_list_valid() -> None:
+    kw = Keyword(keyword=[])
+    assert kw.keyword == []
+
+
+def test_v1_keyword_default_empty_list() -> None:
+    kw = Keyword()
+    assert kw.keyword == []
+
+
+def test_v1_datatype_model_parses() -> None:
+    dt = Datatype(type="WGS")
+    assert dt.type == "WGS"
+
+
+def test_v1_keyword_extra_ignored() -> None:
+    kw = Keyword(keyword=["WGS"], extra_field="ignored")
+    assert kw.keyword == ["WGS"]
+    assert not hasattr(kw, "extra_field") or kw.model_extra == {}
+
+
+def test_v1_datatype_extra_ignored() -> None:
+    dt = Datatype(type="WGS", extra_field="ignored")
+    assert dt.type == "WGS"
+    assert not hasattr(dt, "extra_field") or dt.model_extra == {}

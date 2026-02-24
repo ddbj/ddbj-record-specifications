@@ -87,6 +87,20 @@ class Date(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
 
+class Keyword(BaseModel):
+    keyword: list[str] = Field(default_factory=list, examples=["WGS", "STANDARD_DRAFT"])
+
+    # extra field
+    model_config = ConfigDict(extra="ignore")
+
+
+class Datatype(BaseModel):
+    type: str = Field(examples=["WGS"])
+
+    # extra field
+    model_config = ConfigDict(extra="ignore")
+
+
 class Common(BaseModel):
     DBLINK: Dblink | None = Field(None)
     SUBMITTER: Submitter
@@ -94,6 +108,8 @@ class Common(BaseModel):
     COMMENT: list[Comment] = Field(default_factory=list)
     ST_COMMENT: StComment | None = Field(None)
     DATE: Date | None = Field(None)
+    KEYWORD: Keyword | None = Field(None)
+    DATATYPE: Datatype | None = Field(None)
     trad_submission_category: Literal["WGS", "GNM"] = Field(
         description="if the submission is a draft genome, the value is 'WGS', and if it is a complete genome, the value is 'GNM'.",
         examples=["GNM"],

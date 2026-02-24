@@ -16,6 +16,8 @@ st_trad_category = st.sampled_from(["WGS", "GNM"])
 st_entry_type = st.sampled_from(["chromosome", "plasmid", "unplaced", "other"])
 st_topology = st.sampled_from(["circular", "linear"])
 st_abbr_name = st.from_regex(r"[A-Z][a-z]{1,10},[A-Z]\.", fullmatch=True)
+st_keywords = st.one_of(st.none(), st.lists(st.text(min_size=1, max_size=20), min_size=1, max_size=5))
+st_datatype = st.one_of(st.none(), st.text(min_size=1, max_size=20))
 
 
 @st.composite
@@ -24,27 +26,35 @@ def st_v1_record(draw: st.DrawFn) -> dict:
     mol_type = draw(st_mol_type)
     category = draw(st_trad_category)
     ab_name = draw(st_abbr_name)
+    keywords = draw(st_keywords)
+    datatype = draw(st_datatype)
+
+    common: dict = {
+        "SUBMITTER": {
+            "ab_name": [ab_name],
+            "contact": "Test User",
+            "email": "test@example.com",
+            "institute": "Test Institute",
+            "country": "Japan",
+            "city": "Tokyo",
+            "street": "1-1",
+            "zip": "000-0000",
+        },
+        "ST_COMMENT": {
+            "tagset_id": "Genome-Assembly-Data",
+            "Assembly Method": "test v. 1",
+            "Sequencing Technology": "Illumina",
+        },
+        "trad_submission_category": category,
+    }
+    if keywords is not None:
+        common["KEYWORD"] = {"keyword": keywords}
+    if datatype is not None:
+        common["DATATYPE"] = {"type": datatype}
 
     return {
         "schema_version": "v1.0",
-        "COMMON": {
-            "SUBMITTER": {
-                "ab_name": [ab_name],
-                "contact": "Test User",
-                "email": "test@example.com",
-                "institute": "Test Institute",
-                "country": "Japan",
-                "city": "Tokyo",
-                "street": "1-1",
-                "zip": "000-0000",
-            },
-            "ST_COMMENT": {
-                "tagset_id": "Genome-Assembly-Data",
-                "Assembly Method": "test v. 1",
-                "Sequencing Technology": "Illumina",
-            },
-            "trad_submission_category": category,
-        },
+        "COMMON": common,
         "COMMON_SOURCE": {
             "organism": organism,
             "mol_type": mol_type,
@@ -60,34 +70,42 @@ def st_v2_record(draw: st.DrawFn) -> dict:
     organism = draw(st_organism)
     mol_type = draw(st_mol_type)
     ab_name = draw(st_abbr_name)
+    keywords = draw(st_keywords)
+    datatype = draw(st_datatype)
+
+    submission: dict = {
+        "submitters": [
+            {
+                "name": "Test User",
+                "abbreviation": ab_name,
+                "email": "test@example.com",
+                "organization": [
+                    {
+                        "name": "Test Institute",
+                        "type": "institution",
+                        "address": {"country": "Japan", "city": "Tokyo"},
+                    }
+                ],
+            }
+        ],
+        "references": [
+            {
+                "title": "Test Title",
+                "authors": [{"abbreviation": ab_name}],
+                "status": "unpublished",
+                "year": "2025",
+            }
+        ],
+    }
+    if keywords is not None:
+        submission["keywords"] = keywords
+    if datatype is not None:
+        submission["datatype"] = datatype
 
     return {
         "schema_version": "v2.0",
         "provenance": {},
-        "submission": {
-            "submitters": [
-                {
-                    "name": "Test User",
-                    "abbreviation": ab_name,
-                    "email": "test@example.com",
-                    "organization": [
-                        {
-                            "name": "Test Institute",
-                            "type": "institution",
-                            "address": {"country": "Japan", "city": "Tokyo"},
-                        }
-                    ],
-                }
-            ],
-            "references": [
-                {
-                    "title": "Test Title",
-                    "authors": [{"abbreviation": ab_name}],
-                    "status": "unpublished",
-                    "year": "2025",
-                }
-            ],
-        },
+        "submission": submission,
         "experiments": [
             {
                 "id": "st_comment_experiment",
@@ -173,7 +191,7 @@ def test_pbt_normalize_abbr_idempotent(abbr: str) -> None:
 def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
-    assert v2_obj.schema_version == "v2.1"
+    assert v2_obj.schema_version == "v2.2"
 
 
 @given(record_data=st_v2_record())
@@ -268,3 +286,36 @@ def test_pbt_v1_roundtrip_preserves_division(record_data: dict) -> None:
         v2_obj = v1_to_v2(v1_obj)
         v1_back = v2_to_v1(v2_obj)
     assert v1_back.COMMON_META.division == v1_obj.COMMON_META.division
+
+
+# === PBT: v1->v2->v1 KEYWORD/DATATYPE preservation ===
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_keyword(record_data: dict) -> None:
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    if v1_obj.COMMON.KEYWORD and v1_obj.COMMON.KEYWORD.keyword:
+        assert v1_back.COMMON.KEYWORD is not None
+        assert v1_back.COMMON.KEYWORD.keyword == v1_obj.COMMON.KEYWORD.keyword
+    else:
+        assert v1_back.COMMON.KEYWORD is None
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_datatype(record_data: dict) -> None:
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    if v1_obj.COMMON.DATATYPE:
+        assert v1_back.COMMON.DATATYPE is not None
+        assert v1_back.COMMON.DATATYPE.type == v1_obj.COMMON.DATATYPE.type
+    else:
+        assert v1_back.COMMON.DATATYPE is None

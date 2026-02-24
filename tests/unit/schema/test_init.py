@@ -33,7 +33,7 @@ def test_latest_minor_versions_v1() -> None:
 
 
 def test_latest_minor_versions_v2() -> None:
-    assert LATEST_MINOR_VERSIONS["v2"] == "v2.1"
+    assert LATEST_MINOR_VERSIONS["v2"] == "v2.2"
 
 
 # === normalize_schema_version ===
@@ -45,10 +45,11 @@ def test_latest_minor_versions_v2() -> None:
         ("0.1", "v1.0"),
         ("v1", "v1.0"),
         ("v1.0", "v1.0"),
-        ("0.2", "v2.1"),
-        ("v2", "v2.1"),
-        ("v2.0", "v2.1"),
-        ("v2.1", "v2.1"),
+        ("0.2", "v2.2"),
+        ("v2", "v2.2"),
+        ("v2.0", "v2.2"),
+        ("v2.1", "v2.2"),
+        ("v2.2", "v2.2"),
     ],
 )
 def test_normalize_schema_version_valid(raw: str, expected: str) -> None:
@@ -82,7 +83,7 @@ def test_normalize_schema_version_invalid_returns_none(raw: str) -> None:
         ("draft", "draft"),
         ("v1.0", "v1"),
         ("v2.0", "v2"),
-        ("v2.1", "v2"),
+        ("v2.2", "v2"),
         ("v1.99", "v1"),
     ],
 )

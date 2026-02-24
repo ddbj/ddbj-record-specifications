@@ -304,7 +304,7 @@ def test_validate_json_data_normalizes_legacy_value_before_pydantic() -> None:
     }
     validate_json_data(data, "v2")
     # After validation, the dict should have normalized value (latest minor)
-    assert data["schema_version"] == "v2.1"
+    assert data["schema_version"] == "v2.2"
 
 
 # === parse_args ===
@@ -672,7 +672,7 @@ def test_json_parse_error_has_stage(
     assert output["errors"][0]["stage"] == "schema"
 
 
-# === Pydantic type constraint tests (v2.1) ===
+# === Pydantic type constraint tests (v2.2) ===
 
 
 def _make_v2_data(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -818,7 +818,7 @@ def test_entry_id_with_space_rejected() -> None:
 # --- schema_version ---
 
 
-@pytest.mark.parametrize("version", ["v2.0", "v2.1", "v2", "0.2"])
+@pytest.mark.parametrize("version", ["v2.0", "v2.1", "v2.2", "v2", "0.2"])
 def test_schema_version_valid_values_accepted(version: str) -> None:
     data = _make_v2_data({"schema_version": version})
     result = validate_schema(data, "v2")

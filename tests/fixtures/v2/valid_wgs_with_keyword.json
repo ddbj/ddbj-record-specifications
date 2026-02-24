@@ -1,0 +1,123 @@
+{
+  "schema_version": "v2.2",
+  "provenance": {},
+  "submission": {
+    "submitters": [
+      {
+        "name": "Test User",
+        "abbreviation": "Test,T.",
+        "email": "test@example.com",
+        "organization": [
+          {
+            "name": "Test Institute",
+            "type": "institution",
+            "address": {
+              "country": "Japan",
+              "city": "Tokyo",
+              "street": "1-1",
+              "postal_code": "000-0000"
+            }
+          }
+        ]
+      }
+    ],
+    "db_xrefs": [
+      {
+        "db": "bioproject",
+        "id": "PRJDB99999"
+      },
+      {
+        "db": "biosample",
+        "id": "SAMD999999"
+      }
+    ],
+    "references": [
+      {
+        "title": "Test Title",
+        "authors": [
+          {
+            "abbreviation": "Test,T."
+          }
+        ],
+        "status": "unpublished",
+        "year": "2025"
+      }
+    ],
+    "comments": [
+      [
+        "Annotated by DFAST"
+      ]
+    ],
+    "trad_submission_category": "WGS",
+    "division": "BCT",
+    "locus_tag_prefix": "TEST",
+    "seq_prefix": "sequence",
+    "keywords": [
+      "WGS",
+      "STANDARD_DRAFT"
+    ],
+    "datatype": "WGS"
+  },
+  "experiments": [
+    {
+      "id": "st_comment_experiment",
+      "platform": {
+        "platform_type": "Illumina"
+      },
+      "experiment_attributes": {
+        "tagset_id": "Genome-Assembly-Data",
+        "assembly_method": "test v. 1"
+      }
+    }
+  ],
+  "sequences": {
+    "common_source": {
+      "organism": "Test organism",
+      "mol_type": "genomic DNA"
+    },
+    "entries": [
+      {
+        "id": "sequence1",
+        "name": "sequence1",
+        "type": "other",
+        "topology": "linear",
+        "sequence": "atgc",
+        "source_features": [
+          {
+            "id": "feature_1",
+            "location": "1..4",
+            "definition": [
+              "@@[organism]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feature_2",
+      "type": "CDS",
+      "location": "1..3",
+      "sequence_id": "sequence1",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ]
+      },
+      "locus_tag_id": "00010"
+    }
+  ]
+}

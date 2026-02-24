@@ -1,0 +1,103 @@
+{
+  "schema_version": "v1.0",
+  "COMMON": {
+    "DBLINK": {
+      "project": "PRJDB99999",
+      "biosample": "SAMD999999"
+    },
+    "SUBMITTER": {
+      "ab_name": [
+        "Test,T."
+      ],
+      "contact": "Test User",
+      "email": "test@example.com",
+      "institute": "Test Institute",
+      "country": "Japan",
+      "city": "Tokyo",
+      "street": "1-1",
+      "zip": "000-0000"
+    },
+    "REFERENCE": [
+      {
+        "title": "Test Title",
+        "ab_name": [
+          "Test,T."
+        ],
+        "status": "Unpublished",
+        "year": "2025"
+      }
+    ],
+    "COMMENT": [
+      {
+        "line": [
+          "Annotated by DFAST"
+        ]
+      }
+    ],
+    "ST_COMMENT": {
+      "tagset_id": "Genome-Assembly-Data",
+      "Assembly Method": "test v. 1",
+      "Sequencing Technology": "Illumina"
+    },
+    "KEYWORD": {
+      "keyword": [
+        "WGS",
+        "STANDARD_DRAFT"
+      ]
+    },
+    "DATATYPE": {
+      "type": "WGS"
+    },
+    "trad_submission_category": "WGS"
+  },
+  "COMMON_SOURCE": {
+    "organism": "Test organism",
+    "mol_type": "genomic DNA"
+  },
+  "COMMON_META": {
+    "division": "BCT",
+    "locus_tag_prefix": "TEST",
+    "seq_prefix": "sequence"
+  },
+  "ENTRIES": [
+    {
+      "id": "sequence1",
+      "name": "sequence1",
+      "type": "other",
+      "topology": "linear",
+      "sequence": "atgc",
+      "features": [
+        {
+          "id": "feature_1",
+          "type": "source",
+          "location": "1..4",
+          "qualifiers": {
+            "submitter_seqid": [
+              "@@[entry]@@"
+            ],
+            "ff_definition": [
+              "@@[organism]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        },
+        {
+          "id": "feature_2",
+          "type": "CDS",
+          "location": "1..3",
+          "qualifiers": {
+            "product": [
+              "hypothetical protein"
+            ],
+            "transl_table": [
+              "11"
+            ],
+            "codon_start": [
+              "1"
+            ]
+          },
+          "locus_tag_id": "00010"
+        }
+      ]
+    }
+  ]
+}

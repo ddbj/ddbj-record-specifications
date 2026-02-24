@@ -156,3 +156,43 @@ def test_v1_dfc_gnm_roundtrip_common_meta(v1_valid_dfc_gnm: dict[str, Any]) -> N
     original_meta = v1_obj.COMMON_META.model_dump(exclude_none=True)
     roundtrip_meta = v1_back.COMMON_META.model_dump(exclude_none=True)
     assert roundtrip_meta == original_meta
+
+
+# === KEYWORD / DATATYPE roundtrip ===
+
+
+def test_v1_to_v2_to_v1_preserves_keyword(v1_valid_wgs_with_keyword: dict[str, Any]) -> None:
+    v1_obj = DdbjRecordV1.model_validate(v1_valid_wgs_with_keyword)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON.KEYWORD is not None
+    assert v1_back.COMMON.KEYWORD.keyword == v1_obj.COMMON.KEYWORD.keyword
+
+
+def test_v1_to_v2_to_v1_preserves_datatype(v1_valid_wgs_with_keyword: dict[str, Any]) -> None:
+    v1_obj = DdbjRecordV1.model_validate(v1_valid_wgs_with_keyword)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON.DATATYPE is not None
+    assert v1_back.COMMON.DATATYPE.type == v1_obj.COMMON.DATATYPE.type
+
+
+def test_v1_to_v2_keyword_values_preserved(v1_valid_wgs_with_keyword: dict[str, Any]) -> None:
+    v1_obj = DdbjRecordV1.model_validate(v1_valid_wgs_with_keyword)
+    v2_obj = v1_to_v2(v1_obj)
+    assert v2_obj.submission.keywords == ["WGS", "STANDARD_DRAFT"]
+    assert v2_obj.submission.datatype == "WGS"
+
+
+def test_v1_without_keyword_roundtrip_preserves_none(v1_to_v2_input: dict[str, Any]) -> None:
+    v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    assert v1_back.COMMON.KEYWORD is None
+    assert v1_back.COMMON.DATATYPE is None

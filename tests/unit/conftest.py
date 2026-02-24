@@ -35,6 +35,12 @@ def v1_valid_wf_dfc_wgs() -> dict[str, Any]:
 
 
 @pytest.fixture
+def v1_valid_wgs_with_keyword() -> dict[str, Any]:
+
+    return _load_json("v1/valid_wgs_with_keyword.json")
+
+
+@pytest.fixture
 def v1_invalid_missing_required() -> dict[str, Any]:
 
     return _load_json("v1/invalid_missing_required.json")
@@ -101,6 +107,12 @@ def v2_valid_complex_location() -> dict[str, Any]:
 def v2_valid_multi_source() -> dict[str, Any]:
 
     return _load_json("v2/valid_multi_source.json")
+
+
+@pytest.fixture
+def v2_valid_wgs_with_keyword() -> dict[str, Any]:
+
+    return _load_json("v2/valid_wgs_with_keyword.json")
 
 
 @pytest.fixture
