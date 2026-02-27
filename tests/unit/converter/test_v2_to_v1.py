@@ -84,6 +84,7 @@ def _make_v2_minimal(overrides: dict[str, Any] | None = None) -> DdbjRecordV2:
                     ],
                 }
             ],
+            "db_xrefs": [],
             "references": [
                 {
                     "title": "Test Title",
@@ -92,6 +93,7 @@ def _make_v2_minimal(overrides: dict[str, Any] | None = None) -> DdbjRecordV2:
                     "year": "2025",
                 }
             ],
+            "comments": [],
         },
         "experiments": [
             {
@@ -104,8 +106,10 @@ def _make_v2_minimal(overrides: dict[str, Any] | None = None) -> DdbjRecordV2:
             }
         ],
         "sequences": {
-            "common_source": {"organism": "Test organism", "mol_type": "genomic DNA"},
+            "common_source": {"organism": "Test organism", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
         },
+        "features": [],
     }
     if overrides:
         _deep_merge(base, overrides)
@@ -195,6 +199,7 @@ def test_convert_common_reference_status_in_press_denormalized() -> None:
 def test_convert_common_st_comment_from_experiment() -> None:
     v2_obj = _make_v2_minimal()
     common = _convert_common(v2_obj)
+    assert common.ST_COMMENT is not None
     assert common.ST_COMMENT.sequencing_technology == "Illumina"
     assert common.ST_COMMENT.tagset_id == "Genome-Assembly-Data"
 

@@ -62,7 +62,7 @@ def test_convert_json_data_same_version_v2_identity(v2_valid_minimal: dict[str, 
 
 def test_convert_json_data_v1_to_v2(v1_to_v2_input: dict[str, Any]) -> None:
     result = convert_json_data(v1_to_v2_input, "v1", "v2")
-    assert result["schema_version"] == "v2.2"
+    assert result["schema_version"] == "v2.3"
     assert "provenance" in result
     assert "submission" in result
 
@@ -109,7 +109,7 @@ def test_converter_cli_runs_post_conversion_validation(
     assert result.returncode == 0, f"stderr: {result.stderr}"
     assert output_file.exists()
     output_data = json.loads(output_file.read_text())
-    assert output_data["schema_version"] == "v2.2"
+    assert output_data["schema_version"] == "v2.3"
 
 
 def test_converter_cli_v2_to_v1_subprocess(

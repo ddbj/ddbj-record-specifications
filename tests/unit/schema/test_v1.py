@@ -226,7 +226,7 @@ def test_v1_entry_extra_forbid() -> None:
             type="chromosome",
             topology="linear",
             sequence=None,
-            unknown_field="value",
+            unknown_field="value",  # type: ignore[call-arg]
         )
 
 

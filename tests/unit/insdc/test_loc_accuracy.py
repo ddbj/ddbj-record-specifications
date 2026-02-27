@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from tests.unit.insdc.conftest import MakeDataFn
+
 from ddbj_record.insdc.validator import validate_insdc_v1, validate_insdc_v2
 
 # === v2 loc accuracy ===
 
 
-def test_unknown_feature_key_loc(make_v2_data) -> None:
+def test_unknown_feature_key_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "FAKE", "sequence_id": "seq1", "qualifiers": {}},
     ])
@@ -16,7 +18,7 @@ def test_unknown_feature_key_loc(make_v2_data) -> None:
     assert e.loc == ["features", 0, "type"]
 
 
-def test_unknown_qualifier_key_loc(make_v2_data) -> None:
+def test_unknown_qualifier_key_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -29,7 +31,7 @@ def test_unknown_qualifier_key_loc(make_v2_data) -> None:
     assert e.loc == ["features", 0, "qualifiers", "fake_qual"]
 
 
-def test_missing_mandatory_qualifier_loc(make_v2_data) -> None:
+def test_missing_mandatory_qualifier_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "assembly_gap",
@@ -45,7 +47,7 @@ def test_missing_mandatory_qualifier_loc(make_v2_data) -> None:
         assert isinstance(e.loc[3], str)
 
 
-def test_invalid_cv_value_loc(make_v2_data) -> None:
+def test_invalid_cv_value_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -58,7 +60,7 @@ def test_invalid_cv_value_loc(make_v2_data) -> None:
     assert e.loc == ["features", 0, "qualifiers", "codon_start", 0, "value"]
 
 
-def test_deprecated_qualifier_loc(make_v2_data) -> None:
+def test_deprecated_qualifier_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -71,7 +73,7 @@ def test_deprecated_qualifier_loc(make_v2_data) -> None:
     assert e.loc == ["features", 0, "qualifiers", "pseudo"]
 
 
-def test_constraint_violation_mutual_exclusion_loc(make_v2_data) -> None:
+def test_constraint_violation_mutual_exclusion_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -87,7 +89,7 @@ def test_constraint_violation_mutual_exclusion_loc(make_v2_data) -> None:
     assert e.loc == ["features", 0, "qualifiers"]
 
 
-def test_constraint_violation_dependency_loc(make_v2_data) -> None:
+def test_constraint_violation_dependency_loc(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -151,7 +153,7 @@ def test_source_feature_qualifier_loc() -> None:
 # === v1 loc accuracy ===
 
 
-def test_v1_feature_key_loc(make_v1_data) -> None:
+def test_v1_feature_key_loc(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {"id": "f1", "type": "FAKE", "qualifiers": {}},
     ])
@@ -160,7 +162,7 @@ def test_v1_feature_key_loc(make_v1_data) -> None:
     assert e.loc == ["ENTRIES", 0, "features", 1, "type"]
 
 
-def test_v1_qualifier_key_loc(make_v1_data) -> None:
+def test_v1_qualifier_key_loc(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {"id": "f1", "type": "CDS", "qualifiers": {"fake_qual": ["x"]}},
     ])
@@ -169,7 +171,7 @@ def test_v1_qualifier_key_loc(make_v1_data) -> None:
     assert e.loc == ["ENTRIES", 0, "features", 1, "qualifiers", "fake_qual"]
 
 
-def test_v1_invalid_cv_value_loc(make_v1_data) -> None:
+def test_v1_invalid_cv_value_loc(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {"id": "f1", "type": "CDS", "qualifiers": {"codon_start": ["9"]}},
     ])
@@ -178,7 +180,7 @@ def test_v1_invalid_cv_value_loc(make_v1_data) -> None:
     assert e.loc == ["ENTRIES", 0, "features", 1, "qualifiers", "codon_start", 0, "value"]
 
 
-def test_multiple_features_loc_indexing(make_v2_data) -> None:
+def test_multiple_features_loc_indexing(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -199,7 +201,7 @@ def test_multiple_features_loc_indexing(make_v2_data) -> None:
 # === context field verification ===
 
 
-def test_invalid_cv_value_context_has_allowed_values(make_v2_data) -> None:
+def test_invalid_cv_value_context_has_allowed_values(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -216,7 +218,7 @@ def test_invalid_cv_value_context_has_allowed_values(make_v2_data) -> None:
     assert e.context["current_value"] == "9"
 
 
-def test_deprecated_qualifier_context_has_replacement(make_v2_data) -> None:
+def test_deprecated_qualifier_context_has_replacement(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -230,7 +232,7 @@ def test_deprecated_qualifier_context_has_replacement(make_v2_data) -> None:
     assert "replacement" in e.context
 
 
-def test_constraint_violation_mutual_exclusion_context(make_v2_data) -> None:
+def test_constraint_violation_mutual_exclusion_context(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -251,7 +253,7 @@ def test_constraint_violation_mutual_exclusion_context(make_v2_data) -> None:
 # === stage field verification ===
 
 
-def test_insdc_errors_have_stage(make_v2_data) -> None:
+def test_insdc_errors_have_stage(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "FAKE",

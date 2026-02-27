@@ -10,7 +10,8 @@ from ddbj_record.validator import validate_json_data
 _VALID_V2_RECORD: dict[str, Any] = {
     "schema_version": "v2.0",
     "provenance": {},
-    "submission": {},
+    "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+    "experiments": [],
     "sequences": {
         "common_source": {
             "organism": "Homo sapiens",

@@ -178,7 +178,7 @@ class Reference(BaseModel):
         description="The title of the publication or reference.",
     )
     authors: list[Person] = Field(
-        default_factory=list,
+        ...,
         description="The list of authors who contributed to the publication.",
     )
     consortiums: list[Organization] | None = Field(
@@ -255,19 +255,19 @@ class Submission(BaseModel):
     """
 
     submitters: list[Person] = Field(
-        default_factory=list,
+        ...,
         description="The list of people who are submitting the data. The first element (index 0) is the contact person.",
     )
     db_xrefs: list[Xref] = Field(
-        default_factory=list,
+        ...,
         description="Cross-references to external databases related to this submission.",
     )
     references: list[Reference] = Field(
-        default_factory=list,
+        ...,
         description="List of publications or references associated with this submission.",
     )
     comments: list[list[str]] = Field(
-        default_factory=list,
+        ...,
         examples=[["Example comment line 1", "Annotated by DFAST"]],
         description="Additional comments or notes about the submission.",
     )
@@ -552,7 +552,7 @@ class Experiment(BaseModel):
         description="The sequencing or array platform information.",
     )
     experiment_attributes: dict[str, str] = Field(
-        default_factory=dict,
+        ...,
         examples=[{"assembly_method": "HGAP v. x.x", "genome_coverage": "60x"}],
         description="Experiment attributes as key-value pairs. This is a simplified version of EXPERIMENT_ATTRIBUTES, where each attribute is represented as a key-value pair.",
     )
@@ -608,7 +608,7 @@ class Source(BaseModel):
         description="The type of molecule sequenced",
     )  # mol_type are defined in INSDC specifications, but enumerating them would require schema updates every time they change, so we intentionally avoid enumeration here.
     qualifiers: dict[str, list[Qualifier]] = Field(
-        default_factory=dict,
+        ...,
         description="Additional qualifiers. Key is the qualifier name.",
     )
 
@@ -684,7 +684,7 @@ class Entry(BaseModel):
         description="Comments specific to this entry.",
     )
     source_features: list[SourceFeature] = Field(
-        default_factory=list,
+        ...,
         description="List of source features associated with this entry. Multiple source features can exist in a single entry.",
     )
 
@@ -704,7 +704,7 @@ class Sequences(BaseModel):
         description="The common source information that applies to all sequence entries unless overridden by individual entry sources.",
     )
     entries: list[Entry] = Field(
-        default_factory=list,
+        ...,
         description="List of individual sequence entries, each with its own metadata and optional sequence data.",
     )
 
@@ -743,7 +743,7 @@ class Feature(BaseModel):
         description="The ID of the sequence entry to which this feature belongs. Must match one of sequences.entries[].id.",
     )
     qualifiers: dict[str, list[Qualifier]] = Field(
-        default_factory=dict,
+        ...,
         description="Qualifiers that provide additional information about this feature. Key is the qualifier name.",
     )
     locus_tag_id: str | None = Field(
@@ -795,7 +795,7 @@ class DdbjRecord(BaseModel):
         description="Submission metadata including submitters, cross-references, and submission parameters.",
     )
     experiments: list[Experiment] = Field(
-        default_factory=list,
+        ...,
         description="List of experimental information associated with this submission.",
     )
     sequences: Sequences = Field(
@@ -803,7 +803,7 @@ class DdbjRecord(BaseModel):
         description="Collection of sequence entries with their metadata and optional sequence data.",
     )
     features: list[Feature] = Field(
-        default_factory=list,
+        ...,
         description="List of feature annotations associated with the sequences.",
     )
 

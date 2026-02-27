@@ -1,11 +1,18 @@
 {
   "schema_version": "v2.0",
   "provenance": {},
-  "submission": {},
+  "submission": {
+    "submitters": [],
+    "db_xrefs": [],
+    "references": [],
+    "comments": []
+  },
+  "experiments": [],
   "sequences": {
     "common_source": {
       "organism": "Paucilactobacillus hokkaidonensis",
-      "mol_type": "genomic DNA"
+      "mol_type": "genomic DNA",
+      "qualifiers": {}
     },
     "entries": [
       {
@@ -13,7 +20,8 @@
         "name": "seq1",
         "type": "chromosome",
         "topology": "linear",
-        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc"
+        "sequence": "atgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgcatgc",
+        "source_features": []
       }
     ]
   },

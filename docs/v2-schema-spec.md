@@ -1,6 +1,6 @@
-# v2 Schema Type Constraints (v2.2)
+# v2 Schema Type Constraints (v2.3)
 
-v2.1 で追加された Pydantic モデルの型制約仕様。v2.2 で KEYWORD/DATATYPE フィールドを追加。
+v2.1 で追加された Pydantic モデルの型制約仕様。v2.2 で KEYWORD/DATATYPE フィールドを追加。v2.3 で全 list/dict フィールドから default_factory を除去し required 化。
 
 ## フィールド制約一覧
 
@@ -25,9 +25,33 @@ v2.1 で追加された Pydantic モデルの型制約仕様。v2.2 で KEYWORD/
 
 このチェックは `validator.py` の Stage 2.5 で実行され、エラータイプは `invalid_date_value` となる。
 
+## v2.3: 全 list/dict フィールドの required 化
+
+v2.2 以前は `default_factory=list` / `default_factory=dict` により list/dict フィールドが JSON Schema 上 optional だった。
+v2.3 ではこれらを全て除去し、JSON 中に常に存在すべき required フィールドとした。
+
+対象フィールド:
+
+| モデル | フィールド | 型 |
+|---|---|---|
+| `Reference` | `authors` | `list[Person]` |
+| `Submission` | `submitters` | `list[Person]` |
+| `Submission` | `db_xrefs` | `list[Xref]` |
+| `Submission` | `references` | `list[Reference]` |
+| `Submission` | `comments` | `list[list[str]]` |
+| `Experiment` | `experiment_attributes` | `dict[str, str]` |
+| `Source` | `qualifiers` | `dict[str, list[Qualifier]]` |
+| `Entry` | `source_features` | `list[SourceFeature]` |
+| `Sequences` | `entries` | `list[Entry]` |
+| `Feature` | `qualifiers` | `dict[str, list[Qualifier]]` |
+| `DdbjRecord` | `experiments` | `list[Experiment]` |
+| `DdbjRecord` | `features` | `list[Feature]` |
+
+`default=None` の nullable フィールドは変更なし。
+
 ## レガシー schema_version の扱い
 
-`"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.2`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
+`"0.2"`, `"v2"` などのレガシー値は Pydantic `field_validator` で最新 minor version (`v2.3`) に正規化される。validator.py の Stage 1 でも同じ `normalize_schema_version()` を使用する。
 
 ## submitters の contact person 規約
 

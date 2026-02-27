@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from tests.unit.insdc.conftest import MakeDataFn
+
 from ddbj_record.insdc.models import MutualExclusionConstraint
 from ddbj_record.insdc.validator import (
     _check_single_constraint,
@@ -45,7 +47,7 @@ def test_mutual_exclusion_no_violation_with_one_qualifier() -> None:
 # === 2b: gene_synonym dependency with OR requires ===
 
 
-def test_gene_synonym_with_gene_produces_no_error(make_v2_data) -> None:
+def test_gene_synonym_with_gene_produces_no_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -62,7 +64,7 @@ def test_gene_synonym_with_gene_produces_no_error(make_v2_data) -> None:
     assert constraint_errors == []
 
 
-def test_gene_synonym_with_locus_tag_produces_no_error(make_v2_data) -> None:
+def test_gene_synonym_with_locus_tag_produces_no_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -79,7 +81,7 @@ def test_gene_synonym_with_locus_tag_produces_no_error(make_v2_data) -> None:
     assert constraint_errors == []
 
 
-def test_gene_synonym_without_gene_or_locus_tag_produces_error(make_v2_data) -> None:
+def test_gene_synonym_without_gene_or_locus_tag_produces_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -95,7 +97,7 @@ def test_gene_synonym_without_gene_or_locus_tag_produces_error(make_v2_data) -> 
     assert len(constraint_errors) == 1
 
 
-def test_v1_gene_synonym_with_locus_tag_produces_no_error(make_v1_data) -> None:
+def test_v1_gene_synonym_with_locus_tag_produces_no_error(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -112,7 +114,7 @@ def test_v1_gene_synonym_with_locus_tag_produces_no_error(make_v1_data) -> None:
     assert constraint_errors == []
 
 
-def test_v1_gene_synonym_without_gene_or_locus_tag_produces_error(make_v1_data) -> None:
+def test_v1_gene_synonym_without_gene_or_locus_tag_produces_error(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -131,7 +133,7 @@ def test_v1_gene_synonym_without_gene_or_locus_tag_produces_error(make_v1_data) 
 # === 2c: Non-allowed qualifier value validation skip ===
 
 
-def test_non_allowed_qualifier_not_value_validated(make_v2_data) -> None:
+def test_non_allowed_qualifier_not_value_validated(make_v2_data: MakeDataFn) -> None:
     """A qualifier not in the feature's allowed list should not get value-validated."""
     data = make_v2_data([
         {
@@ -150,7 +152,7 @@ def test_non_allowed_qualifier_not_value_validated(make_v2_data) -> None:
     assert value_errors == []
 
 
-def test_allowed_qualifier_still_value_validated(make_v2_data) -> None:
+def test_allowed_qualifier_still_value_validated(make_v2_data: MakeDataFn) -> None:
     """A qualifier in the feature's allowed list should still be value-validated."""
     data = make_v2_data([
         {
@@ -166,7 +168,7 @@ def test_allowed_qualifier_still_value_validated(make_v2_data) -> None:
     assert len(value_errors) >= 1
 
 
-def test_v1_non_allowed_qualifier_not_value_validated(make_v1_data) -> None:
+def test_v1_non_allowed_qualifier_not_value_validated(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",

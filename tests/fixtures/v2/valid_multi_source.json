@@ -1,11 +1,18 @@
 {
   "schema_version": "v2.0",
   "provenance": {},
-  "submission": {},
+  "submission": {
+    "submitters": [],
+    "db_xrefs": [],
+    "references": [],
+    "comments": []
+  },
+  "experiments": [],
   "sequences": {
     "common_source": {
       "organism": "Paucilactobacillus hokkaidonensis",
-      "mol_type": "genomic DNA"
+      "mol_type": "genomic DNA",
+      "qualifiers": {}
     },
     "entries": [
       {
@@ -35,11 +42,13 @@
             "location": "1..12",
             "source": {
               "organism": "Escherichia phage T4",
-              "mol_type": "genomic DNA"
+              "mol_type": "genomic DNA",
+              "qualifiers": {}
             }
           }
         ]
       }
     ]
-  }
+  },
+  "features": []
 }

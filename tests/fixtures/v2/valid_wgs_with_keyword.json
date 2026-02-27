@@ -73,7 +73,8 @@
   "sequences": {
     "common_source": {
       "organism": "Test organism",
-      "mol_type": "genomic DNA"
+      "mol_type": "genomic DNA",
+      "qualifiers": {}
     },
     "entries": [
       {

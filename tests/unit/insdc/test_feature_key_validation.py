@@ -1,9 +1,11 @@
+from tests.unit.insdc.conftest import MakeDataFn
+
 from ddbj_record.insdc.validator import validate_insdc_v2
 
 # === Phase 1: Feature Key Validation ===
 
 
-def test_known_feature_key_produces_no_error(make_v2_data) -> None:
+def test_known_feature_key_produces_no_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "CDS", "sequence_id": "seq1", "qualifiers": {"product": [{"value": "test"}]}},
     ])
@@ -12,7 +14,7 @@ def test_known_feature_key_produces_no_error(make_v2_data) -> None:
     assert feature_errors == []
 
 
-def test_unknown_feature_key_lenient_produces_warning(make_v2_data) -> None:
+def test_unknown_feature_key_lenient_produces_warning(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "NONEXISTENT_FEATURE", "sequence_id": "seq1", "qualifiers": {}},
     ])
@@ -23,7 +25,7 @@ def test_unknown_feature_key_lenient_produces_warning(make_v2_data) -> None:
     assert "NONEXISTENT_FEATURE" in feature_errors[0].msg
 
 
-def test_unknown_feature_key_strict_produces_error(make_v2_data) -> None:
+def test_unknown_feature_key_strict_produces_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "NONEXISTENT_FEATURE", "sequence_id": "seq1", "qualifiers": {}},
     ])
@@ -33,7 +35,7 @@ def test_unknown_feature_key_strict_produces_error(make_v2_data) -> None:
     assert feature_errors[0].severity == "error"
 
 
-def test_unknown_feature_key_loc_includes_index(make_v2_data) -> None:
+def test_unknown_feature_key_loc_includes_index(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "good_type", "sequence_id": "seq1", "qualifiers": {}},
         {"type": "BAD_TYPE", "sequence_id": "seq1", "qualifiers": {}},
@@ -44,7 +46,7 @@ def test_unknown_feature_key_loc_includes_index(make_v2_data) -> None:
     assert feature_errors[1].loc == ["features", 1, "type"]
 
 
-def test_all_standard_feature_keys_are_valid(make_v2_data) -> None:
+def test_all_standard_feature_keys_are_valid(make_v2_data: MakeDataFn) -> None:
     standard_features = [
         "assembly_gap", "C_region", "CDS", "centromere", "D-loop", "D_segment",
         "exon", "gap", "intron", "J_segment", "mat_peptide", "misc_binding",
@@ -64,7 +66,7 @@ def test_all_standard_feature_keys_are_valid(make_v2_data) -> None:
         assert feature_errors == [], f"Feature '{feature_type}' should be recognized"
 
 
-def test_case_sensitive_feature_key(make_v2_data) -> None:
+def test_case_sensitive_feature_key(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {"type": "cds", "sequence_id": "seq1", "qualifiers": {}},
     ])

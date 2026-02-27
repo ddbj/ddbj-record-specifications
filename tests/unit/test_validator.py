@@ -250,8 +250,13 @@ def test_validate_json_data_schema_version_consistency_check() -> None:
     data = {
         "schema_version": "v1.0",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is False
@@ -262,8 +267,13 @@ def test_validate_json_data_v2_with_v1_schema_version_returns_mismatch_error() -
     data = {
         "schema_version": "v1.0",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is False
@@ -275,8 +285,13 @@ def test_validate_json_data_legacy_0_2_passes_consistency() -> None:
     data = {
         "schema_version": "0.2",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is True
@@ -286,8 +301,13 @@ def test_validate_json_data_missing_schema_version_key_skips_consistency() -> No
     # schema_version key is missing -> skip consistency, let Pydantic catch it
     data = {
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is False
@@ -299,12 +319,17 @@ def test_validate_json_data_normalizes_legacy_value_before_pydantic() -> None:
     data = {
         "schema_version": "0.2",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     validate_json_data(data, "v2")
     # After validation, the dict should have normalized value (latest minor)
-    assert data["schema_version"] == "v2.2"
+    assert data["schema_version"] == "v2.3"
 
 
 # === parse_args ===
@@ -519,8 +544,9 @@ def _make_data_with_ref_and_insdc_errors() -> dict[str, Any]:
             "references": [],
             "comments": [],
         },
+        "experiments": [],
         "sequences": {
-            "common_source": {"organism": "Test", "mol_type": "genomic DNA"},
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
             "entries": [
                 {
                     "id": "seq1",
@@ -586,8 +612,9 @@ def test_fail_fast_false_with_only_insdc_warnings() -> None:
             "references": [],
             "comments": [],
         },
+        "experiments": [],
         "sequences": {
-            "common_source": {"organism": "Test", "mol_type": "genomic DNA"},
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
             "entries": [
                 {
                     "id": "seq1",
@@ -621,8 +648,13 @@ def test_schema_version_mismatch_has_stage() -> None:
     data = {
         "schema_version": "v1.0",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.errors[0].stage == "schema_version"
@@ -681,6 +713,8 @@ def _make_v2_data(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
         "schema_version": "v2.0",
         "provenance": {},
         "submission": {
+            "submitters": [],
+            "db_xrefs": [],
             "references": [
                 {
                     "title": "Test",
@@ -689,9 +723,11 @@ def _make_v2_data(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
                     "year": "2025",
                 }
             ],
+            "comments": [],
         },
+        "experiments": [],
         "sequences": {
-            "common_source": {"organism": "Test", "mol_type": "genomic DNA"},
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
             "entries": [
                 {
                     "id": "seq1",
@@ -714,7 +750,7 @@ def _apply_overrides(data: dict[str, Any], overrides: dict[str, Any]) -> None:
     """Apply nested overrides using dot notation."""
     for key, value in overrides.items():
         keys = key.split(".")
-        target = data
+        target: Any = data
         for k in keys[:-1]:
             target = target[int(k)] if k.isdigit() else target[k]
         last_key = keys[-1]
@@ -818,7 +854,7 @@ def test_entry_id_with_space_rejected() -> None:
 # --- schema_version ---
 
 
-@pytest.mark.parametrize("version", ["v2.0", "v2.1", "v2.2", "v2", "0.2"])
+@pytest.mark.parametrize("version", ["v2.0", "v2.1", "v2.2", "v2.3", "v2", "0.2"])
 def test_schema_version_valid_values_accepted(version: str) -> None:
     data = _make_v2_data({"schema_version": version})
     result = validate_schema(data, "v2")
@@ -931,9 +967,7 @@ def test_validate_contact_person_missing_email_warns() -> None:
 
 
 def test_validate_contact_person_complete_no_warning() -> None:
-    data = _make_v2_data(
-        {"submission.submitters": [{"name": "Test User", "email": "test@example.com"}]}
-    )
+    data = _make_v2_data({"submission.submitters": [{"name": "Test User", "email": "test@example.com"}]})
     result = validate_json_data(data, "v2", no_insdc_validation=True)
     assert result.valid is True
     contact_warnings = [

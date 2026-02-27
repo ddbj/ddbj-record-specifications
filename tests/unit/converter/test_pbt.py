@@ -1,4 +1,5 @@
 import warnings
+from typing import Any
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -21,7 +22,7 @@ st_datatype = st.one_of(st.none(), st.text(min_size=1, max_size=20))
 
 
 @st.composite
-def st_v1_record(draw: st.DrawFn) -> dict:
+def st_v1_record(draw: st.DrawFn) -> dict[str, Any]:
     organism = draw(st_organism)
     mol_type = draw(st_mol_type)
     category = draw(st_trad_category)
@@ -29,7 +30,7 @@ def st_v1_record(draw: st.DrawFn) -> dict:
     keywords = draw(st_keywords)
     datatype = draw(st_datatype)
 
-    common: dict = {
+    common: dict[str, Any] = {
         "SUBMITTER": {
             "ab_name": [ab_name],
             "contact": "Test User",
@@ -66,14 +67,14 @@ def st_v1_record(draw: st.DrawFn) -> dict:
 
 
 @st.composite
-def st_v2_record(draw: st.DrawFn) -> dict:
+def st_v2_record(draw: st.DrawFn) -> dict[str, Any]:
     organism = draw(st_organism)
     mol_type = draw(st_mol_type)
     ab_name = draw(st_abbr_name)
     keywords = draw(st_keywords)
     datatype = draw(st_datatype)
 
-    submission: dict = {
+    submission: dict[str, Any] = {
         "submitters": [
             {
                 "name": "Test User",
@@ -88,6 +89,7 @@ def st_v2_record(draw: st.DrawFn) -> dict:
                 ],
             }
         ],
+        "db_xrefs": [],
         "references": [
             {
                 "title": "Test Title",
@@ -96,6 +98,7 @@ def st_v2_record(draw: st.DrawFn) -> dict:
                 "year": "2025",
             }
         ],
+        "comments": [],
     }
     if keywords is not None:
         submission["keywords"] = keywords
@@ -120,8 +123,11 @@ def st_v2_record(draw: st.DrawFn) -> dict:
             "common_source": {
                 "organism": organism,
                 "mol_type": mol_type,
+                "qualifiers": {},
             },
+            "entries": [],
         },
+        "features": [],
     }
 
 
@@ -130,7 +136,7 @@ def st_v2_record(draw: st.DrawFn) -> dict:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_to_v2_produces_valid_v2(record_data: dict) -> None:
+def test_pbt_v1_to_v2_produces_valid_v2(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
     dumped = v2_obj.model_dump(exclude_none=True, by_alias=True)
@@ -139,7 +145,7 @@ def test_pbt_v1_to_v2_produces_valid_v2(record_data: dict) -> None:
 
 @given(record_data=st_v2_record())
 @settings(max_examples=100)
-def test_pbt_v2_to_v1_produces_valid_v1(record_data: dict) -> None:
+def test_pbt_v2_to_v1_produces_valid_v1(record_data: dict[str, Any]) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
     dumped = v1_obj.model_dump(exclude_none=True, by_alias=True)
@@ -148,7 +154,7 @@ def test_pbt_v2_to_v1_produces_valid_v1(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_to_v2_preserves_organism(record_data: dict) -> None:
+def test_pbt_v1_to_v2_preserves_organism(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
     assert v2_obj.sequences.common_source.organism == v1_obj.COMMON_SOURCE.organism
@@ -156,7 +162,7 @@ def test_pbt_v1_to_v2_preserves_organism(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_to_v2_preserves_mol_type(record_data: dict) -> None:
+def test_pbt_v1_to_v2_preserves_mol_type(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
     assert v2_obj.sequences.common_source.mol_type == v1_obj.COMMON_SOURCE.mol_type
@@ -164,7 +170,7 @@ def test_pbt_v1_to_v2_preserves_mol_type(record_data: dict) -> None:
 
 @given(record_data=st_v2_record())
 @settings(max_examples=100)
-def test_pbt_v2_to_v1_preserves_organism(record_data: dict) -> None:
+def test_pbt_v2_to_v1_preserves_organism(record_data: dict[str, Any]) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
     assert v1_obj.COMMON_SOURCE.organism == v2_obj.sequences.common_source.organism
@@ -172,7 +178,7 @@ def test_pbt_v2_to_v1_preserves_organism(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_to_v2_preserves_entries_count(record_data: dict) -> None:
+def test_pbt_v1_to_v2_preserves_entries_count(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
     assert len(v2_obj.sequences.entries) == len(v1_obj.ENTRIES)
@@ -188,15 +194,15 @@ def test_pbt_normalize_abbr_idempotent(abbr: str) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict) -> None:
+def test_pbt_v1_to_v2_output_schema_version_fixed(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     v2_obj = v1_to_v2(v1_obj)
-    assert v2_obj.schema_version == "v2.2"
+    assert v2_obj.schema_version == "v2.3"
 
 
 @given(record_data=st_v2_record())
 @settings(max_examples=100)
-def test_pbt_v2_to_v1_output_schema_version_fixed(record_data: dict) -> None:
+def test_pbt_v2_to_v1_output_schema_version_fixed(record_data: dict[str, Any]) -> None:
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
     assert v1_obj.schema_version == "v1.0"
@@ -241,7 +247,7 @@ def test_pbt_qualifier_roundtrip_preserves_value(value: str) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_common_source(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_common_source(record_data: dict[str, Any]) -> None:
     """v1->v2->v1 roundtrip preserves organism and mol_type in COMMON_SOURCE."""
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
@@ -257,7 +263,7 @@ def test_pbt_v1_roundtrip_preserves_common_source(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_trad_category(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_trad_category(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -268,7 +274,7 @@ def test_pbt_v1_roundtrip_preserves_trad_category(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_ab_names(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_ab_names(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -279,7 +285,7 @@ def test_pbt_v1_roundtrip_preserves_ab_names(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_division(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_division(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -293,7 +299,7 @@ def test_pbt_v1_roundtrip_preserves_division(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_keyword(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_keyword(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -308,7 +314,7 @@ def test_pbt_v1_roundtrip_preserves_keyword(record_data: dict) -> None:
 
 @given(record_data=st_v1_record())
 @settings(max_examples=100)
-def test_pbt_v1_roundtrip_preserves_datatype(record_data: dict) -> None:
+def test_pbt_v1_roundtrip_preserves_datatype(record_data: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(record_data)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)

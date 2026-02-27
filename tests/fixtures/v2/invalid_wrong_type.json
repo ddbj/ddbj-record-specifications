@@ -2,25 +2,32 @@
   "schema_version": "v2.0",
   "provenance": {},
   "submission": {
+    "submitters": [],
     "db_xrefs": [
       {
         "db": "invalid_db",
         "id": "PRJDB999999"
       }
-    ]
+    ],
+    "references": [],
+    "comments": []
   },
+  "experiments": [],
   "sequences": {
     "common_source": {
       "organism": "Paucilactobacillus hokkaidonensis",
-      "mol_type": "genomic DNA"
+      "mol_type": "genomic DNA",
+      "qualifiers": {}
     },
     "entries": [
       {
         "id": "seq1",
         "name": "seq1",
         "type": "unknown",
-        "topology": "linear"
+        "topology": "linear",
+        "source_features": []
       }
     ]
-  }
+  },
+  "features": []
 }

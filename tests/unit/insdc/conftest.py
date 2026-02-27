@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import pytest
+
+MakeDataFn = Callable[[list[dict[str, Any]]], dict[str, Any]]
 
 
 def _make_v2_data_raw(features: list[dict[str, Any]]) -> dict[str, Any]:
@@ -46,12 +49,12 @@ def _make_v1_data_raw(features: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 @pytest.fixture
-def make_v2_data():
+def make_v2_data() -> MakeDataFn:
     """Create minimal v2 JSON data with the given features."""
     return _make_v2_data_raw
 
 
 @pytest.fixture
-def make_v1_data():
+def make_v1_data() -> MakeDataFn:
     """Create minimal v1 JSON data with the given non-source features."""
     return _make_v1_data_raw

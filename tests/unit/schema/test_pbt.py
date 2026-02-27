@@ -1,3 +1,5 @@
+from typing import Any
+
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -16,25 +18,29 @@ st_topology = st.sampled_from(["circular", "linear"])
 
 
 @st.composite
-def st_v2_minimal_record(draw: st.DrawFn) -> dict:
+def st_v2_minimal_record(draw: st.DrawFn) -> dict[str, Any]:
     organism = draw(st_organism)
     mol_type = draw(st_mol_type)
 
     return {
         "schema_version": "v2.0",
         "provenance": {},
-        "submission": {},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
         "sequences": {
             "common_source": {
                 "organism": organism,
                 "mol_type": mol_type,
+                "qualifiers": {},
             },
+            "entries": [],
         },
+        "features": [],
     }
 
 
 @st.composite
-def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
+def st_v2_record_with_entry(draw: st.DrawFn) -> dict[str, Any]:
     organism = draw(st_organism)
     mol_type = draw(st_mol_type)
     entry_type = draw(st_entry_type)
@@ -44,11 +50,13 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
     return {
         "schema_version": "v2.0",
         "provenance": {},
-        "submission": {},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
         "sequences": {
             "common_source": {
                 "organism": organism,
                 "mol_type": mol_type,
+                "qualifiers": {},
             },
             "entries": [
                 {
@@ -56,9 +64,11 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
                     "name": entry_id,
                     "type": entry_type,
                     "topology": topology,
+                    "source_features": [],
                 }
             ],
         },
+        "features": [],
     }
 
 
@@ -67,21 +77,21 @@ def st_v2_record_with_entry(draw: st.DrawFn) -> dict:
 
 @given(record_data=st_v2_minimal_record())
 @settings(max_examples=100)
-def test_pbt_v2_minimal_record_validates(record_data: dict) -> None:
+def test_pbt_v2_minimal_record_validates(record_data: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(record_data)
-    assert record.schema_version == "v2.2"
+    assert record.schema_version == "v2.3"
 
 
 @given(record_data=st_v2_record_with_entry())
 @settings(max_examples=100)
-def test_pbt_v2_record_with_entry_validates(record_data: dict) -> None:
+def test_pbt_v2_record_with_entry_validates(record_data: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(record_data)
     assert len(record.sequences.entries) == 1
 
 
 @given(record_data=st_v2_minimal_record())
 @settings(max_examples=100)
-def test_pbt_schema_version_normalization_idempotent(record_data: dict) -> None:
+def test_pbt_schema_version_normalization_idempotent(record_data: dict[str, Any]) -> None:
     record1 = DdbjRecord.model_validate(record_data)
     dumped = record1.model_dump(exclude_none=True, by_alias=True)
     record2 = DdbjRecord.model_validate(dumped)
@@ -90,7 +100,7 @@ def test_pbt_schema_version_normalization_idempotent(record_data: dict) -> None:
 
 @given(record_data=st_v2_minimal_record())
 @settings(max_examples=100)
-def test_pbt_model_dump_validate_roundtrip(record_data: dict) -> None:
+def test_pbt_model_dump_validate_roundtrip(record_data: dict[str, Any]) -> None:
     record1 = DdbjRecord.model_validate(record_data)
     dumped = record1.model_dump(exclude_none=True, by_alias=True)
     record2 = DdbjRecord.model_validate(dumped)

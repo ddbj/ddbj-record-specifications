@@ -168,6 +168,7 @@ def test_v1_to_v2_to_v1_preserves_keyword(v1_valid_wgs_with_keyword: dict[str, A
         v2_obj = v1_to_v2(v1_obj)
         v1_back = v2_to_v1(v2_obj)
     assert v1_back.COMMON.KEYWORD is not None
+    assert v1_obj.COMMON.KEYWORD is not None
     assert v1_back.COMMON.KEYWORD.keyword == v1_obj.COMMON.KEYWORD.keyword
 
 
@@ -178,6 +179,7 @@ def test_v1_to_v2_to_v1_preserves_datatype(v1_valid_wgs_with_keyword: dict[str, 
         v2_obj = v1_to_v2(v1_obj)
         v1_back = v2_to_v1(v2_obj)
     assert v1_back.COMMON.DATATYPE is not None
+    assert v1_obj.COMMON.DATATYPE is not None
     assert v1_back.COMMON.DATATYPE.type == v1_obj.COMMON.DATATYPE.type
 
 

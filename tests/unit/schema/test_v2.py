@@ -23,7 +23,7 @@ from ddbj_record.validator import validate_json_data
 
 def test_v2_valid_minimal_parses(v2_valid_minimal: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_minimal)
-    assert record.schema_version == "v2.2"
+    assert record.schema_version == "v2.3"
 
 
 def test_v2_valid_dfc_gnm_parses(v2_valid_dfc_gnm: dict[str, Any]) -> None:
@@ -40,12 +40,12 @@ def test_v2_valid_wf_dfc_wgs_parses(v2_valid_wf_dfc_wgs: dict[str, Any]) -> None
 
 def test_v2_valid_dfv_parses(v2_valid_dfv: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_dfv)
-    assert record.schema_version == "v2.2"
+    assert record.schema_version == "v2.3"
 
 
 def test_v2_valid_wf_dfv_parses(v2_valid_wf_dfv: dict[str, Any]) -> None:
     record = DdbjRecord.model_validate(v2_valid_wf_dfv)
-    assert record.schema_version == "v2.2"
+    assert record.schema_version == "v2.3"
 
 
 def test_v2_valid_boolean_qualifier_parses(v2_valid_boolean_qualifier: dict[str, Any]) -> None:
@@ -92,31 +92,41 @@ def test_v2_invalid_extra_field_raises(v2_invalid_extra_field: dict[str, Any]) -
 def test_v2_legacy_schema_version_normalized(v2_legacy_schema_version: dict[str, Any]) -> None:
     result = validate_json_data(v2_legacy_schema_version, "v2")
     assert result.valid is True
-    assert v2_legacy_schema_version["schema_version"] == "v2.2"
+    assert v2_legacy_schema_version["schema_version"] == "v2.3"
 
 
 def test_v2_schema_version_02_normalized() -> None:
     data = {
         "schema_version": "0.2",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is True
-    assert data["schema_version"] == "v2.2"
+    assert data["schema_version"] == "v2.3"
 
 
 def test_v2_schema_version_v2_normalized() -> None:
     data = {
         "schema_version": "v2",
         "provenance": {},
-        "submission": {},
-        "sequences": {"common_source": {"organism": "Test", "mol_type": "genomic DNA"}},
+        "submission": {"submitters": [], "db_xrefs": [], "references": [], "comments": []},
+        "experiments": [],
+        "sequences": {
+            "common_source": {"organism": "Test", "mol_type": "genomic DNA", "qualifiers": {}},
+            "entries": [],
+        },
+        "features": [],
     }
     result = validate_json_data(data, "v2")
     assert result.valid is True
-    assert data["schema_version"] == "v2.2"
+    assert data["schema_version"] == "v2.3"
 
 
 # === Literal type boundary values ===
@@ -130,6 +140,7 @@ def test_v2_entry_type_valid_values(entry_type: str) -> None:
         type=entry_type,
         topology="linear",
         sequence=None,
+        source_features=[],
     )
     assert entry.type == entry_type
 
@@ -142,18 +153,19 @@ def test_v2_entry_type_invalid_value_raises() -> None:
             type="unknown",
             topology="linear",
             sequence=None,
+            source_features=[],
         )
 
 
 @pytest.mark.parametrize("status", ["unpublished", "in-press", "published"])
 def test_v2_reference_status_valid_values(status: str) -> None:
-    ref = Reference(title="Test", status=status, year="2025")
+    ref = Reference(title="Test", authors=[], status=status, year="2025")
     assert ref.status == status
 
 
 def test_v2_reference_status_invalid_value_raises() -> None:
     with pytest.raises(ValidationError):
-        Reference(title="Test", status="draft", year="2025")
+        Reference(title="Test", authors=[], status="draft", year="2025")
 
 
 @pytest.mark.parametrize(
@@ -192,17 +204,17 @@ def test_v2_provenance_extra_allow() -> None:
 
 def test_v2_submission_extra_forbid() -> None:
     with pytest.raises(ValidationError):
-        Submission(unknown_field="value")
+        Submission(submitters=[], db_xrefs=[], references=[], comments=[], unknown_field="value")  # type: ignore[call-arg]
 
 
 def test_v2_address_extra_forbid() -> None:
     with pytest.raises(ValidationError):
-        Address(country="Japan", city="Tokyo", extra="bad")
+        Address(country="Japan", city="Tokyo", extra="bad")  # type: ignore[call-arg]
 
 
 def test_v2_person_extra_forbid() -> None:
     with pytest.raises(ValidationError):
-        Person(name="Test", extra="bad")
+        Person(name="Test", extra="bad")  # type: ignore[call-arg]
 
 
 # === Qualifier.value is always str ===
@@ -237,13 +249,13 @@ def test_v2_person_all_none_fields_valid() -> None:
 
 
 def test_v2_submission_empty_submitters_list_valid() -> None:
-    sub = Submission()
+    sub = Submission(submitters=[], db_xrefs=[], references=[], comments=[])
     assert sub.submitters == []
 
 
 def test_v2_entry_comments_none_vs_empty_list() -> None:
-    entry_none = Entry(id="e1", name="e1", type="chromosome", topology="linear")
-    entry_empty = Entry(id="e2", name="e2", type="chromosome", topology="linear", comments=[])
+    entry_none = Entry(id="e1", name="e1", type="chromosome", topology="linear", source_features=[])
+    entry_empty = Entry(id="e2", name="e2", type="chromosome", topology="linear", source_features=[], comments=[])
     assert entry_none.comments is None
     assert entry_empty.comments == []
 
@@ -277,21 +289,21 @@ def test_v2_valid_wgs_with_keyword_parses(v2_valid_wgs_with_keyword: dict[str, A
 
 
 def test_v2_submission_keywords_none_by_default() -> None:
-    sub = Submission()
+    sub = Submission(submitters=[], db_xrefs=[], references=[], comments=[])
     assert sub.keywords is None
     assert sub.datatype is None
 
 
 def test_v2_submission_keywords_list() -> None:
-    sub = Submission(keywords=["WGS", "STANDARD_DRAFT"])
+    sub = Submission(submitters=[], db_xrefs=[], references=[], comments=[], keywords=["WGS", "STANDARD_DRAFT"])
     assert sub.keywords == ["WGS", "STANDARD_DRAFT"]
 
 
 def test_v2_submission_keywords_empty_list() -> None:
-    sub = Submission(keywords=[])
+    sub = Submission(submitters=[], db_xrefs=[], references=[], comments=[], keywords=[])
     assert sub.keywords == []
 
 
 def test_v2_submission_datatype_str() -> None:
-    sub = Submission(datatype="WGS")
+    sub = Submission(submitters=[], db_xrefs=[], references=[], comments=[], datatype="WGS")
     assert sub.datatype == "WGS"

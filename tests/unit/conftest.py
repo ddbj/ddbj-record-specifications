@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -10,7 +10,7 @@ FIXTURES_DIR = Path(__file__).resolve().parent.parent.joinpath("fixtures")
 def _load_json(relative_path: str) -> dict[str, Any]:
     path = FIXTURES_DIR.joinpath(relative_path)
     with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
 
 
 # === v1 fixtures ===

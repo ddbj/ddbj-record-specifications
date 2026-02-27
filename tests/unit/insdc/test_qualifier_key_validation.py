@@ -1,9 +1,11 @@
+from tests.unit.insdc.conftest import MakeDataFn
+
 from ddbj_record.insdc.validator import validate_insdc_v1, validate_insdc_v2
 
 # === Phase 2: Qualifier Key Validation (v2) ===
 
 
-def test_valid_qualifier_key_produces_no_error(make_v2_data) -> None:
+def test_valid_qualifier_key_produces_no_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -19,7 +21,7 @@ def test_valid_qualifier_key_produces_no_error(make_v2_data) -> None:
     assert qual_errors == []
 
 
-def test_unknown_qualifier_key_lenient_produces_warning(make_v2_data) -> None:
+def test_unknown_qualifier_key_lenient_produces_warning(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -34,7 +36,7 @@ def test_unknown_qualifier_key_lenient_produces_warning(make_v2_data) -> None:
     assert "nonexistent_qual" in qual_errors[0].msg
 
 
-def test_unknown_qualifier_key_strict_produces_error(make_v2_data) -> None:
+def test_unknown_qualifier_key_strict_produces_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -48,7 +50,7 @@ def test_unknown_qualifier_key_strict_produces_error(make_v2_data) -> None:
     assert qual_errors[0].severity == "error"
 
 
-def test_missing_mandatory_qualifier_produces_error(make_v2_data) -> None:
+def test_missing_mandatory_qualifier_produces_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "assembly_gap",
@@ -67,7 +69,7 @@ def test_missing_mandatory_qualifier_produces_error(make_v2_data) -> None:
     assert "gap_type" in messages
 
 
-def test_mandatory_qualifier_present_produces_no_error(make_v2_data) -> None:
+def test_mandatory_qualifier_present_produces_no_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "assembly_gap",
@@ -87,7 +89,7 @@ def test_mandatory_qualifier_present_produces_no_error(make_v2_data) -> None:
     assert feature_mandatory_errors == []
 
 
-def test_deprecated_qualifier_produces_warning(make_v2_data) -> None:
+def test_deprecated_qualifier_produces_warning(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "CDS",
@@ -105,7 +107,7 @@ def test_deprecated_qualifier_produces_warning(make_v2_data) -> None:
     assert "pseudogene" in deprecated_errors[0].msg
 
 
-def test_qualifier_for_wrong_feature_produces_error(make_v2_data) -> None:
+def test_qualifier_for_wrong_feature_produces_error(make_v2_data: MakeDataFn) -> None:
     data = make_v2_data([
         {
             "type": "centromere",
@@ -180,7 +182,7 @@ def test_v2_unknown_source_qualifier_produces_warning() -> None:
 # === Phase 2: v1 Qualifier Validation ===
 
 
-def test_v1_unknown_qualifier_key_produces_warning(make_v1_data) -> None:
+def test_v1_unknown_qualifier_key_produces_warning(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",

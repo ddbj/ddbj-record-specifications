@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from tests.unit.insdc.conftest import MakeDataFn
+
 from ddbj_record.insdc.validator import validate_insdc_v1
 
 # === v1 mutual_exclusion ===
 
 
-def test_v1_mutual_exclusion_pseudo_pseudogene(make_v1_data) -> None:
+def test_v1_mutual_exclusion_pseudo_pseudogene(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -49,7 +51,7 @@ def test_v1_mutual_exclusion_germline_rearranged() -> None:
     assert any("germline" in e.msg and "rearranged" in e.msg for e in constraint_errors)
 
 
-def test_v1_no_mutual_exclusion_with_single_qualifier(make_v1_data) -> None:
+def test_v1_no_mutual_exclusion_with_single_qualifier(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -123,7 +125,7 @@ def test_v1_dependency_metagenome_source_satisfied() -> None:
 # === v1 conditional_mandatory ===
 
 
-def test_v1_conditional_mandatory_cds_product_required(make_v1_data) -> None:
+def test_v1_conditional_mandatory_cds_product_required(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -138,7 +140,7 @@ def test_v1_conditional_mandatory_cds_product_required(make_v1_data) -> None:
     assert len(mandatory_errors) >= 1
 
 
-def test_v1_conditional_mandatory_cds_product_with_pseudo_ok(make_v1_data) -> None:
+def test_v1_conditional_mandatory_cds_product_with_pseudo_ok(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -154,7 +156,7 @@ def test_v1_conditional_mandatory_cds_product_with_pseudo_ok(make_v1_data) -> No
     assert mandatory_errors == []
 
 
-def test_v1_conditional_mandatory_assembly_gap_linkage_evidence(make_v1_data) -> None:
+def test_v1_conditional_mandatory_assembly_gap_linkage_evidence(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",
@@ -170,7 +172,7 @@ def test_v1_conditional_mandatory_assembly_gap_linkage_evidence(make_v1_data) ->
     assert len(mandatory_errors) >= 1
 
 
-def test_v1_conditional_mandatory_assembly_gap_other_gap_type_ok(make_v1_data) -> None:
+def test_v1_conditional_mandatory_assembly_gap_other_gap_type_ok(make_v1_data: MakeDataFn) -> None:
     data = make_v1_data([
         {
             "id": "f1",

@@ -29,6 +29,7 @@
         ]
       }
     ],
+    "db_xrefs": [],
     "references": [
       {
         "title": "",
@@ -46,8 +47,10 @@
         "status": "unpublished",
         "year": ""
       }
-    ]
+    ],
+    "comments": []
   },
+  "experiments": [],
   "sequences": {
     "common_source": {
       "organism": "",

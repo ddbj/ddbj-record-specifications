@@ -32,7 +32,7 @@ def test_v1_to_v2_fixture_matches_expected(
 def test_v1_to_v2_output_schema_version(v1_to_v2_input: dict[str, Any]) -> None:
     v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
     result = v1_to_v2(v1_obj)
-    assert result.schema_version == "v2.2"
+    assert result.schema_version == "v2.3"
 
 
 def test_v1_to_v2_output_is_valid_v2(v1_to_v2_input: dict[str, Any]) -> None:
@@ -706,9 +706,7 @@ def test_convert_submission_ghost_contact_at_front() -> None:
 
 
 def test_convert_submission_keyword_to_keywords() -> None:
-    v1_obj = _make_v1_minimal(
-        {"COMMON.KEYWORD": {"keyword": ["WGS", "STANDARD_DRAFT"]}}
-    )
+    v1_obj = _make_v1_minimal({"COMMON.KEYWORD": {"keyword": ["WGS", "STANDARD_DRAFT"]}})
     submission = _convert_submission(v1_obj)
     assert submission.keywords == ["WGS", "STANDARD_DRAFT"]
 
