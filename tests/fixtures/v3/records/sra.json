@@ -1,0 +1,229 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "SRA XML"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Yuki Sato",
+        "first_name": "Yuki",
+        "last_name": "Sato",
+        "email": "sato@example.ac.jp",
+        "role": "contact",
+        "organizations": [
+          {
+            "name": "Example Medical University",
+            "type": "institution",
+            "department": "Department of Genomic Medicine",
+            "address": {
+              "country": "Japan",
+              "state": "Osaka",
+              "city": "Suita"
+            }
+          }
+        ]
+      }
+    ],
+    "hold_date": "2026-12-31"
+  },
+  "project": {
+    "accession": "PRJDB12345",
+    "alias": "rnaseq-liver-project",
+    "title": "Transcriptome analysis of human liver cancer",
+    "description": "RNA-seq analysis comparing tumor and normal tissue from liver cancer patients.",
+    "project_type": "primary",
+    "organism": {
+      "name": "Homo sapiens",
+      "taxonomy_id": 9606
+    },
+    "target": {
+      "sample_scope": "monoisolate",
+      "material": "transcriptome",
+      "capture": "whole",
+      "method": "sequencing"
+    }
+  },
+  "samples": [
+    {
+      "accession": "SAMD00000001",
+      "alias": "tumor-sample",
+      "title": "Liver tumor tissue",
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      },
+      "attributes": [
+        {
+          "name": "sample_name",
+          "value": "Liver tumor tissue"
+        },
+        {
+          "name": "tissue",
+          "value": "liver"
+        },
+        {
+          "name": "disease",
+          "value": "hepatocellular carcinoma"
+        },
+        {
+          "name": "collection_date",
+          "value": "2025-03-15"
+        }
+      ]
+    },
+    {
+      "accession": "SAMD00000002",
+      "alias": "normal-sample",
+      "title": "Liver normal tissue",
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      },
+      "attributes": [
+        {
+          "name": "sample_name",
+          "value": "Liver normal tissue"
+        },
+        {
+          "name": "tissue",
+          "value": "liver"
+        },
+        {
+          "name": "disease",
+          "value": "normal"
+        },
+        {
+          "name": "collection_date",
+          "value": "2025-03-15"
+        }
+      ]
+    }
+  ],
+  "experiments": [
+    {
+      "accession": "DRX000001",
+      "alias": "tumor-exp",
+      "title": "RNA-seq of liver tumor tissue",
+      "library": {
+        "name": "tumor-rna-lib",
+        "strategy": "RNA-Seq",
+        "source": "TRANSCRIPTOMIC",
+        "selection": "cDNA",
+        "layout": "paired",
+        "nominal_length": 300,
+        "construction_protocol": "TruSeq Stranded mRNA Library Prep Kit"
+      },
+      "platform": {
+        "type": "ILLUMINA",
+        "instrument_model": "Illumina NovaSeq 6000"
+      }
+    },
+    {
+      "accession": "DRX000002",
+      "alias": "normal-exp",
+      "title": "RNA-seq of liver normal tissue",
+      "library": {
+        "name": "normal-rna-lib",
+        "strategy": "RNA-Seq",
+        "source": "TRANSCRIPTOMIC",
+        "selection": "cDNA",
+        "layout": "paired",
+        "nominal_length": 300,
+        "construction_protocol": "TruSeq Stranded mRNA Library Prep Kit"
+      },
+      "platform": {
+        "type": "ILLUMINA",
+        "instrument_model": "Illumina NovaSeq 6000"
+      }
+    }
+  ],
+  "runs": [
+    {
+      "accession": "DRR000001",
+      "alias": "tumor-run",
+      "title": "Sequencing of liver tumor RNA-seq library",
+      "run_date": "2025-04-01",
+      "files": [
+        {
+          "filename": "tumor_R1.fastq.gz",
+          "filetype": "fastq",
+          "checksum_method": "MD5",
+          "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        {
+          "filename": "tumor_R2.fastq.gz",
+          "filetype": "fastq",
+          "checksum_method": "MD5",
+          "checksum": "e99a18c428cb38d5f260853678922e03"
+        }
+      ]
+    },
+    {
+      "accession": "DRR000002",
+      "alias": "normal-run",
+      "title": "Sequencing of liver normal RNA-seq library",
+      "run_date": "2025-04-01",
+      "files": [
+        {
+          "filename": "normal_R1.fastq.gz",
+          "filetype": "fastq",
+          "checksum_method": "MD5",
+          "checksum": "ab56b4d92b40713acc5af89985d4b786"
+        },
+        {
+          "filename": "normal_R2.fastq.gz",
+          "filetype": "fastq",
+          "checksum_method": "MD5",
+          "checksum": "3d0941e7539bf2c44a8e25c82e3f74f9"
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "alias": "tumor-exp"
+      },
+      "target": {
+        "db": "sample",
+        "id": "tumor-sample"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "alias": "normal-exp"
+      },
+      "target": {
+        "db": "sample",
+        "id": "normal-sample"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "tumor-run"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "tumor-exp"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "normal-run"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "normal-exp"
+      }
+    }
+  ]
+}

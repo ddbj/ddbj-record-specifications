@@ -30,7 +30,7 @@ DDBJ Record のスキーマ仕様自体のバージョン。JSON の `schema_ver
 - 形式: `v{major}.{minor}` (e.g., `v1.0`, `v2.0`, `v2.1`)
 - major: スキーマ構造の根本的な再設計。新しいスキーマファイル (e.g., `v3.py`) を作成する
 - minor: 同じ設計思想の範囲内での変更 (フィールドの追加・削除・名称変更、型の調整など)。既存スキーマファイル内で更新する
-  - minor の変更は後方互換とは限らない。変更内容は CHANGELOG.md に記録する
+  - minor の変更は後方互換とは限らない。変更内容は GitHub Release に記録する
 
 CLI やモジュール名では major 部分のみ使用する (e.g., `--version v2`, `ddbj_record.schema.v2`)。
 JSON の `schema_version` フィールドには minor を含めた完全な表記 (e.g., `"v2.0"`) を記録する。
@@ -44,22 +44,25 @@ Python パッケージ `ddbj-record` としてのバージョン。[Semantic Ver
 - 形式: `MAJOR.MINOR.PATCH` (e.g., `0.2.0`, `1.0.0`)
 - git tag が single source of truth (hatch-vcs により自動解決)
 - Specification version とは独立して管理する
-- 各リリースにおける変更内容は CHANGELOG.md に記録する
+- 各リリースにおける変更内容は GitHub Release に記録する
 
 ## スキーマ仕様
 
 現状、以下の spec version が存在する:
 
-| Version | 概要 | Python 定義 |
-|---|---|---|
-| v1.0 | DFAST 互換のレガシー形式 | [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py) |
-| v2.0 | 構造化された現行形式 | [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py) |
+| Version | 概要 | Python 定義 | 仕様書 |
+|---|---|---|---|
+| v1.0 | DFAST 互換のレガシー形式 | [`ddbj_record/schema/v1.py`](./ddbj_record/schema/v1.py) | - |
+| v2.0 | 構造化された現行形式 | [`ddbj_record/schema/v2.py`](./ddbj_record/schema/v2.py) | [`docs/v2-schema.md`](./docs/v2-schema.md) |
+| v3.0 | 全形式統一フォーマット（設計中） | - | [`docs/v3-schema.md`](./docs/v3-schema.md) |
+
+v3 は全登録形式（Trad, BioProject, BioSample, SRA, JGA, ST.26, GFF, Assembly）を統一的に扱う新フォーマットとして `record-v3` ブランチで設計を進めている。詳細は [v3 スキーマ仕様](./docs/v3-schema.md)、[v3 Validator 仕様](./docs/v3-validator.md)、[v3 Converter 仕様](./docs/v3-converter.md) を参照。
 
 JSON Schema は [GitHub Release](https://github.com/ddbj/ddbj-record-specifications/releases) からダウンロードするか、ローカルで `uv run dump_json_schema --version v1` / `--version v2` で生成する。
 
 ## Validator
 
-スキーマに基づくバリデーションを行う。詳細は [Validator 機能仕様](./docs/validator-spec.md) を参照。
+スキーマに基づくバリデーションを行う。詳細は [Validator 機能仕様](./docs/v2-validator.md) を参照。
 
 ```bash
 ddbj_record_validator --version v2 --input input.json
@@ -67,7 +70,7 @@ ddbj_record_validator --version v2 --input input.json
 
 ## Converter
 
-スキーマバージョン間の変換を行う。詳細は [Converter 機能仕様](./docs/converter-spec.md) を参照。
+スキーマバージョン間の変換を行う。詳細は [Converter 機能仕様](./docs/v2-converter.md) を参照。
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input input.json --output output.json
@@ -113,8 +116,7 @@ uv run dump_json_schema --version draft
 ### Release
 
 1. 必要に応じて `ddbj_record/schema/` 内の `schema_version` を変更する
-2. CHANGELOG.md を更新する
-3. タグを打って push する:
+2. タグを打って push する:
 
 ```bash
 git tag 0.2.0 && git push origin 0.2.0
@@ -129,19 +131,15 @@ CI が以下を自動実行する:
 
 ## Known Limitations / Future Improvements
 
-v2 スキーマにおける既知の設計課題と将来の改善候補を以下に記録する。
+v2 スキーマにおける既知の設計課題。v3 で解決予定。
 
 ### Submission モデルの責務過多
 
-`Submission` に登録メタデータ (submitters, references, comments, hold_date)、データ分類 (trad_submission_category, division)、命名規則 (locus_tag_prefix, seq_prefix) が混在している。将来の major version では以下のような分離を検討する:
-
-- **Submission**: submitters, references, comments, hold_date
-- **DataClassification** (または Sequences に統合): trad_submission_category, division
-- **NamingConvention** (または Sequences に統合): locus_tag_prefix, seq_prefix
+`Submission` に登録メタデータ、データ分類、命名規則が混在している。v3 では Submission を thin 化し、各情報を適切なモデル（Project, Sequences, Provenance）に分離する。詳細は [v3 Converter 仕様の責務分解表](./docs/v3-converter.md#submission-の責務分解v2--v3) を参照。
 
 ### Assembly 情報と Experiment の混在
 
-v1 の `ST_COMMENT` (Assembly Method, Coverage, Sequencing Technology) を v2 では `Experiment` に格納しているが、Assembly 情報 (どうアセンブルしたか) と Experiment (何をどうシーケンスしたか) は本質的に異なる概念である。現在のコンバーターは `id: "st_comment_experiment"` というマジックストリングで Assembly 用の Experiment を判別しており、暗黙の規約に依存している。将来の major version では Assembly を独立したモデルとして分離することを検討する。
+v2 では `ST_COMMENT` を `Experiment` に格納しているが、Assembly と Experiment は本質的に異なる概念である。v3 では Assembly を独立モデルとし、ST_COMMENT は `Sequences.structured_comments` に移動する。
 
 ## License
 

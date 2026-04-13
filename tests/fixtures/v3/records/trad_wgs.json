@@ -1,0 +1,224 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "DFAST",
+    "submission_category": "WGS"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Taro Yamada",
+        "first_name": "Taro",
+        "last_name": "Yamada",
+        "abbreviation": "Yamada,T.",
+        "email": "yamada@example.ac.jp",
+        "role": "contact",
+        "organizations": [
+          {
+            "name": "Example University",
+            "type": "institution",
+            "department": "Department of Microbiology",
+            "address": {
+              "country": "Japan",
+              "state": "Tokyo",
+              "city": "Bunkyo",
+              "street": "Hongo 7-3-1",
+              "postal_code": "113-0033"
+            }
+          }
+        ]
+      }
+    ],
+    "hold_date": "2026-06-30"
+  },
+  "project": {
+    "locus_tag_prefix": [
+      "ECK12"
+    ],
+    "publications": [
+      {
+        "title": "Draft genome sequence of Escherichia coli K-12",
+        "status": "unpublished",
+        "authors": [
+          {
+            "abbreviation": "Yamada,T."
+          }
+        ]
+      }
+    ]
+  },
+  "sequences": {
+    "seq_prefix": "contig",
+    "common_source": {
+      "organism": {
+        "name": "Escherichia coli"
+      },
+      "mol_type": "genomic DNA",
+      "qualifiers": {
+        "strain": [
+          {
+            "value": "K-12"
+          }
+        ],
+        "isolation_source": [
+          {
+            "value": "laboratory culture"
+          }
+        ],
+        "geo_loc_name": [
+          {
+            "value": "Japan:Tokyo"
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "alias": "contig_001",
+        "name": "contig_001",
+        "type": "unplaced",
+        "topology": "linear",
+        "sequence": "atgaaagcaattttcg...(523890 bp)...tga",
+        "source_features": [
+          {
+            "location": "1..523890",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@ @@[entry]@@"
+            ],
+            "alias": "feature_1"
+          }
+        ]
+      },
+      {
+        "alias": "contig_002",
+        "name": "contig_002",
+        "type": "unplaced",
+        "topology": "linear",
+        "sequence": "gcattagcaagatttc...(412567 bp)...caa",
+        "source_features": [
+          {
+            "location": "1..412567",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@ @@[entry]@@"
+            ],
+            "alias": "feature_2"
+          }
+        ]
+      },
+      {
+        "alias": "contig_003",
+        "name": "contig_003",
+        "type": "unplaced",
+        "topology": "linear",
+        "sequence": "ttgccagaaacgttaa...(189234 bp)...atg",
+        "source_features": [
+          {
+            "location": "1..189234",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@ @@[entry]@@"
+            ],
+            "alias": "feature_3"
+          }
+        ]
+      }
+    ],
+    "structured_comments": [
+      {
+        "tagset_id": "Genome-Assembly-Data",
+        "fields": {
+          "Assembly Method": "SPAdes v. 3.15.5",
+          "Genome Coverage": "120x",
+          "Sequencing Technology": "Illumina NovaSeq 6000"
+        }
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "CDS",
+      "location": "125..1678",
+      "sequence_id": "contig_001",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          }
+        ]
+      },
+      "locus_tag_id": "00010",
+      "alias": "feature_10"
+    },
+    {
+      "type": "CDS",
+      "location": "complement(1750..2892)",
+      "sequence_id": "contig_001",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "ABC transporter permease"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "abcT"
+          }
+        ],
+        "inference": [
+          {
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          },
+          {
+            "value": "similar to AA sequence:RefSeq:WP_001234567.1"
+          }
+        ]
+      },
+      "locus_tag_id": "00020",
+      "alias": "feature_11"
+    }
+  ],
+  "assembly": {
+    "assembly_level": "contig",
+    "genome_representation": "full"
+  },
+  "relations": [
+    {
+      "type": "xref",
+      "target": {
+        "db": "bioproject",
+        "id": "PRJDB88888"
+      }
+    },
+    {
+      "type": "xref",
+      "target": {
+        "db": "biosample",
+        "id": "SAMD888888"
+      }
+    }
+  ]
+}

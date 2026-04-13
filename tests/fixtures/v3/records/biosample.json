@@ -6,6 +6,7 @@
   "samples": [
     {
       "accession": "SAMD00000001",
+      "alias": "bradyrhizobium-doa9",
       "title": "MIGS Cultured Bacterial/Archaeal sample from Bradyrhizobium sp. DOA9",
       "organism": {
         "name": "Bradyrhizobium sp. DOA9",
@@ -43,7 +44,7 @@
       "type": "child_of",
       "source": {
         "type": "sample",
-        "alias": "SAMD00000001"
+        "alias": "bradyrhizobium-doa9"
       },
       "target": {
         "db": "bioproject",

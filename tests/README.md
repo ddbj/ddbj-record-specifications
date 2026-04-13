@@ -13,12 +13,12 @@ uv run pytest
 | `unit/schema/test_init.py` | バージョン定数・正規化 | - |
 | `unit/schema/test_cli.py` | `dump_json_schema` CLI | - |
 | `unit/schema/test_pbt.py` | スキーマの PBT (hypothesis) | - |
-| `unit/test_validator.py` | バリデーション | [validator-spec.md](../docs/validator-spec.md) |
-| `unit/converter/test_v1_to_v2.py` | v1->v2 変換 | [converter-spec.md](../docs/converter-spec.md) |
-| `unit/converter/test_v2_to_v1.py` | v2->v1 変換 | [converter-spec.md](../docs/converter-spec.md) |
-| `unit/converter/test_roundtrip.py` | ラウンドトリップ変換 | [converter-spec.md](../docs/converter-spec.md) |
-| `unit/converter/test_cli.py` | `ddbj_record_converter` CLI | [converter-spec.md](../docs/converter-spec.md) |
-| `unit/converter/test_pbt.py` | コンバーターの PBT (hypothesis) | [converter-spec.md](../docs/converter-spec.md) |
+| `unit/test_validator.py` | バリデーション | [v2-validator.md](../docs/v2-validator.md) |
+| `unit/converter/test_v1_to_v2.py` | v1->v2 変換 | [v2-converter.md](../docs/v2-converter.md) |
+| `unit/converter/test_v2_to_v1.py` | v2->v1 変換 | [v2-converter.md](../docs/v2-converter.md) |
+| `unit/converter/test_roundtrip.py` | ラウンドトリップ変換 | [v2-converter.md](../docs/v2-converter.md) |
+| `unit/converter/test_cli.py` | `ddbj_record_converter` CLI | [v2-converter.md](../docs/v2-converter.md) |
+| `unit/converter/test_pbt.py` | コンバーターの PBT (hypothesis) | [v2-converter.md](../docs/v2-converter.md) |
 | `unit/test_utils.py` | ユーティリティ関数 | - |
 
 ## テストデータの方針

@@ -2,7 +2,6 @@
   "schema_version": "v3.0",
   "provenance": {
     "source_format": "DFAST",
-    "dfast_version": "1.3.4",
     "submission_category": "GNM"
   },
   "submission": {
@@ -85,6 +84,7 @@
   "samples": [
     {
       "accession": "SAMD999999",
+      "alias": "p-hokkaidonensis-looc260",
       "title": "MIGS Cultured Bacterial/Archaeal sample from Paucilactobacillus hokkaidonensis LOOC260",
       "organism": {
         "name": "Paucilactobacillus hokkaidonensis",
@@ -399,7 +399,8 @@
     {
       "type": "child_of",
       "source": {
-        "type": "sample"
+        "type": "sample",
+        "alias": "p-hokkaidonensis-looc260"
       },
       "target": {
         "db": "bioproject",

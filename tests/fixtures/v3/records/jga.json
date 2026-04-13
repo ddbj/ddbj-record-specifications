@@ -1,0 +1,308 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "JGA XML"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Kenji Tanaka",
+        "first_name": "Kenji",
+        "last_name": "Tanaka",
+        "email": "tanaka@example.ac.jp",
+        "role": "contact",
+        "organizations": [
+          {
+            "name": "Example Genomics Institute",
+            "type": "institution",
+            "address": {
+              "country": "Japan",
+              "state": "Kanagawa",
+              "city": "Yokohama"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "project": {
+    "accession": "PRJDB54321",
+    "alias": "jga-gwas-study",
+    "title": "Genome-wide association study of type 2 diabetes",
+    "description": "A case-control GWAS study investigating genetic risk factors for type 2 diabetes in a Japanese population cohort.",
+    "project_type": "primary",
+    "study_types": [
+      "Case-Control"
+    ],
+    "organism": {
+      "name": "Homo sapiens",
+      "taxonomy_id": 9606
+    }
+  },
+  "samples": [
+    {
+      "alias": "case-sample-1",
+      "title": "T2D case subject 001",
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      },
+      "attributes": [
+        {
+          "name": "subject_id",
+          "value": "SUBJ001"
+        },
+        {
+          "name": "sex",
+          "value": "male"
+        },
+        {
+          "name": "age",
+          "value": "58",
+          "unit": "years"
+        },
+        {
+          "name": "disease",
+          "value": "type 2 diabetes"
+        }
+      ],
+      "donor_id": "DONOR001",
+      "sample_group_type": "case"
+    },
+    {
+      "alias": "control-sample-1",
+      "title": "Healthy control subject 001",
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      },
+      "attributes": [
+        {
+          "name": "subject_id",
+          "value": "SUBJ002"
+        },
+        {
+          "name": "sex",
+          "value": "female"
+        },
+        {
+          "name": "age",
+          "value": "55",
+          "unit": "years"
+        },
+        {
+          "name": "disease",
+          "value": "normal"
+        }
+      ],
+      "donor_id": "DONOR002",
+      "sample_group_type": "control"
+    }
+  ],
+  "experiments": [
+    {
+      "alias": "case-exp-1",
+      "title": "Genotyping of case subject 001",
+      "library": {
+        "name": "case-geno-lib-1",
+        "strategy": "OTHER",
+        "source": "GENOMIC",
+        "selection": "unspecified"
+      },
+      "platform": {
+        "type": "ILLUMINA",
+        "instrument_model": "Illumina Global Screening Array",
+        "array_name": "Infinium Global Screening Array-24",
+        "array_provider": "Illumina"
+      }
+    },
+    {
+      "alias": "control-exp-1",
+      "title": "Genotyping of control subject 001",
+      "library": {
+        "name": "control-geno-lib-1",
+        "strategy": "OTHER",
+        "source": "GENOMIC",
+        "selection": "unspecified"
+      },
+      "platform": {
+        "type": "ILLUMINA",
+        "instrument_model": "Illumina Global Screening Array",
+        "array_name": "Infinium Global Screening Array-24",
+        "array_provider": "Illumina"
+      }
+    }
+  ],
+  "runs": [
+    {
+      "alias": "case-run-1",
+      "title": "Genotyping data for case subject 001",
+      "data_type": "array",
+      "files": [
+        {
+          "filename": "case_001.idat",
+          "filetype": "idat",
+          "checksum_method": "MD5",
+          "checksum": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+        }
+      ]
+    },
+    {
+      "alias": "control-run-1",
+      "title": "Genotyping data for control subject 001",
+      "data_type": "array",
+      "files": [
+        {
+          "filename": "control_001.idat",
+          "filetype": "idat",
+          "checksum_method": "MD5",
+          "checksum": "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3"
+        }
+      ]
+    }
+  ],
+  "analyses": [
+    {
+      "alias": "gwas-analysis-1",
+      "title": "GWAS analysis for type 2 diabetes",
+      "analysis_type": "microarray",
+      "analysis_date": "2025-06-15",
+      "files": [
+        {
+          "filename": "gwas_results.vcf.gz",
+          "filetype": "vcf",
+          "checksum_method": "MD5",
+          "checksum": "1234567890abcdef1234567890abcdef"
+        }
+      ]
+    }
+  ],
+  "datasets": [
+    {
+      "alias": "dataset-1",
+      "title": "Type 2 diabetes GWAS dataset",
+      "description": "Genotyping array data and GWAS results for T2D case-control study.",
+      "dataset_types": [
+        "Genotyping by array"
+      ]
+    }
+  ],
+  "access_control": {
+    "policy": {
+      "alias": "policy-1",
+      "title": "Data access policy for T2D GWAS study",
+      "policy_text": "Data access is restricted to approved researchers. Applications must include IRB approval and a detailed research plan."
+    },
+    "dac": {
+      "alias": "dac-1",
+      "contacts": [
+        {
+          "name": "Kenji Tanaka",
+          "email": "tanaka@example.ac.jp",
+          "role": "contact"
+        }
+      ]
+    }
+  },
+  "relations": [
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "alias": "case-exp-1"
+      },
+      "target": {
+        "db": "sample",
+        "id": "case-sample-1"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "alias": "control-exp-1"
+      },
+      "target": {
+        "db": "sample",
+        "id": "control-sample-1"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "case-run-1"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "case-exp-1"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "control-run-1"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "control-exp-1"
+      }
+    },
+    {
+      "type": "governed_by",
+      "source": {
+        "type": "dataset",
+        "alias": "dataset-1"
+      },
+      "target": {
+        "db": "jga.policy",
+        "id": "policy-1"
+      }
+    },
+    {
+      "type": "managed_by",
+      "source": {
+        "type": "policy",
+        "alias": "policy-1"
+      },
+      "target": {
+        "db": "jga.dac",
+        "id": "dac-1"
+      }
+    },
+    {
+      "type": "contains",
+      "source": {
+        "type": "dataset",
+        "alias": "dataset-1"
+      },
+      "target": {
+        "db": "run",
+        "id": "case-run-1"
+      }
+    },
+    {
+      "type": "contains",
+      "source": {
+        "type": "dataset",
+        "alias": "dataset-1"
+      },
+      "target": {
+        "db": "run",
+        "id": "control-run-1"
+      }
+    },
+    {
+      "type": "contains",
+      "source": {
+        "type": "dataset",
+        "alias": "dataset-1"
+      },
+      "target": {
+        "db": "analysis",
+        "id": "gwas-analysis-1"
+      }
+    }
+  ]
+}
