@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ANALYSIS_SET>
+<ANALYSIS alias="JSUB000003_Analysis_0001" center_name="Individual" accession="JGAZ000000001">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAZ00000000001</SECONDARY_ID>
+  </IDENTIFIERS>
+  <TITLE>Oocyte +Amp</TITLE>
+  <DESCRIPTION>Sequenced reads were processed using the Illumina standard base-calling pipeline (v1.8.2) and the first 4 bases were trimmed to remove random primer sequences. The resulting reads were aligned to the reference genome (UCSC hg19) using Bismark (v.0.9.0) with default parameters. Identical reads were treated as a single read to remove PCR duplicates. The number of Cs (methylated Cs) and Ts (unmethylated Cs) at each CpG site was calculated using the Bismark methylation extractor and reads from both strands were combined. The number of Cs and Ts at each CpG site is shown as a tab separated file (Chromosome, Start, End, the number of Cs and the number of Ts).</DESCRIPTION>
+  <STUDY_REFS>
+    <STUDY_REF refname="JGAS000006" refcenter="Individual" accession="JGAS000006"/>
+  </STUDY_REFS>
+  <DATA_REFS>
+    <DATA_REF refname="JGAR000000221" refcenter="Individual" accession="JGAR000000221"/>
+  </DATA_REFS>
+  <ANALYSIS_TYPE>
+    <REFERENCE_ALIGNMENT/>
+  </ANALYSIS_TYPE>
+  <FILES>
+    <FILE filename="Oocyte-1.tab" filetype="tab" checksum_method="MD5" checksum="9caba079bc6e2a70403ef0ee9b763e23" unencrypted_checksum="8d74bedaf8fdbd5ce6b4ab0b270ffefb"/>
+  </FILES>
+</ANALYSIS>
+
+<ANALYSIS alias="JSUB000003_Analysis_0002" center_name="Individual" accession="JGAZ000000002">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAZ00000000002</SECONDARY_ID>
+  </IDENTIFIERS>
+  <TITLE>Oocyte -Amp</TITLE>
+  <DESCRIPTION>Sequenced reads were processed using the Illumina standard base-calling pipeline (v1.8.2) and the first 4 bases were trimmed to remove random primer sequences. The resulting reads were aligned to the reference genome (UCSC hg19) using Bismark (v.0.9.0) with default parameters. The number of Cs (methylated Cs) and Ts (unmethylated Cs) at each CpG site was calculated using the Bismark methylation extractor and reads from both strands were combined. The number of Cs and Ts at each CpG site is shown as a tab separated file (Chromosome, Start, End, the number of Cs and the number of Ts).</DESCRIPTION>
+  <STUDY_REFS>
+    <STUDY_REF refname="JGAS000006" refcenter="Individual" accession="JGAS000006"/>
+  </STUDY_REFS>
+  <DATA_REFS>
+    <DATA_REF refname="JGAR000000222" refcenter="Individual" accession="JGAR000000222"/>
+  </DATA_REFS>
+  <ANALYSIS_TYPE>
+    <REFERENCE_ALIGNMENT/>
+  </ANALYSIS_TYPE>
+  <FILES>
+    <FILE filename="Oocyte-2.tab" filetype="tab" checksum_method="MD5" checksum="23ae2d9027018b0dc3bda032c1bace18" unencrypted_checksum="89e23f98d15951969636af4a469c62be"/>
+  </FILES>
+</ANALYSIS>
+
+<ANALYSIS alias="JSUB000003_Analysis_0003" center_name="Individual" accession="JGAZ000000003">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAZ00000000003</SECONDARY_ID>
+  </IDENTIFIERS>
+  <TITLE>Sperm-1</TITLE>
+  <DESCRIPTION>Sequenced reads were processed using the Illumina standard base-calling pipeline (v1.8.2) and the first 4 bases were trimmed to remove random primer sequences. The resulting reads were aligned to the reference genome (UCSC hg19) using Bismark (v.0.9.0) with default parameters. The number of Cs (methylated Cs) and Ts (unmethylated Cs) at each CpG site was calculated using the Bismark methylation extractor and reads from both strands were combined. The number of Cs and Ts at each CpG site is shown as a tab separated file (Chromosome, Start, End, the number of Cs and the number of Ts).</DESCRIPTION>
+  <STUDY_REFS>
+    <STUDY_REF refname="JGAS000006" refcenter="Individual" accession="JGAS000006"/>
+  </STUDY_REFS>
+  <DATA_REFS>
+    <DATA_REF refname="JGAR000000223" refcenter="Individual" accession="JGAR000000223"/>
+  </DATA_REFS>
+  <ANALYSIS_TYPE>
+    <REFERENCE_ALIGNMENT/>
+  </ANALYSIS_TYPE>
+  <FILES>
+    <FILE filename="Sperm-1.tab" filetype="tab" checksum_method="MD5" checksum="90ea3f2c0df50e8cfdb80200d426b3e8" unencrypted_checksum="06c0f0eca930cd661d83149eeca5b95b"/>
+  </FILES>
+</ANALYSIS>
+
+<ANALYSIS alias="JSUB000003_Analysis_0004" center_name="Individual" accession="JGAZ000000004">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAZ00000000004</SECONDARY_ID>
+  </IDENTIFIERS>
+  <TITLE>Sperm-2</TITLE>
+  <DESCRIPTION>Sequenced reads were processed using the Illumina standard base-calling pipeline (v1.8.2) and the first 4 bases were trimmed to remove random primer sequences. The resulting reads were aligned to the reference genome (UCSC hg19) using Bismark (v.0.9.0) with default parameters. The number of Cs (methylated Cs) and Ts (unmethylated Cs) at each CpG site was calculated using the Bismark methylation extractor and reads from both strands were combined. The number of Cs and Ts at each CpG site is shown as a tab separated file (Chromosome, Start, End, the number of Cs and the number of Ts).</DESCRIPTION>
+  <STUDY_REFS>
+    <STUDY_REF refname="JGAS000006" refcenter="Individual" accession="JGAS000006"/>
+  </STUDY_REFS>
+  <DATA_REFS>
+    <DATA_REF refname="JGAR000000224" refcenter="Individual" accession="JGAR000000224"/>
+  </DATA_REFS>
+  <ANALYSIS_TYPE>
+    <REFERENCE_ALIGNMENT/>
+  </ANALYSIS_TYPE>
+  <FILES>
+    <FILE filename="Sperm-2.tab" filetype="tab" checksum_method="MD5" checksum="18efde8a3eb1a4a836f3a37486dc1325" unencrypted_checksum="fb0231c05a3e13d76d17d1bf9b2367c1"/>
+  </FILES>
+</ANALYSIS>
+
+<ANALYSIS alias="JSUB000003_Analysis_0005" center_name="Individual" accession="JGAZ000000005">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAZ00000000005</SECONDARY_ID>
+  </IDENTIFIERS>
+  <TITLE>Sperm-3</TITLE>
+  <DESCRIPTION>Sequenced reads were processed using the Illumina standard base-calling pipeline (v1.8.2) and the first 4 bases were trimmed to remove random primer sequences. The resulting reads were aligned to the reference genome (UCSC hg19) using Bismark (v.0.9.0) with default parameters. The number of Cs (methylated Cs) and Ts (unmethylated Cs) at each CpG site was calculated using the Bismark methylation extractor and reads from both strands were combined. The number of Cs and Ts at each CpG site is shown as a tab separated file (Chromosome, Start, End, the number of Cs and the number of Ts).</DESCRIPTION>
+  <STUDY_REFS>
+    <STUDY_REF refname="JGAS000006" refcenter="Individual" accession="JGAS000006"/>
+  </STUDY_REFS>
+  <DATA_REFS>
+    <DATA_REF refname="JGAR000000225" refcenter="Individual" accession="JGAR000000225"/>
+  </DATA_REFS>
+  <ANALYSIS_TYPE>
+    <REFERENCE_ALIGNMENT/>
+  </ANALYSIS_TYPE>
+  <FILES>
+    <FILE filename="Sperm-3.tab" filetype="tab" checksum_method="MD5" checksum="0fa10cdb5e16fa6416255ed4dc4c5b30" unencrypted_checksum="376d866927f1326108ddca90636a0902"/>
+  </FILES>
+</ANALYSIS>
+</ANALYSIS_SET>

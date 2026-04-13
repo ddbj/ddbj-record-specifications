@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ASSEMBLY_SET>
+<ASSEMBLY accession="GCA_000010525.1" alias="ASM1052v1" center_name="University of Tokyo">
+  <IDENTIFIERS>
+    <PRIMARY_ID>GCA_000010525.1</PRIMARY_ID>
+    <SUBMITTER_ID namespace="University of Tokyo">ASM1052v1</SUBMITTER_ID>
+  </IDENTIFIERS>
+  <TITLE>ASM1052v1 assembly for Azorhizobium caulinodans ORS 571</TITLE>
+  <DESCRIPTION>&lt;p&gt; &lt;b&gt;&lt;i&gt;Azorhizobium caulinodans&lt;/i&gt; ORS 571&lt;/b&gt;. This strain is being sequenced for comparative genome analysis.&lt;br/&gt;&lt;p&gt;&lt;b&gt;Comment&lt;/b&gt;&lt;br/&gt;This genome project was supported by Bio-oriented Technology Research Advancement Institution (BRAIN)~~Takakazu Kaneko~Kazusa DNA Research Institute~Department of Plant Genome Research</DESCRIPTION>
+  <NAME>ASM1052v1</NAME>
+  <ASSEMBLY_LEVEL>complete genome</ASSEMBLY_LEVEL>
+  <COVERAGE>0</COVERAGE>
+  <GENOME_REPRESENTATION>full</GENOME_REPRESENTATION>
+  <TAXON>
+    <TAXON_ID>438753</TAXON_ID>
+    <SCIENTIFIC_NAME>Azorhizobium caulinodans ORS 571</SCIENTIFIC_NAME>
+    <STRAIN>ORS 571</STRAIN>
+  </TAXON>
+  <SAMPLE_REF>
+    <IDENTIFIERS>
+      <PRIMARY_ID>SAMD00060925</PRIMARY_ID>
+    </IDENTIFIERS>
+  </SAMPLE_REF>
+  <STUDY_REF>
+    <IDENTIFIERS>
+      <PRIMARY_ID>PRJDA19267</PRIMARY_ID>
+    </IDENTIFIERS>
+  </STUDY_REF>
+  <CHROMOSOMES>
+    <CHROMOSOME accession="AP009384.1">
+      <TYPE>Chromosome</TYPE>
+    </CHROMOSOME>
+  </CHROMOSOMES>
+  <ASSEMBLY_ATTRIBUTES>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>total-length</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>ungapped-length</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>n50</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>spanned-gaps</TAG>
+      <VALUE>0</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>unspanned-gaps</TAG>
+      <VALUE>0</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>scaffold-count</TAG>
+      <VALUE>1</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>count-contig</TAG>
+      <VALUE>1</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>contig-n50</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>contig-L50</TAG>
+      <VALUE>1</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>contig-n75</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>contig-n90</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>scaf-L50</TAG>
+      <VALUE>1</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>scaf-n75</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>scaf-n90</TAG>
+      <VALUE>5369772</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>replicon-count</TAG>
+      <VALUE>1</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>count-non-chromosome-replicon</TAG>
+      <VALUE>0</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+    <ASSEMBLY_ATTRIBUTE>
+      <TAG>ENA-LAST-UPDATED</TAG>
+      <VALUE>2011-02-17</VALUE>
+    </ASSEMBLY_ATTRIBUTE>
+  </ASSEMBLY_ATTRIBUTES>
+</ASSEMBLY>
+</ASSEMBLY_SET>

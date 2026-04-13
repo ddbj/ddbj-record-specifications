@@ -7,6 +7,7 @@ Specification version (スキーマ仕様) の変更も合わせて記載する�
 ## Unreleased
 
 - Specification version を v1.0 / v2.0 として確定し、バージョニングルールを導入
+- v2.3: 全 list/dict フィールドから default_factory を除去し required 化
 
 ## 0.1.0 ~ 0.1.5 (2025-08-18 ~ 2025-09-10)
 

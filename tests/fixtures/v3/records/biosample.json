@@ -1,0 +1,54 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "BioSample XML"
+  },
+  "samples": [
+    {
+      "accession": "SAMD00000001",
+      "title": "MIGS Cultured Bacterial/Archaeal sample from Bradyrhizobium sp. DOA9",
+      "organism": {
+        "name": "Bradyrhizobium sp. DOA9",
+        "taxonomy_id": 1126627
+      },
+      "package": "MIGS.ba",
+      "attributes": [
+        { "name": "sample_name", "value": "Bradyrhizobium sp. DOA9" },
+        { "name": "strain", "value": "DOA9" },
+        { "name": "env_broad_scale", "value": "grassland" },
+        { "name": "collection_date", "value": "N/A" },
+        { "name": "env_local_scale", "value": "grassland" },
+        { "name": "geo_loc_name", "value": "Thailand" },
+        { "name": "lat_lon", "value": "N/A" },
+        { "name": "env_medium", "value": "soil" },
+        { "name": "project_name", "value": "Genetic diversity of Bradyrhizobium strains isolated from root nodules of Aeschynomene americana" },
+        { "name": "isol_growth_condt", "value": "22752179" },
+        { "name": "num_replicons", "value": "2" },
+        { "name": "ref_biomaterial", "value": "22752179" },
+        { "name": "biotic_relationship", "value": "symbiont" },
+        { "name": "host", "value": "Aeschynomene americana" },
+        { "name": "locus_tag_prefix", "value": "BDOA9" }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "xref",
+      "target": {
+        "db": "pubmed",
+        "id": "22752179"
+      }
+    },
+    {
+      "type": "child_of",
+      "source": {
+        "type": "sample",
+        "alias": "SAMD00000001"
+      },
+      "target": {
+        "db": "bioproject",
+        "id": "PRJDB1640"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+LOCUS       IAAA01000001            1225 bp    mRNA    linear   TSA 25-JUL-2018
+DEFINITION  TSA: Parasteatoda tepidariorum mRNA, contig: comp0_seq0.
+ACCESSION   IAAA01000001
+VERSION     IAAA01000001.1
+DBLINK      BioProject:PRJDB4182
+            Sequence Read Archive:DRR047015, DRR047016, DRR047017
+            BioSample:SAMD00039891, SAMD00039892, SAMD00039893
+KEYWORDS    TSA; Transcriptome Shotgun Assembly.
+SOURCE      Parasteatoda tepidariorum (common house spider)
+  ORGANISM  Parasteatoda tepidariorum
+            Eukaryota; Metazoa; Ecdysozoa; Arthropoda; Chelicerata; Arachnida;
+            Araneae; Araneomorphae; Entelegynae; Araneoidea; Theridiidae;
+            Parasteatoda.
+REFERENCE   1  (bases 1 to 1225)
+  AUTHORS   Kono,N. and Arakawa,K.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (23-OCT-2015)
+            Contact:Nobuaki Kono
+            Keio university, Institute for Advanced Biosciences; Mizukami
+            246-2, Kakuganji, Tsuruoka, Yamagata 997-0052, Japan
+REFERENCE   2  
+  AUTHORS   Kono,N., Nakamura,H., Ito,Y., Tomita,M. and Arakawa,K.
+  TITLE     Evaluation of the impact of RNA preservation methods of spiders
+            for de novo transcriptome assembly
+  JOURNAL   Mol Ecol Resour 16, 662-672 (2016)
+  REMARK    DOI:10.1111/1755-0998.12485
+COMMENT     ##Assembly-Data-START##
+            Assembly Method       :: Bridger v. 2014-12-01
+            Sequencing Technology :: llumina Solexa
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..1225
+                     /db_xref="taxon:114398"
+                     /dev_stage="adult"
+                     /mol_type="mRNA"
+                     /note="contig: comp0_seq0"
+                     /organism="Parasteatoda tepidariorum"
+                     /tissue_type="whole body"
+BASE COUNT          257 a          442 c          286 g          240 t
+ORIGIN      
+        1 aggccaaggt ggttatgaag aaatagttga atactcctcc tggtccgtaa ccaccgggtc
+       61 catatccacc aggacctgca cccccgggtc catatcctcc tgggccagag ctgtattcaa
+      121 ctatttcttc ataaccacct tggcctcctc cagcaccacc tgctgcagaa gctgctgcgg
+      181 ctgctgaagc tgctgctgaa gcaccaccgg gtccagattc tccaggtcca taacctccgg
+      241 gtcctgatcc tcctggtcca taaccaccgg gtccatatcc tcctgggcct gcaccaccgg
+      301 gacctgatcc tcctggtcca taaccaccgg ggcctgaccc tcctggtcca ccactaccag
+      361 ctgcagctgc tgctgctgca gaagcaccac cgggtcctga tcctcctggt ccgtaaccac
+      421 cgggtccata tcctcctggg cctgcaccac cgggtccata tcctccaggg ccagcgccac
+      481 cgggtccata tcctccaggg ccagcacctc cgggacctga accaccagct gctgctgctg
+      541 cagctgctgc tgaagcacca ccgggtcctg atcctccagg tccatatcct ccgggacctg
+      601 atcctcctgg gcctgaacca ccggctgctg ctgcagctgc tgctgctgaa gcaccaccgg
+      661 gtcctgattc tccaggtcca tatcctccgg gccctgatcc tcctggtcca taaccaccgg
+      721 gtccatatcc tcctgggcct gcacctccgg gtccatatcc tccagggcca gcacatccgg
+      781 gacctgaacc accagctgct gctgaagcac cacctggtcc tgatcctcct ggtcctgatc
+      841 caccaggtcc ataacctcca gggccagaac tttcaggtcc ataccctcct gggccggaac
+      901 ttccaggtcc atatcctcct gggccagagc tgtattcaac tatttcttca taaccacctt
+      961 ggcctcctcc accaccacct gctgcagaag ctgcagcggc tgctgaagct gctcctggtc
+     1021 ctgatcctcc tggtccataa ccaccgggtc catatcctcc ggggcctcca ccaccgggtc
+     1081 catatcctcc agggccaaca acaccaggtc cataacctcc agggacaaaa acacaaggaa
+     1141 catctacaac aaggacaaaa acagaaggag aggaagaaaa aagtgaaaga gaaagaggag
+     1201 gtagctggta gtgggggtag agatg
+//

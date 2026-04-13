@@ -1,0 +1,31 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "BioProject XML"
+  },
+  "project": {
+    "accession": "PRJDB503",
+    "title": "Genome projects for evolutional studies of the family Acetobacteraceae",
+    "description": "We are pursuing a research project to comprehend the evolutional status of the family Acetobacteraceae based on genome analyses. First 18 bacterial genomes were projected to read the genome DNA sequences. We will provide data of more bacterial genome and moreover transcriptome by mRNA sequencing.",
+    "project_type": "primary",
+    "organism": {
+      "name": "Acetobacteraceae",
+      "taxonomy_id": 433
+    },
+    "grants": [
+      {
+        "title": "Industrial utilization and molecular comprehension of the thermo-tolerance of thermostable fermentation microbes",
+        "agency": "The Program for Promotion of Basic Research Activities for Innovative Biosciences"
+      },
+      {
+        "title": "Applied studies for biomass utilization based on genome analyses of acetic acid bacteria exhibiting specific metabolic traits.",
+        "agency": "Scientific Research from the Ministry of Education, Culture, Sports, Science and Technology of Japan",
+        "id": "2251022"
+      },
+      {
+        "title": "Fermentational approaches for low CO2 exhausting from genome engineering and evolutional adaptation of thermo-tolerant microbes.",
+        "agency": "Advanced Low Carbon Technology Research and Development Program"
+      }
+    ]
+  }
+}

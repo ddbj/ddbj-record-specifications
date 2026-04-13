@@ -16,6 +16,7 @@ DDBJ Record v3 の設計に関する議論ノート。
   - SRA study + BioProject → 統一 "project"
   - SRA sample + BioSample → 統一 "sample"
   - 共通化による複雑性は validator / converter で吸収する（例: BP → record → BP round-trip）
+- record は純粋な data。status や validation config は外付け
 
 ## 対応形式のスコープ
 
@@ -37,916 +38,474 @@ v3 で扱う形式の一覧と、それぞれが関わる DDBJ データベー�
 | GFF | DDBJ | ゲノムアノテーション |
 | Assembly | DDBJ + NCBI | NCBI Assembly 登録、accession、index 生成 |
 
-### Open questions
-
-- [ ] Trad のゲノム細分化（MAG, SAG, haplotype）は `trad_submission_category` の拡張か、別の軸か
-- [ ] GEA, MetaboBank, JVar はスコープに含めるか
-- [ ] ENA の JSON 化動向をどこまで意識するか
-
-## 調査結果: 各形式のスキーマ構造
-
-XSD 定義（[ddbj/pub](https://github.com/ddbj/pub)）とスパコン上の実データを調査した結果。
-
-### 形式横断の共通パターン
-
-| パターン | 使われる場所 | 説明 |
-|----------|-------------|------|
-| ObjectType | BP, BS, SRA 全 6 types, JGA 全 10 types | alias, center_name, accession, IDENTIFIERS を共有する基底構造 |
-| RefNameGroup | SRA/JGA のオブジェクト間参照 | refname（登録前のローカル名）/ refcenter / accession（登録後） |
-| ATTRIBUTES | SRA, JGA の全 object | TAG/VALUE/UNITS による自由形式メタデータ |
-| EAV | BioSample | attribute_name/value による柔軟な属性。~150 packages で必須/任意を制御 |
-| Controlled-access chain | JGA 固有 | Dataset → Policy → DAC のアクセス制御チェーン |
-| FILE | SRA Run, JGA Data/Analysis | filename/filetype/checksum_method/checksum によるファイル管理 |
-| LINKS | 全形式 | URL_LINK と XREF_LINK（DB cross-reference）の 2 種類 |
-
-### BioProject (XSD: Core.xsd, Submission.xsd)
-
-スキーマ: [ddbj/pub/docs/bioproject/xsd/](https://github.com/ddbj/pub/tree/master/docs/bioproject/xsd/)
-
-```
-Project
-├── ProjectID
-│   ├── ArchiveID (accession: PRJNA/PRJDB/PRJEB, archive: NCBI/DDBJ/EBI)
-│   ├── SecondaryArchiveID (0+, replaced accessions)
-│   ├── CenterID (0+)
-│   └── LocalID (0+)
-├── ProjectDescr
-│   ├── Name (optional)
-│   ├── Title (required)
-│   ├── Description (optional)
-│   ├── ExternalLink (0+, URL or dbXREF)
-│   ├── Grant (0+, Title/Agency/GrantId)
-│   ├── Publication (0+, Reference/StructuredCitation/DbType)
-│   ├── ProjectReleaseDate (optional)
-│   ├── Keyword (0+)
-│   ├── Relevance (optional: Agricultural/Medical/Industrial/Environmental/Evolution/ModelOrganism)
-│   ├── LocusTagPrefix (0+, biosample_id/assembly_id attributes)
-│   └── UserTerm (0+, key-value with term/category/units)
-└── ProjectType (choice)
-    ├── ProjectTypeTopSingleOrganism (single species)
-    │   └── Organism (required: taxID, species, OrganismName, Strain, BiologicalProperties)
-    ├── ProjectTypeTopAdmin (umbrella/multi-disciplinary)
-    │   └── subtype: eDisease/eMetagenome/eFundingInitiative/eOther/...
-    └── ProjectTypeSubmission (submitter-level)
-        ├── Target (sample_scope/material/capture, Organism, BioSampleSet)
-        ├── Method (eSequencing/eArray/eMassSpectrometry/eOther)
-        └── Objectives (data_type: eRawSequenceReads/eAssembly/eAnnotation/eVariation/...)
-```
-
-- sample_scope: eMonoisolate, eMultispecies, eEnvironment, eSynthetic, eSingleCell, ...
-- material: eGenome, eTranscriptome, eProteome, ePhenotype, ...
-- capture: eWhole, eExome, eTargetedLocusLoci, ...
-
-Submission は Organization（type/role/Contact）+ Hold（release_date）+ Access（public/controlled-access）+ Action（ADD/MODIFY/SUPPRESS/HOLD/RELEASE）で構成。
-
-### BioSample (XSD: biosample.xsd v1.2.0)
-
-スキーマ: [ddbj/pub/docs/biosample/xsd/](https://github.com/ddbj/pub/tree/master/docs/biosample/xsd/)
-
-```
-BioSample (@access: public/controlled-access, @last_update, @publication_date)
-├── Ids (required, 1+)
-│   └── Id (@namespace: BioSample/SRA/dbGaP/GEO/Coriell/ATCC/..., @is_primary)
-├── Description (required)
-│   ├── SampleName (optional)
-│   ├── Synonym (0+)
-│   ├── Title (required)
-│   ├── Organism (required, 1+)
-│   │   ├── OrganismName (required)
-│   │   ├── Strain/IsolateName/Breed/Cultivar/Label (all optional)
-│   │   └── @taxonomy_id
-│   └── Comment (optional)
-├── Owner (required)
-│   └── Name (+abbreviation, +url), Contacts
-├── Models (required, 1+)
-│   └── Model (text + @version)
-├── Attributes (required, 1+)
-│   └── Attribute (@attribute_name: required, @unit: optional, value: text or Id ref)
-├── Links (optional)
-│   └── Link (@type: url/db_xref, @target, @label)
-└── Relations (optional)
-    └── Relation (@type: derived_from/part_of, To: accession)
-```
-
-- EAV パターン: attribute_name でキーを指定し、テキスト値を格納
-- ~150 packages（MIGS.ba, Pathogen.cl.1.0, Human.1.0 等）が mandatory/optional を定義
-- Relations で BioSample 間の derived_from / part_of を表現
-
-### SRA/DRA (XSD: v1.6)
-
-スキーマ: [ddbj/pub/docs/dra/xsd/1-6/](https://github.com/ddbj/pub/tree/master/docs/dra/xsd/1-6/)
-
-6 object types の構造:
-
-```
-SUBMISSION (@alias, @center_name, @accession, @submission_date)
-├── CONTACTS (0+)
-└── ACTIONS (ADD/MODIFY/SUPPRESS/HOLD/RELEASE/VALIDATE)
-
-STUDY (@alias, @center_name, @accession)
-├── DESCRIPTOR
-│   ├── STUDY_TITLE (required)
-│   ├── STUDY_TYPE (@existing_study_type: WGS/Metagenomics/Transcriptome/Epigenetics/...)
-│   ├── STUDY_ABSTRACT (optional)
-│   └── RELATED_STUDIES (optional)
-├── STUDY_LINKS, STUDY_ATTRIBUTES
-
-SAMPLE (@alias, @center_name, @accession)
-├── SAMPLE_NAME
-│   ├── TAXON_ID (required)
-│   ├── SCIENTIFIC_NAME, COMMON_NAME (optional)
-│   └── ANONYMIZED_NAME, INDIVIDUAL_NAME (optional)
-├── SAMPLE_LINKS, SAMPLE_ATTRIBUTES
-
-EXPERIMENT (@alias, @center_name, @accession)
-├── STUDY_REF (required, -> Study)
-├── DESIGN
-│   ├── SAMPLE_DESCRIPTOR (-> Sample, optional POOL for multiplexing)
-│   └── LIBRARY_DESCRIPTOR
-│       ├── LIBRARY_NAME (optional)
-│       ├── LIBRARY_STRATEGY (required, 43+ values)
-│       ├── LIBRARY_SOURCE (required, 8 values)
-│       ├── LIBRARY_SELECTION (required, 30+ values)
-│       ├── LIBRARY_LAYOUT (SINGLE or PAIRED with nominal_length/sdev)
-│       ├── TARGETED_LOCI (optional, 16S rRNA/18S rRNA/exome/...)
-│       └── LIBRARY_CONSTRUCTION_PROTOCOL (optional)
-├── PLATFORM (required, 17 families, 80+ instrument models)
-├── EXPERIMENT_LINKS, EXPERIMENT_ATTRIBUTES
-
-RUN (@alias, @accession, @run_date, @run_center)
-├── EXPERIMENT_REF (required, -> Experiment)
-└── DATA_BLOCK
-    └── FILES (1+)
-        └── FILE (@filename, @filetype: fastq/bam/cram/..., @checksum_method: MD5, @checksum)
-
-ANALYSIS (@alias, @accession, @analysis_date)
-├── STUDY_REF (required, -> Study)
-├── ANALYSIS_TYPE (choice)
-│   ├── DE_NOVO_ASSEMBLY
-│   ├── REFERENCE_ALIGNMENT (+ Assembly + RUN_LABELS + SEQ_LABELS)
-│   ├── SEQUENCE_ANNOTATION
-│   └── ABUNDANCE_MEASUREMENT
-├── TARGETS (0+, -> RUN/SAMPLE/EXPERIMENT/STUDY)
-└── DATA_BLOCK/FILES (output files: bam/vcf/gff/bed/...)
-```
-
-主要な controlled vocabulary:
-
-- LIBRARY_STRATEGY: WGS, WGA, WXS, RNA-Seq, ChIP-Seq, ATAC-seq, Hi-C, Bisulfite-Seq, AMPLICON, ...
-- LIBRARY_SOURCE: GENOMIC, TRANSCRIPTOMIC, METAGENOMIC, GENOMIC SINGLE CELL, ...
-- LIBRARY_SELECTION: RANDOM, PCR, cDNA, PolyA, ChIP, Hybrid Selection, ...
-- PLATFORM: ILLUMINA, PACBIO_SMRT, OXFORD_NANOPORE, ION_TORRENT, BGISEQ, DNBSEQ, ELEMENT, ULTIMA, ...
-
-### JGA (XSD: v1.2)
-
-スキーマ: [ddbj/pub/docs/jga/xsd/1-2/](https://github.com/ddbj/pub/tree/master/docs/jga/xsd/1-2/)
-
-SRA を拡張した 10 object types。SRA との差分を中心に記載:
-
-```
-STUDY - SRA Study + STUDY_TYPES (multiple allowed), GRANTS, PUBLICATIONS
-  Study types: Case-Control, Cohort, Family, Twin, Clinical Trial, GWAS, ...
-
-SAMPLE - SRA Sample + DONOR_ID, SAMPLE_GROUP_TYPE (case/control/cancer)
-
-EXPERIMENT - SRA Experiment + ARRAY_PLATFORM (array strategies)
-  + Genotyping by array, Transcription profiling by array, ...
-
-DATA (SRA Run equivalent)
-  + DATA_TYPE: SEQUENCING, REFERENCE_ALIGNMENT, ARRAY_HYBRIDIZATION, METABOLITE_ASSAY, IMAGE
-  + Extended file types: CEL, NIfTI, Analyze, ...
-
-ANALYSIS - SRA Analysis + extended types
-  + MICROARRAY, METABOLOMICS, PROTEOMICS, BIOCHEMICAL_ASSAY, IMAGE, DOCUMENT
-
-DATASET (JGA-specific, controlled-access)
-  ├── TITLE (required)
-  ├── DATASET_TYPE (0+, e.g. "Exome sequencing", "Genotyping by array")
-  ├── DATA_REFS (-> Data), ANALYSIS_REFS (-> Analysis)
-  └── POLICY_REF (required, -> Policy)
-
-POLICY (JGA-specific)
-  ├── TITLE (required)
-  ├── DAC_REF (required, -> DAC)
-  └── POLICY_TEXT or POLICY_FILE
-
-DAC (JGA-specific, Data Access Committee)
-  └── CONTACTS (required, 1+: name, email, organisation)
-
-SUBMISSION - SRA Submission + @nbdc_number (required, NBDC approval)
-  + PROTECT action (EGA integration)
-```
-
-JGA 申請管理システム（jga-shinsei）のステータス:
-
-| Code | 意味 | record-idm mapping |
-|------|------|--------------------|
-| 10 | 申請書類作成中 | draft |
-| 20 | 申請完了 | submitted |
-| 30 | 差し戻し中 | revision_requested |
-| 40 | 審査中 | in_curation |
-| 50 | 申請却下 | rejected (canceled) |
-| 60 | 申請承認 | accepted |
-| 70 | 申請取り下げ | canceled |
-| 80 | 利用期間終了 | (closed) |
-
-### GEA (MAGE-TAB 形式)
-
-XML スキーマなし。IDF/SDRF テキスト形式。
-
-```
-IDF (Investigation Description Format):
-  Investigation Title, Experiment Description
-  Experimental Design, Experimental Factor Name/Type
-  Person (Last Name, First Name, Affiliation, Roles)
-  Public Release Date, PubMed ID
-  Protocol (Name, Type, Description)
-  Comment[BioProject], Comment[GEAAccession]
-
-SDRF (Sample and Data Relationship Format):
-  Source Name, Characteristics[organism/taxonomy_id/strain/...]
-  Comment[BioSample], Comment[sample_title]
-  Comment[LIBRARY_LAYOUT/SELECTION/SOURCE/STRATEGY/INSTRUMENT_MODEL]
-  Comment[SRA_EXPERIMENT], Comment[SRA_RUN]
-  Array Data File, Derived Array Data Matrix File
-```
-
-- SRA の library 情報を Comment フィールドで参照
-- BioProject, BioSample への参照あり
-
-### Assembly
-
-XML ベースのスキーマは ENA のみ（ENA.assembly.xsd）。NCBI は AGP + TSV。
-
-```
-NCBI Assembly submission:
-  ├── FASTA files (.fsa)
-  ├── AGP file (9-column TSV: scaffold/chromosome assembly from contigs)
-  ├── Chromosome list (TSV: OBJECT_NAME, CHROMOSOME_NAME, TYPE, TOPOLOGY)
-  └── Structured metadata (web form or Genome Info TSV)
-
-ENA Assembly XML (ENA.assembly.xsd):
-  ├── TITLE, NAME
-  ├── ASSEMBLY_LEVEL (complete genome/chromosome/scaffold/contig)
-  ├── GENOME_REPRESENTATION (full/partial)
-  ├── TAXON (TAXON_ID, SCIENTIFIC_NAME, STRAIN)
-  ├── STUDY_REF, SAMPLE_REF
-  ├── WGS_SET (PREFIX, VERSION)
-  └── CHROMOSOMES (NAME, TYPE: Chromosome/Mitochondrion/Plasmid/Chloroplast/...)
-```
-
-- assembly_summary_genbank.txt はスパコン上の trad/ には存在しない（NCBI FTP から取得）
-- AGP v2.1: component_type (A/D/F/G/O/P/W = sequence, N/U = gap)、gap_type (scaffold/contig/centromere/telomere/...)
-
-### ST.26 (調査済み)
-
-詳細は [st26.md](../st26.md) を参照。WIPO Standard ST.26 は特許配列リストを XML で記述する国際標準。配列データ部分は INSDC DTD のサブセット。INSDSeq_division は "PAT" 固定。
-
-### データソースの所在
-
-スパコン上のパスと形式:
-
-| リポジトリ | パス | 形式 | サイズ目安 |
-|-----------|------|------|----------|
-| BioProject | `/usr/local/resources/bioproject/ddbj_core_bioproject.xml` | XML (PackageSet) | 33 MB (DDBJ), 3.6 GB (全極) |
-| BioSample | `/usr/local/resources/biosample/ddbj_biosample_set.xml.gz` | XML (gzip) | 31 MB gz (DDBJ), 4.3 GB gz (全極) |
-| DRA | `/usr/local/resources/dra/fastq/{DRA000}/{DRA000XXX}/*.xml` | XML (5 types per submission) | ~230 万 submissions |
-| JGA | `/usr/local/shared_data/jga/metadata-history/metadata/` | XML (7 types) + CSV (relations, dates) | study: 37K lines, dataset: 442K lines |
-| GEA | `/usr/local/resources/gea/experiment/E-GEAD-{N000}/` | IDF/SDRF (TSV) | ~682 experiments |
-| Trad | `/usr/local/resources/trad/{ddbj,wgs,tsa,...}/` | flat file (.seq.gz) | ~1.87 億 records |
-| SRA Accessions | `/lustre9/open/database/ddbj-dbt/dra-private/mirror/SRA_Accessions/` | TSV (20 columns) | ~30 GB |
-| Assembly summary | NCBI FTP (streaming) | TSV | - |
-
-## データモデル設計
+## 確定したデータモデル
 
 ### Top-level 構造
-
-v2 の DdbjRecord:
-
-```
-DdbjRecord
-├── schema_version: str
-├── provenance: Provenance
-├── submission: Submission
-├── experiments: list[Experiment]
-├── sequences: Sequences
-│   ├── common_source: Source
-│   └── entries: list[Entry]
-└── features: list[Feature]
-```
-
-v3 では、Trad 以外の形式（BP, BS, SRA, JGA 等）も表現する必要がある。調査の結果、各形式は独立したオブジェクト構造を持つが、概念レベルでの共通化が可能と判明した。
-
-#### 議論ログ: 概念の統合
-
-DB ごとのサイロ化ではなく、ontology に基づいてフィールドを統合する方針を決定:
-
-| v3 の統一概念 | 統合元 |
-|-------------|-------|
-| **Project** | BioProject + SRA Study + JGA Study |
-| **Sample** | BioSample + SRA Sample + JGA Sample |
-| **Experiment** | SRA Experiment + JGA Experiment |
-| **Run/Data** | SRA Run + JGA Data |
-| **Analysis** | SRA Analysis + JGA Analysis |
-| **Sequences** | Trad entries + ST.26 sequences (そのまま) |
-| **Features** | INSDC feature table (そのまま) |
-| **Assembly** | Assembly 情報 (新規) |
-| **Access Control** | JGA Dataset + Policy + DAC (そのまま) |
-
-共通化による複雑性は validator / converter で吸収する（例: BP → record → BP round-trip で正しさを検証）。
-
-v3 の Top-level 構造案:
 
 ```
 DdbjRecord (all fields Optional/None)
 ├── schema_version: str
-├── provenance: Provenance | None       # data の来歴記録（変換元形式、ツールバージョン等）
+├── provenance: Provenance | None       # data の来歴記録（変換元形式、GFF メタデータ等）
 ├── submission: Submission | None       # thin: submitters, hold_date, comments only
-├── links: list[Link] | None            # 外部リンク (URL) + DB 相互参照 (db_xref)
-├── relations: list[Relation] | None    # 意味的関係 (child_of, derived_from, part_of, ...)
 ├── project: Project | None             # = BP + SRA Study + JGA Study
-│   ├── title, description, organism
-│   ├── publications                    # <- v2 submission.references
-│   ├── keywords                        # <- v2 submission.keywords
-│   ├── grants
-│   ├── locus_tag_prefix                # <- v2 submission, BP XSD ProjectDescr
-│   └── division                        # <- v2 submission (or auto-derived)
-├── samples: list[Sample] | None        # = BS + SRA Sample + JGA Sample
+│   ├── project_type                    # "primary", "umbrella"
+│   ├── study_types                     # "WGS", "Case-Control", ...
+│   ├── publications, grants, keywords, relevance
+│   ├── locus_tag_prefix
+│   └── target                          # sample_scope, material, capture, method, data_types
+├── samples: list[Sample] | None        # = BS + SRA Sample + JGA Sample (EAV)
 ├── experiments: list[Experiment] | None # SRA/JGA experiment (library, platform)
 ├── runs: list[Run] | None              # SRA Run + JGA Data (files)
-│   └── run_date                        # submitter 指定の data 取得日
 ├── analyses: list[Analysis] | None     # SRA/JGA analysis (analysis_type, files)
-│   └── analysis_date                   # submitter 指定の解析実施日
 ├── sequences: Sequences | None         # Trad/ST.26 (entries, common_source)
-│   └── seq_prefix                      # <- v2 submission
 ├── features: list[Feature] | None      # INSDC feature table
-├── assembly: Assembly | None           # assembly level, AGP, chromosomes
-│   └── submission_category             # <- v2 submission.trad_submission_category
-└── access_control: AccessControl | None # JGA Dataset/Policy/DAC
+├── assembly: Assembly | None           # assembly accession, name, level
+├── datasets: list[Dataset] | None      # JGA Dataset（独立）
+├── relations: list[Relation] | None    # 外部参照 (URL, db_xref) + 意味的関係 (child_of, ...)
+└── access_control: AccessControl | None # JGA Policy/DAC
 ```
 
-#### 議論ログ: DdbjRecord の粒度と形式識別
+設計上の決定:
 
-検討した 3 案:
+- **案 E の徹底**: 全フィールド `T | None`。record_type のような判別フィールドは不要。validation rules の通過結果から「何として有効か」を導出する
+- **段階的更新**: 1 つの record ファイルを段階的に更新していく運用モデル（project 登録 → accession 追記 → sample 追記 → ...）
+- **submission set**: 1 つの DdbjRecord に複数 DB の情報を含めることで、submission set を自然に表現
+- **status**: record に含めない。record-idm の外部メタデータ
+- **ObjectType 基底モデル**: 作らない。accession, alias 等は各モデルが個別に持つ
+- **GFF トップレベル廃止**: GFF は入力フォーマットであり record の構成要素ではない。features に正規化し、GFF 固有情報は provenance に退避
+- **Links と Relations の統合**: 外部参照（URL, db_xref）も意味的関係も広義の relation として `relations` に統合。旧 `links` フィールドは廃止
+- **submission_category**: record_type / 判別フィールドに該当するため、モデルに持たない（Option E 原則）。変換元の分類情報は provenance に格納
 
-| 案 | 1 JSON の単位 | 例 |
-|---|---|---|
-| A: 1 object | DB のオブジェクト 1 つ | bioproject.json, experiment.json, ... |
-| B: 1 DB submission | 1 DB への提出単位 | sra_submission.json (study+experiment+run+sample を含む) |
-| C: 1 submission set | 複数 DB にまたがる登録全体 | submission.json (BP+BS+SRA+Trad を全部含む) |
+### 共通型
 
-**決定: 案 E の徹底により A/B/C の区分を溶かす**
+#### Organism
 
-案 E（flat + validation rules）を徹底すると、DdbjRecord に record_type のような判別フィールドは不要になる:
+Project, Sample, Sequences (common_source) で横断的に使われる。最小限のフィールドに絞る（strain, isolate 等は Sample attributes (EAV) で扱う）。
 
-- 全フィールドを flat に `T | None` で定義する
-- validation rules が「何として有効か」を判定する
-- record_type は validation rules の通過結果から **導出** される
-
-具体例:
-
-- `project` だけ埋める → BP validation rules が通る → BP として投稿可能
-- `project` + `samples` を埋める → BP rules も BS rules も通る → BP+BS として投稿可能
-- 後から `experiments` + `runs` を追記 → SRA validation rules も通るようになる
-
-この方式の利点:
-
-- record_type を宣言する必要がない（validation 結果から導出）
-- 1 つの DdbjRecord に複数 DB の情報を段階的に追加できる
-- API 側は「どの validation rules が通ったか」を見て適切な DB に投入する
-- A/B/C すべてのユースケースを 1 つの仕組みで包含する
-
-#### 議論ログ: Tier 1 構造的決定
-
-| # | 論点 | 決定 |
-|---|------|------|
-| 1 | provenance | 維持。data の来歴記録用（変換元形式、ツールバージョン等）。record から直接書き始めるケースも考慮し、provenance がない record も有効とする。record の metadata の metadata という位置付け |
-| 2 | ObjectType 基底モデル | 作らない。accession, alias 等は各概念（project, sample 等）が個別に持つ |
-| 3 | submitter 統一 | Person + Organization の統一モデルを定義。各形式の差異は validation rule で吸収 |
-| 5 | hold_date | 要調査: 全形式の date フィールドを洗い出してから判断 |
-| 6 | organism 共有 | 共通の Organism 型を定義し再利用。taxonomy dump の追加調査が必要 |
-| 7 | EAV | EAV を完全にやめたい。要検討 |
-| 8 | status | record に含めない。status は record-idm の責務であり外部メタデータ。record は純粋な data を表す。理由: (1) 同じ data が status 変化しても data 自体は変わらない (2) status は DB 側の管理情報 (3) validation config と同様に外付けすべき |
-| 9 | id / 参照 | 保留 |
-
-未決定で議論が必要:
-
-- #4: db_xrefs / links — 単純な cross-ref だけでなく親子関係（umbrella 等）も表現する必要がある
-- #7: EAV 廃止 — BioSample の ~150 packages をどう扱うか
-
-#### Open questions
-
-- [x] ~~1 つの DdbjRecord が 1 つの形式を表すか~~ → 案 E により区分不要
-- [x] ~~形式識別子のフィールド名~~ → 不要。validation rules から導出
-- [x] ~~provenance を維持するか~~ → 維持。来歴記録用
-- [x] ~~ObjectType 基底モデル~~ → 作らない
-- [x] ~~status を record に含めるか~~ → 含めない（外部メタデータ）
-- [ ] sequences / features / experiments は Trad 固有の概念。他形式ではどうなるか
-- [ ] フィールド数が膨大になる可能性。全形式のフィールドを 1 モデルに flat に並べた場合の実用性
-- [x] ~~db_xrefs / links の設計~~ → links（外部参照）と relations（意味的関係）を分離。ルート直下に配置
-- [ ] EAV を完全にやめる方法の検討 — 調査完了、方針検討中（「EAV 廃止の調査結果と方針」参照）
-
-### Submission モデル
-
-#### 議論ログ: submission の責務分解
-
-v2 の Submission は「features と sequences 以外の全部」を押し込んだ結果、責務が混在していた。べき論に基づいて分解する:
-
-| フィールド | v2 の場所 | v3 の帰属先 | 理由 |
-|-----------|----------|------------|------|
-| submitters | submission | **submission** | 提出行為のメタデータ |
-| hold_date | submission | **submission** | 提出行為のメタデータ |
-| comments | submission | **submission** | 提出行為のメタデータ |
-| references | submission | **project** | BP の Publication に相当。研究プロジェクトの属性 |
-| keywords | submission | **project** | BP の Keyword に相当。研究プロジェクトの属性 |
-| locus_tag_prefix | submission | **project** | BP XSD の ProjectDescr に定義。プロジェクトの属性 |
-| division | submission | **project** or 導出 | organism + sample + 文脈から決まるアーカイブ分類 |
-| trad_submission_category | submission | **assembly** | アセンブリの種別・完成度（WGS/GNM/MAG/SAG/haplotype） |
-| seq_prefix | submission | **sequences** | 配列エントリの命名規則 |
-| datatype | submission | **project** or **assembly** | データ種別の分類 |
-| db_xrefs | submission | **ルート直下に links + relations として分離** | 下記「Links と Relations の設計」参照 |
-
-**決定: submission は提出行為のメタデータに限定する（thin submission）**
-
-```
-Submission (thin)
-├── submitters: list[Person] | None
-├── hold_date: str | None
-└── comments: list[str] | None
+```python
+class Organism(BaseModel):
+    name: str | None              # "Homo sapiens"
+    taxonomy_id: int | None       # NCBI Taxonomy ID (e.g., 9606)
 ```
 
-各形式での submitter / contact 情報の表現:
+#### Date
 
-| 形式 | 提出者の表現 | 備考 |
-|------|-------------|------|
-| Trad (v2) | Person (name, abbreviation, email, orcid, Organization) | submitters[0] が contact |
-| BioProject XSD | Organization (Name, Contact: email/phone/Address) | role: owner/participant |
-| BioSample XSD | Owner > Name + Contacts (email, lab, department) | Organization 単位 |
-| SRA XSD | SUBMISSION > CONTACTS (name, inform_on_status/error) | 通知先としての contact |
-| JGA XSD | DAC > CONTACTS (name, email, organisation) | DAC の委員 |
-| JGA 申請 | PI (last_name, first_name, institution) + Submitter + Head | 3 種の担当者 |
+型は `str | None`。ISO 8601 形式で精度のバリエーションを許容（`"2024-01-15T09:00:00Z"`, `"2024-01-15"`, `"2024-01"`, `"2024"`）。形式の検証は validation rule で行う。submitter 指定の date のみ record に含め、archive 管理の日付（created, modified, published 等）は外部メタデータ。
 
-#### Open questions
+#### Person / Organization / Address
 
-- [x] ~~submitter 情報は全形式で共通化できるか~~ → Person + Organization の統一モデルで共通化。形式差異は validation rule で吸収
-- [x] ~~db_xrefs / links の設計~~ → 下記「Links と Relations の設計」で解決。links（外部参照）と relations（意味的関係）を分離
-- [x] ~~hold_date / date 周りの統一~~ → 下記「Date フィールドの設計」で解決
+```python
+class Address(BaseModel):
+    country: str | None
+    state: str | None
+    city: str | None
+    street: str | None
+    postal_code: str | None
+
+class Organization(BaseModel):
+    name: str | None
+    abbreviation: str | None
+    url: str | None
+    role: str | None              # "owner", "participant", ...
+    type: str | None              # "institution", "company", "government", ...
+    department: str | None
+    address: Address | None
+    ror_id: str | None
+
+class Person(BaseModel):
+    name: str | None              # full name ("Hanako Mishima")
+    first_name: str | None        # "Hanako"
+    last_name: str | None         # "Mishima"
+    abbreviation: str | None      # "Mishima,H." (Trad)
+    email: str | None
+    phone: str | None
+    orcid: str | None
+    role: str | None              # "PI", "submitter", "head", "contact", ...
+    organizations: list[Organization] | None
+```
+
+role は Entity に持たせる（flat pragmatic）。同一人物が複数の role を持つ場合は Person オブジェクトを複製する。
+
+#### accession / alias
+
+各モデルに持たせる識別子フィールド。
+
+```python
+# Project, Sample, Experiment, Run, Analysis, Entry, Dataset, Assembly,
+# Policy, Dac に共通:
+accession: str | None         # 登録後に付与 ("PRJDB12345", "SAMD00123456", ...)
+alias: str | None             # 登録前のローカル名 (SRA refname 等)
+
+# Feature, Qualifier:
+alias: str | None             # ローカル識別子（accession は持たない）
+```
+
+- 登録前は alias のみ、登録後に accession が追記される
+- alias は submission (record) 内で unique
+- submit 時に submission_id が namespace になる（例: `<submission_id>::bioproject::my-project-01`）
+- center_name は submission.submitters の Organization から導出可能なため含めない
+- Feature / Qualifier は accession を持たない。alias のみで識別する（Feature は type + location でも識別可能）
+
+### Submission
+
+提出行為のメタデータに限定する（thin submission）。
+
+```python
+class Submission(BaseModel):
+    submitters: list[Person] | None   # submitters[0] = contact person
+    hold_date: str | None             # ISO 8601
+    comments: list[str] | None        # free-form notes
+```
+
+v2 submission にあった references, keywords, locus_tag_prefix, division, db_xrefs 等は適切な帰属先に移動済み。
+
+### Project
+
+BioProject + SRA Study + JGA Study の統合。
+
+```python
+class Publication(BaseModel):
+    title: str | None
+    pubmed_id: str | None              # PubMed ID
+    doi: str | None
+    status: str | None                 # "published", "in_press", "unpublished"
+    date: str | None                   # ISO 8601
+    journal: str | None
+    volume: str | None
+    issue: str | None
+    pages_from: str | None
+    pages_to: str | None
+    authors: list[Person] | None
+
+class Grant(BaseModel):
+    title: str | None
+    agency: str | None
+    id: str | None
+
+# grant の URI
+
+class ProjectTarget(BaseModel):
+    sample_scope: str | None           # "monoisolate", "multispecies", "environment", ...
+    material: str | None               # "genome", "transcriptome", "proteome", ...
+    capture: str | None                # "whole", "exome", "targeted_locus", ...
+    method: str | None                 # "sequencing", "array", "mass_spec", ...
+    data_types: list[str] | None       # "raw_sequence_reads", "assembly", "annotation", ...
+
+class Project(BaseModel):
+    accession: str | None              # PRJDB/PRJNA/PRJEB
+    alias: str | None
+    title: str | None
+    description: str | None
+    project_type: str | None           # "primary", "umbrella"
+    study_types: list[str] | None      # "WGS", "Case-Control", ...
+    organism: Organism | None
+    publications: list[Publication] | None
+    grants: list[Grant] | None
+    keywords: list[str] | None
+    relevance: dict[str, str] | None   # {"agricultural": "crop improvement", ...}
+    locus_tag_prefix: list[str] | None
+    target: ProjectTarget | None
+```
+
+設計上の決定:
+
+- **project_type と study_types を分離**: BP の構造種別（primary/umbrella）と SRA/JGA の研究手法/デザインは別概念
+- **Umbrella**: 1 JSON = 1 Project。umbrella は `project_type: "umbrella"` で表現し、親子関係は `relations` で
+- **target**: BP ProjectTypeSubmission 固有の概念を `ProjectTarget` としてネスト
+- **division**: project には含めない（Entry レベル or validator 導出）
+- **datatype**: project には含めない（assembly.submission_category に統合）
+- **relevance**: BP XSD の Relevance は string 値を持てるため `dict[str, str]` で保持
+
+### Sample
+
+BioSample + SRA Sample + JGA Sample の統合。
+
+```python
+class Attribute(BaseModel):
+    name: str | None
+    value: str | None
+    unit: str | None
+
+class Sample(BaseModel):
+    accession: str | None              # SAMD/SAMN/SAME
+    alias: str | None
+    title: str | None
+    organism: Organism | None
+    attributes: list[Attribute] | None # EAV (name/value/unit)
+    package: str | None                # "MIGS.ba", "Pathogen.cl.1.0", ...
+    donor_id: str | None               # JGA
+    sample_group_type: str | None      # JGA: "case", "control", "cancer"
+```
+
+設計上の決定:
+
+- **EAV 維持**: BioSample の ~960 attributes を全て typed fields にするのは非現実的。validation rule で必須/任意を制御
+- **common_source との関係**: 統合しない。Sample.organism と Sequences.common_source は役割が異なる（試料メタデータ vs INSDC source feature のデフォルト値）。整合性は validation rule で検証
+- **collection_date**: attributes のまま（昇格させるとキリがない）
+- **anonymized_name**: attributes で扱う
+
+### Experiment
+
+SRA Experiment + JGA Experiment の統合。
+
+```python
+class LibraryDescriptor(BaseModel):
+    name: str | None                   # library name
+    strategy: str | None               # "WGS", "RNA-Seq", "ChIP-Seq", ...
+    source: str | None                 # "GENOMIC", "TRANSCRIPTOMIC", ...
+    selection: str | None              # "RANDOM", "PCR", "cDNA", ...
+    layout: str | None                 # "single", "paired"
+    nominal_length: int | None         # paired-end の insert size
+    nominal_sdev: float | None         # paired-end の標準偏差
+    construction_protocol: str | None  # free text
+
+class Platform(BaseModel):
+    type: str | None                   # "ILLUMINA", "PACBIO_SMRT", ...
+    instrument_model: str | None       # "Illumina HiSeq 2500", ...
+    array_name: str | None             # JGA array の場合
+    array_description: str | None      # JGA array の場合
+    array_provider: str | None         # JGA array の場合
+
+class Experiment(BaseModel):
+    accession: str | None              # DRX/SRX/ERX
+    alias: str | None
+    title: str | None
+    library: LibraryDescriptor | None
+    platform: Platform | None
+    targeted_loci: list[str] | None    # "16S rRNA", "exome", ...
+```
+
+設計上の決定:
+
+- **controlled vocabulary**: 全て `str | None`。許容値は YAML 外部定義 + validation rule で制御（XSD enum は頻繁に更新されるため）
+- **JGA array platform**: Platform に flat に統合
+
+### Run
+
+SRA Run + JGA Data の統合。
+
+```python
+class File(BaseModel):
+    filename: str | None
+    filetype: str | None               # "fastq", "bam", "cram", "CEL", ...
+    checksum_method: str | None        # "MD5"
+    checksum: str | None
+
+class Run(BaseModel):
+    accession: str | None              # DRR/SRR/ERR
+    alias: str | None
+    title: str | None
+    run_date: str | None               # ISO 8601
+    data_type: str | None              # JGA: "sequencing", "array", "metabolite", "image"
+    files: list[File] | None
+```
+
+設計上の決定:
+
+- **名称 "run"**: SRA の用語を採用（"data" はあいまい）。JGA の "Data" は run に mapping
+- **file type 統合**: SRA 31 enum + JGA 65+ enum を 1 つの `str` に統合、validation rule で制御
+
+### Analysis
+
+SRA Analysis + JGA Analysis の統合。
+
+```python
+class Analysis(BaseModel):
+    accession: str | None              # DRZ/SRZ/ERZ
+    alias: str | None
+    title: str | None
+    analysis_type: str | None          # "de_novo_assembly", "microarray", ...
+    analysis_date: str | None          # ISO 8601
+    files: list[File] | None           # File 型を再利用
+```
+
+SRA 4 types + JGA 11+ types を 1 つの `str` に統合。validation rule で制御。
 
 ### Sequences & Entries
 
-Trad / ST.26 固有のモデル。v3 でも塩基配列登録で使用。
+Trad / ST.26 固有のモデル。
 
-v2 からの変更: `seq_prefix` を submission から移動。
+```python
+class Source(BaseModel):
+    organism: Organism | None
+    mol_type: str | None               # "genomic DNA"
+    qualifiers: dict[str, list[Qualifier]] | None
 
+class Entry(BaseModel):
+    accession: str | None              # "AB123456.1" (version 含む)
+    alias: str | None                  # submitter 指定 ID ("contig_001")
+    name: str | None
+    type: str | None                   # "chromosome", "plasmid", "unplaced", ...
+    topology: str | None               # "circular", "linear"
+    sequence: str | None
+    comments: list[str] | None
+    source_features: list[SourceFeature] | None
+
+class StructuredComment(BaseModel):
+    tagset_id: str | None              # "Genome-Assembly-Data", "FluData", ...
+    fields: dict[str, str] | None
+
+class Sequences(BaseModel):
+    seq_prefix: str | None
+    common_source: Source | None
+    entries: list[Entry] | None
+    structured_comments: list[StructuredComment] | None
 ```
-Sequences
-├── seq_prefix: str | None              # <- v2 submission.seq_prefix
-├── common_source: Source | None
-└── entries: list[Entry] | None
-```
 
-#### Open questions
-
-- [ ] 大規模ゲノム（数万エントリ）での JSON サイズ実用性
-- [ ] common_source の organism と project.organism / sample.organism の関係
-  - 概念的に同じ。統合するか、それぞれが持つか
+ST_COMMENT（Structured Comment）は Trad 固有の概念。21+ 種のブロック型、150-200+ の key field が存在するため EAV（`dict[str, str]`）で保持。v2 の `experiments[].experiment_attributes` から移動。
 
 ### Features
 
-INSDC feature table に基づくアノテーション。現行の INSDC validation（YAML rule）を継続。
+INSDC feature table に基づくアノテーション。
 
-#### Open questions
+```python
+class Qualifier(BaseModel):
+    alias: str | None                  # ローカル識別子
+    value: str | None
 
-- [ ] ST.26 は INSDC のサブセット。validation rule の差異をどう表現するか
-- [ ] GFF 由来の feature との対応付け
-- [ ] location 構文の validation（未実装、Biopython 連携？）
-
-### Project (= BioProject + SRA Study + JGA Study の統合)
-
-v2 には存在しないモデル。v3 で新規追加。DB 横断で「研究プロジェクト」を統一的に表現する。
-
-統合元の主要フィールド:
-
-| フィールド | BioProject | SRA Study | JGA Study |
-|-----------|-----------|-----------|-----------|
-| title | Title (required) | STUDY_TITLE (required) | STUDY_TITLE (required) |
-| description | Description | STUDY_ABSTRACT | STUDY_ABSTRACT |
-| project_type | TopSingleOrganism / TopAdmin / Submission | STUDY_TYPE (WGS/Metagenomics/...) | STUDY_TYPES (multiple: Case-Control/Cohort/...) |
-| organism | Organism (taxID, strain, BiologicalProperties) | - (Sample 側) | - (Sample 側) |
-| grants | Grant (Agency, GrantId) | - | GRANTS |
-| publications | Publication (PMID, DOI) | STUDY_LINKS | PUBLICATIONS |
-| keywords | Keyword (0+) | - | - |
-| relevance | Agricultural/Medical/Industrial/... | - | - |
-| locus_tag_prefix | LocusTagPrefix | - | - |
-| target | sample_scope, material, capture | - | - |
-| related_projects | Links.xsd Hierarchical (umbrella) | RELATED_STUDIES | - |
-
-#### Open questions
-
-- [ ] Project の必須フィールド — title のみか、organism も含めるか
-- [ ] project_type の統合 — BP の 3 種と SRA/JGA の study_type をどうマージするか
-  - BP TopAdmin (umbrella) は特殊。project_type の 1 値として扱うか
-- [ ] Umbrella BioProject の扱い
-  - 複数 Project の登録を 1 JSON で許容するか
-  - 親子関係の表現方法
-  - 調査結果: 144 umbrella、99.6% が depth 1（umbrella → leaf のみ）
-- [ ] BP 固有の target (sample_scope/material/capture) をどこに置くか
-- [ ] SRA study の RELATED_STUDIES と BP の Links.xsd Hierarchical を統合するか
-
-### Sample (= BioSample + SRA Sample + JGA Sample の統合)
-
-v2 には存在しないモデル。v3 で新規追加。DB 横断で「試料」を統一的に表現する。
-
-統合元の主要フィールド:
-
-| フィールド | BioSample | SRA Sample | JGA Sample |
-|-----------|-----------|-----------|-----------|
-| title | Title (required) | TITLE | TITLE |
-| organism | Organism (taxonomy_id, strain, breed, cultivar) | SAMPLE_NAME (TAXON_ID, SCIENTIFIC_NAME) | SAMPLE_NAME (TAXON_ID) |
-| attributes | Attributes (EAV: attribute_name/value/unit) | SAMPLE_ATTRIBUTES (TAG/VALUE/UNITS) | SAMPLE_ATTRIBUTES |
-| models/packages | Models (MIGS.ba, Pathogen.cl.1.0, ...) | - | - |
-| relations | Relations (derived_from/part_of) | - | - |
-| anonymized_name | - | ANONYMIZED_NAME | ANONYMIZED_NAME |
-| donor_id | - | - | DONOR_ID |
-| sample_group_type | - | - | SAMPLE_GROUP_TYPE (case/control/cancer) |
-
-注目点: BioSample の EAV と SRA/JGA の SAMPLE_ATTRIBUTES は同じパターン（TAG/VALUE）。統一可能。
-
-#### Open questions
-
-- [ ] EAV を完全にやめる方法の検討（下記「EAV 廃止の調査結果と方針」参照）
-- [ ] BioSample package（~229 種）の validation rule 化
-  - INSDC feature table と同じ YAML パターンで定義可能
-  - 機械可読な定義が既に存在: NCBI XML, DDBJ xlsx, DDBJ RDF/OWL, GenSC MIxS LinkML
-- [ ] BioSample Relations（derived_from/part_of）を v3 でどう表現するか
-  - Sample 間の関係グラフ。record-idm の relation とは別概念
-- [ ] Trad の common_source（organism + mol_type + qualifiers）との関係
-  - Sample の organism と common_source の organism は概念的に同じ。統合するか
-
-### Experiment (SRA + JGA 共通)
-
-v2 には限定的に存在（ST_COMMENT 用）。v3 では SRA/JGA の実験メタデータを統一的に表現する。
-
-study → Project に統合済み、sample → Sample に統合済みのため、Experiment 以下が SRA/JGA 固有の概念として残る。
-
-統合元の主要フィールド:
-
-| フィールド | SRA Experiment | JGA Experiment |
-|-----------|---------------|----------------|
-| library_strategy | LIBRARY_STRATEGY (43+ enum) | SEQUENCING_LIBRARY_STRATEGY + ARRAY strategies |
-| library_source | LIBRARY_SOURCE (8 enum) | 同左 |
-| library_selection | LIBRARY_SELECTION (30+ enum) | 同左 |
-| library_layout | SINGLE / PAIRED (nominal_length, sdev) | 同左 (optional) |
-| platform | PLATFORM (17 families, 80+ models) | SEQUENCING_PLATFORM + ARRAY_PLATFORM |
-| targeted_loci | TARGETED_LOCI (16S rRNA, exome, ...) | 同左 |
-| protocol | LIBRARY_CONSTRUCTION_PROTOCOL | 同左 |
-
-JGA の拡張: ARRAY_PLATFORM（array_name, array_description, array_provider）
-
-#### Open questions
-
-- [ ] Experiment の controlled vocabulary（strategy/source/selection/platform）の管理方法
-  - YAML 外部定義? Pydantic Literal? 両方?
-  - XSD の enum は頻繁に更新される（新しい sequencer 追加等）
-- [ ] JGA の array platform をどう統合するか — platform の拡張として扱うか、別フィールドか
-
-### Run / Data (SRA Run + JGA Data の統合)
-
-データファイルの管理。
-
-| フィールド | SRA Run | JGA Data |
-|-----------|---------|----------|
-| files | FILES (filename, filetype, checksum) | FILES (同構造) |
-| data_type | - | DATA_TYPE (sequencing/array/metabolite/image) |
-| file types | 31 enum (fastq, bam, cram, ...) | 65+ enum (+ CEL, NIfTI, Analyze, ...) |
-
-#### Open questions
-
-- [ ] 名称: "run" か "data" か — JGA では "Data" と呼ぶ
-- [ ] JGA の拡張 file types (CEL, NIfTI 等) を同じ enum に含めるか、validation rule で分けるか
-
-### Analysis (SRA + JGA 共通)
-
-二次解析結果。
-
-| フィールド | SRA Analysis | JGA Analysis |
-|-----------|-------------|--------------|
-| analysis_type | 4 types (DE_NOVO_ASSEMBLY, REFERENCE_ALIGNMENT, SEQUENCE_ANNOTATION, ABUNDANCE_MEASUREMENT) | 4 + MICROARRAY, METABOLOMICS, PROTEOMICS, BIOCHEMICAL_ASSAY, IMAGE, DOCUMENT |
-| files | AnalysisFileType (bam, vcf, gff, ...) | 拡張 (+ metabolomics, proteomics formats) |
-| references | STUDY_REF, TARGETS (-> run/sample/experiment) | STUDY_REFS, SAMPLE_REFS, DATA_REFS |
-
-#### Open questions
-
-- [ ] SRA の 4 types と JGA の 11+ types を 1 つの enum にするか
-  - 案 E: 全値を 1 enum に入れ、validation rule で「SRA submission なら 4 types のみ許可」
-- [x] ~~study / sample は Project / Sample に統合~~ → 統合済み
-
-### Access Control (JGA 固有)
-
-JGA の controlled-access chain。Experiment, Run/Data, Analysis は SRA と統合済みのため、JGA 固有として残るのは Dataset → Policy → DAC のアクセス制御構造。
-
-```
-Dataset (Data + Analysis grouping)
-├── dataset_type (0+)
-├── data_refs (-> Run/Data)
-├── analysis_refs (-> Analysis)
-└── policy_ref (-> Policy, required)
-
-Policy
-├── dac_ref (-> DAC, required)
-└── policy_text or policy_file
-
-DAC (Data Access Committee)
-└── contacts (name, email, organisation: required)
+class Feature(BaseModel):
+    alias: str | None                  # ローカル識別子（GFF の ID 属性に相当）
+    type: str | None                   # "CDS", "gene", "rRNA", ...
+    location: str | None               # INSDC location format
+    sequence_id: str | None            # Entry.alias への参照
+    qualifiers: dict[str, list[Qualifier]] | None
+    locus_tag_id: str | None
+    source_tool: str | None            # GFF source 列（どのツールが予測したか）
+    score: float | None                # GFF score 列（予測信頼度）
 ```
 
-JGA Submission 固有: `nbdc_number`（NBDC 承認番号、required）
+設計上の決定:
 
-#### Open questions
-
-- [ ] Dataset / Policy / DAC は DdbjRecord に含めるか、別管理か
-  - DAC は組織情報であり、複数 Dataset で共有される
-  - Policy も同様に再利用される可能性がある
-- [ ] JGA の承認ワークフロー（却下あり）と status の関係
-  - 10(作成中) → 20(申請完了) → 40(審査中) → 60(承認) / 50(却下)
-  - record-idm の submission_stage に mapping 可能（rejected は JGA 固有）
-- [ ] nbdc_number は submission レベルの共通フィールドに置くか、JGA 固有として validation rule で制約するか
+- Feature / Qualifier は accession を持たない。alias のみで識別する
+- Feature は type + location でも識別可能（CDS は領域の重複を許容しないため composite key として機能）
+- `source_tool` / `score` は GFF 由来の情報を保持するためのフィールド。GFF 以外の入力では None
+- protein_id の付与は alias を参照先として行う
 
 ### Assembly
 
-現 v2 では ST_COMMENT として Experiment に埋め込まれている。v3 では独立モデルにする。
-
-v2 からの変更: `trad_submission_category` を submission から移動し、`submission_category` として配置。
-
-```
-Assembly
-├── submission_category: str | None     # <- v2 submission.trad_submission_category
-│                                       #    WGS/GNM/MAG/SAG/haplotype
-├── assembly_level: str | None          # complete genome/chromosome/scaffold/contig
-├── genome_representation: str | None   # full/partial
-├── assembly_accession: str | None      # GCA_/GCF_
-├── chromosomes: list[Chromosome] | None
-└── ...
+```python
+class Assembly(BaseModel):
+    accession: str | None              # GCA_/GCF_ (version 含む)
+    alias: str | None
+    name: str | None                   # assembly name（グローバル名）
+    assembly_level: str | None         # "complete genome", "chromosome", "scaffold", "contig"
+    genome_representation: str | None  # "full", "partial"
 ```
 
-調査結果:
+設計上の決定:
 
-- NCBI: XML スキーマなし。AGP ファイル + chromosome list (TSV) + structured metadata
-- ENA: ENA.assembly.xsd あり（ASSEMBLY_LEVEL, GENOME_REPRESENTATION, TAXON, WGS_SET, CHROMOSOMES）
-- BioProject XSD: Assembly.xsd あり（assemblyName, assemblyAccession, WGSprefix, LocusTagPrefix, Replicon list）
-- スパコン: assembly_summary_genbank.txt は trad/ には未配置（NCBI FTP から streaming 取得）
+- **Chromosome モデルを廃止**: Entry が既に name, type, topology を持つ。「この Entry は chromosome 1」という情報は Entry 自身で表現し、二重管理を避ける
+- **submission_category を削除**: Option E 原則（判別フィールドを持たない）に従い、変換元の分類情報は `provenance` に格納する
+- ST_COMMENT 由来の Assembly Method, Genome Coverage 等は `Sequences.structured_comments` に格納
 
-#### Open questions
+### Dataset
 
-- [ ] submission_category の命名 — `trad_submission_category` を改名するか、そのままか
-  - "trad" は Trad 固有の名前。v3 では assembly 一般の概念として使う
-- [ ] NCBI Assembly 登録に必要な情報の整理
-  - AGP file (9-column TSV: component/gap)
-  - Chromosome list (TSV: object_name, chromosome_name, type, topology)
-  - Assembly accession (GCA/GCF)
-- [ ] Assembly index の生成機能はこの repo の責務か
-- [ ] assembly_summary_genbank.txt との連携
-- [ ] ENA の assembly XML を参考にするか（DDBJ/NCBI にはない形式）
+JGA 固有。独立したトップレベル概念。Run/Analysis/Policy への参照は `relations` で表現。
 
-### EAV 廃止の調査結果と方針
-
-**方針: EAV を完全にやめたい。**
-
-#### 調査結果
-
-| 指標 | 値 |
-|------|-----|
-| DDBJ の unique attribute_name 数 | 1,153（ジャンク含む、実質 400-700） |
-| NCBI の harmonized attributes | 960 |
-| packages 数 | 229 (NCBI) / 228 (DDBJ) |
-| 全 packages 共通の core attributes | 8 (sample_name, organism, taxonomy_id, bioproject_id, collection_date, geo_loc_name, sample_title, description) |
-| 1 package あたりの最大属性数 | 203 (MIGS.eu.built) |
-| 1 package あたりの平均属性数 | ~88 |
-| いずれかの package で mandatory な属性数 | 103 |
-| 常に optional な属性数 | 765 |
-| 1 package にしか存在しない属性数 | 123 |
-| unit の扱い | テキスト値に埋め込み（`"0.4 m"`）、構造化されていない |
-| multi-value | なし（1 attribute = 1 value） |
-| 機械可読な定義 | NCBI XML, DDBJ xlsx, DDBJ RDF/OWL, GenSC MIxS LinkML |
-
-Top 20 attributes（DDBJ、844K samples 中の出現数）:
-
-| 順位 | attribute | 出現数 |
-|------|-----------|--------|
-| 1 | sample_name | 844,129 |
-| 2 | geo_loc_name | 731,576 |
-| 3 | collection_date | 723,420 |
-| 4 | lat_lon | 520,424 |
-| 5 | bioproject_id | 440,806 |
-| 6 | env_broad_scale | 419,995 |
-| 7 | env_medium | 419,380 |
-| 8 | env_local_scale | 419,315 |
-| 9 | isolate | 315,277 |
-| 10 | isolation_source | 271,960 |
-| 11 | host | 267,184 |
-| 12 | project_name | 215,806 |
-| 13 | strain | 184,905 |
-| 14 | tissue | 166,465 |
-| 15 | age | 138,660 |
-| 16 | metagenome_source | 134,714 |
-| 17 | dev_stage | 118,511 |
-| 18 | isol_growth_condt | 117,498 |
-| 19 | derived_from | 117,171 |
-| 20 | sex | 107,246 |
-
-Top 20 packages（DDBJ）:
-
-| 順位 | package | 件数 |
-|------|---------|------|
-| 1 | Generic | 115,750 |
-| 2 | Plant | 66,630 |
-| 3 | Metagenome.environmental | 63,458 |
-| 4 | MIMAG | 60,806 |
-| 5 | MIGS.eu | 56,436 |
-| 6 | Model.organism.animal | 51,745 |
-| 7 | MIMS.me.human-gut | 38,495 |
-| 8 | MIMS.me.soil | 28,190 |
-| 9 | Omics | 24,396 |
-| 10 | Functional.genomics | 23,683 |
-
-#### 既存の typed 化の試み
-
-| プロジェクト | 方式 | 説明 |
-|-------------|------|------|
-| GenSC MIxS | LinkML (YAML) | MIxS v6.1+ の公式仕様。1000+ slots。JSON Schema, OWL 生成可能 |
-| NMDC Schema | LinkML | `Biosample` class を定義。MIxS ベース |
-| EBI BioSamples | JSON Schema | チェックリストごとの JSON Schema。MongoDB + biovalidator |
-| DDBJ RDF/OWL | OWL ontology | package/attribute を OWL class/property で定義 |
-
-#### Open questions
-
-- [ ] 全 960 属性を typed fields にするか、よく使うものだけにするか
-  - 全部: 案 E に完全一致。巨大だが一貫性がある
-  - よく使うもの + catch-all: 実用的だが EAV が部分的に残る
-- [ ] attribute の命名: NCBI の harmonized_name をそのまま使うか
-- [ ] unit の扱い: テキスト埋め込みのまま（`"0.4 m"`）か、value + unit に分離するか
-- [ ] package の validation rule 化の具体的手法
-  - DDBJ xlsx / NCBI XML から自動生成する仕組みが必要
-
-### Links と Relations の設計
-
-#### 調査結果
-
-全形式のリンク/関係パターンを調査し、4 カテゴリに分類:
-
-| カテゴリ | 例 | XML での表現 |
-|----------|-----|-------------|
-| 外部リンク (URL) | Web ページ、カタログ | BP: `ExternalLink/URL`、SRA: `URL_LINK` |
-| DB 相互参照 (db_xref) | PubMed, taxonomy, SRA accession | BP: `ExternalLink/dbXREF`、SRA: `XREF_LINK`、BS: `Link type="db_xref"` |
-| 構造的/意味的関係 | umbrella 親子、derived_from、parasitic | BP: `Links.xsd Hierarchical/PeerProject`、BS: `Relations` |
-| record 内参照 | experiment → sample | SRA: `EXPERIMENT_REF/SAMPLE_DESCRIPTOR (refname/accession)` |
-
-#### 決定: links と relations を分離
-
-BioSample XSD の設計を踏襲し、外部参照と意味的関係を分離する:
-
-```
-# links: 外部リソースへの参照（旧 submission.db_xrefs を昇格）
-links: list[Link] | None
-  Link = UrlLink | DbXrefLink  (discriminated by type)
-  UrlLink:    {type: "url", url: str, label: str | None}
-  DbXrefLink: {type: "db_xref", db: str, id: str, label: str | None}
-
-# relations: レコード間の意味的・構造的関係
-relations: list[Relation] | None
-  Relation:
-    type: "child_of" | "parent_of" | "derived_from" | "part_of" |
-          "peer" | "same_as" | "replaced_by" | "replaces"
-    target: {db: str, id: str}
-    properties: dict[str, str] | None  # 追加属性（hierarchy_type 等）
+```python
+class Dataset(BaseModel):
+    accession: str | None              # JGAD
+    alias: str | None
+    title: str | None
+    description: str | None
+    dataset_types: list[str] | None    # "Exome sequencing", "Genotyping by array", ...
 ```
 
-v2 からの移行:
+### Access Control
 
-| v2 | v3 |
-|---|---|
-| `submission.db_xrefs[{db, id}]` | `links[{type: "db_xref", db, id}]` |
-| （存在しない） | `links[{type: "url", url, label}]` |
-| （存在しない） | `relations[{type, target}]` |
-| `feature.sequence_id` | `feature.sequence_id`（変更なし） |
+JGA 固有。Policy と DAC を `access_control` にネスト。
 
-#### 設計の根拠
+```python
+class Policy(BaseModel):
+    accession: str | None              # JGAP
+    alias: str | None
+    title: str | None
+    policy_text: str | None
+    policy_url: str | None
 
-1. BioSample XSD が Links と Relations を明確に分離しており、意図が最も明確
-2. links は「関連する外部リソースは何か」、relations は「他レコードとの意味的関係は何か」という異なる問い
-3. relations の type enum で umbrella BP 親子（child_of）、BS 派生（derived_from/part_of）、Trad 置換（replaced_by）を統一的に表現
+class Dac(BaseModel):
+    accession: str | None              # JGAC
+    alias: str | None
+    contacts: list[Person] | None
 
-### Date フィールドの設計
+class AccessControl(BaseModel):
+    policy: Policy | None
+    dac: Dac | None
+```
 
-#### 調査結果
+### Relations
 
-全形式の date フィールドを横断調査し、submitter 指定と archive 管理に分類:
+外部参照（URL, db_xref）と意味的関係を統合。旧 Links と旧 Relations を統一。
 
-| カテゴリ | submitter 指定 | archive 管理 | v3 での扱い |
-|----------|--------------|-------------|------------|
-| hold/release | hold_date (BP/SRA/JGA/Trad) | - | **submission.hold_date** |
-| created | - | create_date (BP/BS/DRA) | 外部メタデータ |
-| submitted | - | submitted/submit_date (BP/SRA/JGA) | 外部メタデータ |
-| modified | - | modified_date/last_update (全形式) | 外部メタデータ |
-| published/released | - | release_date/publication_date/open_date | 外部メタデータ |
-| distributed | - | dist_date (BP/BS/DRA/Trad) | 外部メタデータ |
-| run/acquisition | run_date (SRA), data_acquisition_date (JGA) | - | **runs[].run_date** |
-| analysis | analysis_date (SRA/JGA) | - | **analyses[].analysis_date** |
-| sample collection | collection_date (BS attribute) | - | **samples[].collection_date** |
-| sample preparation | preparation_date (BS) | - | **samples[].preparation_date** |
-| publication (paper) | Publication/@date (BP/JGA) | - | **project.publications[].date** |
+```python
+class RelationSource(BaseModel):
+    type: str | None                   # "sample", "project", "experiment", ...
+    alias: str | None
 
-#### 決定: submitter 指定の date のみ record に含める
+class RelationTarget(BaseModel):
+    url: str | None                    # URL 参照の場合
+    db: str | None                     # DB 参照 / record 内参照
+    id: str | None                     # DB 参照 / record 内参照
 
-- **record は純粋な data** という原則に基づき、archive が管理する日付（created, modified, published 等）は record-idm の外部メタデータとして扱う
-- submitter が指定する日付（hold_date, run_date, collection_date 等）は data の一部として record に含める
+class Relation(BaseModel):
+    type: str | None                   # "reference", "xref", "child_of", "derived_from", "part_of", ...
+    source: RelationSource | None      # record 内の起点（省略時は record 全体）
+    target: RelationTarget | None
+    label: str | None                  # 表示名
+    properties: dict[str, str] | None
+```
 
-形式間の命名の不統一（publication_date vs release_date vs open_date 等）は v3 では統一する:
+設計上の決定:
 
-| v3 フィールド | 対応する各形式の名称 |
-|-------------|-------------------|
-| submission.hold_date | BP: Hold/@release_date、SRA: HOLD/@HoldUntilDate、Trad: hold_date |
-| runs[].run_date | SRA: Run/@run_date、JGA: Data/@data_acquisition_date |
-| analyses[].analysis_date | SRA: Analysis/@analysis_date、JGA: Analysis/@analysis_date |
-| samples[].collection_date | BS: collection_date attribute |
-| project.publications[].date | BP: Publication/@date |
+- **Links と Relations を統合**: 外部 web 参照、外部 DB 参照、意味的関係は全て広義の relation
+- `type` で用途を区別: `"reference"` (URL), `"xref"` (db_xref), `"child_of"`, `"derived_from"` 等
+- `RelationTarget` に `url` / `db` + `id` を統合。URL が入っていれば外部参照、db + id が入っていれば DB/record 内参照
+- `source` は record 内のどのオブジェクトからの関係かを示す。省略時は record 全体が起点
+- record 内参照（Experiment → Sample, Run → Experiment 等）も `relations` で統一的に表現
 
-## Submission Set の概念
+使用例:
 
-1 つの「登録」が複数の DB にまたがるケースの扱い。
+```jsonc
+// Web 参照（旧 Link）
+{"type": "reference", "target": {"url": "https://example.com"}, "label": "Project homepage"}
 
-典型的な登録パターン（record-idm の relation graph より）:
+// DB 相互参照（旧 Link の db_xref）
+{"type": "xref", "target": {"db": "pubmed", "id": "12345678"}}
 
-| パターン | 割合 | 含まれる DB |
-|----------|------|------------|
-| BP only | 47.0% | BioProject のみ |
-| BP + BS + SRA | 33.8% | BioProject + BioSample + SRA |
-| BP + BS + SRA + Trad | 6.7% | 全部入り |
-| BP + BS + Trad | 6.4% | BioProject + BioSample + Trad |
-| BP + BS | 5.3% | BioProject + BioSample |
+// record 内参照
+{"type": "part_of", "source": {"type": "experiment", "alias": "exp-1"}, "target": {"db": "sample", "id": "sample-1"}}
 
-XSD 調査で判明した参照方式:
+// 親子関係
+{"type": "child_of", "target": {"db": "bioproject", "id": "PRJDB00001"}}
+```
 
-| 参照元 | 参照先 | 方式 |
-|--------|--------|------|
-| SRA Study | BioProject | STUDY_LINKS > XREF_LINK (db="bioproject") |
-| SRA Sample | BioSample | EXTERNAL_ID (namespace="BioSample") |
-| SRA Experiment | Study | STUDY_REF (refname or accession) |
-| SRA Experiment | Sample | SAMPLE_DESCRIPTOR (refname or accession) |
-| SRA Run | Experiment | EXPERIMENT_REF (refname or accession) |
-| JGA Dataset | Policy | POLICY_REF (required) |
-| JGA Policy | DAC | DAC_REF (required) |
+### Provenance
 
-RefNameGroup の 2 フェーズ:
+data の来歴記録。変換元形式やツール情報を typed フィールドで保持する。
 
-- **登録前**: `refname` + `refcenter` で同一 submission 内のオブジェクトを参照
-- **登録後**: `accession` で archive 全体のスコープで参照
+```python
+class GffMeta(BaseModel):
+    version: str | None                # GFF version ("3")
+    pragmas: list[str] | None          # ["##sequence-region chr1 1 2000000"]
+    source_tool: str | None            # GFF source 列のデフォルト値（"DFAST" 等）
 
-#### 議論ログ: submission set の扱い
+class Provenance(BaseModel):
+    source_format: str | None          # "GFF", "trad", "SRA", ...
+    submission_category: str | None    # 変換元の分類情報（"WGS", "GNM", "MAG" 等）
+    gff: GffMeta | None                # GFF 固有の来歴情報
+```
 
-案 E の徹底により、submission set は DdbjRecord 自体で自然に表現できる:
+設計上の決定:
 
-- 1 つの DdbjRecord に BP + BS + SRA のフィールドを全部入れれば、それ自体が submission set
-- 各 DB 向けの validation rules が全て通れば、API 側がそれぞれの DB に投入する
-- 別々の DdbjRecord に分けて投入することもできる（API 層で束ねる）
-- つまり submission set は JSON フォーマットの仕様としても API 層としても扱える
+- `extra="allow"` は将来の拡張用に残すが、既知の情報は typed フィールドで保持する
+- `submission_category` は Option E 原則（判別フィールドを持たない）に従い、record のトップレベルではなく provenance に格納
+- GFF 固有の per-feature 情報（source_tool, score）は Feature のフィールドとして保持し、provenance には record レベルの GFF メタデータのみ格納
 
-#### Open questions
-
-- [x] ~~submission set を DdbjRecord の上位概念として定義するか~~ → 案 E により DdbjRecord 自体で表現可能。API 層でも扱える
-- [ ] JGA-Dataset は submission set の一種か
-  - 調査結果: Dataset は Data + Analysis をグループ化し Policy を紐付ける単位。set に近い概念
-  - ただし JGA 内部の概念なので、JGA の DdbjRecord 内で表現する（cross-DB ではない）
-- [ ] set 内の record 間の参照をどう解決するか
-  - XSD の RefNameGroup パターン: 登録前は refname（ローカル名）、登録後は accession
-  - v3 でも同様の 2 フェーズ参照が必要
-  - API 層が accession 発行後に参照を解決する想定
-
-## Status と Validation
-
-### record-idm の 2D status model
-
-record-idm で定義された 2 軸のステータスモデルを v3 に取り込む。
-
-| record_status | 意味 | 許容される submission_stage |
-|---------------|------|-----------------------------|
-| private | 非公開 | draft, submitted, in_curation, revision_requested, accepted |
-| public | 公開 | accepted |
-| suppressed | 公開後抑制 | accepted |
-| withdrawn | 公開後取下 | accepted |
-| canceled | 公開前取消 | null, draft, submitted, in_curation, rejected |
-| unregistered | accession 予約済み未登録 | null |
-
-#### Open questions
-
-- [ ] record_status / submission_stage を DdbjRecord のフィールドに含めるか
-- [ ] status は DdbjRecord の属性か、外部メタデータか
+## Validation rule 実装リファレンス
 
 ### Validation 機構の設計
 
-#### 議論ログ: 設計方針
-
-eslint のアーキテクチャを参考に、以下の方針を決定:
+eslint のアーキテクチャを参考にした設計。
 
 **原則: record は純粋な data。validation config は外付け。**
 
@@ -954,6 +513,17 @@ eslint のアーキテクチャを参考に、以下の方針を決定:
 record.json          -> pure data (what)
 rules (Python)       -> validation logic (check + fix)
 config (CLI/API)     -> which rules to run, at what severity (how)
+```
+
+**Rule の Python interface:**
+
+```python
+class Rule(Protocol):
+    id: str                          # "bp/title-required"
+    default_severity: Severity       # error / warning
+
+    def check(self, record, context) -> list[Diagnostic]: ...
+    def fix(self, record, diagnostic) -> Record | None: ...  # optional
 ```
 
 **Rule の構成:**
@@ -968,26 +538,12 @@ This repo (ddbj-record-specifications)
 │   ├── insdc/feature-key-exists
 │   └── ...
 ├── Rule sets (convenience groupings)
-│   ├── BP_RULES: list[Rule]
-│   ├── BS_RULES: list[Rule]
-│   ├── SRA_RULES: list[Rule]
-│   ├── INSDC_RULES: list[Rule]
-│   └── ALL_RULES: list[Rule]
+│   ├── BP_RULES, BS_RULES, SRA_RULES, INSDC_RULES, ALL_RULES
+│   └── BP_SUBMISSION_RULES
 └── Rule definitions (YAML data, loaded by Python rules)
     ├── insdc_feature_table.yaml
     ├── bs_packages.yaml
     └── ...
-```
-
-**Rule の Python interface:**
-
-```python
-class Rule(Protocol):
-    id: str                          # "bp/title-required"
-    default_severity: Severity       # error / warning
-
-    def check(self, record, context) -> list[Diagnostic]: ...
-    def fix(self, record, diagnostic) -> Record | None: ...  # optional
 ```
 
 **Consumer による自由な組み合わせ:**
@@ -1002,12 +558,6 @@ ddbj-record validate --rules bp,bs --stage draft record.json
 ddbj-record validate --rules bp,bs --stage draft --fix record.json
 ```
 
-**3 つの決定事項:**
-
-1. **record は純粋な data** — validation config を record 内に持たない
-2. **rule の interface は Python に統一** — YAML は data definition（INSDC feature table 等）として使うが、rule の interface は Python class/function
-3. **fix は rule ごとに optional** — eslint パターン。rule が `fix()` を提供していれば `--fix` で自動修正可能
-
 **rule と config の責務分離:**
 
 | 責務 | 担当 | 例 |
@@ -1020,8 +570,6 @@ ddbj-record validate --rules bp,bs --stage draft --fix record.json
 
 ### Validation の段階的挙動
 
-validation の挙動を context に応じて切り替える。stage は consumer が外部から指定する。
-
 | stage | 例 | validation の期待 |
 |-------|-----|-------------------|
 | draft | submitter がローカルで作成 | 緩い（warning 中心） |
@@ -1029,21 +577,6 @@ validation の挙動を context に応じて切り替える。stage は consumer
 | curation | DDBJ staff が編集 | 厳密 + 追加ルール |
 | accepted | accession 発行済み | 変更制約あり |
 | public | 外部公開済み | validation skip or 読み取り専用 |
-
-rule 内で stage に応じて severity を切り替える:
-
-```python
-class BpTitleRequired(Rule):
-    id = "bp/title-required"
-    default_severity = Severity.ERROR
-
-    def check(self, record, context):
-        if record.project and not record.project.title:
-            severity = (Severity.WARNING if context.stage == "draft"
-                       else Severity.ERROR)
-            return [Diagnostic(rule=self.id, severity=severity, ...)]
-        return []
-```
 
 ### Fix の設計
 
@@ -1057,26 +590,367 @@ class BpTitleRequired(Rule):
 | 構造変換 | v2 → v3 マイグレーション | converter の責務 |
 | curation | qualifier value の修正、organism 名の正規化 | 外部リソース依存 |
 
-#### Open questions
+### 各形式との対応表
 
-- [ ] fix の安全性レベルを分類し、`--fix` のモードを分けるか（`--fix=safe`, `--fix=all` 等）
-- [ ] 外部リソース依存の fix（taxonomy DB 等）をどう扱うか
-- [ ] fix の結果を diff として表示する機能（dry-run）
-- [ ] 公開後の record に対する validation は skip するか
+v3 モデルと各形式のフィールド対応。converter / validation rule 実装時に参照する。
+
+#### Project
+
+| v3 | BP | SRA Study | JGA Study |
+|----|----|----|-----|
+| title | Title | STUDY_TITLE | STUDY_TITLE |
+| description | Description | STUDY_ABSTRACT | STUDY_ABSTRACT |
+| project_type | TopSingle="primary", TopAdmin="umbrella" | - | - |
+| study_types | - | STUDY_TYPE (1 値) | STUDY_TYPES (複数値) |
+| organism | Organism | - (Sample 側) | - (Sample 側) |
+| publications | Publication (StructuredCitation) | STUDY_LINKS (PubMed xref) | PUBLICATIONS |
+| grants | Grant | - | GRANTS |
+| keywords | Keyword | - | - |
+| relevance | Relevance (6+1 categories) | - | - |
+| locus_tag_prefix | LocusTagPrefix | - | - |
+| target.* | Target (sample_scope/material/capture) + Method + Objectives | - | - |
+
+#### Sample
+
+| v3 | BioSample | SRA Sample | JGA Sample |
+|----|-----------|-----------|-----------|
+| title | Title | TITLE | TITLE |
+| organism | Organism (taxonomy_id, OrganismName) | SAMPLE_NAME (TAXON_ID, SCIENTIFIC_NAME) | SAMPLE_NAME (TAXON_ID) |
+| attributes | Attributes (attribute_name/value/unit) | SAMPLE_ATTRIBUTES (TAG/VALUE/UNITS) | SAMPLE_ATTRIBUTES |
+| package | Models | - | - |
+| donor_id | - | - | DONOR_ID |
+| sample_group_type | - | - | SAMPLE_GROUP_TYPE |
+
+#### Experiment
+
+| v3 | SRA Experiment | JGA Experiment |
+|----|---------------|----------------|
+| library.strategy | LIBRARY_STRATEGY | SEQUENCING_LIBRARY_STRATEGY / ARRAY strategies |
+| library.source | LIBRARY_SOURCE | 同左 |
+| library.selection | LIBRARY_SELECTION | 同左 |
+| library.layout | LIBRARY_LAYOUT (SINGLE/PAIRED) | 同左 |
+| library.nominal_length | PAIRED@nominal_length | 同左 |
+| library.construction_protocol | LIBRARY_CONSTRUCTION_PROTOCOL | 同左 |
+| platform.type | PLATFORM (family) | SEQUENCING_PLATFORM |
+| platform.instrument_model | INSTRUMENT_MODEL | 同左 |
+| platform.array_name | - | ARRAY_PLATFORM.array_name |
+| platform.array_provider | - | ARRAY_PLATFORM.array_provider |
+| targeted_loci | TARGETED_LOCI | 同左 |
+
+#### Organism
+
+| v3 | BP | BS | SRA | JGA | Trad | ST.26 |
+|----|----|----|-----|-----|------|-------|
+| name | OrganismName | OrganismName | SCIENTIFIC_NAME | SCIENTIFIC_NAME | organism qualifier | organism テキスト |
+| taxonomy_id | Organism@taxID | Organism@taxonomy_id | TAXON_ID | TAXON_ID | /db_xref="taxon:XXX" | なし（DB側付与） |
+
+#### Date フィールドの対応
+
+| v3 フィールド | 対応する各形式の名称 |
+|-------------|-------------------|
+| submission.hold_date | BP: Hold/@release_date、SRA: HOLD/@HoldUntilDate、Trad: hold_date |
+| runs[].run_date | SRA: Run/@run_date、JGA: Data/@data_acquisition_date |
+| analyses[].analysis_date | SRA: Analysis/@analysis_date、JGA: Analysis/@analysis_date |
+| project.publications[].date | BP: Publication/@date |
+
+#### Relations の対応
+
+| v2 | v3 |
+|---|---|
+| `submission.db_xrefs[{db, id}]` | `relations[{type: "xref", target: {db, id}}]` |
+| （存在しない） | `relations[{type: "reference", target: {url}, label}]` |
+| （存在しない） | `relations[{type: "child_of", target: {db, id}}]` |
+| `feature.sequence_id` | `feature.sequence_id`（変更なし） |
+
+#### Submission の責務分解（v2 → v3）
+
+| v2 フィールド | v3 の帰属先 | 理由 |
+|-----------|------------|------|
+| submitters | **submission** | 提出行為のメタデータ |
+| hold_date | **submission** | 提出行為のメタデータ |
+| comments | **submission** | 提出行為のメタデータ |
+| references | **project.publications** | 研究プロジェクトの属性 |
+| keywords | **project.keywords** | 研究プロジェクトの属性 |
+| locus_tag_prefix | **project.locus_tag_prefix** | BP XSD ProjectDescr に定義 |
+| division | **Entry レベル or validator 導出** | アーカイブ分類 |
+| trad_submission_category | **provenance.submission_category** | 変換元の分類情報（Option E 原則） |
+| seq_prefix | **sequences.seq_prefix** | 配列エントリの命名規則 |
+| datatype | **provenance.submission_category に統合** | データ種別 |
+| db_xrefs | **ルート直下の relations** | 外部参照 |
+
+### Submission Set と段階的更新フロー
+
+典型的な登録パターン（record-idm の relation graph より）:
+
+| パターン | 割合 | 含まれる DB |
+|----------|------|------------|
+| BP only | 47.0% | BioProject のみ |
+| BP + BS + SRA | 33.8% | BioProject + BioSample + SRA |
+| BP + BS + SRA + Trad | 6.7% | 全部入り |
+| BP + BS + Trad | 6.4% | BioProject + BioSample + Trad |
+| BP + BS | 5.3% | BioProject + BioSample |
+
+段階的更新の例:
+
+```jsonc
+// Step 1: project のみ
+{"project": {"alias": "my-project-2024", "title": "..."}}
+
+// Step 2: accession 追記
+{"project": {"alias": "my-project-2024", "accession": "PRJDB12345", "title": "..."}}
+
+// Step 3: sample 追記
+{"project": {"accession": "PRJDB12345", "title": "..."},
+ "samples": [{"alias": "sample-1", "title": "..."}]}
+```
+
+record 内参照の例:
+
+```jsonc
+{
+  "relations": [
+    {"type": "part_of", "source": {"type": "experiment", "alias": "exp-1"}, "target": {"db": "sample", "id": "sample-1"}},
+    {"type": "part_of", "source": {"type": "run", "alias": "run-1"}, "target": {"db": "experiment", "id": "exp-1"}}
+  ]
+}
+```
+
+### BioSample EAV 調査結果
+
+validation rule 実装時の参考データ。
+
+| 指標 | 値 |
+|------|-----|
+| DDBJ の unique attribute_name 数 | 1,153（ジャンク含む、実質 400-700） |
+| NCBI の harmonized attributes | 960 |
+| packages 数 | 229 (NCBI) / 228 (DDBJ) |
+| 全 packages 共通の core attributes | 8 (sample_name, organism, taxonomy_id, bioproject_id, collection_date, geo_loc_name, sample_title, description) |
+| 1 package あたりの最大属性数 | 203 (MIGS.eu.built) |
+| 1 package あたりの平均属性数 | ~88 |
+| いずれかの package で mandatory な属性数 | 103 |
+| 常に optional な属性数 | 765 |
+
+既存の typed 化の試み:
+
+| プロジェクト | 方式 | 説明 |
+|-------------|------|------|
+| GenSC MIxS | LinkML (YAML) | MIxS v6.1+ の公式仕様。1000+ slots |
+| NMDC Schema | LinkML | `Biosample` class を定義。MIxS ベース |
+| EBI BioSamples | JSON Schema | チェックリストごとの JSON Schema |
+| DDBJ RDF/OWL | OWL ontology | package/attribute を OWL class/property で定義 |
+
+## 調査結果（参考資料）
+
+### 各形式のスキーマ構造
+
+XSD 定義（[ddbj/pub](https://github.com/ddbj/pub)）とスパコン上の実データを調査した結果。
+
+#### 形式横断の共通パターン
+
+| パターン | 使われる場所 | 説明 |
+|----------|-------------|------|
+| ObjectType | BP, BS, SRA 全 6 types, JGA 全 10 types | alias, center_name, accession, IDENTIFIERS を共有する基底構造 |
+| RefNameGroup | SRA/JGA のオブジェクト間参照 | refname / refcenter / accession |
+| ATTRIBUTES | SRA, JGA の全 object | TAG/VALUE/UNITS による自由形式メタデータ |
+| EAV | BioSample | attribute_name/value による柔軟な属性 |
+| Controlled-access chain | JGA 固有 | Dataset → Policy → DAC |
+| FILE | SRA Run, JGA Data/Analysis | filename/filetype/checksum_method/checksum |
+| LINKS | 全形式 | URL_LINK と XREF_LINK の 2 種類 |
+
+#### BioProject (XSD: Core.xsd, Submission.xsd)
+
+```
+Project
+├── ProjectID (ArchiveID, SecondaryArchiveID, CenterID, LocalID)
+├── ProjectDescr (Name, Title, Description, ExternalLink, Grant, Publication, Keyword, Relevance, LocusTagPrefix)
+└── ProjectType (choice)
+    ├── TopSingleOrganism (Organism)
+    ├── TopAdmin (umbrella, subtype: eDisease/eMetagenome/...)
+    └── ProjectTypeSubmission (Target, Method, Objectives)
+```
+
+#### BioSample (XSD: biosample.xsd v1.2.0)
+
+```
+BioSample
+├── Ids (1+, namespace: BioSample/SRA/...)
+├── Description (Title, Organism, Comment)
+├── Owner (Name, Contacts)
+├── Models (1+, package version)
+├── Attributes (1+, attribute_name/value/unit)
+├── Links (url/db_xref)
+└── Relations (derived_from/part_of)
+```
+
+#### SRA/DRA (XSD: v1.6)
+
+```
+SUBMISSION (@alias, @center_name, CONTACTS, ACTIONS)
+STUDY      (DESCRIPTOR: STUDY_TITLE, STUDY_TYPE, STUDY_ABSTRACT, RELATED_STUDIES)
+SAMPLE     (SAMPLE_NAME: TAXON_ID/SCIENTIFIC_NAME, SAMPLE_ATTRIBUTES)
+EXPERIMENT (STUDY_REF, DESIGN: SAMPLE_DESCRIPTOR + LIBRARY_DESCRIPTOR, PLATFORM)
+RUN        (EXPERIMENT_REF, DATA_BLOCK: FILES)
+ANALYSIS   (STUDY_REF, ANALYSIS_TYPE, TARGETS, DATA_BLOCK/FILES)
+```
+
+主要 controlled vocabulary: LIBRARY_STRATEGY (43+), LIBRARY_SOURCE (8), LIBRARY_SELECTION (30+), PLATFORM (17 families, 80+ models)
+
+#### JGA (XSD: v1.2)
+
+SRA を拡張した 10 object types。SRA との差分:
+
+- STUDY: + STUDY_TYPES (multiple), GRANTS, PUBLICATIONS
+- SAMPLE: + DONOR_ID, SAMPLE_GROUP_TYPE
+- EXPERIMENT: + ARRAY_PLATFORM
+- DATA (SRA Run 相当): + DATA_TYPE, 拡張 file types (CEL, NIfTI, ...)
+- ANALYSIS: + MICROARRAY, METABOLOMICS, PROTEOMICS, ...
+- DATASET, POLICY, DAC: JGA 固有（controlled-access chain）
+- SUBMISSION: + @nbdc_number
+
+#### Assembly
+
+```
+NCBI: FASTA + AGP + chromosome list (TSV) + structured metadata
+ENA:  ENA.assembly.xsd (ASSEMBLY_LEVEL, GENOME_REPRESENTATION, TAXON, WGS_SET, CHROMOSOMES)
+```
+
+#### ST.26
+
+詳細は [st26.md](../st26.md) 参照。WIPO Standard ST.26。配列データ部分は INSDC DTD のサブセット。
+
+#### GEA (MAGE-TAB 形式)
+
+IDF (Investigation Description) + SDRF (Sample and Data Relationship)。SRA の library 情報を Comment フィールドで参照。BioProject/BioSample への参照あり。
+
+### データソースの所在
+
+| リポジトリ | パス | 形式 | サイズ目安 |
+|-----------|------|------|----------|
+| BioProject | `/usr/local/resources/bioproject/ddbj_core_bioproject.xml` | XML | 33 MB (DDBJ), 3.6 GB (全極) |
+| BioSample | `/usr/local/resources/biosample/ddbj_biosample_set.xml.gz` | XML (gzip) | 31 MB gz (DDBJ), 4.3 GB gz (全極) |
+| DRA | `/usr/local/resources/dra/fastq/{DRA000}/{DRA000XXX}/*.xml` | XML | ~230 万 submissions |
+| JGA | `/usr/local/shared_data/jga/metadata-history/metadata/` | XML + CSV | study: 37K lines |
+| GEA | `/usr/local/resources/gea/experiment/E-GEAD-{N000}/` | IDF/SDRF | ~682 experiments |
+| Trad | `/usr/local/resources/trad/{ddbj,wgs,tsa,...}/` | flat file | ~1.87 億 records |
+
+### XSD 参照方式
+
+| 参照元 | 参照先 | 方式 |
+|--------|--------|------|
+| SRA Study | BioProject | STUDY_LINKS > XREF_LINK (db="bioproject") |
+| SRA Sample | BioSample | EXTERNAL_ID (namespace="BioSample") |
+| SRA Experiment | Study | STUDY_REF (refname or accession) |
+| SRA Experiment | Sample | SAMPLE_DESCRIPTOR (refname or accession) |
+| SRA Run | Experiment | EXPERIMENT_REF (refname or accession) |
+| JGA Dataset | Policy | POLICY_REF (required) |
+| JGA Policy | DAC | DAC_REF (required) |
+
+## 未解決の設計判断
+
+### データモデル
+
+- [x] GFF 固有情報の保持方法 — トップレベル `gff` 廃止。record レベルは `provenance.gff`、feature レベルは `Feature.source_tool` / `Feature.score` で保持
+- [x] Links と Relations の統合 — `links` 廃止、全て `relations` に統合
+- [x] Assembly の Chromosome 二重管理 — Chromosome モデル廃止、Entry で表現
+- [x] submission_category — `provenance.submission_category` に格納（Option E 原則）
+- [x] Feature / Qualifier の識別子 — `id` → `alias` に rename
+- [ ] GFF -> INSDC feature table の変換ルール定義
+- [ ] GEA (IDF/SDRF) の record 表現 — Experiment/Sample との対応で十分か
+- [ ] BioSample package（~229 種）の validation rule 化の具体的手法
+- [ ] set 内の record 間の参照をどう解決するか（RefNameGroup の 2 フェーズ）
+
+### Validation
+
 - [ ] forbidden フィールドに値が入っていた場合、error か warning か
+- [ ] 公開後の record に対する validation は skip するか
+- [ ] fix の安全性レベル分類（`--fix=safe` / `--fix=all`）
+- [ ] 外部リソース依存の fix（taxonomy DB 等）の扱い
+- [ ] fix の結果を diff として表示する機能（dry-run）
 
-## 技術的制約
-
-#### Open questions
+### 技術的制約
 
 - [ ] JSON ファイルサイズの実用上限（大規模ゲノムで数 GB になりうるか）
-- [ ] 文字数上限（qualifier value 等）
 - [ ] streaming parse の必要性（巨大 JSON）
 - [ ] binary data（配列本体）を JSON に含めるか、外部ファイル参照か
 
-## Converter 戦略
+### 外部連携
 
-v3 の converter は双方向変換を担う。
+- [ ] ENA の JSON schema を参考にするか
+- [ ] 3 極間でのデータ互換性をどこまで意識するか
+- [ ] converter のリポジトリ構成（この repo / 別 repo）
+- [ ] dr_tools との関係（統合 / 分離）
+
+### スコープ
+
+- [x] Trad のゲノム細分化（MAG, SAG, haplotype）→ `provenance.submission_category` で表現
+- [ ] GEA, MetaboBank, JVar はスコープに含めるか
+
+## 優先順位とロードマップ
+
+### 実装の優先順位
+
+**trad + st26 の DFAST 登録向け validation rule を最優先で進める。**
+
+### Tier 1: 最優先（trad/st26 DFAST validation に必要）
+
+| # | 論点 | 状態 | 次のアクション |
+|---|------|------|---------------|
+| T1-1 | v3 スキーマの Pydantic モデル定義 | 未着手 | 確定したデータモデルを実装 |
+| T1-2 | trad 向け validation rule の定義 | 未着手 | DFAST の登録要件を調査し rule 一覧を作成 |
+| T1-3 | st26 向け validation rule の定義 | 未着手 | st26.md の調査結果をもとに rule 一覧を作成 |
+| T1-4 | Validation 機構の実装（Rule interface, check/fix） | 未着手 | eslint 風の Rule protocol を実装 |
+| T1-5 | Submission モデル | **確定** | |
+| T1-6 | Sequences & Entries モデル | **確定** | |
+| T1-7 | Features モデル | **確定** | |
+| T1-8 | Assembly モデル | **確定** | |
+
+### Tier 2: 高優先（データモデルの骨格）— 全て確定
+
+| # | 論点 | 状態 |
+|---|------|------|
+| T2-1 | Project モデル（Publication, Grant, ProjectTarget 含む） | **確定** |
+| T2-2 | Sample モデル（Attribute 含む） | **確定** |
+| T2-3 | accession / alias 設計 | **確定** |
+| T2-4 | Links と Relations の型定義 | **確定** |
+| T2-5 | Person / Organization の統一モデル | **確定** |
+| T2-6 | Organism の統一モデル | **確定** |
+| T2-7 | Date フィールドの型定義 | **確定** |
+
+### Tier 3: 中優先（拡張形式）— ほぼ確定
+
+| # | 論点 | 状態 |
+|---|------|------|
+| T3-1 | Experiment モデル（LibraryDescriptor, Platform 含む） | **確定** |
+| T3-2 | Run モデル（File 含む） | **確定** |
+| T3-3 | Analysis モデル | **確定** |
+| T3-4 | Dataset モデル | **確定** |
+| T3-5 | Access Control (Policy/DAC) | **確定** |
+| T3-6 | GEA validation の設計 | 未着手 |
+| T3-7 | EAV 方針 | **確定**（EAV 維持） |
+
+### Tier 4: 低優先（converter, 周辺機能）
+
+| # | 論点 | 状態 |
+|---|------|------|
+| T4-1 | GFF round-trip converter の設計 | 議論中 |
+| T4-2 | IDF/SDRF converter の設計 | 未着手 |
+| T4-3 | v2 → v3 migration converter | 未着手 |
+| T4-4 | Converter のリポジトリ構成 | 未決定 |
+| T4-5 | dr_tools との関係整理 | 未決定 |
+
+### Tier 5: 将来課題
+
+| # | 論点 | 状態 |
+|---|------|------|
+| T5-1 | キュレーター問い合わせ情報の KV フィールド | 保留 |
+| T5-2 | record_status / submission_stage の扱い | 保留 |
+| T5-3 | JSON ファイルサイズの実用上限 | 未調査 |
+| T5-4 | ENA の JSON schema との整合性 | 未調査 |
+| T5-5 | GEA, MetaboBank, JVar のスコープ判断 | 未決定 |
+| T5-6 | fix の安全性レベル分類 | 保留 |
+| T5-7 | JGA の承認ワークフローと status の関係 | 保留 |
+
+## Converter 戦略
 
 ```
 +----------+     +-----------+     +----------+
@@ -1091,37 +965,14 @@ Raw formats:        Submit formats:
 - SRA XML           - SRA XML
 - BioProject XML    - JGA XML
 - BioSample XML     - Assembly submission
-- JGA XML
+- JGA XML           - GFF (round-trip)
+- IDF/SDRF (GEA)
 ```
-
-#### Open questions
-
-- [ ] converter はこの repo に含めるか、別 repo（ddbj_record_converter）にするか
-- [ ] v2 → v3 の migration converter は必要か
-- [ ] round-trip 保証の範囲（全形式で保証するか、形式ごとに定義するか）
-- [ ] dr_tools との関係（統合？分離？）
 
 ## ENA との関係
 
-ENA も独自に JSON 化を進めている。
+- ENA は独自に JSON 化を進めており、ENA 仕様に寄っている可能性がある
+- BioSample の `name` を ENA だけ `alias` という単語で運用していたことが判明し、`name` に直すよう合意済み
+- ENA には BioProject ではなく `study` があり、そこに BioProject を link している
 
 参考: <https://ena-docs.readthedocs.io/en/latest/submit/general-guide/programmatic.html>
-
-### 既知の情報
-
-- ENA は独自に JSON を進めており、ENA 仕様に寄っている可能性がある
-- BioSample の `name` を ENA だけ `alias` という単語で運用していたことが判明し、他極（実際は minimum）に合わせて `name` に直すよう合意済み（コードは未修正の可能性）
-- ENA には BioProject ではなく `study` があり、そこに BioProject を link（sameAs かは未確認）している
-
-#### Open questions
-
-- [ ] ENA の JSON schema を参考にするか
-- [ ] alias vs name の用語整合の現状確認
-- [ ] study と BioProject の link 方式（sameAs? 別の関係?）
-- [ ] 3 極（DDBJ, ENA, NCBI）間でのデータ互換性をどこまで意識するか
-
-## 未解決の論点一覧
-
-各セクションの open questions を集約したもの。議論の進行に応じて resolved / dropped に移動する。
-
-（各セクション内の `- [ ]` を参照）

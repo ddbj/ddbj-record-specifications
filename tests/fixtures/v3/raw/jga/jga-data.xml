@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DATA_SET>
+<DATA alias="JSUB000002_Data_0001" center_name="Individual" accession="JGAR000000001">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAR00000000001</SECONDARY_ID>
+  </IDENTIFIERS>
+  <EXPERIMENT_REF refname="JGAX000000001" refcenter="Individual" accession="JGAX000000001"/>
+  <DATA_BLOCK>
+    <FILES>
+      <FILE filename="100512_EAS1776_l5_read1.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="1b32e526ba62dacd8e6dc9416f67a0a7" unencrypted_checksum="7b36473208fb1dc207cc124ee86d02ae"/>
+      <FILE filename="100512_EAS1776_l5_read2.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="af4ca9f71f3e36d9ff84a3c72c285da1" unencrypted_checksum="f50b504a7acb3131c8d31a4352d0e8ec"/>
+    </FILES>
+  </DATA_BLOCK>
+</DATA>
+
+<DATA alias="JSUB000002_Data_0002" center_name="Individual" accession="JGAR000000002">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAR00000000002</SECONDARY_ID>
+  </IDENTIFIERS>
+  <EXPERIMENT_REF refname="JGAX000000002" refcenter="Individual" accession="JGAX000000002"/>
+  <DATA_BLOCK>
+    <FILES>
+      <FILE filename="100512_EAS1776_l6_read1.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="95238d639d2330f79c4f8abfe5fb7888" unencrypted_checksum="197625c2352a70aa0572a12476c490c5"/>
+      <FILE filename="100512_EAS1776_l6_read2.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="de720163e71f1dee3795d7b9e44d450f" unencrypted_checksum="f12f6b71a632e6f122ac81211b975c9d"/>
+    </FILES>
+  </DATA_BLOCK>
+</DATA>
+
+<DATA alias="JSUB000002_Data_0003" center_name="Individual" accession="JGAR000000003">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAR00000000003</SECONDARY_ID>
+  </IDENTIFIERS>
+  <EXPERIMENT_REF refname="JGAX000000003" refcenter="Individual" accession="JGAX000000003"/>
+  <DATA_BLOCK>
+    <FILES>
+      <FILE filename="100528_EAS1776_l4_read1.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="bda56e2cb232b1d52b59215e0332a5ea" unencrypted_checksum="3e2811b3afb67819edbf1e5fa83a9854"/>
+      <FILE filename="100528_EAS1776_l4_read2.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="2f0b0a9e096a50e8252043a94240c5f2" unencrypted_checksum="d9f8d8cde98b240709a1ac6131adf585"/>
+    </FILES>
+  </DATA_BLOCK>
+</DATA>
+
+<DATA alias="JSUB000002_Data_0004" center_name="Individual" accession="JGAR000000004">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAR00000000004</SECONDARY_ID>
+  </IDENTIFIERS>
+  <EXPERIMENT_REF refname="JGAX000000004" refcenter="Individual" accession="JGAX000000004"/>
+  <DATA_BLOCK>
+    <FILES>
+      <FILE filename="100528_EAS1776_l5_read1.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="824439d96f9565979bc517998bb838af" unencrypted_checksum="6e0ef56977eb0166adf7470ac18d8b9a"/>
+      <FILE filename="100528_EAS1776_l5_read2.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="5b36d37df07854f0c2ac143d3e2837bb" unencrypted_checksum="aeca1beec356e745a3147d27f52fd7db"/>
+    </FILES>
+  </DATA_BLOCK>
+</DATA>
+
+<DATA alias="JSUB000002_Data_0005" center_name="Individual" accession="JGAR000000005">
+  <IDENTIFIERS>
+    <SECONDARY_ID>JGAR00000000005</SECONDARY_ID>
+  </IDENTIFIERS>
+  <EXPERIMENT_REF refname="JGAX000000005" refcenter="Individual" accession="JGAX000000005"/>
+  <DATA_BLOCK>
+    <FILES>
+      <FILE filename="100528_EAS1776_l7_read1.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="20eb34a9a285b10d97e612d233f15b6e" unencrypted_checksum="c6858c89929f4f94dd0461e54b09de50"/>
+      <FILE filename="100528_EAS1776_l7_read2.tgz" filetype="fastq" quality_scoring_system="phred" quality_encoding="ascii" ascii_offset="!" checksum_method="MD5" checksum="c34fa5f19216a039811355543403247e" unencrypted_checksum="1bcc32a5021bf6890c654aee811cbb2a"/>
+    </FILES>
+  </DATA_BLOCK>
+</DATA>
+</DATA_SET>
