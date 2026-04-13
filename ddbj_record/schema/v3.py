@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class Organism(BaseModel):
     name: str | None = Field(None, examples=["Homo sapiens"])
+    common_name: str | None = Field(None, examples=["human"])
     taxonomy_id: int | None = Field(None, examples=[9606])
 
     model_config = ConfigDict(extra="forbid")
@@ -51,6 +52,14 @@ class Person(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class Attribute(BaseModel):
+    name: str | None = None
+    value: str | None = None
+    unit: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 # === Provenance ===
 
 
@@ -72,6 +81,43 @@ class Provenance(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+# === ST.26 ===
+
+
+class InventionTitle(BaseModel):
+    title: str | None = None
+    language_code: str | None = Field(None, examples=["ja"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ApplicationIdentification(BaseModel):
+    ip_office_code: str | None = Field(None, examples=["JP"])
+    application_number_text: str | None = None
+    filing_date: str | None = Field(None, examples=["2024-01-15"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class St26Meta(BaseModel):
+    dtd_version: str | None = Field(None, examples=["V1_3"])
+    software_name: str | None = None
+    software_version: str | None = None
+    production_date: str | None = None
+    original_language: str | None = Field(None, examples=["ja"])
+    non_english_language: str | None = Field(None, examples=["ja"])
+    applicant_file_reference: str | None = None
+    application: ApplicationIdentification | None = None
+    earliest_priority: ApplicationIdentification | None = None
+    applicant_name: str | None = None
+    applicant_name_latin: str | None = None
+    inventor_name: str | None = None
+    inventor_name_latin: str | None = None
+    invention_titles: list[InventionTitle] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 # === Submission ===
 
 
@@ -79,6 +125,8 @@ class Submission(BaseModel):
     submitters: list[Person] | None = None
     hold_date: str | None = Field(None, examples=["2025-01-01"])
     comments: list[str] | None = None
+    st26: St26Meta | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -98,6 +146,7 @@ class Publication(BaseModel):
     pages_from: str | None = None
     pages_to: str | None = None
     authors: list[Person] | None = None
+    consortiums: list[str] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -123,9 +172,13 @@ class ProjectTarget(BaseModel):
 class Project(BaseModel):
     accession: str | None = Field(None, examples=["PRJDB12345"])
     alias: str | None = None
+    name: str | None = None
     title: str | None = None
     description: str | None = None
     project_type: str | None = Field(None, examples=["primary"])
+    umbrella_subtype: str | None = Field(
+        None, examples=["eComparativeGenomics"]
+    )
     study_types: list[str] | None = None
     organism: Organism | None = None
     publications: list[Publication] | None = None
@@ -134,6 +187,7 @@ class Project(BaseModel):
     relevance: dict[str, str] | None = None
     locus_tag_prefix: list[str] | None = None
     target: ProjectTarget | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -141,18 +195,11 @@ class Project(BaseModel):
 # === Sample ===
 
 
-class Attribute(BaseModel):
-    name: str | None = None
-    value: str | None = None
-    unit: str | None = None
-
-    model_config = ConfigDict(extra="forbid")
-
-
 class Sample(BaseModel):
     accession: str | None = Field(None, examples=["SAMD00123456"])
     alias: str | None = None
     title: str | None = None
+    description: str | None = None
     organism: Organism | None = None
     attributes: list[Attribute] | None = None
     package: str | None = Field(None, examples=["MIGS.ba"])
@@ -190,13 +237,44 @@ class Platform(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ReadSpec(BaseModel):
+    read_index: int | None = None
+    read_class: str | None = Field(
+        None, examples=["Application Read"]
+    )
+    read_type: str | None = Field(None, examples=["Forward"])
+    base_coord: int | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SpotDescriptor(BaseModel):
+    spot_length: int | None = None
+    reads: list[ReadSpec] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class PipelineStep(BaseModel):
+    step_index: str | None = None
+    prev_step_index: str | None = None
+    program: str | None = None
+    version: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class Experiment(BaseModel):
     accession: str | None = Field(None, examples=["DRX000001"])
     alias: str | None = None
     title: str | None = None
+    description: str | None = None
     library: LibraryDescriptor | None = None
     platform: Platform | None = None
     targeted_loci: list[str] | None = None
+    spot_descriptor: SpotDescriptor | None = None
+    processing: list[PipelineStep] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -209,6 +287,7 @@ class File(BaseModel):
     filetype: str | None = Field(None, examples=["fastq"])
     checksum_method: str | None = Field(None, examples=["MD5"])
     checksum: str | None = None
+    unencrypted_checksum: str | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -220,6 +299,7 @@ class Run(BaseModel):
     run_date: str | None = None
     data_type: str | None = Field(None, examples=["sequencing"])
     files: list[File] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -231,11 +311,14 @@ class Analysis(BaseModel):
     accession: str | None = Field(None, examples=["DRZ000001"])
     alias: str | None = None
     title: str | None = None
+    description: str | None = None
     analysis_type: str | None = Field(
         None, examples=["de_novo_assembly"]
     )
     analysis_date: str | None = None
     files: list[File] | None = None
+    processing: list[PipelineStep] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -273,6 +356,7 @@ class Entry(BaseModel):
     name: str | None = None
     type: str | None = Field(None, examples=["chromosome"])
     topology: str | None = Field(None, examples=["circular"])
+    division: str | None = Field(None, examples=["BCT"])
     sequence: str | None = None
     comments: list[str] | None = None
     source_features: list[SourceFeature] | None = None
@@ -294,6 +378,7 @@ class Sequences(BaseModel):
     common_source: Source | None = None
     entries: list[Entry] | None = None
     structured_comments: list[StructuredComment] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -310,6 +395,8 @@ class Feature(BaseModel):
     locus_tag_id: str | None = None
     source_tool: str | None = None
     score: float | None = None
+    phase: int | None = None
+    parent_ids: list[str] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -320,9 +407,12 @@ class Feature(BaseModel):
 class Assembly(BaseModel):
     accession: str | None = Field(None, examples=["GCA_000001405.29"])
     alias: str | None = None
+    title: str | None = None
     name: str | None = None
+    description: str | None = None
     assembly_level: str | None = Field(None, examples=["contig"])
     genome_representation: str | None = Field(None, examples=["full"])
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -336,6 +426,7 @@ class Dataset(BaseModel):
     title: str | None = None
     description: str | None = None
     dataset_types: list[str] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -349,6 +440,7 @@ class Policy(BaseModel):
     title: str | None = None
     policy_text: str | None = None
     policy_url: str | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -357,6 +449,7 @@ class Dac(BaseModel):
     accession: str | None = Field(None, examples=["JGAC000001"])
     alias: str | None = None
     contacts: list[Person] | None = None
+    attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 

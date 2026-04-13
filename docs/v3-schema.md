@@ -46,9 +46,10 @@ GEA, MetaboBank, JVar は現在スコープ外。将来の拡張候補。
 DdbjRecord (all fields Optional/None)
 ├── schema_version: str
 ├── provenance: Provenance | None       # data の来歴記録（変換元形式、GFF メタデータ等）
-├── submission: Submission | None       # thin: submitters, hold_date, comments only
+├── submission: Submission | None       # submitters, hold_date, comments, st26
 ├── project: Project | None             # = BP + SRA Study + JGA Study
-│   ├── project_type                    # "primary", "umbrella"
+│   ├── name, project_type              # BP Name (短縮名), "primary"/"umbrella"
+│   ├── umbrella_subtype                # umbrella 固有の subtype
 │   ├── study_types                     # "WGS", "Case-Control", ...
 │   ├── publications, grants, keywords, relevance
 │   ├── locus_tag_prefix
@@ -85,6 +86,7 @@ Project, Sample, Sequences (common_source) で横断的に使われる。最小�
 ```python
 class Organism(BaseModel):
     name: str | None              # "Homo sapiens"
+    common_name: str | None       # "human" (SRA COMMON_NAME)
     taxonomy_id: int | None       # NCBI Taxonomy ID (e.g., 9606)
 ```
 
@@ -148,16 +150,49 @@ alias: str | None             # ローカル識別子（accession は持たな�
 
 ## Submission
 
-提出行為のメタデータに限定する（thin submission）。
+提出行為のメタデータ。ST.26 特許メタデータも提出文脈の一次データとしてここに配置する。
 
 ```python
+class InventionTitle(BaseModel):
+    title: str | None                  # 発明名称
+    language_code: str | None          # ISO 639-1 (e.g., "ja", "en")
+
+class ApplicationIdentification(BaseModel):
+    ip_office_code: str | None         # WIPO ST.3 (e.g., "JP", "US")
+    application_number_text: str | None
+    filing_date: str | None            # ISO 8601
+
+class St26Meta(BaseModel):
+    dtd_version: str | None            # "V1_3"
+    software_name: str | None
+    software_version: str | None
+    production_date: str | None        # ISO 8601
+    original_language: str | None      # ISO 639-1
+    non_english_language: str | None   # ISO 639-1
+    applicant_file_reference: str | None
+    application: ApplicationIdentification | None
+    earliest_priority: ApplicationIdentification | None
+    applicant_name: str | None
+    applicant_name_latin: str | None   # ラテン文字翻字
+    inventor_name: str | None
+    inventor_name_latin: str | None    # ラテン文字翻字
+    invention_titles: list[InventionTitle] | None
+
 class Submission(BaseModel):
     submitters: list[Person] | None   # submitters[0] = contact person
     hold_date: str | None             # ISO 8601
     comments: list[str] | None        # free-form notes
+    st26: St26Meta | None             # ST.26 特許メタデータ
+    attributes: list[Attribute] | None
 ```
 
 v2 submission にあった references, keywords, locus_tag_prefix, division, db_xrefs 等は適切な帰属先に移動済み。
+
+設計上の決定:
+
+- **ST.26 配置先**: ST.26 特許メタデータ（出願人、発明者、発明名称等）は来歴（provenance）ではなく提出内容の一次データ。Submission.st26 に typed model として配置する
+- **多言語対応**: InventionTitle は languageCode 付きで複数言語に対応。applicant_name / inventor_name はラテン文字翻字版も保持
+- **attributes**: Submission 固有のカスタムメタデータ用。typed field 優先、残りを EAV
 
 ## Project
 
@@ -176,6 +211,7 @@ class Publication(BaseModel):
     pages_from: str | None
     pages_to: str | None
     authors: list[Person] | None
+    consortiums: list[str] | None      # BP AuthorSet/Consortium
 
 class Grant(BaseModel):
     title: str | None
@@ -192,9 +228,11 @@ class ProjectTarget(BaseModel):
 class Project(BaseModel):
     accession: str | None              # PRJDB/PRJNA/PRJEB
     alias: str | None
+    name: str | None                   # BP ProjectDescr/Name (短縮名、Title とは別)
     title: str | None
     description: str | None
     project_type: str | None           # "primary", "umbrella"
+    umbrella_subtype: str | None       # umbrella 固有: "eDisease", "eComparativeGenomics", ...
     study_types: list[str] | None      # "WGS", "Case-Control", ...
     organism: Organism | None
     publications: list[Publication] | None
@@ -203,6 +241,7 @@ class Project(BaseModel):
     relevance: dict[str, str] | None   # {"agricultural": "crop improvement", ...}
     locus_tag_prefix: list[str] | None
     target: ProjectTarget | None
+    attributes: list[Attribute] | None # STUDY_ATTRIBUTES (TAG/VALUE)
 ```
 
 設計上の決定:
@@ -228,6 +267,7 @@ class Sample(BaseModel):
     accession: str | None              # SAMD/SAMN/SAME
     alias: str | None
     title: str | None
+    description: str | None            # SRA DESCRIPTION, BS Comment/Paragraph
     organism: Organism | None
     attributes: list[Attribute] | None # EAV (name/value/unit)
     package: str | None                # "MIGS.ba", "Pathogen.cl.1.0", ...
@@ -264,13 +304,33 @@ class Platform(BaseModel):
     array_description: str | None      # JGA array の場合
     array_provider: str | None         # JGA array の場合
 
+class ReadSpec(BaseModel):
+    read_index: int | None
+    read_class: str | None             # "Application Read", "Technical Read", ...
+    read_type: str | None              # "Forward", "Reverse", ...
+    base_coord: int | None
+
+class SpotDescriptor(BaseModel):
+    spot_length: int | None
+    reads: list[ReadSpec] | None
+
+class PipelineStep(BaseModel):
+    step_index: str | None
+    prev_step_index: str | None        # "NIL" for first step
+    program: str | None
+    version: str | None
+
 class Experiment(BaseModel):
     accession: str | None              # DRX/SRX/ERX
     alias: str | None
     title: str | None
+    description: str | None            # SRA DESIGN_DESCRIPTION
     library: LibraryDescriptor | None
     platform: Platform | None
     targeted_loci: list[str] | None    # "16S rRNA", "exome", ...
+    spot_descriptor: SpotDescriptor | None  # SRA SPOT_DESCRIPTOR
+    processing: list[PipelineStep] | None   # SRA PROCESSING/PIPELINE
+    attributes: list[Attribute] | None # EXPERIMENT_ATTRIBUTES (TAG/VALUE)
 ```
 
 設計上の決定:
@@ -288,6 +348,7 @@ class File(BaseModel):
     filetype: str | None               # "fastq", "bam", "cram", "CEL", ...
     checksum_method: str | None        # "MD5"
     checksum: str | None
+    unencrypted_checksum: str | None   # JGA: checksum before encryption
 
 class Run(BaseModel):
     accession: str | None              # DRR/SRR/ERR
@@ -296,6 +357,7 @@ class Run(BaseModel):
     run_date: str | None               # ISO 8601
     data_type: str | None              # JGA: "sequencing", "array", "metabolite", "image"
     files: list[File] | None
+    attributes: list[Attribute] | None # RUN_ATTRIBUTES (TAG/VALUE)
 ```
 
 設計上の決定:
@@ -312,9 +374,12 @@ class Analysis(BaseModel):
     accession: str | None              # DRZ/SRZ/ERZ
     alias: str | None
     title: str | None
+    description: str | None            # SRA/JGA DESCRIPTION
     analysis_type: str | None          # "de_novo_assembly", "microarray", ...
     analysis_date: str | None          # ISO 8601
     files: list[File] | None           # File 型を再利用
+    processing: list[PipelineStep] | None   # SRA PROCESSING/PIPELINE
+    attributes: list[Attribute] | None # ANALYSIS_ATTRIBUTES (TAG/VALUE)
 ```
 
 SRA 4 types + JGA 11+ types を 1 つの `str` に統合。validation rule で制御。
@@ -335,6 +400,7 @@ class Entry(BaseModel):
     name: str | None
     type: str | None                   # "chromosome", "plasmid", "unplaced", ...
     topology: str | None               # "circular", "linear"
+    division: str | None               # GenBank division: "PLN", "BCT", "PAT", ...
     sequence: str | None
     comments: list[str] | None
     source_features: list[SourceFeature] | None
@@ -348,6 +414,7 @@ class Sequences(BaseModel):
     common_source: Source | None
     entries: list[Entry] | None
     structured_comments: list[StructuredComment] | None
+    attributes: list[Attribute] | None
 ```
 
 ST_COMMENT（Structured Comment）は Trad 固有の概念。21+ 種のブロック型、150-200+ の key field が存在するため EAV（`dict[str, str]`）で保持。v2 の `experiments[].experiment_attributes` から移動。
@@ -372,6 +439,8 @@ class Feature(BaseModel):
     locus_tag_id: str | None
     source_tool: str | None            # GFF source 列（どのツールが予測したか）
     score: float | None                # GFF score 列（予測信頼度）
+    phase: int | None                  # GFF phase 列 (0, 1, 2)
+    parent_ids: list[str] | None       # GFF Parent 属性（親 Feature の alias 参照）
 ```
 
 設計上の決定:
@@ -379,6 +448,8 @@ class Feature(BaseModel):
 - Feature / Qualifier は accession を持たない。alias のみで識別する
 - Feature は type + location でも識別可能（CDS は領域の重複を許容しないため composite key として機能）
 - `source_tool` / `score` は GFF 由来の情報を保持するためのフィールド。GFF 以外の入力では None
+- `phase` は GFF の 8 列目（CDS のリーディングフレーム、0/1/2）。INSDC の codon_start qualifier と相互変換可能（phase=0 → codon_start=1）
+- `parent_ids` は GFF の Parent 属性。feature 階層（gene → mRNA → CDS）をローカルに表現する。GFF3 は複数 Parent を許容するため `list[str]`
 - protein_id の付与は alias を参照先として行う
 
 ## Assembly
@@ -387,9 +458,12 @@ class Feature(BaseModel):
 class Assembly(BaseModel):
     accession: str | None              # GCA_/GCF_ (version 含む)
     alias: str | None
+    title: str | None                  # ENA Assembly TITLE
     name: str | None                   # assembly name（グローバル名）
+    description: str | None            # ENA Assembly DESCRIPTION
     assembly_level: str | None         # "complete genome", "chromosome", "scaffold", "contig"
     genome_representation: str | None  # "full", "partial"
+    attributes: list[Attribute] | None # ASSEMBLY_ATTRIBUTES (TAG/VALUE: n50, total-length, ...)
 ```
 
 設計上の決定:
@@ -409,6 +483,7 @@ class Dataset(BaseModel):
     title: str | None
     description: str | None
     dataset_types: list[str] | None    # "Exome sequencing", "Genotyping by array", ...
+    attributes: list[Attribute] | None
 ```
 
 ## Access Control
@@ -422,11 +497,13 @@ class Policy(BaseModel):
     title: str | None
     policy_text: str | None
     policy_url: str | None
+    attributes: list[Attribute] | None
 
 class Dac(BaseModel):
     accession: str | None              # JGAC
     alias: str | None
     contacts: list[Person] | None
+    attributes: list[Attribute] | None
 
 class AccessControl(BaseModel):
     policy: Policy | None
