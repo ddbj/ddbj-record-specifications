@@ -112,7 +112,7 @@ v1 は「ab_name リスト + 単一の contact 情報」というフラット構
 | `division` | `COMMON_META.division` |
 | `locus_tag_prefix` | `COMMON_META.locus_tag_prefix` |
 | `seq_prefix` | `COMMON_META.seq_prefix` |
-| `hold_date` | `COMMON.DATE.hold_date` (null なら `None`) |
+| `hold_date` | `COMMON.DATE.hold_date` (null なら `None`)。v1 の MSS DATE 形式 `YYYYMMDD` を v2 の ISO 形式 `YYYY-MM-DD` に変換する。8 桁の数字でない値はそのまま通す |
 
 ### experiments
 
@@ -203,7 +203,7 @@ v2 Reference の journal, volume, doi, pubmed_id, consortiums 等は無視され
 ### その他
 
 - **COMMENT**: `submission.comments` を `Comment(line=...)` のリストに変換
-- **DATE**: `submission.hold_date` があれば `Date(hold_date=...)` を生成
+- **DATE**: `submission.hold_date` があれば `Date(hold_date=...)` を生成する。v1 は MSS の DATE 行に載る形式を持つので、ISO 形式 `YYYY-MM-DD` を `YYYYMMDD` に変換する (v1 -> v2 の逆変換)。`YYYY-MM-DD` の形をしていない値はそのまま通す
 - **trad_submission_category**: `None` または `"WGS"`/`"GNM"` 以外の値の場合はデフォルト `"GNM"` (警告出力)
 - **COMMON_META.division**: `None` の場合はデフォルト `"BCT"` (警告出力)
 

@@ -81,7 +81,7 @@ class StComment(BaseModel):
 
 
 class Date(BaseModel):
-    hold_date: str = Field(examples=["2025-01-01"])
+    hold_date: str = Field(examples=["20250101"], description="Release date in MSS DATE format (YYYYMMDD).")
 
     # extra field
     model_config = ConfigDict(extra="ignore")

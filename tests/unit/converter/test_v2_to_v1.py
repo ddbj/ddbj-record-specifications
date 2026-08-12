@@ -8,6 +8,7 @@ from ddbj_record.converter.v2_to_v1 import (
     _convert_common_meta,
     _convert_common_source,
     _convert_entries,
+    _convert_hold_date,
     _qualifier_value_to_union,
     v2_to_v1,
 )
@@ -225,7 +226,25 @@ def test_convert_common_date_from_hold_date() -> None:
     )
     common = _convert_common(v2_obj)
     assert common.DATE is not None
-    assert common.DATE.hold_date == "2025-03-31"
+    assert common.DATE.hold_date == "20250331"
+
+
+@pytest.mark.parametrize(
+    ("v2_value", "expected"),
+    [
+        ("2025-03-31", "20250331"),
+        ("0001-01-01", "00010101"),
+        ("9999-12-31", "99991231"),
+        ("20250331", "20250331"),
+        ("2025-3-31", "2025-3-31"),
+        ("2025-03-31T00:00:00", "2025-03-31T00:00:00"),
+        ("YYYY-MM-DD", "YYYY-MM-DD"),
+        ("", ""),
+    ],
+)
+def test_convert_hold_date_only_converts_iso_dates(v2_value: str, expected: str) -> None:
+    """Anything that is not exactly YYYY-MM-DD is passed through instead of being mangled."""
+    assert _convert_hold_date(v2_value) == expected
 
 
 def test_convert_common_trad_submission_category() -> None:

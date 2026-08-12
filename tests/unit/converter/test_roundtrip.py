@@ -53,6 +53,16 @@ def test_v1_to_v2_to_v1_preserves_entry_ids(v1_to_v2_input: dict[str, Any]) -> N
         assert rt_entry.topology == orig_entry.topology
 
 
+def test_v1_to_v2_to_v1_preserves_hold_date(v1_to_v2_input: dict[str, Any]) -> None:
+    """v1 holds the MSS DATE format (YYYYMMDD), so the roundtrip must not leave the ISO form behind."""
+    v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
+    v2_obj = v1_to_v2(v1_obj)
+    v1_back = v2_to_v1(v2_obj)
+    assert v1_obj.COMMON.DATE is not None
+    assert v1_back.COMMON.DATE is not None
+    assert v1_back.COMMON.DATE.hold_date == v1_obj.COMMON.DATE.hold_date
+
+
 # === v2 -> v1 -> v2 roundtrip ===
 
 
@@ -68,6 +78,15 @@ def test_v2_to_v1_to_v2_preserves_entries_count(v2_to_v1_input: dict[str, Any]) 
     v1_obj = v2_to_v1(v2_obj)
     v2_back = v1_to_v2(v1_obj)
     assert len(v2_back.sequences.entries) == len(v2_obj.sequences.entries)
+
+
+def test_v2_to_v1_to_v2_preserves_hold_date(v2_to_v1_input: dict[str, Any]) -> None:
+    """v2 holds the ISO form, so the v1 detour must convert in both directions."""
+    v2_obj = DdbjRecordV2.model_validate(v2_to_v1_input)
+    v1_obj = v2_to_v1(v2_obj)
+    v2_back = v1_to_v2(v1_obj)
+    assert v2_obj.submission.hold_date is not None
+    assert v2_back.submission.hold_date == v2_obj.submission.hold_date
 
 
 def test_v1_minimal_roundtrip_more_stable(v1_valid_minimal: dict[str, Any]) -> None:

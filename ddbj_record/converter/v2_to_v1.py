@@ -45,6 +45,20 @@ def _qualifier_value_to_union(value: str) -> str | bool:
     return value
 
 
+_ISO_DATE_LENGTH = 10
+_ISO_DATE_HYPHEN_POSITIONS = (4, 7)
+
+
+def _convert_hold_date(v2_hold_date: str) -> str:
+    """Convert v2 hold_date format (YYYY-MM-DD) to v1 format (YYYYMMDD)."""
+    if len(v2_hold_date) == _ISO_DATE_LENGTH and all(v2_hold_date[i] == "-" for i in _ISO_DATE_HYPHEN_POSITIONS):
+        digits = v2_hold_date[:4] + v2_hold_date[5:7] + v2_hold_date[8:]
+        if digits.isdigit():
+            return digits
+
+    return v2_hold_date
+
+
 def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     # DBLINK
     dblink_project = ""
@@ -229,7 +243,7 @@ def _convert_common(v2_obj: DdbjRecordV2) -> Common:
     # DATE
     date = None
     if v2_obj.submission.hold_date:
-        date = Date(hold_date=v2_obj.submission.hold_date)
+        date = Date(hold_date=_convert_hold_date(v2_obj.submission.hold_date))
 
     # trad_submission_category
     trad_submission_category = v2_obj.submission.trad_submission_category
