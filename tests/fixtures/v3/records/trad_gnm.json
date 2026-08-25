@@ -46,7 +46,9 @@
   },
   "project": {
     "locus_tag_prefix": [
-      "PLH"
+      {
+        "prefix": "PLH"
+      }
     ],
     "publications": [
       {

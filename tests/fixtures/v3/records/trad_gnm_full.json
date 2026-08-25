@@ -72,7 +72,9 @@
       }
     ],
     "locus_tag_prefix": [
-      "PLH"
+      {
+        "prefix": "PLH"
+      }
     ],
     "target": {
       "sample_scope": "monoisolate",
