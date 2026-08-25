@@ -224,6 +224,13 @@ class ProjectTarget(BaseModel):
     capture: str | None                # "whole", "exome", "targeted_locus", ...
     method: str | None                 # "sequencing", "array", "mass_spec", ...
     data_types: list[str] | None       # "raw_sequence_reads", "assembly", "annotation", ...
+    description: str | None            # sample_scope/material/capture が "other" のときの説明
+    method_description: str | None     # method が "other" のときの説明
+    data_type_descriptions: dict[str, str] | None   # {"other": "..."}
+
+class LocusTagPrefix(BaseModel):
+    prefix: str | None                 # "ECK12"
+    biosample_id: str | None           # "SAMD00123456"（対になる BioSample が無ければ省略）
 
 class Project(BaseModel):
     accession: str | None              # PRJDB/PRJNA/PRJEB
@@ -233,13 +240,14 @@ class Project(BaseModel):
     description: str | None
     project_type: str | None           # "primary", "umbrella"
     umbrella_subtype: str | None       # umbrella 固有: "eDisease", "eComparativeGenomics", ...
+    umbrella_subtype_description: str | None   # umbrella_subtype が "other" のときの説明
     study_types: list[str] | None      # "WGS", "Case-Control", ...
     organism: Organism | None
     publications: list[Publication] | None
     grants: list[Grant] | None
     keywords: list[str] | None
     relevance: dict[str, str] | None   # {"agricultural": "crop improvement", ...}
-    locus_tag_prefix: list[str] | None
+    locus_tag_prefix: list[LocusTagPrefix] | None
     target: ProjectTarget | None
     attributes: list[Attribute] | None # STUDY_ATTRIBUTES (TAG/VALUE)
 ```
@@ -252,6 +260,14 @@ class Project(BaseModel):
 - **division**: project には含めない（Entry レベル or validator 導出）
 - **datatype**: project には含めない（assembly.submission_category に統合）
 - **relevance**: BP XSD の Relevance は string 値を持てるため `dict[str, str]` で保持
+- **"other" の説明を選択肢と対で持つ**: BP は sample_scope / material / capture / method /
+  data_type / umbrella_subtype が "other" のとき説明文を要求する（BP_R0008-R0013, BP_R0019）。
+  説明を持てない形式だと、説明を書いた登録者に「説明が無い」と言うことになるため、
+  選択肢の隣に説明の置き場を用意する。`relevance` が同じ理由で `dict[str, str]` なのと同じ扱い
+- **locus_tag_prefix は prefix 単独では検証できない**: BP_R0021 は prefix と BioSample の組を
+  BioSample DB と突き合わせ、BP_R0022 は biosample_id の形式を見る。prefix の文字列だけでは
+  どちらも判定できないので、対で保持する `LocusTagPrefix` にした。Trad のように対になる
+  BioSample が無い形式では `biosample_id` を省く
 
 ## Sample
 

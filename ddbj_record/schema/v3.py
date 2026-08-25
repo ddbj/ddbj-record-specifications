@@ -165,6 +165,27 @@ class ProjectTarget(BaseModel):
     capture: str | None = Field(None, examples=["whole"])
     method: str | None = Field(None, examples=["sequencing"])
     data_types: list[str] | None = None
+    # BP は sample_scope / material / capture が "other" のとき Target/Description に、
+    # method が "other" のとき Method 本文に説明を要求する（BP_R0009-R0013, BP_R0019）。
+    # 説明を持てないと「説明が無い」と誤検知するので、選択肢と対で保持する。
+    description: str | None = None
+    method_description: str | None = None
+    # data_type ごとの説明。data_types と対にするため relevance と同じ dict[str, str]。
+    data_type_descriptions: dict[str, str] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class LocusTagPrefix(BaseModel):
+    """locus_tag prefix と、それを申告した BioSample の対。
+
+    BP は prefix 単独では検証できない（BP_R0021 が prefix と BioSample の組を
+    BioSample DB と突き合わせ、BP_R0022 が biosample_id の形式を見る）。
+    Trad のように対になる BioSample が無い場合は biosample_id を省く。
+    """
+
+    prefix: str | None = Field(None, examples=["ECK12"])
+    biosample_id: str | None = Field(None, examples=["SAMD00123456"])
 
     model_config = ConfigDict(extra="forbid")
 
@@ -179,13 +200,15 @@ class Project(BaseModel):
     umbrella_subtype: str | None = Field(
         None, examples=["eComparativeGenomics"]
     )
+    # umbrella_subtype が "other" のときの説明（BP_R0008）。
+    umbrella_subtype_description: str | None = None
     study_types: list[str] | None = None
     organism: Organism | None = None
     publications: list[Publication] | None = None
     grants: list[Grant] | None = None
     keywords: list[str] | None = None
     relevance: dict[str, str] | None = None
-    locus_tag_prefix: list[str] | None = None
+    locus_tag_prefix: list[LocusTagPrefix] | None = None
     target: ProjectTarget | None = None
     attributes: list[Attribute] | None = None
 

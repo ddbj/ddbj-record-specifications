@@ -139,6 +139,15 @@ def v2_legacy_schema_version() -> dict[str, Any]:
     return _load_json("v2/legacy_schema_version.json")
 
 
+# === v3 fixtures ===
+
+
+@pytest.fixture
+def v3_bioproject_other() -> dict[str, Any]:
+
+    return _load_json("v3/records/bioproject_other.json")
+
+
 # === converter fixtures ===
 
 

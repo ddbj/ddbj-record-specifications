@@ -38,8 +38,12 @@ v3 モデルと各形式のフィールド対応。converter / validation rule �
 | grants | Grant | - | GRANTS |
 | keywords | Keyword | - | - |
 | relevance | Relevance (6+1 categories) | - | - |
-| locus_tag_prefix | LocusTagPrefix | - | - |
+| locus_tag_prefix | LocusTagPrefix (＋ @biosample_id) | - | - |
+| umbrella_subtype_description | ProjectTypeTopAdmin/DescriptionSubtypeOther | - | - |
 | target.* | Target (sample_scope/material/capture) + Method + Objectives | - | - |
+| target.description | Target/Description | - | - |
+| target.method_description | Method 本文 | - | - |
+| target.data_type_descriptions | Objectives/Data 本文（data_type をキーに） | - | - |
 
 ### Sample
 
