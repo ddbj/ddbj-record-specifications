@@ -53,7 +53,9 @@ class Person(BaseModel):
 
 
 class Attribute(BaseModel):
-    name: str | None = None
+    # 名前は必須で、空白だけも不可。名前の無い属性は何の値かが分からず検証しようが
+    # ない。正規化で前後の空白を落とすので、`"  "` も名前が無いのと同じになる。
+    name: str = Field(pattern=r"\S", examples=["collection_date"])
     value: str | None = None
     unit: str | None = None
 
