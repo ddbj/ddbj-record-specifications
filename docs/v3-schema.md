@@ -259,7 +259,7 @@ BioSample + SRA Sample + JGA Sample の統合。
 
 ```python
 class Attribute(BaseModel):
-    name: str | None
+    name: str                          # 必須。空白だけも不可
     value: str | None
     unit: str | None
 
@@ -281,6 +281,9 @@ class Sample(BaseModel):
 - **common_source との関係**: 統合しない。Sample.organism と Sequences.common_source は役割が異なる（試料メタデータ vs INSDC source feature のデフォルト値）。整合性は validation rule で検証
 - **collection_date**: attributes のまま（昇格させるとキリがない）
 - **anonymized_name**: attributes で扱う
+- **Attribute.name は必須**（空白だけも不可）。名前の無い属性は何の値かが分からず、検証も表示もしようがない。
+  `Attribute` は Sample に限らず全エンティティ共通なので、この制約も全 DB に効く。正規化は前後の空白を落とすので、
+  `"  "` を許すと正規化の後で名前の無い属性になる
 
 ## Experiment
 
