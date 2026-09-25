@@ -319,12 +319,12 @@ class ProjectLegacy(BaseModel):
 設計上の決定:
 
 - **project_type と study_types を分離**: BP の構造種別（primary/umbrella）と SRA/JGA の研究手法/デザインは別概念
+- **description と study_description**: `description` は BP の Description と SRA の STUDY_ABSTRACT（研究の要旨）、`study_description` は SRA の STUDY_DESCRIPTION（研究の説明）。SRA は両方を別に書ける
 - **Umbrella**: 1 JSON = 1 Project。umbrella は `project_type: "umbrella"` ��表現し、親子関係は `relations` で
 - **target**: BP ProjectTypeSubmission 固有の概念を `ProjectTarget` としてネスト
 - **division**: project には含めない（Entry レベル or validator 導出）
 - **datatype**: project には含めない（assembly.submission_category に統合）
 - **relevance**: BP XSD の Relevance は string 値を持てるため `dict[str, str]` で保持
-- **description と study_description**: `description` は BP の Description と SRA の STUDY_ABSTRACT（研究の要旨）、`study_description` は SRA の STUDY_DESCRIPTION（研究の説明）。SRA は両方を別に書ける
 
 ## Sample
 
