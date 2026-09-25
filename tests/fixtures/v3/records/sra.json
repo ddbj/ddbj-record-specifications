@@ -144,18 +144,22 @@
       "alias": "tumor-run",
       "title": "Sequencing of liver tumor RNA-seq library",
       "run_date": "2025-04-01",
-      "files": [
+      "data_blocks": [
         {
-          "filename": "tumor_R1.fastq.gz",
-          "filetype": "fastq",
-          "checksum_method": "MD5",
-          "checksum": "d41d8cd98f00b204e9800998ecf8427e"
-        },
-        {
-          "filename": "tumor_R2.fastq.gz",
-          "filetype": "fastq",
-          "checksum_method": "MD5",
-          "checksum": "e99a18c428cb38d5f260853678922e03"
+          "files": [
+            {
+              "filename": "tumor_R1.fastq.gz",
+              "filetype": "fastq",
+              "checksum_method": "MD5",
+              "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+            },
+            {
+              "filename": "tumor_R2.fastq.gz",
+              "filetype": "fastq",
+              "checksum_method": "MD5",
+              "checksum": "e99a18c428cb38d5f260853678922e03"
+            }
+          ]
         }
       ]
     },
@@ -164,18 +168,22 @@
       "alias": "normal-run",
       "title": "Sequencing of liver normal RNA-seq library",
       "run_date": "2025-04-01",
-      "files": [
+      "data_blocks": [
         {
-          "filename": "normal_R1.fastq.gz",
-          "filetype": "fastq",
-          "checksum_method": "MD5",
-          "checksum": "ab56b4d92b40713acc5af89985d4b786"
-        },
-        {
-          "filename": "normal_R2.fastq.gz",
-          "filetype": "fastq",
-          "checksum_method": "MD5",
-          "checksum": "3d0941e7539bf2c44a8e25c82e3f74f9"
+          "files": [
+            {
+              "filename": "normal_R1.fastq.gz",
+              "filetype": "fastq",
+              "checksum_method": "MD5",
+              "checksum": "ab56b4d92b40713acc5af89985d4b786"
+            },
+            {
+              "filename": "normal_R2.fastq.gz",
+              "filetype": "fastq",
+              "checksum_method": "MD5",
+              "checksum": "3d0941e7539bf2c44a8e25c82e3f74f9"
+            }
+          ]
         }
       ]
     }
@@ -185,7 +193,7 @@
       "type": "part_of",
       "source": {
         "type": "experiment",
-        "alias": "tumor-exp"
+        "accession": "DRX000001"
       },
       "target": {
         "db": "sample",
@@ -196,7 +204,7 @@
       "type": "part_of",
       "source": {
         "type": "experiment",
-        "alias": "normal-exp"
+        "accession": "DRX000002"
       },
       "target": {
         "db": "sample",
@@ -207,7 +215,7 @@
       "type": "part_of",
       "source": {
         "type": "run",
-        "alias": "tumor-run"
+        "accession": "DRR000001"
       },
       "target": {
         "db": "experiment",
@@ -218,7 +226,7 @@
       "type": "part_of",
       "source": {
         "type": "run",
-        "alias": "normal-run"
+        "accession": "DRR000002"
       },
       "target": {
         "db": "experiment",

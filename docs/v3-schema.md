@@ -46,7 +46,7 @@ GEA, MetaboBank, JVar は現在スコープ外。将来の拡張候補。
 DdbjRecord (all fields Optional/None)
 ├── schema_version: str
 ├── provenance: Provenance | None       # data の来歴記録（変換元形式、GFF メタデータ等）
-├── submission: Submission | None       # submitters, hold_date, comments, st26
+├── submission: Submission | None       # submitters, hold_date, comments, st26, sra
 ├── project: Project | None             # = BP + SRA Study + JGA Study
 │   ├── name, project_type              # BP Name (短縮名), "primary"/"umbrella"
 │   ├── umbrella_subtype                # umbrella 固有の subtype
@@ -56,8 +56,8 @@ DdbjRecord (all fields Optional/None)
 │   └── target                          # sample_scope, material, capture, method, data_types
 ├── samples: list[Sample] | None        # = BS + SRA Sample + JGA Sample (EAV)
 ├── experiments: list[Experiment] | None # SRA/JGA experiment (library, platform)
-├── runs: list[Run] | None              # SRA Run + JGA Data (files)
-├── analyses: list[Analysis] | None     # SRA/JGA analysis (analysis_type, files)
+├── runs: list[Run] | None              # SRA Run + JGA Data (data_blocks → files)
+├── analyses: list[Analysis] | None     # SRA/JGA analysis (analysis_type, data_blocks → files)
 ├── sequences: Sequences | None         # Trad/ST.26 (entries, common_source)
 ├── features: list[Feature] | None      # INSDC feature table
 ├── assembly: Assembly | None           # assembly accession, name, level
@@ -128,6 +128,30 @@ class Person(BaseModel):
 
 role は Entity に持たせる（flat pragmatic）。同一人物が複数の role を持つ場合は Person オブジェクトを複製する。
 
+### Identifier
+
+accession 以外の識別子。SRA の IDENTIFIERS（PRIMARY_ID / SECONDARY_ID / EXTERNAL_ID / SUBMITTER_ID / UUID）を 1 つの list で持つ。
+
+```python
+class Identifier(BaseModel):
+    type: str | None              # "primary", "secondary", "external", "submitter", "uuid"
+    value: str | None
+    label: str | None
+    namespace: str | None         # external / submitter の名前空間（"BioSample", "NGDC", ...）
+```
+
+### ExternalRef
+
+record の中の値そのものが外部の何かを指すときに使う（参照アセンブリの名前、targeted locus のプローブなど）。record のオブジェクトの間の関係は [Relations](#relations) に置く。
+
+```python
+class ExternalRef(BaseModel):
+    url: str | None
+    db: str | None
+    id: str | None
+    label: str | None
+```
+
 ### accession / alias
 
 各モデルに持たせる識別子フィールド。
@@ -143,9 +167,9 @@ alias: str | None             # ローカル識別子（accession は持たな�
 ```
 
 - 登録前は alias のみ、登録後に accession が追記される
-- alias は submission (record) 内で unique
+- alias は submission (record) 内で unique。ただし SRA から写した record では重なることがあり、relation は accession か位置で指す（[v3-sra.md](./v3-sra.md)）
 - submit 時に submission_id が namespace になる（例: `<submission_id>::bioproject::my-project-01`）
-- center_name は submission.submitters の Organization から導出可能なため含めない
+- SRA 由来のオブジェクトは center_name / broker_name と、accession 以外の識別子（`identifiers`）も持つ。SRA XML は各オブジェクトにそれぞれ書けるので、submission の値から導出すると戻せない（[v3-sra.md](./v3-sra.md)）
 - Feature / Qualifier は accession を持たない。alias のみで識別する（Feature は type + location でも識別可能）
 
 ## Submission
@@ -178,18 +202,55 @@ class St26Meta(BaseModel):
     inventor_name_latin: str | None    # ラテン文字翻字
     invention_titles: list[InventionTitle] | None
 
+class SraContact(BaseModel):          # SRA CONTACTS/CONTACT
+    name: str | None
+    inform_on_status: str | None       # 経過を知らせる宛先
+    inform_on_error: str | None        # エラーを知らせる宛先
+
+class SraActionLegacy(BaseModel):     # SRA XSD 1.5 より前
+    hold_for_period: str | None
+    notes: str | None
+
+class SraAction(BaseModel):           # SRA ACTIONS/ACTION（書かれた順）
+    type: str | None                   # "ADD", "MODIFY", "VALIDATE", "HOLD", "RELEASE", "SUPPRESS", "PROTECT"
+    source: str | None                 # ADD / MODIFY / VALIDATE の対象ファイル
+    object_type: str | None            # 同じく、その文書の種類（@schema）
+    target: str | None                 # HOLD / RELEASE / SUPPRESS の対象 accession
+    hold_until_date: str | None
+    legacy: SraActionLegacy | None
+
+class SraSubmissionLegacy(BaseModel): # SRA XSD 1.5 より前
+    submission_id: str | None
+    files: list[File] | None           # FILES/FILE
+
+class SraSubmission(BaseModel):       # SRA の登録手続きについての情報
+    lab_name: str | None
+    submission_date: str | None
+    submission_comment: str | None
+    contacts: list[SraContact] | None
+    actions: list[SraAction] | None
+    legacy: SraSubmissionLegacy | None
+
 class Submission(BaseModel):
+    accession: str | None              # DRA
+    alias: str | None
+    title: str | None
     submitters: list[Person] | None   # submitters[0] = contact person
     hold_date: str | None             # ISO 8601
     comments: list[str] | None        # free-form notes
     st26: St26Meta | None             # ST.26 特許メタデータ
+    sra: SraSubmission | None         # SRA の登録手続き
     attributes: list[Attribute] | None
+    identifiers: list[Identifier] | None
+    center_name: str | None           # SRA
+    broker_name: str | None           # SRA
 ```
 
 v2 submission にあった references, keywords, locus_tag_prefix, division, db_xrefs 等は適切な帰属先に移動済み。
 
 設計上の決定:
 
+- **SRA 配置先**: SRA の SUBMISSION が持つ登録手続きの情報（連絡先、ACTIONS、lab_name など）は、ST.26 と同じく `Submission.sra` にまとめる。accession / alias / title / center_name などは他の DB のオブジェクトと同じ形なので Submission に直接置く
 - **ST.26 配置先**: ST.26 特許メタデータ（出願人、発明者、発明名称等）は来歴（provenance）ではなく提出内容の一次データ。Submission.st26 に typed model として配置する
 - **多言語対応**: InventionTitle は languageCode 付きで複数言語に対応。applicant_name / inventor_name はラテン文字翻字版も保持
 - **attributes**: Submission 固有のカスタムメタデータ用。typed field 優先、残りを EAV
@@ -242,6 +303,17 @@ class Project(BaseModel):
     locus_tag_prefix: list[str] | None
     target: ProjectTarget | None
     attributes: list[Attribute] | None # STUDY_ATTRIBUTES (TAG/VALUE)
+    identifiers: list[Identifier] | None
+    center_name: str | None            # SRA
+    broker_name: str | None            # SRA
+    study_description: str | None      # SRA STUDY_DESCRIPTION（description は STUDY_ABSTRACT）
+    center_project_name: str | None    # SRA
+    descriptor_center_name: str | None # SRA XSD 1.5d2 の DESCRIPTOR/CENTER_NAME
+    new_study_type: str | None         # SRA STUDY_TYPE@new_study_type
+    legacy: ProjectLegacy | None       # SRA XSD 1.5 より前
+
+class ProjectLegacy(BaseModel):
+    project_id: str | None             # DESCRIPTOR/PROJECT_ID（NCBI Genome Project の番号）
 ```
 
 設計上の決定:
@@ -252,6 +324,7 @@ class Project(BaseModel):
 - **division**: project には含めない（Entry レベル or validator 導出）
 - **datatype**: project には含めない（assembly.submission_category に統合）
 - **relevance**: BP XSD の Relevance は string 値を持てるため `dict[str, str]` で保持
+- **description と study_description**: `description` は BP の Description と SRA の STUDY_ABSTRACT（研究の要旨）、`study_description` は SRA の STUDY_DESCRIPTION（研究の説明）。SRA は両方を別に書ける
 
 ## Sample
 
@@ -273,6 +346,11 @@ class Sample(BaseModel):
     package: str | None                # "MIGS.ba", "Pathogen.cl.1.0", ...
     donor_id: str | None               # JGA
     sample_group_type: str | None      # JGA: "case", "control", "cancer"
+    identifiers: list[Identifier] | None
+    center_name: str | None            # SRA
+    broker_name: str | None            # SRA
+    anonymized_name: str | None        # SRA SAMPLE_NAME/ANONYMIZED_NAME
+    individual_name: str | None        # SRA SAMPLE_NAME/INDIVIDUAL_NAME
 ```
 
 設計上の決定:
@@ -280,7 +358,7 @@ class Sample(BaseModel):
 - **EAV 維持**: BioSample の ~960 attributes を全て typed fields にするのは非現実的。validation rule で必須/任意を制御
 - **common_source との関係**: 統合しない。Sample.organism と Sequences.common_source は役割が異なる（試料メタデータ vs INSDC source feature のデフォルト値）。整合性は validation rule で検証
 - **collection_date**: attributes のまま（昇格させるとキリがない）
-- **anonymized_name**: attributes で扱う
+- **anonymized_name / individual_name**: typed field。attributes に置くと、同じ名前の SAMPLE_ATTRIBUTE と見分けられず SRA XML に戻せない
 - **Attribute.name は必須**（空白だけも不可）。名前の無い属性は何の値かが分からず、検証も表示もしようがない。
   `Attribute` は Sample に限らず全エンティティ共通なので、この制約も全 DB に効く。正規化は前後の空白を落とすので、
   `"  "` を許すと正規化の後で名前の無い属性になる
@@ -299,6 +377,20 @@ class LibraryDescriptor(BaseModel):
     nominal_length: int | None         # paired-end の insert size
     nominal_sdev: float | None         # paired-end の標準偏差
     construction_protocol: str | None  # free text
+    pooling_strategy: str | None       # SRA XSD 1.5d2
+    legacy: LibraryLegacy | None
+
+class LibraryLegacy(BaseModel):        # SRA XSD 1.5 より前
+    orientation: str | None            # PAIRED@ORIENTATION
+
+class TargetedLocus(BaseModel):
+    name: str | None                   # "16S rRNA", "exome", ...
+    description: str | None
+    probe_set: ExternalRef | None
+
+class ColorMatrixEntry(BaseModel):     # SOLiD の 2 塩基と色の対応
+    dibase: str | None
+    color: str | None
 
 class Platform(BaseModel):
     type: str | None                   # "ILLUMINA", "PACBIO_SMRT", ...
@@ -306,22 +398,110 @@ class Platform(BaseModel):
     array_name: str | None             # JGA array の場合
     array_description: str | None      # JGA array の場合
     array_provider: str | None         # JGA array の場合
+    legacy: PlatformLegacy | None
+
+class PlatformLegacy(BaseModel):       # SRA XSD 1.5 より前の、装置ごとの運転条件
+    cycle_count: int | None            # ILLUMINA, ABI_SOLID
+    sequence_length: int | None        # ILLUMINA, ABI_SOLID
+    cycle_sequence: str | None         # ILLUMINA
+    flow_count: int | None             # LS454, HELICOS
+    flow_sequence: str | None          # LS454, HELICOS
+    key_sequence: str | None           # LS454
+    color_matrix: list[ColorMatrixEntry] | None  # ABI_SOLID
+    color_matrix_code: str | None      # ABI_SOLID
+
+class RelativeOrder(BaseModel):
+    follows_read_index: int | None
+    precedes_read_index: int | None
+
+class Basecall(BaseModel):             # EXPECTED_BASECALL_TABLE の 1 行
+    value: str | None                  # その位置に来るはずの配列（バーコードなど）
+    read_group_tag: str | None
+    min_match: int | None
+    max_mismatch: int | None
+    match_edge: str | None             # "start", "end", "full"
+
+class BasecallTable(BaseModel):
+    base_coord: int | None
+    default_length: int | None
+    basecalls: list[Basecall] | None
+
+class ExpectedBasecall(BaseModel):     # READ_SPEC/EXPECTED_BASECALL
+    value: str | None
+    base_coord: int | None
+    default_length: int | None
 
 class ReadSpec(BaseModel):
     read_index: int | None
+    read_label: str | None
     read_class: str | None             # "Application Read", "Technical Read", ...
     read_type: str | None              # "Forward", "Reverse", ...
+    # 読みの位置は次の 3 つ（1.5 より前は legacy の 2 つを加えた 5 つ）のどれか 1 つで決める
     base_coord: int | None
+    relative_order: RelativeOrder | None
+    expected_basecall_table: BasecallTable | None
+    legacy: ReadSpecLegacy | None
+
+class ReadSpecLegacy(BaseModel):       # SRA XSD 1.5 より前
+    cycle_coord: int | None
+    expected_basecall: ExpectedBasecall | None
 
 class SpotDescriptor(BaseModel):
     spot_length: int | None
     reads: list[ReadSpec] | None
+    legacy: SpotDescriptorLegacy | None
+
+class SpotDescriptorLegacy(BaseModel): # SRA XSD 1.5 より前
+    number_of_reads_per_spot: int | None
+    adapter_spec: str | None
 
 class PipelineStep(BaseModel):
     step_index: str | None
-    prev_step_index: str | None        # "NIL" for first step
+    prev_step_indexes: list[str] | None  # "NIL" for first step
     program: str | None
     version: str | None
+    section_name: str | None
+    notes: str | None
+
+class Gap(BaseModel):                  # DESIGN/GAP_DESCRIPTOR/GAP
+    type: str | None                   # "MatePair", "PairedEnd", "Tandem"
+    orientation: str | None
+    link5: str | None
+    link3: str | None
+    min_length: int | None
+    max_length: int | None
+    mean: float | None
+    stdev: float | None
+
+class BaseCalling(BaseModel):          # PROCESSING/BASE_CALLS
+    base_caller: str | None
+    sequence_space: str | None         # "Base Space", "Color Space"
+
+class QualityScoring(BaseModel):       # PROCESSING/QUALITY_SCORES
+    qtype: str | None                  # "phred", "other"
+    quality_scorer: str | None
+    number_of_levels: int | None
+    multiplier: float | None
+
+class ExperimentLegacy(BaseModel):     # SRA XSD 1.5 より前
+    expected_number_runs: int | None
+    gaps: list[Gap] | None
+    base_calling: BaseCalling | None
+    quality_scoring: list[QualityScoring] | None
+
+class ReadLabel(BaseModel):
+    value: str | None
+    read_group_tag: str | None
+
+class PoolMember(BaseModel):           # SAMPLE_DESCRIPTOR/POOL/MEMBER
+    sample: RelationTarget | None
+    member_name: str | None            # runs[].data_blocks[].member_name から指される
+    proportion: float | None
+    read_labels: list[ReadLabel] | None
+
+class Pool(BaseModel):
+    default_member: PoolMember | None
+    members: list[PoolMember] | None
 
 class Experiment(BaseModel):
     accession: str | None              # DRX/SRX/ERX
@@ -330,16 +510,24 @@ class Experiment(BaseModel):
     description: str | None            # SRA DESIGN_DESCRIPTION
     library: LibraryDescriptor | None
     platform: Platform | None
-    targeted_loci: list[str] | None    # "16S rRNA", "exome", ...
+    targeted_loci: list[TargetedLocus] | None
     spot_descriptor: SpotDescriptor | None  # SRA SPOT_DESCRIPTOR
     processing: list[PipelineStep] | None   # SRA PROCESSING/PIPELINE
     attributes: list[Attribute] | None # EXPERIMENT_ATTRIBUTES (TAG/VALUE)
+    identifiers: list[Identifier] | None
+    center_name: str | None
+    broker_name: str | None
+    pool: Pool | None                  # 1 experiment に複数の sample を混ぜたとき
+    sample_demux_directive: str | None # "leave_as_pool", "submitter_demultiplexed"
+    legacy: ExperimentLegacy | None
 ```
 
 設計上の決定:
 
-- **controlled vocabulary**: 全て `str | None`。許容値は YAML 外部定義 + validation rule で制御（XSD enum は頻繁に更新される���め）
+- **controlled vocabulary**: 全て `str | None`。許容値は YAML 外部定義 + validation rule で制御（XSD enum は頻繁に更新されるため）
 - **JGA array platform**: Platform に flat に統合
+- **POOL**: 混ぜた sample は `relations` でなく `pool.members[].sample` に置く。member は sample への参照に加えて read label の list を持ち、relation の `properties`（`dict[str, str]`）には収まらない。run の data block は member_name でこれを指す
+- **legacy**: SRA XSD 1.5 より前の登録にだけある要素は、各モデルの `legacy` にまとめる（[v3-sra.md](./v3-sra.md)）
 
 ## Run
 
@@ -352,6 +540,29 @@ class File(BaseModel):
     checksum_method: str | None        # "MD5"
     checksum: str | None
     unencrypted_checksum: str | None   # JGA: checksum before encryption
+    quality_scoring_system: str | None # "phred", "log-odds"
+    quality_encoding: str | None       # "ascii", "decimal", "hexadecimal"
+    ascii_offset: str | None           # "!", "@"
+    read_labels: list[str] | None
+    legacy: FileLegacy | None
+
+class FileLegacy(BaseModel):           # SRA XSD 1.5 より前
+    data_series_labels: list[str] | None
+
+class DataBlock(BaseModel):            # SRA / JGA の DATA_BLOCK
+    name: str | None
+    serial: int | None
+    member_name: str | None            # experiments[].pool.members[].member_name を指す
+    files: list[File] | None
+    legacy: DataBlockLegacy | None
+
+class DataBlockLegacy(BaseModel):      # SRA XSD 1.5 より前の、装置上の位置と読みの数
+    sector: int | None
+    region: int | None
+    format_code: int | None
+    number_channels: int | None
+    total_spots: int | None
+    total_reads: int | None
 
 class Run(BaseModel):
     accession: str | None              # DRR/SRR/ERR
@@ -359,20 +570,65 @@ class Run(BaseModel):
     title: str | None
     run_date: str | None               # ISO 8601
     data_type: str | None              # JGA: "sequencing", "array", "metabolite", "image"
-    files: list[File] | None
+    data_blocks: list[DataBlock] | None
     attributes: list[Attribute] | None # RUN_ATTRIBUTES (TAG/VALUE)
+    identifiers: list[Identifier] | None
+    center_name: str | None
+    broker_name: str | None
+    run_center: str | None
+    # experiment の値をこの run に限って上書きするもの
+    platform: Platform | None
+    spot_descriptor: SpotDescriptor | None
+    processing: list[PipelineStep] | None
+    sample_demux_directive: str | None
+    legacy: RunLegacy | None
+
+class RunLegacy(BaseModel):            # SRA XSD 1.5 より前の RUN の属性
+    instrument_model: str | None       # PLATFORM の INSTRUMENT_MODEL とは別に書かれる
+    instrument_name: str | None
+    run_file: str | None
+    total_data_blocks: int | None
 ```
 
 設計上の決定:
 
 - **名称 "run"**: SRA の用語を採用（"data" はあいまい）。JGA の "Data" は run に mapping
 - **file type 統合**: SRA 31 enum + JGA 65+ enum を 1 つの `str` に統合、validation rule で制御
+- **data_blocks**: SRA は file を DATA_BLOCK でまとめ、block ごとに名前や pool の member を持つ（1 つの run に複数ある）。file を平らな list にするとその区切りが失われる。JGA の DATA も DATA_BLOCK を 1 つ持つ形なので同じ型にする
 
 ## Analysis
 
 SRA Analysis + JGA Analysis の統合。
 
 ```python
+class StandardAssembly(BaseModel):
+    short_name: str | None             # "GRCh38"
+    names: list[ExternalRef] | None
+
+class CustomAssembly(BaseModel):
+    description: str | None
+    sources: list[ExternalRef] | None
+
+class RunLabel(BaseModel):             # read group とそれが来た run
+    run: RelationTarget | None
+    data_block_name: str | None
+    read_group_label: str | None
+
+class SeqLabel(BaseModel):             # 参照配列の名前とその配列
+    accession: str | None
+    gi: str | None
+    data_block_name: str | None
+    seq_label: str | None
+
+class ReferenceAlignment(BaseModel):   # ANALYSIS_TYPE/REFERENCE_ALIGNMENT
+    standard_assembly: StandardAssembly | None
+    custom_assembly: CustomAssembly | None
+    run_labels: list[RunLabel] | None
+    seq_labels: list[SeqLabel] | None
+    includes_unaligned_reads: bool | None
+    marks_duplicate_reads: bool | None
+    includes_failed_reads: bool | None
+
 class Analysis(BaseModel):
     accession: str | None              # DRZ/SRZ/ERZ
     alias: str | None
@@ -380,9 +636,14 @@ class Analysis(BaseModel):
     description: str | None            # SRA/JGA DESCRIPTION
     analysis_type: str | None          # "de_novo_assembly", "microarray", ...
     analysis_date: str | None          # ISO 8601
-    files: list[File] | None           # File 型を再利用
+    data_blocks: list[DataBlock] | None
     processing: list[PipelineStep] | None   # SRA PROCESSING/PIPELINE
     attributes: list[Attribute] | None # ANALYSIS_ATTRIBUTES (TAG/VALUE)
+    identifiers: list[Identifier] | None
+    center_name: str | None
+    broker_name: str | None
+    analysis_center: str | None
+    reference_alignment: ReferenceAlignment | None
 ```
 
 SRA 4 types + JGA 11+ types を 1 つの `str` に統合。validation rule で制御。
@@ -523,11 +784,16 @@ class AccessControl(BaseModel):
 class RelationSource(BaseModel):
     type: str | None                   # "sample", "project", "experiment", ...
     alias: str | None
+    accession: str | None              # あれば alias より先にこちらで指す（SRA の alias は一意でない）
+    index: int | None                  # accession も一意な alias も無いとき、その種類の list の中の位置
 
 class RelationTarget(BaseModel):
     url: str | None                    # URL 参照の場合
     db: str | None                     # DB 参照 / record 内参照
-    id: str | None                     # DB 参照 / record 内参照
+    id: str | None                     # DB 参照ならその DB の番号、オブジェクト参照なら alias
+    accession: str | None              # オブジェクト参照で、相手の accession も書くとき
+    center_name: str | None            # alias の名前空間（SRA の refcenter）
+    identifiers: list[Identifier] | None
 
 class Relation(BaseModel):
     type: str | None                   # "reference", "xref", "child_of", "derived_from", "part_of", ...
@@ -543,6 +809,8 @@ class Relation(BaseModel):
 - `type` で用途を区別: `"reference"` (URL), `"xref"` (db_xref), `"child_of"`, `"derived_from"` 等
 - `RelationTarget` に `url` / `db` + `id` を統合。URL が入っていれば外部参照、db + id が入っていれば DB/record 内参照
 - `source` は record 内のどのオブジェクトからの関係かを示す。省略時は record 全体が起点
+- SRA の参照は refname（alias）と accession を同時に書ける。オブジェクト参照では `id` に alias、`accession` に accession を置き、どちらか一方に寄せない
+- `db` がオブジェクトの種類のとき、相手がこの record の中にあるかどうかは表さない。読む側が accession か (center_name, alias) で探す
 - record 内参照（Experiment → Sample, Run → Experiment 等）も `relations` で統一的に表現
 - **set 内 record 間参照**: 1 submit で複数 record を送る場合、alias 参照解決は 2 フェーズ（submit 時に namespace 付与 → 参照解決）を想定
 
@@ -554,10 +822,11 @@ class Relation(BaseModel):
 | `xref` | 外部 DB 相互参照 | PubMed, BioProject accession 等 |
 | `part_of` | 起点が対象の一部である | SRA Experiment → Sample, Run → Experiment |
 | `child_of` | 起点が対象の子である | Umbrella BioProject の親子関係 |
-| `derived_from` | 起点が対象から派生した | BioSample の派生関係（培養株 → 元株） |
+| `derived_from` | 起点が対象から派生した | BioSample の派生関係（培養株 → 元株）、SRA Analysis の TARGETS |
 | `governed_by` | 起点が対象のポリシーに従う | JGA Dataset → Policy |
 | `managed_by` | 起点が対象に管理される | JGA Policy → DAC |
 | `contains` | 起点が対象を含む | JGA Dataset → Run/Analysis |
+| `related_to` | 起点が対象に関係する | SRA STUDY の RELATED_STUDIES（`properties.is_primary`） |
 
 ### 使用例
 
@@ -595,39 +864,43 @@ SRA の典型的なオブジェクトグラフ。1 record 内で Experiment が 
   "relations": [
     {
       "type": "part_of",
-      "source": {"type": "experiment", "alias": "exp-1"},
-      "target": {"db": "sample", "id": "sample-1"}
+      "source": {"type": "experiment", "accession": "DRX000001"},
+      "target": {"db": "sample", "id": "sample-1", "accession": "SAMD00000001"}
     },
     {
       "type": "part_of",
-      "source": {"type": "run", "alias": "run-1"},
-      "target": {"db": "experiment", "id": "exp-1"}
+      "source": {"type": "run", "accession": "DRR000001"},
+      "target": {"db": "experiment", "id": "exp-1", "accession": "DRX000001"}
     }
   ]
 }
 ```
 
-XSD 対応: `EXPERIMENT/SAMPLE_DESCRIPTOR`, `RUN/EXPERIMENT_REF`
+XSD 対応: `EXPERIMENT/SAMPLE_DESCRIPTOR`, `RUN/EXPERIMENT_REF`。起点は accession で指し、target には参照に書かれた refname（`id`）と accession を両方置く（[v3-sra.md](./v3-sra.md)）
 
 #### SRA Analysis → Study 参照
 
 ```json
 {
-  "project": {"accession": "PRJDB12345", "alias": "my-project"},
+  "project": {
+    "accession": "DRP000001",
+    "alias": "my-study",
+    "identifiers": [{"type": "primary", "value": "PRJDB12345", "label": "BioProject ID"}]
+  },
   "analyses": [
     {"accession": "DRZ000001", "alias": "analysis-1", "analysis_type": "de_novo_assembly"}
   ],
   "relations": [
     {
       "type": "part_of",
-      "source": {"type": "analysis", "alias": "analysis-1"},
-      "target": {"db": "bioproject", "id": "PRJDB12345"}
+      "source": {"type": "analysis", "accession": "DRZ000001"},
+      "target": {"db": "project", "id": "my-study", "accession": "DRP000001"}
     }
   ]
 }
 ```
 
-XSD 対応: `ANALYSIS/STUDY_REF`
+XSD 対応: `ANALYSIS/STUDY_REF`。DRA の study の accession は DRP で、BioProject の番号は `PRIMARY_ID` に書かれる
 
 #### Umbrella BioProject の親子関係
 
