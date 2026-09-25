@@ -1,7 +1,7 @@
 # v3 スキーマ仕様
 
 DDBJ Record v3 のデータモデル定義。
-全形式（Trad, BP, BS, SRA, JGA, ST.26, GFF, Assembly）を統一的に扱う JSON フォーマットを定義する。
+全形式（Trad, BP, BS, SRA, JGA, ST.26, GFF, Assembly, GEA）を統一的に扱う JSON フォーマットを定義する。
 
 ## 設計方針
 
@@ -37,8 +37,9 @@ v3 で扱う形式の一覧と、それぞれが関わる DDBJ データベー�
 | ST.26 | DDBJ (PAT division) | 特許配列リスト（WIPO Standard ST.26、詳細は [v3-converter.md](./v3-converter.md#st26-wipo-standard-st26)） |
 | GFF | DDBJ | ゲノムアノテーション |
 | Assembly | DDBJ + NCBI | NCBI Assembly 登録、accession、index 生成 |
+| GEA | GEA | 発現データ（experiment の MAGE-TAB、アレイ設計、前身 CIBEX の登録。詳細は [v3-gea.md](./v3-gea.md)） |
 
-GEA, MetaboBank, JVar は現在スコープ外。将来の拡張候補。
+MetaboBank, JVar は現在スコープ外。将来の拡張候補。
 
 ## Top-level 構造
 
@@ -63,7 +64,9 @@ DdbjRecord (all fields Optional/None)
 ├── assembly: Assembly | None           # assembly accession, name, level
 ├── datasets: list[Dataset] | None      # JGA Dataset（独立）
 ├── relations: list[Relation] | None    # 外部参照 (URL, db_xref) + 意味的関係 (child_of, ...)
-└── access_control: AccessControl | None # JGA Policy/DAC
+├── access_control: AccessControl | None # JGA Policy/DAC
+├── investigation: Investigation | None # GEA experiment（MAGE-TAB の IDF / SDRF）
+└── array_design: ArrayDesign | None    # GEA アレイ設計（ADF）
 ```
 
 設計上の決定:
@@ -158,7 +161,7 @@ class ExternalRef(BaseModel):
 
 ```python
 # Project, Sample, Experiment, Run, Analysis, Entry, Dataset, Assembly,
-# Policy, Dac に共通:
+# Policy, Dac, Investigation, ArrayDesign に共通:
 accession: str | None         # 登録後に付与 ("PRJDB12345", "SAMD00123456", ...)
 alias: str | None             # 登録前のローカル名 (SRA refname 等)
 
@@ -648,6 +651,238 @@ class Analysis(BaseModel):
 
 SRA 4 types + JGA 11+ types を 1 つの `str` に統合。validation rule で制御。
 
+## Investigation (GEA)
+
+GEA の experiment（E-GEAD）。MAGE-TAB の IDF と SDRF をそのままの形で持つ。写し方は [v3-gea.md](./v3-gea.md)。
+
+```python
+class ExperimentalFactor(BaseModel):   # IDF の Experimental Factor Name / Type の 1 組
+    name: str | None
+    type: str | None
+
+class Protocol(BaseModel):             # IDF の Protocol Name / Type / Description（CIBEX の Protocol も）
+    name: str | None                   # SDRF の Protocol REF から指される
+    type: str | None
+    description: str | None
+
+class SdrfSource(BaseModel):
+    name: str | None
+    characteristics: list[Attribute] | None
+    comments: list[Attribute] | None
+
+class SdrfExtract(BaseModel):
+    name: str | None
+    protocol_refs: list[str] | None    # このノードの前に並ぶ Protocol REF
+    material_type: str | None
+    comments: list[Attribute] | None
+
+class SdrfLabeledExtract(BaseModel):
+    name: str | None
+    protocol_refs: list[str] | None
+    label: str | None
+    comments: list[Attribute] | None
+
+class SdrfAssay(BaseModel):
+    name: str | None
+    protocol_refs: list[str] | None
+    technology_type: str | None
+    array_design_ref: str | None
+    comments: list[Attribute] | None
+
+class SdrfDataFile(BaseModel):
+    type: str | None                   # 列の名前（"Array Data File" など）
+    name: str | None
+    protocol_refs: list[str] | None
+    comments: list[Attribute] | None
+
+class SdrfFactorValue(BaseModel):      # Factor Value[name] と、その後の Unit[unit_type]
+    name: str | None
+    value: str | None
+    unit: str | None
+    unit_type: str | None
+
+class SdrfRow(BaseModel):              # SDRF の 1 行
+    source: SdrfSource | None
+    extract: SdrfExtract | None
+    labeled_extract: SdrfLabeledExtract | None
+    assay: SdrfAssay | None
+    data_files: list[SdrfDataFile] | None
+    factor_values: list[SdrfFactorValue] | None
+
+class CibexExperiment(BaseModel):
+    title: str | None
+    design_type: str | None
+    factor: str | None
+    common_reference: str | None
+    quality_control_description: str | None
+    number_of_hybridizations: int | None
+    description: str | None
+
+class CibexSubmitter(BaseModel):       # 住所・所属・研究室が自由記述で、Person / Organization に分けられない
+    first_name: str | None
+    middle_initials: str | None
+    last_name: str | None
+    organization: str | None
+    department: str | None
+    laboratory: str | None
+    address: str | None
+
+class CibexReference(BaseModel):       # 著者が 1 つの文字列、頁が 1 つの値で、Publication に写せない
+    title: str | None
+    author: str | None
+    journal: str | None
+    year: str | None
+    volume: str | None
+    issue: str | None
+    page: str | None
+    pubmed_id: str | None
+
+class CibexDataField(BaseModel):       # データファイルの列の 1 つと、その説明
+    field: str | None
+    description: str | None
+
+class CibexArrayDesign(BaseModel):
+    accession: str | None              # CAR
+    model_name: str | None
+    technology_type: str | None
+    surface_type: str | None
+    number_of_features: int | None
+    reporter_type: str | None
+    strand_type: str | None
+    substrate_type: str | None
+    attachment: str | None
+    design_provider: str | None
+    array_design_protocol: str | None
+    description: str | None
+    file: str | None
+    data_fields: list[CibexDataField] | None
+
+class CibexSample(BaseModel):
+    name: str | None
+    organism: str | None
+    organism_part: str | None
+    sex: str | None
+    age: str | None
+    strain_or_line: str | None
+    cell_line: str | None
+    cell_type: str | None
+    developmental_stage: str | None
+    disease_state: str | None
+    genetic_modification: str | None
+    individual: str | None
+    individual_genetic_characteristics: str | None
+    growth_condition_protocol: str | None
+    treatment_protocol: str | None
+    biosource_provider: str | None
+    description: str | None
+
+class CibexLabeledExtract(BaseModel):
+    label: str | None
+    label_compound: str | None
+    extraction_protocol: str | None
+    labeling_protocol: str | None
+    pooling_protocol: str | None
+
+class CibexHybridization(BaseModel):
+    name: str | None
+    array_design_accession: str | None
+    hybridization_protocol: str | None
+    scanning_protocol: str | None
+    description: str | None
+    file: str | None
+    data_fields: list[CibexDataField] | None
+
+class CibexSummary(BaseModel):
+    name: str | None
+    normalization_protocol: str | None
+    transformation_protocol: str | None
+    description: str | None
+    file: str | None
+    data_fields: list[CibexDataField] | None
+
+class Cibex(BaseModel):                # GEA に移す前の CIBEX の登録（CBX）
+    accession: str | None
+    release_date: str | None
+    experiment: CibexExperiment | None
+    submitters: list[CibexSubmitter] | None
+    references: list[CibexReference] | None
+    protocols: list[Protocol] | None
+    array_designs: list[CibexArrayDesign] | None
+    samples: list[CibexSample] | None
+    labeled_extracts: list[CibexLabeledExtract] | None
+    hybridizations: list[CibexHybridization] | None
+    summaries: list[CibexSummary] | None
+
+class InvestigationLegacy(BaseModel):  # CIBEX から移した experiment にだけあるもの
+    cibex_accept_date: str | None
+    cibex_public_release_date: str | None
+    cibex_submitter: str | None
+    cibex: Cibex | None
+
+class Investigation(BaseModel):
+    accession: str | None              # E-GEAD
+    alias: str | None
+    identifiers: list[Identifier] | None   # CIBEX の CBX は secondary
+    title: str | None
+    description: str | None
+    magetab_version: str | None
+    experimental_designs: list[str] | None
+    experimental_factors: list[ExperimentalFactor] | None
+    persons: list[Person] | None
+    protocols: list[Protocol] | None
+    publications: list[Publication] | None
+    public_release_date: str | None
+    sdrf_file: str | None
+    sdrf: list[SdrfRow] | None
+    # 以下は GEA が IDF の Comment[...] に書くもの
+    experiment_type: str | None
+    channel_type: str | None           # "single-channel", "dual-channel"
+    array_design_ref: str | None       # SDRF の Array Design REF をまとめたもの
+    last_update_date: str | None
+    nbdc_approval: str | None          # NBDC のデータアクセス委員会の承認を述べる文
+    dbcls_approval: str | None         # 同じく DBCLS
+    legacy: InvestigationLegacy | None
+```
+
+設計上の決定:
+
+- **SDRF は行ごと**: 同じ名前のノードを行の間で共有しない。保存された SDRF には、同じ名前のノードが行ごとに違う値を持つものがあり、共有すると失われる
+- **BioProject / 関連する研究への参照**: IDF の `Comment[BioProject]`（`part_of`）と `Comment[Related study]`（`related_to`）は `relations` に置く。起点は `{"type": "investigation", "accession": ...}`
+- **SDRF の中の参照は値のまま**: SDRF の `Comment[BioSample]`、`Comment[SRA_RUN]`、`Array Design REF` は BioSample や DRA、アレイ設計を指すが、relation にしない。relation の起点になれるのはオブジェクト（accession / alias / list の位置を持つもの）で、SDRF の行のノードはそうでない
+
+## Array Design (GEA)
+
+GEA のアレイ設計（A-GEAD）。ADF の見出しを型付きで持ち、プローブの表はファイルのまま指す。
+
+```python
+class TermSource(BaseModel):
+    name: str | None
+    file: str | None
+    version: str | None
+
+class ArrayDesignLegacy(BaseModel):
+    cibex_public_release_date: str | None
+
+class ArrayDesign(BaseModel):          # 見出しの欄は file の見出しから読んだもので、正本は file
+    accession: str | None              # A-GEAD
+    alias: str | None
+    name: str | None
+    version: str | None
+    provider: str | None
+    printing_protocol: str | None
+    technology_type: str | None
+    surface_type: str | None
+    substrate_type: str | None
+    sequence_polymer_type: str | None
+    term_sources: list[TermSource] | None
+    organism: Organism | None
+    description: str | None
+    public_release_date: str | None
+    submitted_name: str | None
+    file: File | None                  # ADF そのもの（プローブの表を含む）
+    legacy: ArrayDesignLegacy | None
+```
+
 ## Sequences & Entries
 
 Trad / ST.26 固有のモデル。
@@ -782,7 +1017,7 @@ class AccessControl(BaseModel):
 
 ```python
 class RelationSource(BaseModel):
-    type: str | None                   # "sample", "project", "experiment", ...
+    type: str | None                   # "sample", "project", "experiment", "investigation", ...
     alias: str | None
     accession: str | None              # あれば alias より先にこちらで指す（SRA の alias は一意でない）
     index: int | None                  # accession も一意な alias も無いとき、その種類の list の中の位置

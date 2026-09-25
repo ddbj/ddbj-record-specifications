@@ -25,7 +25,7 @@ Raw formats:        Submit formats:
 
 v3 モデルと各形式のフィールド対応。converter / validation rule 実装時に参照する。
 
-ここに挙げるのは主なものだけ。SRA XML については、全ての要素と属性の置き場所を [v3-sra-mapping.yml](./v3-sra-mapping.yml) に書いた（考え方は [v3-sra.md](./v3-sra.md)）。
+ここに挙げるのは主なものだけ。SRA XML と GEA については、全ての要素と属性の置き場所を [v3-sra-mapping.yml](./v3-sra-mapping.yml) と [v3-gea-mapping.yml](./v3-gea-mapping.yml) に書いた（考え方は [v3-sra.md](./v3-sra.md) と [v3-gea.md](./v3-gea.md)）。
 
 ### Project
 
@@ -280,7 +280,7 @@ IDF (Investigation Description) + SDRF (Sample and Data Relationship)。SRA の 
 | BioSample | `/usr/local/resources/biosample/ddbj_biosample_set.xml.gz` | XML (gzip) | 31 MB gz (DDBJ), 4.3 GB gz (全極) |
 | DRA | `/usr/local/resources/dra/fastq/{DRA000}/{DRA000XXX}/*.xml` | XML | ~230 万 submissions |
 | JGA | `/usr/local/shared_data/jga/metadata-history/metadata/` | XML + CSV | study: 37K lines |
-| GEA | `/usr/local/resources/gea/experiment/E-GEAD-{N000}/` | IDF/SDRF | ~682 experiments |
+| GEA | a012 `/usr/local/resources/gea/{experiment,array,cibex}/`（公開用の写し） | IDF/SDRF、ADF、CIBEX | experiment 768、アレイ設計 242、CIBEX 216（2026-09-25） |
 | Trad | `/usr/local/resources/trad/{ddbj,wgs,tsa,...}/` | flat file | ~1.87 億 records |
 
 ### XSD 参照方式

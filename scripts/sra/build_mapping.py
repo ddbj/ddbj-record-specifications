@@ -23,15 +23,13 @@ import json
 import re
 import sys
 from pathlib import Path
-from types import NoneType, UnionType
-from typing import Any, Union, get_args, get_origin, get_type_hints
+from typing import Any
 
 import yaml
-from pydantic import BaseModel
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from ddbj_record.schema.v3 import DdbjRecord
+from v3_locations import CONTAINER, resolve, segments, unreadable
 
 # Document type -> (root element, where it goes in v3).
 ENTITIES = {
@@ -43,7 +41,6 @@ ENTITIES = {
     "analysis": ("ANALYSIS", "analyses[]"),
 }
 
-CONTAINER = "(container)"
 NAME_IS_VALUE = " (要素名が値)"
 LOWER_NAME_IS_VALUE = " (要素名を小文字にした値)"
 
@@ -520,67 +517,6 @@ def quote(value: str) -> str:
 
 # --- Checking the rules against the XSDs and the stored documents
 
-SEGMENT = re.compile(r"(\w+)(\[[^\]]*\]|\{[^}]*\})?")
-
-# The kinds of stored value (census_drmdb.rb's kind_of) each v3 type can hold.
-READABLE_AS = {int: {"int", "empty"}, float: {"int", "float", "empty"}, bool: {"bool", "empty"}}
-
-
-def strip_note(location: str) -> str:
-    return re.sub(r" \(.*\)$", "", location)
-
-
-def _unwrap_optional(tp: Any) -> Any:
-    if get_origin(tp) in (Union, UnionType):
-        args = [a for a in get_args(tp) if a is not NoneType]
-        if len(args) != 1:
-            raise TypeError(tp)
-        return args[0]
-    return tp
-
-
-def resolve(location: str) -> Any:
-    """The type at a location such as `experiments[].pool.members[].sample.id`.
-
-    `[...]` is an element of a list and `{...}` a value of a dict; what is inside the brackets is a
-    note for the reader. Raises LookupError when the location does not exist in the model.
-    """
-    tp: Any = DdbjRecord
-
-    for segment in strip_note(location).split("."):
-        m = SEGMENT.fullmatch(segment)
-        if not m:
-            raise LookupError(f"{location}: cannot read {segment!r}")
-        name, bracket = m.groups()
-
-        if not (isinstance(tp, type) and issubclass(tp, BaseModel)):
-            raise LookupError(f"{location}: {name} is below a non-model")  # noqa: TRY004 -- the location is wrong, not a type
-        if name not in tp.model_fields:
-            raise LookupError(f"{location}: {tp.__name__} has no field {name!r}")
-
-        # Annotations naming a model defined later (RelationTarget, File) are still strings.
-        tp = _unwrap_optional(get_type_hints(tp)[name])
-        container = get_origin(tp)
-
-        if bracket is None:
-            if container in (list, dict):
-                raise LookupError(f"{location}: {name} is a {container.__name__}")
-        elif bracket.startswith("["):
-            if container is not list:
-                raise LookupError(f"{location}: {name} is not a list")
-            tp = get_args(tp)[0]
-        else:
-            if container is not dict:
-                raise LookupError(f"{location}: {name} is not a dict")
-            tp = get_args(tp)[1]
-
-    return tp
-
-
-def _segments(location: str) -> list[str]:
-    """The location's segments, with the notes inside brackets dropped."""
-    return [re.sub(r"\[[^\]]*\]", "[]", segment) for segment in strip_note(location).split(".")] if location else []
-
 
 def _opens_a_list(doc: str, path: str, location: str) -> bool:
     """Whether location has a list of its own, below where its nearest ancestor with a value goes.
@@ -597,7 +533,7 @@ def _opens_a_list(doc: str, path: str, location: str) -> bool:
             above = found
             break
 
-    own, theirs = _segments(location), _segments(above)
+    own, theirs = segments(location), segments(above)
     common = 0
     while common < min(len(own), len(theirs)) and own[common] == theirs[common]:
         common += 1
@@ -624,10 +560,8 @@ def disagreements(doc: str, path: str, location: str, inventory: dict[str, Any],
     if (xsd.get("many") or stored.get("max_repeat", 1) > 1) and not _opens_a_list(doc, path, location):
         problems.append("repeats, but goes into no list of its own")
 
-    if tp in READABLE_AS:
-        unreadable = set(stored.get("kinds", {})) - READABLE_AS[tp]
-        if unreadable:
-            problems.append(f"{tp.__name__}, but stored values include {sorted(unreadable)}")
+    if cannot := unreadable(tp, set(stored.get("kinds", {}))):
+        problems.append(f"{tp.__name__}, but stored values include {sorted(cannot)}")
 
     return problems
 

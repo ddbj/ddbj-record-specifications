@@ -761,6 +761,347 @@ class Analysis(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+# === Investigation (GEA: MAGE-TAB IDF / SDRF) ===
+
+
+class ExperimentalFactor(BaseModel):
+    """IDF の Experimental Factor Name / Type の 1 組。"""
+
+    name: str | None = Field(None, examples=["treatment"])
+    type: str | None = Field(None, examples=["compound"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class Protocol(BaseModel):
+    """IDF の Protocol Name / Type / Description の 1 組 (CIBEX の Protocol も)。
+
+    name は SDRF の Protocol REF から指される。
+    """
+
+    name: str | None = Field(None, examples=["P-GEAD-16"])
+    type: str | None = Field(None, examples=["nucleic acid extraction protocol"])
+    description: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfSource(BaseModel):
+    """SDRF の Source のノード。
+
+    comments は SDRF の Comment[x] の列 (name が x)。Submission.comments のような自由記述ではない。
+    """
+
+    name: str | None = None
+    characteristics: list[Attribute] | None = None
+    comments: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfExtract(BaseModel):
+    name: str | None = None
+    # このノードを作るのに使った protocol。SDRF でこのノードの前に並ぶ Protocol REF。
+    protocol_refs: list[str] | None = None
+    material_type: str | None = Field(None, examples=["total RNA"])
+    comments: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfLabeledExtract(BaseModel):
+    name: str | None = None
+    protocol_refs: list[str] | None = None
+    label: str | None = Field(None, examples=["Cy3"])
+    comments: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfAssay(BaseModel):
+    name: str | None = None
+    protocol_refs: list[str] | None = None
+    technology_type: str | None = Field(None, examples=["array assay"])
+    array_design_ref: str | None = Field(None, examples=["A-GEAD-210"])
+    comments: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfDataFile(BaseModel):
+    """SDRF のデータファイルの列の 1 つ。
+
+    type は列の名前 ("Array Data File" / "Derived Array Data File" /
+    "Array Data Matrix File" / "Derived Array Data Matrix File")。
+    File を使わない: SDRF が書くのはファイルの名前だけで、checksum などは登録者が名前を付けた
+    Comment[...] の列 (Comment[Array Data File md5] など) として書かれる。
+    """
+
+    type: str | None = Field(None, examples=["Array Data File"])
+    name: str | None = Field(None, examples=["sample1.CEL"])
+    protocol_refs: list[str] | None = None
+    comments: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfFactorValue(BaseModel):
+    """SDRF の Factor Value[name] の列と、その後の Unit[unit_type] の列。"""
+
+    name: str | None = Field(None, examples=["time"])
+    value: str | None = Field(None, examples=["24"])
+    unit: str | None = Field(None, examples=["hour"])
+    unit_type: str | None = Field(None, examples=["time unit"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class SdrfRow(BaseModel):
+    """SDRF の 1 行。Source から始まり、protocol を経てデータファイルに至る 1 本の道筋。
+
+    同じ名前のノードが行ごとに違う値を持つことがある (保存された SDRF にある) ので、
+    ノードを行の間で共有せず、行ごとに持つ。
+    """
+
+    source: SdrfSource | None = None
+    extract: SdrfExtract | None = None
+    labeled_extract: SdrfLabeledExtract | None = None
+    assay: SdrfAssay | None = None
+    data_files: list[SdrfDataFile] | None = None
+    factor_values: list[SdrfFactorValue] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexExperiment(BaseModel):
+    title: str | None = None
+    design_type: str | None = None
+    factor: str | None = None
+    common_reference: str | None = None
+    quality_control_description: str | None = None
+    number_of_hybridizations: int | None = None
+    description: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexSubmitter(BaseModel):
+    """Person に写さない: 住所、所属、研究室が 1 つずつの自由記述で、Organization の形に分けられない。"""
+
+    first_name: str | None = None
+    middle_initials: str | None = None
+    last_name: str | None = None
+    organization: str | None = None
+    department: str | None = None
+    laboratory: str | None = None
+    address: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexReference(BaseModel):
+    """Publication に写さない: 著者は 1 つの文字列、頁は「13784-9」のような 1 つの値、年は日付でない。"""
+
+    title: str | None = None
+    author: str | None = None
+    journal: str | None = None
+    year: str | None = None
+    volume: str | None = None
+    issue: str | None = None
+    page: str | None = None
+    pubmed_id: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexDataField(BaseModel):
+    """データファイルの列の 1 つと、その説明 (CIBEX の * data text field)。"""
+
+    field: str | None = Field(None, examples=["F532 Median"])
+    description: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexArrayDesign(BaseModel):
+    accession: str | None = Field(None, examples=["CAR273"])
+    model_name: str | None = None
+    technology_type: str | None = None
+    surface_type: str | None = None
+    number_of_features: int | None = None
+    reporter_type: str | None = None
+    strand_type: str | None = None
+    substrate_type: str | None = None
+    attachment: str | None = None
+    design_provider: str | None = None
+    array_design_protocol: str | None = None
+    description: str | None = None
+    file: str | None = None
+    data_fields: list[CibexDataField] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexSample(BaseModel):
+    name: str | None = None
+    organism: str | None = None
+    organism_part: str | None = None
+    sex: str | None = None
+    age: str | None = None
+    strain_or_line: str | None = None
+    cell_line: str | None = None
+    cell_type: str | None = None
+    developmental_stage: str | None = None
+    disease_state: str | None = None
+    genetic_modification: str | None = None
+    individual: str | None = None
+    individual_genetic_characteristics: str | None = None
+    growth_condition_protocol: str | None = None
+    treatment_protocol: str | None = None
+    biosource_provider: str | None = None
+    description: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexLabeledExtract(BaseModel):
+    label: str | None = None
+    label_compound: str | None = None
+    extraction_protocol: str | None = None
+    labeling_protocol: str | None = None
+    pooling_protocol: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexHybridization(BaseModel):
+    name: str | None = None
+    array_design_accession: str | None = None
+    hybridization_protocol: str | None = None
+    scanning_protocol: str | None = None
+    description: str | None = None
+    file: str | None = None
+    data_fields: list[CibexDataField] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class CibexSummary(BaseModel):
+    name: str | None = None
+    normalization_protocol: str | None = None
+    transformation_protocol: str | None = None
+    description: str | None = None
+    file: str | None = None
+    data_fields: list[CibexDataField] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class Cibex(BaseModel):
+    """GEA に移す前の CIBEX の登録 (CBX)。GEA の experiment 1 つに 1 つ対応する。"""
+
+    accession: str | None = Field(None, examples=["CBX100"])
+    release_date: str | None = None
+    experiment: CibexExperiment | None = None
+    submitters: list[CibexSubmitter] | None = None
+    references: list[CibexReference] | None = None
+    protocols: list[Protocol] | None = None
+    array_designs: list[CibexArrayDesign] | None = None
+    samples: list[CibexSample] | None = None
+    labeled_extracts: list[CibexLabeledExtract] | None = None
+    hybridizations: list[CibexHybridization] | None = None
+    summaries: list[CibexSummary] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class InvestigationLegacy(BaseModel):
+    """CIBEX から移した experiment にだけある、IDF の Comment[CIBEX *] と、CIBEX の元の登録。"""
+
+    cibex_accept_date: str | None = None
+    cibex_public_release_date: str | None = None
+    cibex_submitter: str | None = None
+    cibex: Cibex | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class Investigation(BaseModel):
+    """GEA の experiment (E-GEAD)。MAGE-TAB の IDF と SDRF。"""
+
+    accession: str | None = Field(None, examples=["E-GEAD-1005"])
+    alias: str | None = None
+    identifiers: list[Identifier] | None = None
+    title: str | None = None
+    description: str | None = None
+    magetab_version: str | None = Field(None, examples=["1.1"])
+    experimental_designs: list[str] | None = None
+    experimental_factors: list[ExperimentalFactor] | None = None
+    persons: list[Person] | None = None
+    protocols: list[Protocol] | None = None
+    publications: list[Publication] | None = None
+    public_release_date: str | None = None
+    sdrf_file: str | None = None
+    sdrf: list[SdrfRow] | None = None
+    # 以下は GEA が IDF の Comment[...] に書くもの。
+    experiment_type: str | None = Field(None, examples=["transcription profiling by array"])
+    channel_type: str | None = Field(None, examples=["single-channel"])
+    # SDRF の Array Design REF をまとめたもの。
+    array_design_ref: str | None = None
+    last_update_date: str | None = None
+    # ヒトのデータの公開を、NBDC / DBCLS のデータアクセス委員会が承認したことを述べる文。
+    nbdc_approval: str | None = None
+    dbcls_approval: str | None = None
+    legacy: InvestigationLegacy | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+# === Array Design (GEA: A-GEAD) ===
+
+
+class TermSource(BaseModel):
+    name: str | None = None
+    file: str | None = None
+    version: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ArrayDesignLegacy(BaseModel):
+    cibex_public_release_date: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ArrayDesign(BaseModel):
+    """GEA のアレイ設計 (A-GEAD)。ADF の見出しと、表を含むファイルそのもの。
+
+    ADF の表 (プローブ 1 つ 1 行) は装置メーカーごとの形式で、ファイルとして保管する。見出しの
+    欄は file の見出しから読んだもので、正本は file。
+    """
+
+    accession: str | None = Field(None, examples=["A-GEAD-210"])
+    alias: str | None = None
+    name: str | None = None
+    version: str | None = None
+    provider: str | None = None
+    printing_protocol: str | None = None
+    technology_type: str | None = None
+    surface_type: str | None = None
+    substrate_type: str | None = None
+    sequence_polymer_type: str | None = None
+    term_sources: list[TermSource] | None = None
+    organism: Organism | None = None
+    description: str | None = None
+    public_release_date: str | None = None
+    submitted_name: str | None = None
+    file: File | None = None
+    legacy: ArrayDesignLegacy | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 # === Sequences & Entries ===
 
 
@@ -967,5 +1308,7 @@ class DdbjRecord(BaseModel):
     datasets: list[Dataset] | None = None
     relations: list[Relation] | None = None
     access_control: AccessControl | None = None
+    investigation: Investigation | None = None
+    array_design: ArrayDesign | None = None
 
     model_config = ConfigDict(extra="forbid")

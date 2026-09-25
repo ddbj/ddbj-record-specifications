@@ -1,0 +1,20 @@
+Comment[GEAAccession]	E-GEAD-291
+MAGE-TAB Version	1.1
+Investigation Title	Identification of neo-antigens in mouse cell lines with exome sequencing
+Experiment Description	"\"\"\"\"\"\"To determine the immunogenicity of the mouse tumor, we performed an epitope discovery study. 
+Exome sequencing were used to identify mutation regarding with neoantigen.\"\"\"\"\"\""
+Experimental Design	strain or line design
+Experimental Factor Name	strain
+Experimental Factor Type	enter experiment factor name here
+Person Last Name	Muraoka
+Person First Name	Daisuke
+Person Affiliation	Oncology, Nagasaki University
+Person Roles	submitter
+Public Release Date	2022-12-08
+Protocol Name	P-GEAD-67	P-GEAD-68	P-GEAD-69	P-GEAD-70	P-GEAD-71
+Protocol Type	sample collection protocol	nucleic acid extraction protocol	nucleic acid library construction protocol	nucleic acid sequencing protocol	normalization data transformation protocol
+Protocol Description	Cell line	Genomic DNA was extracted with Qiagen Blood and cell culture DNA Mini Kit	Exome capture was performed using the SureSelectXT Mouse Exon Kit	Exome capture libraries were then sequenced by Riken Genesis Co, Ltd., Japan on a HiSeq 2000 (Illumina) using an Illumina V3 Kit, resulting in 20 million exome reads from each library.	Whole exome sequence reads were aligned to the mm9 reference sequence using the Burrows-Wheeler Aligner (BWA).
+SDRF File	E-GEAD-291.sdrf.txt
+Comment[AEExperimentType]	DNA-seq
+Comment[BioProject]	PRJDB7770
+Comment[Last Update Date]	2022-12-08

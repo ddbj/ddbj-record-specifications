@@ -1,0 +1,797 @@
+CIBEX accession	CBX62
+Release date	2008-08-20
+
+Experiment:
+Experiment title	microRNA expression profiling in renal cell carcinoma.
+Experimental design type	disease_state_design
+Experimental factor	
+Common reference	YES
+Quality control description	biological_replicate
+Number of hybridization	26
+Experimental description	To investigate the expression profile of miRNAs in Renal cell carcinoma, and to identify candidate miRNAs showing aberrant regulation of expression.
+
+Submitter:
+First name	Nakada
+Last name	Chisato
+Organization	Oita University
+Department	Faculty of Medicine
+Laboratory	Department of Molecular Pathology
+Address	Hasama-machi, Yufu-City, Oita 879-5593, Japan
+
+First name	Moriyama
+Last name	Masatsugu
+Organization	Oita University
+Department	Faculty of Medicine
+Laboratory	Department of Molecular Pathology
+Address	Hasama-machi, Yufu-City, Oita 879-5593, Japan
+
+Reference:
+Title	Genome-wide microRNA expression profiling in renal cell carcinoma: significant down-regulation of miR-141 and miR-200c
+Author	Nakada C, Matsuura K, Tsukamoto Y, Tanigawa M, Yoshimoto T, Narimatsu T, Nguyen L, Hijiya N, Uchida T, Sato F, Mimata H, Seto M, Moriyama M
+Journal	J Pathol.
+Year	2008
+Volume	216
+Issue	4
+Page	418-427
+Pubmed ID	18925646
+
+Protocol:
+Name	miRNeasy mini kit
+Description	Total RNA was extracted with a miRNeasy mini kit (Qiagen, Valencia, CA, USA) according to the manufacturer&#8217;s instructions.
+
+Name	miRNA labeling and hyridization
+Description	100 ng of total RNA was labeled with Cy3 and hybridized with a miRNA labeling and hybridization kit (Agilent Technologies, Santa Clara, CA, USA) according to the manufacturer&#8217;s instructions.
+
+Name	Hybridization
+Description	Using a miRNA labeling and hybridization kit (Agilent Technologies), the labeled RNA was hybridized to miRNA 8x15K array (Agilent miRNA array G4470A) at 55&deg;C for 20 hours.
+
+Name	Scanning
+Description	The arrays were scanned with a laser confocal scanner (G2565BA, Agilent Technologies) and Agilent Scan Control software ver.7.0.
+
+Name	Feature extraction
+Description	The intensities of fluorescence were calculated by Feature extraction software ver.9.5 (Agilent Technologies).<br>Calculating protocol, miRNA-v1_95_May07 (Agilent Technologies).
+
+Name	Normalization
+Description	After transformation, specific samples were normalized to one another: 26 samples were normalized against the median of the 6 normal samples. Each measurement for each miRNA in those specific samples was divided by the median of that miRNA&#8217;s measurements in the corresponding control samples.
+
+Name	Transformation
+Description	Values in raw data below 0.01 were set to 0.01.
+
+Name	array design
+Description	Human mature miRNAs (470 miRNAs) and virus miRNAs (64 miRNAs). Sanger miRBase 9.1.
+
+Array design:
+Array sesign accession	CAR187
+Model name	Agilent  Human miRNA Microarray 8x15K G4470A
+Technology type	spotted_ss_oligo_features
+Surface type	unknown_surface_type
+Number of features	534
+Design provider	Agilent
+Reporter type	synthetic oligo-nucleotides
+Strand type	hairpin structured probe
+Substrate type	glass
+Attachment	other
+Array design protocol	array design
+File	016436_D_20070426 for CIBEX.txt
+
+Array design text field:
+Field	Description
+ProbeID	ID for probe sequence.
+
+Sample:
+Name	S1
+Organism	Homo sapiens
+Sex	male
+Age	52
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S3
+Organism	Homo sapiens
+Sex	male
+Age	72
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S4
+Organism	Homo sapiens
+Sex	male
+Age	62
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S5
+Organism	Homo sapiens
+Sex	female
+Age	70
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S6
+Organism	Homo sapiens
+Sex	male
+Age	46
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 4 (Fuhrman classification system)
+
+Name	S9
+Organism	Homo sapiens
+Sex	male
+Age	59
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S10
+Organism	Homo sapiens
+Sex	male
+Age	85
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 4 (Fuhrman classification system)
+
+Name	S12
+Organism	Homo sapiens
+Sex	male
+Age	75
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S14
+Organism	Homo sapiens
+Sex	female
+Age	68
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S17
+Organism	Homo sapiens
+Sex	male
+Age	54
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S19
+Organism	Homo sapiens
+Sex	female
+Age	46
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S21
+Organism	Homo sapiens
+Sex	male
+Age	65
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S22
+Organism	Homo sapiens
+Sex	male
+Age	69
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S27
+Organism	Homo sapiens
+Sex	male
+Age	54
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 2 (Fuhrman classification system)
+
+Name	S31
+Organism	Homo sapiens
+Sex	female
+Age	62
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 1 (Fuhrman classification system)
+
+Name	S32
+Organism	Homo sapiens
+Sex	male
+Age	59
+Organism part	kidney
+Disease state	Clear cell carcinoma
+Description	Nuclear grade 3 (Fuhrman classification system)
+
+Name	S8
+Organism	Homo sapiens
+Sex	female
+Age	62
+Organism part	kidney
+Disease state	Chromophobe renal cell carcinoma
+
+Name	S16
+Organism	Homo sapiens
+Sex	female
+Age	48
+Organism part	kidney
+Disease state	Chromophobe renal cell carcinoma
+
+Name	S23
+Organism	Homo sapiens
+Sex	female
+Age	64
+Organism part	kidney
+Disease state	Chromophobe renal cell carcinoma
+
+Name	S24
+Organism	Homo sapiens
+Sex	male
+Age	56
+Organism part	kidney
+Disease state	Chromophobe renal cell carcinoma
+
+Name	S1 normal
+Organism	Homo sapiens
+Sex	male
+Age	52
+Organism part	kidney
+Disease state	non-tumor region
+
+Name	S10 normal
+Organism	Homo sapiens
+Sex	male
+Age	85
+Organism part	kidney
+Disease state	non-tumor region
+
+Name	S13 normal
+Organism	Homo sapiens
+Sex	male
+Age	55
+Organism part	kidney
+Disease state	non-tumor region
+
+Name	S15 normal
+Organism	Homo sapiens
+Sex	female
+Age	52
+Organism part	kidney
+Disease state	non-tumor region
+
+Name	S20 normal
+Organism	Homo sapiens
+Sex	male
+Age	68
+Organism part	kidney
+Disease state	non-tumor region
+
+Name	S22 normal
+Organism	Homo sapiens
+Sex	male
+Age	69
+Organism part	kidney
+Disease state	non-tumor region
+
+Labeled Extract:
+Label	S1, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S3, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S4, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S5, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S6, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S9, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S10, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S12, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S14, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S17, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S19, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S21, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S22, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S27, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S31, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S32, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S8, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S16, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S23, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S24, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S1 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S10 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S13 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S15 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S20 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Label	S22 normal, Cy3
+Labeling protocol	miRNA labeling and hyridization
+Extraction protocol	miRNeasy mini kit
+Label compound	Cy3
+
+Hybridization:
+Name	S1
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S1t 251643610419_S01_1_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S3
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S3t 251643610418_S01_1_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S4
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S4t 251643610419_S01_1_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S5
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S5t 251643610418_S01_2_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S6
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S6t 251643610419_S01_1_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S9
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S9t 251643610419_S01_1_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S10
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S10t 251643610418_S01_1_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S12
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S12t 251643610419_S01_2_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S14
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S14t 251643610419_S01_2_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S17
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S17t 251643610418_S01_1_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S19
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S19t 251643610418_S01_1_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S21
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S21t 251643610417_S03_2_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S22
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S22t 251643610417_S03_1_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S27
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S27t 251643610417_S03_1_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S31
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S31t 251643610417_S03_1_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S32
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S32t 251643610417_S03_1_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S8 ChCC
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S8t ChCC 251643610978_S01_1_1_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S16 ChCC
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S16t ChCC 251643610978_S01_1_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S23 ChCC
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S23t ChCC 251643610978_S01_1_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S24 ChCC
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S24t ChCC 251643610978_S01_1_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S1 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S1n 251643610418_S01_2_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S10 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S10n 251643610418_S01_2_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S13 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S13n 251643610418_S01_2_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S15 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S15n 251643610417_S03_2_4_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S20 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S20n 251643610417_S03_2_3_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Name	S22 normal
+Array design accession	CAR187
+Hybridization protocol	Hybridization
+Scanning protocol	Scanning
+File	S22n 251643610417_S03_2_2_GeneView.txt
+
+Hybridization data text field:
+Field	Description
+SystematicName	Name (ID) of target sequence.
+ControlType	0, non-control probe. 1, positive control probe. -1, negative control probe.
+gTotalGeneSignal	Calculated signal intensity for each miRNA.
+gTotalGeneError	Error value of signal intensity.
+gIsGeneDetected	1, gTotalGeneSignal is more than 3 times gTotalGeneError. 0, gTotalGeneSignal is less than 3 times gTotalGeneError.
+
+Summary:
+Name	Calculated signal intensity for each miRNA
+Description	raw data, gTotalGeneSignal
+File	Raw data RCC miRNA for CIBEX_2.txt
+
+Summary data text field:
+Field	Description
+Systematic Name	miRNA (Sanger miRBase 9.1)
+S1n raw	Calculated signal intensity (gTotalGeneSignal)
+S1n Flags	P, present (good) A, absent
+
+Name	Normalized value for each miRNA
+Normalization protocol	Normalization
+Transformation protocol	Transformation
+Description	Fold change
+File	Normalized data RCC miRNA for CIBEX_2.txt
+
+Summary data text field:
+Field	Description
+Systematic Name	miRNA (Sanger miRBase 9.1)
+S1n Flags	P, present (good) A, absent
+
