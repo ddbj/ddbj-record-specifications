@@ -1,81 +1,50 @@
 import json
-from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
 
-from ddbj_record.schema.cli import main, parse_args
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
+from ddbj_record.schema.cli import dump_schema, main, parse_args
 
 # === parse_args ===
 
 
-def test_parse_args_valid_version() -> None:
-    args = parse_args(["--version", "v2"])
-    assert args.version == "v2"
+@pytest.mark.parametrize(("raw", "expected"), [("v1", "v1"), ("v2", "v2"), ("v3", "v3"), ("v2.3", "v2")])
+def test_parse_args_accepts_known_versions(raw: str, expected: str) -> None:
+    assert parse_args(["--version", raw]).version == expected
 
 
-def test_parse_args_v1_valid() -> None:
-    args = parse_args(["--version", "v1"])
-    assert args.version == "v1"
-
-
-def test_parse_args_invalid_version_raises() -> None:
+@pytest.mark.parametrize("raw", ["v999", "draft", ""])
+def test_parse_args_unknown_version_exits(raw: str) -> None:
     with pytest.raises(SystemExit):
-        parse_args(["--version", "v999"])
+        parse_args(["--version", raw])
 
 
-# === main: schema generation ===
+# === dump_schema ===
 
 
-def test_main_generates_schema_file(tmp_path: Path, mocker: "MockerFixture") -> None:
-    schema_dir = tmp_path.joinpath("schemas")
-    schema_dir.mkdir()
-    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
-    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v2"])
+@pytest.mark.parametrize(
+    ("version", "keys"),
+    [
+        ("v1", ("COMMON", "COMMON_SOURCE", "ENTRIES")),
+        ("v2", ("schema_version", "provenance", "submission", "sequences", "features")),
+        ("v3", ("schema_version", "submission", "projects", "samples", "relations")),
+    ],
+)
+def test_dump_schema_has_the_top_level_properties(version: str, keys: tuple[str, ...]) -> None:
+    schema = json.loads(dump_schema(version))
+    assert set(keys) <= set(schema["properties"])
+
+
+def test_dump_schema_keeps_refs_to_defs() -> None:
+    schema = json.loads(dump_schema("v3"))
+    assert "$defs" in schema
+    assert schema["properties"]["projects"]["anyOf"][0]["items"] == {"$ref": "#/$defs/Project"}
+
+
+# === main ===
+
+
+def test_main_writes_the_schema_to_stdout(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("sys.argv", ["dump_json_schema", "--version", "v3"])
     main()
-    output_path = schema_dir.joinpath("v2", "ddbj_record.schema.json")
-    assert output_path.exists()
-    with output_path.open("r", encoding="utf-8") as f:
-        schema = json.load(f)
-    assert "properties" in schema
-
-
-def test_main_generates_v1_schema_file(tmp_path: Path, mocker: "MockerFixture") -> None:
-    schema_dir = tmp_path.joinpath("schemas")
-    schema_dir.mkdir()
-    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
-    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v1"])
-    main()
-    output_path = schema_dir.joinpath("v1", "ddbj_record.schema.json")
-    assert output_path.exists()
-
-
-def test_main_v2_schema_has_key_properties(tmp_path: Path, mocker: "MockerFixture") -> None:
-    schema_dir = tmp_path.joinpath("schemas")
-    schema_dir.mkdir()
-    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
-    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v2"])
-    main()
-    output_path = schema_dir.joinpath("v2", "ddbj_record.schema.json")
-    with output_path.open("r", encoding="utf-8") as f:
-        schema = json.load(f)
-    props = schema["properties"]
-    for key in ("schema_version", "provenance", "submission", "sequences", "features"):
-        assert key in props, f"Missing key property: {key}"
-
-
-def test_main_v1_schema_has_key_properties(tmp_path: Path, mocker: "MockerFixture") -> None:
-    schema_dir = tmp_path.joinpath("schemas")
-    schema_dir.mkdir()
-    mocker.patch("ddbj_record.schema.cli.get_schema_dir_path", return_value=schema_dir)
-    mocker.patch("sys.argv", ["dump_json_schema", "--version", "v1"])
-    main()
-    output_path = schema_dir.joinpath("v1", "ddbj_record.schema.json")
-    with output_path.open("r", encoding="utf-8") as f:
-        schema = json.load(f)
-    props = schema["properties"]
-    for key in ("COMMON", "COMMON_SOURCE", "ENTRIES"):
-        assert key in props, f"Missing key property: {key}"
+    out = capsys.readouterr().out
+    assert json.loads(out) == json.loads(dump_schema("v3"))

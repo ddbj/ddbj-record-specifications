@@ -1,0 +1,1087 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "SRA XML"
+  },
+  "submission": {
+    "accession": "DRA000001",
+    "alias": "sub-1",
+    "title": "Pooled amplicon sequencing of soil fungi",
+    "hold_date": "2026-12-31",
+    "center_name": "NIG",
+    "broker_name": "DDBJ",
+    "identifiers": [
+      {
+        "type": "primary",
+        "value": "DRA000001",
+        "label": "primary"
+      },
+      {
+        "type": "secondary",
+        "value": "SRA000001",
+        "label": "NCBI"
+      },
+      {
+        "type": "external",
+        "value": "ERA000001",
+        "label": "ENA",
+        "namespace": "ENA"
+      },
+      {
+        "type": "submitter",
+        "value": "local-DRA000001",
+        "label": "local",
+        "namespace": "NIG"
+      },
+      {
+        "type": "uuid",
+        "value": "b3f8a1c2-0000-4000-8000-000000000001",
+        "label": "internal"
+      }
+    ],
+    "attributes": [
+      {
+        "name": "submission_tool",
+        "value": "D-way",
+        "unit": "version"
+      }
+    ],
+    "sra": {
+      "lab_name": "Genome Informatics Laboratory",
+      "submission_date": "2012-04-01T00:00:00+09:00",
+      "submission_comment": "Second batch of the survey.",
+      "contacts": [
+        {
+          "name": "Hanako Mishima",
+          "inform_on_status": "mishima@ddbj.nig.ac.jp",
+          "inform_on_error": "mishima-errors@ddbj.nig.ac.jp"
+        }
+      ],
+      "actions": [
+        {
+          "type": "ADD",
+          "source": "DRA000001.experiment.xml",
+          "object_type": "experiment",
+          "legacy": {
+            "notes": "experiment descriptor"
+          }
+        },
+        {
+          "type": "HOLD",
+          "hold_until_date": "2026-12-31"
+        },
+        {
+          "type": "HOLD",
+          "target": "DRX000001",
+          "hold_until_date": "2013-04-01",
+          "legacy": {
+            "hold_for_period": "0"
+          }
+        },
+        {
+          "type": "RELEASE",
+          "target": "DRR000001"
+        }
+      ],
+      "legacy": {
+        "submission_id": "sub-1",
+        "files": [
+          {
+            "filename": "F5ZZ34C01.sff",
+            "checksum_method": "MD5",
+            "checksum": "9ba61fe584de53505e8bb82f5a062b52"
+          }
+        ]
+      }
+    }
+  },
+  "projects": [
+    {
+      "accession": "DRP000001",
+      "alias": "study-1",
+      "title": "Soil fungal diversity",
+      "description": "Abstract of the study.",
+      "study_description": "Description of the study.",
+      "study_types": [
+        "Other"
+      ],
+      "new_study_type": "Amplicon survey",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "center_project_name": "SOIL-ITS",
+      "descriptor_center_name": "NIG",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRP000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRP000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERP000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRP000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "funding",
+          "value": "JSPS",
+          "unit": "agency"
+        }
+      ],
+      "legacy": {
+        "project_id": "72881"
+      }
+    }
+  ],
+  "samples": [
+    {
+      "accession": "DRS000001",
+      "alias": "soil-a",
+      "title": "Soil A",
+      "description": "Topsoil from plot 1.",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "organism": {
+        "name": "soil metagenome",
+        "common_name": "soil",
+        "taxonomy_id": "410658"
+      },
+      "anonymized_name": "S-A",
+      "individual_name": "plot 1",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRS000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRS000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERS000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRS000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "depth",
+          "value": "5",
+          "unit": "cm"
+        },
+        {
+          "name": "collection_date",
+          "value": "2011-10-01"
+        }
+      ]
+    },
+    {
+      "accession": "DRS000002",
+      "alias": "soil-b",
+      "title": "Soil B",
+      "organism": {
+        "name": "soil metagenome",
+        "taxonomy_id": "410658"
+      }
+    },
+    {
+      "alias": "soil-a",
+      "title": "Soil A, second core",
+      "organism": {
+        "name": "soil metagenome",
+        "taxonomy_id": "410658"
+      }
+    }
+  ],
+  "experiments": [
+    {
+      "accession": "DRX000001",
+      "alias": "exp-1",
+      "title": "ITS amplicons, pooled",
+      "description": "Barcoded ITS1 amplicons of two soils in one run.",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRX000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRX000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERX000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRX000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "amplicon_size",
+          "value": "300",
+          "unit": "bp"
+        }
+      ],
+      "library": {
+        "name": "ITS-pool-1",
+        "strategy": "AMPLICON",
+        "source": "METAGENOMIC",
+        "selection": "PCR",
+        "layout": "paired",
+        "nominal_length": 300,
+        "nominal_sdev": 25.0,
+        "construction_protocol": "Two-step PCR.",
+        "pooling_strategy": "barcoded",
+        "legacy": {
+          "orientation": "5'-3'-3'-5'"
+        }
+      },
+      "targeted_loci": [
+        {
+          "name": "other",
+          "description": "ITS1",
+          "probe_set": {
+            "db": "probeBase",
+            "id": "pB-00001",
+            "label": "ITS1F"
+          }
+        }
+      ],
+      "platform": {
+        "type": "LS454",
+        "instrument_model": "454 GS FLX Titanium",
+        "legacy": {
+          "cycle_count": 200,
+          "sequence_length": 400,
+          "cycle_sequence": "ACGT",
+          "flow_count": 800,
+          "flow_sequence": "TACG",
+          "key_sequence": "TCAG",
+          "color_matrix": [
+            {
+              "dibase": "AA",
+              "color": "0"
+            },
+            {
+              "dibase": "AC",
+              "color": "1"
+            }
+          ],
+          "color_matrix_code": "0123"
+        }
+      },
+      "spot_descriptor": {
+        "spot_length": 0,
+        "reads": [
+          {
+            "read_index": 0,
+            "read_label": "barcode",
+            "read_class": "Technical Read",
+            "read_type": "BarCode",
+            "base_coord": 1,
+            "expected_basecall_table": {
+              "base_coord": 1,
+              "default_length": 10,
+              "basecalls": [
+                {
+                  "value": "ACGAGTGCGT",
+                  "read_group_tag": "soil-a",
+                  "min_match": 10,
+                  "max_mismatch": 0,
+                  "match_edge": "start"
+                },
+                {
+                  "value": "ACGCTCGACA",
+                  "read_group_tag": "soil-b",
+                  "min_match": 10,
+                  "max_mismatch": 0,
+                  "match_edge": "start"
+                }
+              ]
+            }
+          },
+          {
+            "read_index": 1,
+            "read_label": "forward",
+            "read_class": "Application Read",
+            "read_type": "Forward",
+            "relative_order": {
+              "follows_read_index": 0,
+              "precedes_read_index": 2
+            }
+          },
+          {
+            "read_index": 2,
+            "read_label": "reverse",
+            "read_class": "Application Read",
+            "read_type": "Reverse",
+            "relative_order": {
+              "follows_read_index": 1
+            }
+          },
+          {
+            "read_index": 3,
+            "read_class": "Technical Read",
+            "read_type": "Adapter",
+            "legacy": {
+              "cycle_coord": 1,
+              "expected_basecall": {
+                "value": "TCAG",
+                "base_coord": 1,
+                "default_length": 4
+              }
+            }
+          }
+        ],
+        "legacy": {
+          "number_of_reads_per_spot": 4,
+          "adapter_spec": "Titanium General Library Preparation Kit"
+        }
+      },
+      "processing": [
+        {
+          "step_index": "1",
+          "prev_step_indexes": [
+            "NIL"
+          ],
+          "program": "sffinfo",
+          "version": "2.9",
+          "section_name": "extract",
+          "notes": "Converted SFF to FASTQ."
+        },
+        {
+          "step_index": "2",
+          "prev_step_indexes": [
+            "1"
+          ],
+          "program": "cutadapt",
+          "version": "1.18",
+          "section_name": "trim"
+        }
+      ],
+      "pool": {
+        "default_member": {
+          "sample": {
+            "db": "sample",
+            "id": "unassigned",
+            "accession": "DRS000003",
+            "center_name": "NIG",
+            "identifiers": [
+              {
+                "type": "primary",
+                "value": "DRS000003",
+                "label": "primary"
+              },
+              {
+                "type": "secondary",
+                "value": "SRS000003",
+                "label": "NCBI"
+              },
+              {
+                "type": "external",
+                "value": "ERS000003",
+                "label": "ENA",
+                "namespace": "ENA"
+              },
+              {
+                "type": "submitter",
+                "value": "local-DRS000003",
+                "label": "local",
+                "namespace": "NIG"
+              },
+              {
+                "type": "uuid",
+                "value": "b3f8a1c2-0000-4000-8000-000000000001",
+                "label": "internal"
+              }
+            ]
+          },
+          "member_name": "unassigned",
+          "proportion": 0.0,
+          "read_labels": [
+            {
+              "value": "barcode",
+              "read_group_tag": "unassigned"
+            }
+          ]
+        },
+        "members": [
+          {
+            "sample": {
+              "db": "sample",
+              "id": "soil-a",
+              "accession": "DRS000001",
+              "center_name": "NIG",
+              "identifiers": [
+                {
+                  "type": "primary",
+                  "value": "DRS000001",
+                  "label": "primary"
+                },
+                {
+                  "type": "secondary",
+                  "value": "SRS000001",
+                  "label": "NCBI"
+                },
+                {
+                  "type": "external",
+                  "value": "ERS000001",
+                  "label": "ENA",
+                  "namespace": "ENA"
+                },
+                {
+                  "type": "submitter",
+                  "value": "local-DRS000001",
+                  "label": "local",
+                  "namespace": "NIG"
+                },
+                {
+                  "type": "uuid",
+                  "value": "b3f8a1c2-0000-4000-8000-000000000001",
+                  "label": "internal"
+                }
+              ]
+            },
+            "member_name": "soil-a",
+            "proportion": 0.5,
+            "read_labels": [
+              {
+                "value": "barcode",
+                "read_group_tag": "soil-a"
+              }
+            ]
+          },
+          {
+            "sample": {
+              "db": "sample",
+              "id": "soil-b",
+              "accession": "DRS000002",
+              "center_name": "NIG"
+            },
+            "member_name": "soil-b",
+            "proportion": 0.5,
+            "read_labels": [
+              {
+                "value": "barcode",
+                "read_group_tag": "soil-b"
+              }
+            ]
+          }
+        ]
+      },
+      "sample_demux_directive": "leave_as_pool",
+      "legacy": {
+        "expected_number_runs": 1,
+        "gaps": [
+          {
+            "type": "MatePair",
+            "orientation": "innie",
+            "link5": "R3",
+            "link3": "F3",
+            "min_length": 1500,
+            "max_length": 3500,
+            "mean": 3000.0,
+            "stdev": 0.0
+          }
+        ],
+        "base_calling": {
+          "base_caller": "454 Base Caller",
+          "sequence_space": "Base Space"
+        },
+        "quality_scoring": [
+          {
+            "qtype": "phred",
+            "quality_scorer": "454 Base Caller",
+            "number_of_levels": 64,
+            "multiplier": 1.0
+          }
+        ]
+      }
+    }
+  ],
+  "runs": [
+    {
+      "accession": "DRR000001",
+      "alias": "run-1",
+      "title": "Run 1 of the pooled ITS amplicons",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "run_center": "NIG",
+      "run_date": "2012-03-15T00:00:00+09:00",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRR000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRR000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERR000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRR000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "run_quality",
+          "value": "30",
+          "unit": "phred"
+        }
+      ],
+      "platform": {
+        "type": "LS454",
+        "instrument_model": "454 GS FLX Titanium"
+      },
+      "spot_descriptor": {
+        "spot_length": 0,
+        "reads": [
+          {
+            "read_index": 0,
+            "read_label": "barcode",
+            "read_class": "Technical Read",
+            "read_type": "BarCode",
+            "base_coord": 1,
+            "expected_basecall_table": {
+              "base_coord": 1,
+              "default_length": 10,
+              "basecalls": [
+                {
+                  "value": "ACGAGTGCGT",
+                  "read_group_tag": "soil-a",
+                  "min_match": 10,
+                  "max_mismatch": 0,
+                  "match_edge": "start"
+                },
+                {
+                  "value": "ACGCTCGACA",
+                  "read_group_tag": "soil-b",
+                  "min_match": 10,
+                  "max_mismatch": 0,
+                  "match_edge": "start"
+                }
+              ]
+            }
+          },
+          {
+            "read_index": 1,
+            "read_label": "forward",
+            "read_class": "Application Read",
+            "read_type": "Forward",
+            "relative_order": {
+              "follows_read_index": 0,
+              "precedes_read_index": 2
+            }
+          },
+          {
+            "read_index": 2,
+            "read_label": "reverse",
+            "read_class": "Application Read",
+            "read_type": "Reverse",
+            "relative_order": {
+              "follows_read_index": 1
+            }
+          }
+        ]
+      },
+      "processing": [
+        {
+          "step_index": "1",
+          "prev_step_indexes": [
+            "NIL"
+          ],
+          "program": "sffinfo",
+          "version": "2.9",
+          "section_name": "extract",
+          "notes": "Converted SFF to FASTQ."
+        },
+        {
+          "step_index": "2",
+          "prev_step_indexes": [
+            "1"
+          ],
+          "program": "cutadapt",
+          "version": "1.18",
+          "section_name": "trim"
+        }
+      ],
+      "sample_demux_directive": "submitter_demultiplexed",
+      "legacy": {
+        "instrument_model": "454 GS FLX",
+        "instrument_name": "GS-FLX titanium",
+        "run_file": "F5ZZ34C.sff",
+        "total_data_blocks": 2
+      },
+      "data_blocks": [
+        {
+          "name": "F5ZZ34C",
+          "member_name": "soil-a",
+          "serial": 1,
+          "legacy": {
+            "sector": 1,
+            "region": 0,
+            "format_code": 1,
+            "number_channels": 4,
+            "total_spots": 246959,
+            "total_reads": 493918
+          },
+          "files": [
+            {
+              "filename": "F5ZZ34C01.sff",
+              "filetype": "sff",
+              "checksum_method": "MD5",
+              "checksum": "9ba61fe584de53505e8bb82f5a062b52"
+            }
+          ]
+        },
+        {
+          "name": "F5ZZ34C",
+          "member_name": "soil-b",
+          "serial": 2,
+          "files": [
+            {
+              "filename": "F5ZZ34C02.fastq",
+              "filetype": "fastq",
+              "checksum_method": "MD5",
+              "checksum": "82ade41c804b0f5d8c5f8fe49da54a99",
+              "quality_scoring_system": "phred",
+              "quality_encoding": "ascii",
+              "ascii_offset": "!",
+              "read_labels": [
+                "forward",
+                "reverse"
+              ],
+              "legacy": {
+                "data_series_labels": [
+                  "INSDC:read",
+                  "INSDC:quality"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "analyses": [
+    {
+      "accession": "DRZ000001",
+      "alias": "aln-1",
+      "title": "Alignment to the ITS reference",
+      "description": "Reads aligned to UNITE.",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "analysis_center": "NIG",
+      "analysis_date": "2012-05-01",
+      "analysis_type": "reference_alignment",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRZ000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRZ000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERZ000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRZ000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "mapping_rate",
+          "value": "92.1",
+          "unit": "%"
+        }
+      ],
+      "reference_alignment": {
+        "standard_assembly": {
+          "short_name": "UNITE",
+          "names": [
+            {
+              "db": "UNITE",
+              "id": "7.2",
+              "label": "UNITE general release"
+            }
+          ]
+        },
+        "custom_assembly": {
+          "description": "ITS1 extracted from UNITE 7.2.",
+          "sources": [
+            {
+              "url": "https://unite.ut.ee/",
+              "label": "UNITE"
+            },
+            {
+              "db": "GenBank",
+              "id": "NR_000001.1",
+              "label": "ITS reference"
+            }
+          ]
+        },
+        "run_labels": [
+          {
+            "run": {
+              "db": "run",
+              "id": "run-1",
+              "accession": "DRR000001",
+              "center_name": "NIG"
+            },
+            "data_block_name": "F5ZZ34C",
+            "read_group_label": "soil-a"
+          }
+        ],
+        "seq_labels": [
+          {
+            "accession": "NR_000001.1",
+            "gi": "000000001",
+            "data_block_name": "F5ZZ34C",
+            "seq_label": "its-ref-1"
+          }
+        ],
+        "includes_unaligned_reads": false,
+        "marks_duplicate_reads": false,
+        "includes_failed_reads": false
+      },
+      "processing": [
+        {
+          "step_index": "1",
+          "prev_step_indexes": [
+            "NIL"
+          ],
+          "program": "bwa",
+          "version": "0.7.17",
+          "section_name": "align",
+          "notes": "bwa mem"
+        }
+      ],
+      "data_blocks": [
+        {
+          "name": "aln",
+          "serial": 1,
+          "member_name": "soil-a",
+          "files": [
+            {
+              "filename": "aln-1.bam",
+              "filetype": "bam",
+              "checksum_method": "MD5",
+              "checksum": "0635efd8ddb26bf304ddeee079d0705f"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "accession": "DRX000001"
+      },
+      "target": {
+        "db": "project",
+        "id": "study-1",
+        "accession": "DRP000001",
+        "center_name": "NIG",
+        "identifiers": [
+          {
+            "type": "primary",
+            "value": "DRP000001",
+            "label": "primary"
+          },
+          {
+            "type": "secondary",
+            "value": "SRP000001",
+            "label": "NCBI"
+          },
+          {
+            "type": "external",
+            "value": "ERP000001",
+            "label": "ENA",
+            "namespace": "ENA"
+          },
+          {
+            "type": "submitter",
+            "value": "local-DRP000001",
+            "label": "local",
+            "namespace": "NIG"
+          },
+          {
+            "type": "uuid",
+            "value": "b3f8a1c2-0000-4000-8000-000000000001",
+            "label": "internal"
+          }
+        ]
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "experiment",
+        "accession": "DRX000001"
+      },
+      "target": {
+        "db": "sample",
+        "id": "soil-a",
+        "accession": "DRS000001",
+        "center_name": "NIG",
+        "identifiers": [
+          {
+            "type": "primary",
+            "value": "DRS000001",
+            "label": "primary"
+          },
+          {
+            "type": "secondary",
+            "value": "SRS000001",
+            "label": "NCBI"
+          },
+          {
+            "type": "external",
+            "value": "ERS000001",
+            "label": "ENA",
+            "namespace": "ENA"
+          },
+          {
+            "type": "submitter",
+            "value": "local-DRS000001",
+            "label": "local",
+            "namespace": "NIG"
+          },
+          {
+            "type": "uuid",
+            "value": "b3f8a1c2-0000-4000-8000-000000000001",
+            "label": "internal"
+          }
+        ]
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "accession": "DRR000001"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "exp-1",
+        "accession": "DRX000001",
+        "center_name": "NIG",
+        "identifiers": [
+          {
+            "type": "primary",
+            "value": "DRX000001",
+            "label": "primary"
+          },
+          {
+            "type": "secondary",
+            "value": "SRX000001",
+            "label": "NCBI"
+          },
+          {
+            "type": "external",
+            "value": "ERX000001",
+            "label": "ENA",
+            "namespace": "ENA"
+          },
+          {
+            "type": "submitter",
+            "value": "local-DRX000001",
+            "label": "local",
+            "namespace": "NIG"
+          },
+          {
+            "type": "uuid",
+            "value": "b3f8a1c2-0000-4000-8000-000000000001",
+            "label": "internal"
+          }
+        ]
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "analysis",
+        "accession": "DRZ000001"
+      },
+      "target": {
+        "db": "project",
+        "accession": "DRP000001"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "accession": "DRZ000001"
+      },
+      "target": {
+        "db": "run",
+        "id": "run-1",
+        "accession": "DRR000001",
+        "center_name": "NIG",
+        "identifiers": [
+          {
+            "type": "primary",
+            "value": "DRR000001",
+            "label": "primary"
+          },
+          {
+            "type": "secondary",
+            "value": "SRR000001",
+            "label": "NCBI"
+          },
+          {
+            "type": "external",
+            "value": "ERR000001",
+            "label": "ENA",
+            "namespace": "ENA"
+          },
+          {
+            "type": "submitter",
+            "value": "local-DRR000001",
+            "label": "local",
+            "namespace": "NIG"
+          },
+          {
+            "type": "uuid",
+            "value": "b3f8a1c2-0000-4000-8000-000000000001",
+            "label": "internal"
+          }
+        ]
+      }
+    },
+    {
+      "type": "related_to",
+      "source": {
+        "type": "project",
+        "accession": "DRP000001"
+      },
+      "target": {
+        "db": "bioproject",
+        "id": "PRJDB00001"
+      },
+      "label": "BioProject",
+      "properties": {
+        "is_primary": "true"
+      }
+    },
+    {
+      "type": "xref",
+      "source": {
+        "type": "project",
+        "accession": "DRP000001"
+      },
+      "target": {
+        "db": "pubmed",
+        "id": "20400770"
+      },
+      "label": "Original article",
+      "properties": {
+        "sra_link_type": "entrez"
+      }
+    },
+    {
+      "type": "reference",
+      "source": {
+        "type": "sample",
+        "accession": "DRS000001"
+      },
+      "target": {
+        "url": "https://example.org/plots/1"
+      },
+      "label": "Plot map"
+    },
+    {
+      "type": "reference",
+      "source": {
+        "type": "sample",
+        "alias": "soil-a",
+        "index": 2
+      },
+      "target": {
+        "url": "https://example.org/plots/1/cores/2"
+      },
+      "label": "Core map"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+LOCUS       BR000123                1954 bp    mRNA    linear   INV 09-MAY-2006
+DEFINITION  TPA_exp: Ciona intestinalis Ci-ZF(Bbox/RING)-6 mRNA for zinc
+            finger protein, complete cds.
+ACCESSION   BR000123
+VERSION     BR000123.1
+KEYWORDS    Third Party Data; TPA; TPA:experimental.
+SOURCE      Ciona intestinalis (vase tunicate)
+  ORGANISM  Ciona intestinalis
+            Eukaryota; Metazoa; Chordata; Tunicata; Ascidiacea;
+            Phlebobranchia; Cionidae; Ciona.
+REFERENCE   1  (bases 1 to 1954)
+  AUTHORS   Satou,Y., Yamada,L., Kubo,J., Miyamura,D. and Satoh,N.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (19-APR-2005)
+            Contact:Lixy Yamada
+            Institute for Enzyme Research, The University of Tokushima,
+            Division of Molecular Enzyme Physiology; 3-18-15 Kuramoto,
+            Tokushima, Tokushima 770-8503, Japan
+REFERENCE   2  
+  AUTHORS   Miwata,K., Chiba,T., Horii,R., Yamada,L., Kubo,A., Miyamura,D.,
+            Satoh,N. and Satou,Y.
+  TITLE     Systematic analysis of embryonic expression profiles of zinc
+            finger genes in Ciona intestinalis
+  JOURNAL   Dev. Biol. 292 (2), 546-554 (2006)
+COMMENT     Ciona intestinalis cDNA Project (URL:
+            http://ghost.zool.kyoto-u.ac.jp/indexr1.html)
+PRIMARY     TPA_SPAN            PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-244               AABS01000685.1     29113-29356         c
+            245-377             AABS01000685.1     28222-28354         c
+            378-524             AABS01000685.1     27988-28134         c
+            525-620             AABS01000685.1     27255-27350         c
+            621-743             AABS01000685.1     26769-26891         c
+            744-877             AABS01000685.1     26283-26416         c
+            878-1008            AABS01000685.1     24836-24966         c
+            1009-1224           AABS01000685.1     24373-24588         c
+            1225-1322           AABS01000685.1     24066-24163         c
+            1323-1954           AABS01000685.1     23035-23666         c
+FEATURES             Location/Qualifiers
+     source          1..1954
+                     /db_xref="taxon:7719"
+                     /mol_type="mRNA"
+                     /organism="Ciona intestinalis"
+     CDS             45..1340
+                     /codon_start=1
+                     /gene="Ci-ZF(Bbox/RING)-6"
+                     /note="Zinc Finger (B-box/RING)-6"
+                     /product="zinc finger protein"
+                     /protein_id="FAA00154.1"
+                     /translation="MDALRLMGGAAGPNPEEIERLLMCPICLEIYTKPVVILPCQHNL
+                     CRKCANDVFQNRGTPMGSGGRFRCPTCRYEVVLDRHGVYGLQRNLLVENIIDMYQTEG
+                     RKPTFKTSEVVMCDQHEEEKVNIYCVTCQKPTCSLCKVFGDHQTCNVSPMEKIYKEQK
+                     SEISDSIALLVAGNDRLQAIISQTEELGKMAECNGRKVKSDLCAAFDKLYAVLEQRKT
+                     DMMNRITSDVQERSQVIKEMLKSYGLQLESASKLMEASLALVEERSVPVFLTQARETI
+                     NKIKATSRDSEVRKPPFKIQDMDEFTVDFNNHETALYKLDFSALQVCDATTNDNNETN
+                     DDETANQSEGATSNTADNDDDSEEEYDVTVEDDVGDSDATSVTSRSDVGSSYSGARSN
+                     NEATGRSQSPSSSRNNGSSSGATESSEARRPLEERSSWW"
+BASE COUNT          597 a          403 c          438 g          516 t
+ORIGIN      
+        1 aaaaaatcta atccaaaaaa gttgttaatt atttaattaa cgtcatggat gcgcttcgtt
+       61 tgatgggagg ggcggctggg ccgaatcccg aagaaattga acggcttctg atgtgtccaa
+      121 tatgtcttga aatctacacc aagcccgttg ttattctccc ctgccagcat aacttgtgca
+      181 ggaaatgcgc caacgatgtg tttcagaaca ggggaactcc catggggtcg ggcgggagat
+      241 tcaggtgtcc tacgtgtcgt tacgaagttg tattggaccg acatggagtc tacggcttgc
+      301 agagaaacct acttgttgag aatattattg acatgtatca aacagaaggg agaaaaccaa
+      361 ctttcaaaac ttcagaggtt gtaatgtgcg accaacatga agaagagaaa gtgaatattt
+      421 actgcgtgac ttgtcagaaa ccaacgtgtt ctctgtgcaa agtatttggg gaccatcaga
+      481 cgtgtaatgt ctcgcctatg gagaaaatat acaaggaaca aaagagtgaa atatctgact
+      541 ctatagcact cctagtggca ggaaatgatc gtcttcaagc aattatttca caaacagaag
+      601 agcttggaaa aatggccgaa tgtaacggtc gtaaagtgaa aagtgattta tgcgctgcgt
+      661 ttgacaaact ttacgccgtg ttggagcaac gtaagactga tatgatgaat cgaataactt
+      721 ctgatgttca agaaagaagt caggttataa aagaaatgtt aaaatcttac ggtcttcaac
+      781 ttgagtcagc aagcaagtta atggaagctt cacttgcgtt ggttgaggaa cgaagcgttc
+      841 ctgtgtttct tacacaagcg agggagacaa ttaataaaat caaagccaca agtcgagact
+      901 ccgaggtcag gaagcctccg tttaaaatac aagacatgga cgagttcacc gttgatttca
+      961 acaatcacga aactgcgctt tataaacttg acttctcagc tttgcaggtt tgtgacgcaa
+     1021 caacgaacga taataacgaa acaaacgatg atgaaaccgc caaccaatca gaaggcgcca
+     1081 catcaaacac agctgacaac gatgacgatt cagaagagga gtatgacgtc acagtggaag
+     1141 atgacgtggg cgattctgac gcaacatctg tgacgtcacg aagtgacgta ggcagcagct
+     1201 acagcggagc aagatctaac aatgaagcaa ccggtcgcag ccaatcacct tcaagctcac
+     1261 gtaacaacgg ttcgtcaagt ggcgccacag agtcgagtga agcaagacgg ccactagagg
+     1321 agagaagcag ttggtggtaa ccatggttac attacgtcac ttcctctctg catgctgctc
+     1381 atacgtcatc aacatcagct acgtcatcat acaatatctc atttcatgac gccataatca
+     1441 ttgctcttca atcgctcgct tccgtcactg tttattacgt catattatta cttacgcaat
+     1501 attgcacccg ggaccttctg gtacgcagcc ccccctttat taattaatca aatcgttctg
+     1561 ttacgctttg gtgacaacgt actataaaac gtacacccaa gcattacact aatcaagtcg
+     1621 cattaactcc taaccaaagc gtaaccgagc ggtttgattg gttataaacg agctggctgc
+     1681 gtaggaggct gtgttttgga tatttagatc attctgtctt atgtgaaagc gttagattcg
+     1741 cacaataagg ttgccaggta tcgccaagta tcttaatggc caacgagtaa agattaaaaa
+     1801 ggctttgccg tgcattggtt ttcaaagtga ttatataact agttgcttac cgagtgtgtg
+     1861 tttaattgca gttaccgctt tttgttaatt gcttgaacat tatttgattg ctcatcgctt
+     1921 catacgtttg cattacacat atgcttgtta gtga
+//

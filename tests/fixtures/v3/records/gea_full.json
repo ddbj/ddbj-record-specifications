@@ -1,0 +1,635 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "MAGE-TAB"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "first_name": "Hanako",
+        "last_name": "Mishima",
+        "role": "submitter",
+        "organizations": [
+          {
+            "name": "National Institute of Genetics"
+          }
+        ]
+      },
+      {
+        "first_name": "Taro",
+        "last_name": "Mishima"
+      }
+    ],
+    "hold_date": "2025-01-31",
+    "gea": {
+      "magetab_version": "1.1",
+      "sdrf_file": "E-GEAD-1.sdrf.txt",
+      "experiment_type": "transcription profiling by array",
+      "channel_type": "dual-channel",
+      "array_design_ref": "A-GEAD-246",
+      "last_update_date": "2025-01-31",
+      "nbdc_approval": "The Data Access Committee of NBDC approved that this personal data was made published.",
+      "dbcls_approval": "The Data Access Committee of DBCLS approved that this personal data was made published.",
+      "legacy": {
+        "cibex_accept_date": "2010-01-01",
+        "cibex_public_release_date": "2010-03-05",
+        "cibex_submitter": "Hanako Mishima",
+        "cibex": {
+          "accession": "CBX55",
+          "release_date": "2010-03-05",
+          "experiment": {
+            "title": "Human lung cancer cell lines",
+            "design_type": "cell_type_comparison_design",
+            "factor": "cell line",
+            "common_reference": "YES",
+            "quality_control_description": "biological_replicate",
+            "number_of_hybridizations": 2,
+            "description": "Comparison of lung cancer cell lines."
+          },
+          "submitters": [
+            {
+              "first_name": "Hanako",
+              "middle_initials": "M",
+              "last_name": "Mishima",
+              "organization": "NIG",
+              "department": "DDBJ",
+              "laboratory": "Genome Informatics",
+              "address": "1111 Yata, Mishima"
+            }
+          ],
+          "references": [
+            {
+              "title": "A study",
+              "author": "Mishima H",
+              "journal": "Genes",
+              "year": "2010",
+              "volume": "10",
+              "issue": "2",
+              "page": "1-10",
+              "pubmed_id": "20142997"
+            }
+          ],
+          "protocols": [
+            {
+              "name": "Hybridization Protocol",
+              "description": "Hybridized at 65 degrees."
+            }
+          ],
+          "array_designs": [
+            {
+              "accession": "CAR273",
+              "model_name": "Custom made",
+              "technology_type": "spotted_ss_oligo_features",
+              "surface_type": "unknown_surface_type",
+              "number_of_features": 100,
+              "reporter_type": "synthetic oligo-nucleotides",
+              "strand_type": "single_stranded",
+              "substrate_type": "glass",
+              "attachment": "covalent",
+              "design_provider": "In house",
+              "array_design_protocol": "Array design",
+              "description": "Oligo array.",
+              "file": "array.txt",
+              "data_fields": [
+                {
+                  "field": "Block",
+                  "description": "Block of the feature"
+                }
+              ]
+            }
+          ],
+          "samples": [
+            {
+              "name": "A549",
+              "organism": "Homo sapiens",
+              "organism_part": "lung",
+              "sex": "male",
+              "age": "58",
+              "strain_or_line": "A549",
+              "cell_line": "adenocarcinoma",
+              "cell_type": "epithelial",
+              "developmental_stage": "adult",
+              "disease_state": "lung cancer",
+              "genetic_modification": "none",
+              "individual": "patient 1",
+              "individual_genetic_characteristics": "none",
+              "growth_condition_protocol": "Growth Condition Protocol 1",
+              "treatment_protocol": "Treatment Protocol 1",
+              "biosource_provider": "RIKEN BRC",
+              "description": "Lung adenocarcinoma."
+            }
+          ],
+          "labeled_extracts": [
+            {
+              "label": "Cy5",
+              "label_compound": "Cy5-dUTP",
+              "extraction_protocol": "Extraction Protocol 1",
+              "labeling_protocol": "Labeling 1",
+              "pooling_protocol": "Pooling 1"
+            }
+          ],
+          "hybridizations": [
+            {
+              "name": "A549 vs reference",
+              "array_design_accession": "CAR273",
+              "hybridization_protocol": "Hybridization Protocol",
+              "scanning_protocol": "Scanning Protocol",
+              "description": "Two-colour hybridization.",
+              "file": "A549.gpr",
+              "data_fields": [
+                {
+                  "field": "F532 Median",
+                  "description": "Median signal at 532 nm"
+                }
+              ]
+            }
+          ],
+          "summaries": [
+            {
+              "name": "Summary table",
+              "normalization_protocol": "Normalization protocol",
+              "transformation_protocol": "Transformation protocol",
+              "description": "Normalized ratios.",
+              "file": "summary.txt",
+              "data_fields": [
+                {
+                  "field": "Log Ratio",
+                  "description": "log2 of the ratio"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "projects": [
+    {
+      "accession": "E-GEAD-1",
+      "identifiers": [
+        {
+          "type": "secondary",
+          "value": "CBX55"
+        }
+      ],
+      "title": "Expression profiling of cultured cells treated with dexamethasone",
+      "description": "Cells were treated with dexamethasone for 24 hours.",
+      "study_types": [
+        "stimulus or stress design",
+        "dose response design"
+      ],
+      "experimental_factors": [
+        {
+          "name": "treatment",
+          "type": "compound"
+        },
+        {
+          "name": "dose",
+          "type": "dose"
+        }
+      ],
+      "protocols": [
+        {
+          "name": "P-GEAD-1",
+          "type": "sample collection protocol",
+          "description": "Cells were harvested."
+        },
+        {
+          "name": "P-GEAD-2",
+          "type": "nucleic acid extraction protocol",
+          "description": "RNeasy."
+        },
+        {
+          "name": "P-GEAD-3",
+          "type": "labeling protocol",
+          "description": "Cy3 / Cy5 labeling."
+        },
+        {
+          "name": "P-GEAD-4",
+          "type": "hybridization protocol",
+          "description": "Hybridized for 17 hours."
+        },
+        {
+          "name": "P-GEAD-5",
+          "type": "array scanning protocol",
+          "description": "Scanned with a GenePix 4000B."
+        },
+        {
+          "name": "P-GEAD-6",
+          "type": "normalization data transformation protocol",
+          "description": "Loess."
+        }
+      ],
+      "publications": [
+        {
+          "pubmed_id": "21187441",
+          "doi": "10.1000/example.1"
+        }
+      ]
+    }
+  ],
+  "samples": [
+    {
+      "accession": "SAMD00000001",
+      "alias": "treated",
+      "title": "treated title",
+      "description": "treated description",
+      "attributes": [
+        {
+          "name": "sample_name",
+          "value": "treated"
+        },
+        {
+          "name": "organism",
+          "value": "Homo sapiens"
+        },
+        {
+          "name": "taxonomy_id",
+          "value": "9606"
+        }
+      ],
+      "comments": [
+        {
+          "name": "Library",
+          "value": "lib-1"
+        }
+      ]
+    },
+    {
+      "accession": "SAMD00000002",
+      "alias": "reference",
+      "title": "reference title",
+      "attributes": [
+        {
+          "name": "sample_name",
+          "value": "reference"
+        },
+        {
+          "name": "organism",
+          "value": "Homo sapiens"
+        },
+        {
+          "name": "taxonomy_id",
+          "value": "9606"
+        }
+      ]
+    }
+  ],
+  "experiments": [
+    {
+      "alias": "hyb1",
+      "technology_type": "array assay",
+      "platform": {
+        "array_design": {
+          "db": "array_design",
+          "accession": "A-GEAD-246"
+        }
+      },
+      "protocol_refs": [
+        "P-GEAD-4"
+      ],
+      "comments": [
+        {
+          "name": "Array Design REF md5",
+          "value": "f907bc5f91be8e0792bbb7d03c0bdd4f"
+        }
+      ],
+      "pool": {
+        "members": [
+          {
+            "sample": {
+              "db": "sample",
+              "id": "treated",
+              "accession": "SAMD00000001"
+            },
+            "member_name": "treated:Cy5",
+            "label": "Cy5",
+            "protocol_refs": [
+              "P-GEAD-3"
+            ],
+            "extract": {
+              "name": "treated RNA",
+              "material_type": "total RNA",
+              "protocol_refs": [
+                "P-GEAD-1",
+                "P-GEAD-2"
+              ]
+            },
+            "factor_values": [
+              {
+                "name": "treatment",
+                "value": "dexamethasone"
+              },
+              {
+                "name": "dose",
+                "value": "10",
+                "unit": "micromolar",
+                "unit_type": "concentration unit"
+              }
+            ]
+          },
+          {
+            "sample": {
+              "db": "sample",
+              "id": "reference",
+              "accession": "SAMD00000002"
+            },
+            "member_name": "reference:Cy3",
+            "label": "Cy3",
+            "protocol_refs": [
+              "P-GEAD-3"
+            ],
+            "extract": {
+              "name": "reference RNA",
+              "material_type": "total RNA",
+              "protocol_refs": [
+                "P-GEAD-1",
+                "P-GEAD-2"
+              ]
+            },
+            "factor_values": [
+              {
+                "name": "treatment",
+                "value": "none"
+              },
+              {
+                "name": "dose",
+                "value": "0",
+                "unit": "micromolar",
+                "unit_type": "concentration unit"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "accession": "DRX000001",
+      "alias": "seq1",
+      "technology_type": "sequencing assay",
+      "protocol_refs": [
+        "P-GEAD-4"
+      ],
+      "pool": {
+        "members": [
+          {
+            "sample": {
+              "db": "sample",
+              "id": "treated",
+              "accession": "SAMD00000001"
+            },
+            "extract": {
+              "name": "treated library",
+              "material_type": "total RNA",
+              "protocol_refs": [
+                "P-GEAD-1",
+                "P-GEAD-2"
+              ],
+              "comments": [
+                {
+                  "name": "LIBRARY_STRATEGY",
+                  "value": "RNA-Seq"
+                },
+                {
+                  "name": "LIBRARY_LAYOUT",
+                  "value": "PAIRED"
+                },
+                {
+                  "name": "INSTRUMENT_MODEL",
+                  "value": "Illumina NovaSeq 6000"
+                }
+              ]
+            },
+            "factor_values": [
+              {
+                "name": "treatment",
+                "value": "dexamethasone"
+              },
+              {
+                "name": "dose",
+                "value": "10",
+                "unit": "micromolar",
+                "unit_type": "concentration unit"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "runs": [
+    {
+      "alias": "hyb1_Cy5.txt",
+      "data_blocks": [
+        {
+          "member_name": "treated:Cy5",
+          "files": [
+            {
+              "filename": "hyb1_Cy5.txt",
+              "filetype": "Array Data File"
+            }
+          ]
+        }
+      ],
+      "protocol_refs": [
+        "P-GEAD-5"
+      ],
+      "comments": [
+        {
+          "name": "Array Data File md5",
+          "value": "0123456789abcdef0123456789abcdef"
+        }
+      ]
+    },
+    {
+      "alias": "hyb1_Cy3.txt",
+      "data_blocks": [
+        {
+          "member_name": "reference:Cy3",
+          "files": [
+            {
+              "filename": "hyb1_Cy3.txt",
+              "filetype": "Array Data File"
+            }
+          ]
+        }
+      ],
+      "protocol_refs": [
+        "P-GEAD-5"
+      ]
+    },
+    {
+      "accession": "DRR000001",
+      "alias": "DRR000001",
+      "data_blocks": [
+        {
+          "files": [
+            {
+              "filename": "DRR000001",
+              "filetype": "Array Data File"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "analyses": [
+    {
+      "alias": "hyb1_normalized.txt",
+      "data_blocks": [
+        {
+          "files": [
+            {
+              "filename": "hyb1_normalized.txt",
+              "filetype": "Derived Array Data File"
+            }
+          ]
+        }
+      ],
+      "protocol_refs": [
+        "P-GEAD-6"
+      ],
+      "comments": [
+        {
+          "name": "Derived Array Data File md5",
+          "value": "fedcba9876543210fedcba9876543210"
+        }
+      ]
+    },
+    {
+      "alias": "normalized_matrix.txt",
+      "data_blocks": [
+        {
+          "files": [
+            {
+              "filename": "normalized_matrix.txt",
+              "filetype": "Derived Array Data Matrix File"
+            }
+          ]
+        }
+      ],
+      "protocol_refs": [
+        "P-GEAD-6"
+      ],
+      "comments": [
+        {
+          "name": "Derived Array Data Matrix File md5",
+          "value": "00112233445566778899aabbccddeeff"
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "type": "part_of",
+      "source": {
+        "type": "project",
+        "accession": "E-GEAD-1"
+      },
+      "target": {
+        "db": "bioproject",
+        "id": "PRJDB00001"
+      }
+    },
+    {
+      "type": "related_to",
+      "source": {
+        "type": "project",
+        "accession": "E-GEAD-1"
+      },
+      "target": {
+        "db": "NBDC",
+        "id": "hum0001"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "hyb1_Cy5.txt"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "hyb1"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "alias": "hyb1_Cy3.txt"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "hyb1"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "run",
+        "accession": "DRR000001"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "seq1",
+        "accession": "DRX000001"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "alias": "hyb1_normalized.txt"
+      },
+      "target": {
+        "db": "run",
+        "id": "hyb1_Cy5.txt"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "alias": "hyb1_normalized.txt"
+      },
+      "target": {
+        "db": "run",
+        "id": "hyb1_Cy3.txt"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "alias": "hyb1_normalized.txt"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "hyb1"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "alias": "normalized_matrix.txt"
+      },
+      "target": {
+        "db": "analysis",
+        "id": "hyb1_normalized.txt"
+      }
+    },
+    {
+      "type": "derived_from",
+      "source": {
+        "type": "analysis",
+        "alias": "normalized_matrix.txt"
+      },
+      "target": {
+        "db": "experiment",
+        "id": "hyb1"
+      }
+    }
+  ]
+}

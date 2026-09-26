@@ -5,12 +5,11 @@ import re
 SCHEMA_VERSIONS = [
     "v1",
     "v2",
-    "draft",
+    "v3",
 ]
-LATEST_VERSION = "v2"
 
-# Latest minor version for each major version.
-# Used by converters to set schema_version in output data.
+# Latest minor version for v1 and v2, whose records carry a minor in schema_version.
+# Used by converters to set schema_version in output data. v3 has no minor: its schema_version is "v3".
 LATEST_MINOR_VERSIONS: dict[str, str] = {
     "v1": "v1.0",
     "v2": "v2.3",

@@ -1,0 +1,19 @@
+Comment[GEAAccession]	E-GEAD-424
+MAGE-TAB Version	1.1
+Investigation Title	Chromatin-based mechanisms to coordinate convergent overlapping transcription
+Experiment Description	In eukaryotic genomes, transcription units of genes often overlap with other protein-coding and/or noncoding transcription units. In such intertwined genomes, coordinated transcription of nearby or overlapping genes would be important to ensure integrity of genome function; however, the mechanisms underlying this coordination are largely unknown. Here, we show in Arabidopsis thaliana that genes with convergent orientation of transcription are major sources of antisense transcripts and that these genes transcribed on both strands are regulated by a putative LSD1 family histone demethylase, FLD. Our genome-wide chromatin profiling revealed that FLD, as well as its associating factor LD, downregulate histone H3K4me1 in regions with convergent overlapping transcription. FLD localizes to actively transcribed genes where it colocalizes with elongating RNA polymerase II phosphorylated at Ser-2 or Ser-5 sites. Genome-wide transcription analyses suggest that FLD-mediated H3K4me1 removal negatively regulates transcription of genes with high level of antisense transcription. Furthermore, the effect of FLD on transcription dynamics is antagonized by DNA topoisomerase I. Our study revealed chromatin-based mechanisms to cope with overlapping transcription, which may occur by modulating DNA topology. This global mechanism to cope with overlapping transcription could be co-opted for specific epigenetic processes, such as cellular memory of responses to environment.
+Experimental Design	genotype design
+Experimental Factor Name	genotype
+Experimental Factor Type	genotype
+Person Last Name	Inagaki
+Person First Name	Soichi
+Person Affiliation	Kakutani lab, Department of Biological Sciences, Graduate School of Science, The University of Tokyo
+Person Roles	submitter
+Public Release Date	2021-02-17
+Protocol Name	P-GEAD-792	P-GEAD-793	P-GEAD-794	P-GEAD-795	P-GEAD-796
+Protocol Type	sample collection protocol	nucleic acid extraction protocol	nucleic acid library construction protocol	nucleic acid sequencing protocol	normalization data transformation protocol
+Protocol Description	Plants were grown on plates of MS agar media in 16h light and 8h dark condition at 22 degrees C. Plants were grown for 2 weeks before sampling. Whole seedlings are coolected to freeze with liquid nitrogen and stored in -80 degrees C until further processing.	For ChIP-seq, nuclear extraction, sonication, and immunoprecipitation were followed by DNA extraction using Monarch PCR & DNA cleanup kit (NEB). For mRNA-seq, total RNA was extracted using RNeasy Plant kit (QIAGEN). For chrRNA-seq, nuclear extraction and nuclear lysis were followed by RNA extraction using TRIzol reagent (ThermoFisher).	For ChIP-seq, ThruPLEX DNA-seq kit (Takara) was used to construct libraries. For mRNA-seq, KAPA mRNA HyperPrep Kit for Illumina (KAPA Biosciences) was used. For chrRNA-seq, Dnase-I treatment and rRNA depletion were followed by library construction using KAPA RNA HyperPrep Kit (KAPA Biosystems).	Sequences were performed on Illumina HiSeq 4000 (single-end 50 or 51 bases) or HiSeq X (paired-end 151 bases).	Normalization was performed after alignment to the Arabidopsis genome using the total million mapped reads as denominator.
+SDRF File	E-GEAD-424.sdrf.txt
+Comment[AEExperimentType]	ChIP-seq
+Comment[BioProject]	PRJDB10113
+Comment[Last Update Date]	2021-02-17

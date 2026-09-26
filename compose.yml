@@ -2,16 +2,11 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
     image: ddbj-record-specifications
     container_name: ddbj-record-specifications
+    # Files the container writes into the bind mount are owned by the host user.
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - .:/app
-      - app-venv:/app/.venv:rw
     working_dir: /app
-    command: ["sleep", "infinity"]
     init: true
-
-volumes:
-  app-venv:

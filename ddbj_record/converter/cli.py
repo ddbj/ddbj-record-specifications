@@ -19,11 +19,10 @@ from ddbj_record.schema import SCHEMA_VERSIONS, normalize_cli_version
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 from ddbj_record.utils import resolve_record_model
-from ddbj_record.validator import validate_json_data
 
 
 class Args(BaseModel):
-    """Command line arguments for the validator."""
+    """Command line arguments for the converter."""
 
     from_: str
     to: str
@@ -74,27 +73,19 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
     # もう少しかっこよく出来る気もしているが、増えてきてから考える
     # schema の class に変換系の method を持たせるのは可読性が落ちそうなため、やめておく
 
-    input_result = validate_json_data(json_data, from_)
-    if not input_result.valid:
-        raise ValueError(f"Input validation failed for schema {from_}: {[e.model_dump() for e in input_result.errors]}")
+    from_obj = resolve_record_model(from_).model_validate(json_data)
 
     if from_ == to:
         return json_data
 
-    from_record_model = resolve_record_model(from_)
-
     if from_ == "v1" and to == "v2":
-        v1_obj = cast("DdbjRecordV1", from_record_model.model_validate(json_data))
-        result = v1_to_v2(v1_obj).model_dump(exclude_none=True, by_alias=True)
+        result = v1_to_v2(cast("DdbjRecordV1", from_obj)).model_dump(exclude_none=True, by_alias=True)
     elif from_ == "v2" and to == "v1":
-        v2_obj = cast("DdbjRecordV2", from_record_model.model_validate(json_data))
-        result = v2_to_v1(v2_obj).model_dump(exclude_none=True, by_alias=True)
+        result = v2_to_v1(cast("DdbjRecordV2", from_obj)).model_dump(exclude_none=True, by_alias=True)
     else:
         raise ValueError(f"Unsupported conversion from {from_} to {to}")
 
-    output_result = validate_json_data(result, to)
-    if not output_result.valid:
-        raise ValueError(f"Output validation failed for schema {to}: {[e.model_dump() for e in output_result.errors]}")
+    resolve_record_model(to).model_validate(result)
 
     return result
 
@@ -114,8 +105,8 @@ def main() -> None:
         with args.output.open("w", encoding="utf-8") as f:
             json.dump(converted_data, f, indent=2, ensure_ascii=False)
 
-    except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 

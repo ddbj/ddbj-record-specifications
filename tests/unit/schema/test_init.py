@@ -2,7 +2,6 @@ import pytest
 
 from ddbj_record.schema import (
     LATEST_MINOR_VERSIONS,
-    LATEST_VERSION,
     SCHEMA_VERSIONS,
     normalize_cli_version,
     normalize_schema_version,
@@ -17,12 +16,12 @@ def test_schema_versions_contains_v2() -> None:
     assert "v2" in SCHEMA_VERSIONS
 
 
-def test_schema_versions_contains_draft() -> None:
-    assert "draft" in SCHEMA_VERSIONS
+def test_schema_versions_contains_v3() -> None:
+    assert "v3" in SCHEMA_VERSIONS
 
 
-def test_latest_version_is_v2() -> None:
-    assert LATEST_VERSION == "v2"
+def test_latest_minor_versions_has_no_v3() -> None:
+    assert "v3" not in LATEST_MINOR_VERSIONS
 
 
 # === LATEST_MINOR_VERSIONS ===
@@ -61,6 +60,7 @@ def test_normalize_schema_version_valid(raw: str, expected: str) -> None:
     "raw",
     [
         "v999.0",
+        "v3",
         "v3.0",
         "invalid",
         "",
@@ -81,7 +81,7 @@ def test_normalize_schema_version_invalid_returns_none(raw: str) -> None:
     [
         ("v1", "v1"),
         ("v2", "v2"),
-        ("draft", "draft"),
+        ("v3", "v3"),
         ("v1.0", "v1"),
         ("v2.0", "v2"),
         ("v2.2", "v2"),
@@ -96,7 +96,7 @@ def test_normalize_cli_version_valid(raw: str, expected: str) -> None:
     "raw",
     [
         "v999",
-        "v3.0",
+        "draft",
         "0.1",
         "0.2",
         "invalid",

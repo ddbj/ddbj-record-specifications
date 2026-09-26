@@ -1,28 +1,19 @@
-FROM python:3.12-bookworm
+FROM ghcr.io/astral-sh/uv:0.12.19-python3.12-trixie
 
-ARG VERSION=0.0.0
-
-LABEL org.opencontainers.image.authors="Bioinformatics and DDBJ Center"
-LABEL org.opencontainers.image.url="https://github.com/ddbj/ddbj-record-specifications"
-LABEL org.opencontainers.image.source="https://github.com/ddbj/ddbj-record-specifications/blob/main/Dockerfile"
-LABEL org.opencontainers.image.version="${VERSION}"
-LABEL org.opencontainers.image.description="The ddbj-record package provides tools for parsing, validating, and converting DDBJ record specifications."
-LABEL org.opencontainers.image.licenses="Apache-2.0"
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# The venv lives outside the bind-mounted /app, so the host never gets a .venv directory.
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_LINK_MODE=copy \
+    PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 COPY . .
 
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION}
-RUN uv sync --extra tests && \
-    chmod -R a+rwX .venv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked && \
+    chmod -R a+rwX /opt/venv
 
-# Writable home for arbitrary UID
+# compose runs the container as the host user, which has no home directory in the image.
 ENV HOME=/home/app
 RUN mkdir -p /home/app && chmod 777 /home/app
 
-ENV PATH="/app/.venv/bin:$PATH"
-
-ENTRYPOINT [""]
 CMD ["sleep", "infinity"]
