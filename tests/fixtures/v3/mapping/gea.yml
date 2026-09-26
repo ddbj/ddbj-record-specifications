@@ -1,8 +1,9 @@
 # GEA のメタデータ（MAGE-TAB の IDF / SDRF、アレイ設計の ADF、CIBEX）の項目を、v3 のどこに置くか。
-# 考え方は docs/v3-gea.md、作り方は scripts/gea/README.md。このファイルは
-# scripts/gea/build_mapping.py が書くので、手で直さない。
+# tests/unit/schema/test_v3_gea_mapping.py が、全ての行の場所がモデルに実在すること、
+# gea_full.json / gea_array_design_full.json に全ての行の実例があることを確かめる。
+# モデルを変えたら、ここも手で直す。
 #
-# 対象は a012:/usr/local/resources/gea（公開用の写し）にある全てのファイルに現れる項目。
+# 対象は GEA が公開している全てのファイルに現れる項目。
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
@@ -10,7 +11,7 @@
 #   adf     ADF の見出しの行。(table) は見出しの後の表
 #   cibex   CIBEX の「節 / キー」
 #
-# 値の読み方は docs/v3-sra-mapping.yml と同じ:
+# 値の読み方は sra.yml と同じ:
 #   (container)          値を持たない入れ物
 #   a.b[]                b は list。[] の中の語は注記で、要素の type と、relation なら target.db
 #   ... (注記)           読み手のための補足

@@ -23,7 +23,7 @@ def _record_paths() -> list[Path]:
 def test_v3_record_fixture_parses(path: Path) -> None:
     with path.open("r", encoding="utf-8") as f:
         record = DdbjRecord.model_validate(json.load(f))
-    assert record.schema_version == "v3.0"
+    assert record.schema_version == "v3"
 
 
 # === Attribute.name ===
@@ -56,7 +56,7 @@ def test_a_name_with_surrounding_spaces_is_still_a_name() -> None:
 
 def test_a_nameless_attribute_fails_the_whole_record() -> None:
     record = {
-        "schema_version": "v3.0",
+        "schema_version": "v3",
         "samples": [{"alias": "s1", "attributes": [{"value": "10 m"}]}],
     }
 

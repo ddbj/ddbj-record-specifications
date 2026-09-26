@@ -1317,7 +1317,7 @@ class Relation(BaseModel):
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str | None = Field(None, examples=["v3.0"])
+    schema_version: str | None = Field(None, examples=["v3"])
     provenance: Provenance | None = None
     submission: Submission | None = None
     project: Project | None = None

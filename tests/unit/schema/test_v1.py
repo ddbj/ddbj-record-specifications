@@ -15,7 +15,6 @@ from ddbj_record.schema.v1 import (
     StComment,
     Submitter,
 )
-from ddbj_record.validator import validate_json_data
 
 # === valid fixture parsing ===
 
@@ -48,13 +47,12 @@ def test_v1_invalid_wrong_type_raises(v1_invalid_wrong_type: dict[str, Any]) -> 
         DdbjRecord.model_validate(v1_invalid_wrong_type)
 
 
-# === legacy schema_version normalization (via validate_json_data) ===
+# === legacy schema_version normalization ===
 
 
 def test_v1_legacy_schema_version_normalized(v1_legacy_schema_version: dict[str, Any]) -> None:
-    result = validate_json_data(v1_legacy_schema_version, "v1")
-    assert result.valid is True
-    assert v1_legacy_schema_version["schema_version"] == "v1.0"
+    record = DdbjRecord.model_validate(v1_legacy_schema_version)
+    assert record.schema_version == "v1.0"
 
 
 def test_v1_schema_version_01_normalized() -> None:
@@ -81,9 +79,8 @@ def test_v1_schema_version_01_normalized() -> None:
         "COMMON_SOURCE": {"organism": "Test organism", "mol_type": "genomic DNA"},
         "COMMON_META": {"division": "BCT"},
     }
-    result = validate_json_data(data, "v1")
-    assert result.valid is True
-    assert data["schema_version"] == "v1.0"
+    record = DdbjRecord.model_validate(data)
+    assert record.schema_version == "v1.0"
 
 
 def test_v1_schema_version_v1_normalized() -> None:
@@ -110,9 +107,8 @@ def test_v1_schema_version_v1_normalized() -> None:
         "COMMON_SOURCE": {"organism": "Test organism", "mol_type": "genomic DNA"},
         "COMMON_META": {"division": "BCT"},
     }
-    result = validate_json_data(data, "v1")
-    assert result.valid is True
-    assert data["schema_version"] == "v1.0"
+    record = DdbjRecord.model_validate(data)
+    assert record.schema_version == "v1.0"
 
 
 # === Literal type boundary values ===

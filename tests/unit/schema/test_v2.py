@@ -16,7 +16,6 @@ from ddbj_record.schema.v2 import (
     Reference,
     Submission,
 )
-from ddbj_record.validator import validate_json_data
 
 # === valid fixture parsing ===
 
@@ -86,13 +85,12 @@ def test_v2_invalid_extra_field_raises(v2_invalid_extra_field: dict[str, Any]) -
         DdbjRecord.model_validate(v2_invalid_extra_field)
 
 
-# === legacy schema_version normalization (via validate_json_data) ===
+# === legacy schema_version normalization ===
 
 
 def test_v2_legacy_schema_version_normalized(v2_legacy_schema_version: dict[str, Any]) -> None:
-    result = validate_json_data(v2_legacy_schema_version, "v2")
-    assert result.valid is True
-    assert v2_legacy_schema_version["schema_version"] == "v2.3"
+    record = DdbjRecord.model_validate(v2_legacy_schema_version)
+    assert record.schema_version == "v2.3"
 
 
 def test_v2_schema_version_02_normalized() -> None:
@@ -107,9 +105,8 @@ def test_v2_schema_version_02_normalized() -> None:
         },
         "features": [],
     }
-    result = validate_json_data(data, "v2")
-    assert result.valid is True
-    assert data["schema_version"] == "v2.3"
+    record = DdbjRecord.model_validate(data)
+    assert record.schema_version == "v2.3"
 
 
 def test_v2_schema_version_v2_normalized() -> None:
@@ -124,9 +121,8 @@ def test_v2_schema_version_v2_normalized() -> None:
         },
         "features": [],
     }
-    result = validate_json_data(data, "v2")
-    assert result.valid is True
-    assert data["schema_version"] == "v2.3"
+    record = DdbjRecord.model_validate(data)
+    assert record.schema_version == "v2.3"
 
 
 # === Literal type boundary values ===

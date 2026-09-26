@@ -1,8 +1,8 @@
-"""docs/v3-sra-mapping.yml の行が、v3 のモデルと実例に合っていることを確かめる。
+"""tests/fixtures/v3/mapping/sra.yml の行が、v3 のモデルと実例に合っていることを確かめる。
 
 対応表は SRA XML の要素と属性の 1 つ 1 つについて、v3 のどこに置くかを書いたもの。
 行が正しい場所を指しているか (TAG を value に写していないか、など) は確かめない。
-それは scripts/sra/build_mapping.py の規則と、それを読む人が決める。ここで確かめるのは次のこと。
+それは対応表を読む人が決める。ここで確かめるのは次のこと。
 
 - 対応表が指す v3 の場所が、どれもモデルに実在する
 - 属性と、要素の名前が値になるものは、値 (str / int / float / bool) の場所を指す
@@ -15,11 +15,11 @@ from pathlib import Path
 
 import pytest
 
-from .mapping_helpers import ROOT, SCALARS, load_mapping, load_record, resolve, rows, values_at
+from .mapping_helpers import FIXTURES_V3, SCALARS, load_mapping, load_record, resolve, rows, values_at
 
-RAW_DRA = ROOT.joinpath("tests/fixtures/v3/raw/dra")
+RAW_DRA = FIXTURES_V3.joinpath("raw/dra")
 SRA_FULL = load_record("sra_full.json")
-MAPPING = load_mapping("v3-sra-mapping.yml")
+MAPPING = load_mapping("sra.yml")
 
 
 ROWS = rows(MAPPING)

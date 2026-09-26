@@ -1,57 +1,74 @@
-"""docs/v3-*-mapping.yml を読んで確かめるテストの共通部品。"""
+"""tests/fixtures/v3/mapping/*.yml を読んで確かめるテストの共通部品。
 
-import importlib.util
+対応表の場所は DdbjRecord の中の点区切りの道筋 (`experiments[].pool.members[].sample.id`)。
+`[...]` は list の要素、`{...}` は dict の値で、括弧の中と末尾の ` (...)` は読み手のための注記。
+`(container)` は、自分では値を持たない入れ物の要素を表す。
+"""
+
 import json
 import re
-import sys
 from pathlib import Path
-from types import ModuleType
-from typing import Any
+from types import NoneType, UnionType
+from typing import Any, Union, get_args, get_origin, get_type_hints
 
 import yaml
+from pydantic import BaseModel
+
+from ddbj_record.schema.v3 import DdbjRecord
 
 ROOT = Path(__file__).resolve().parents[3]
+FIXTURES_V3 = ROOT.joinpath("tests/fixtures/v3")
 
-
-def _load_script_module(name: str, path: Path) -> ModuleType:
-    """scripts/ の下のファイルを module として読む。
-
-    一度読んだものは sys.modules から返す (build_mapping.py が import する v3_locations を二重に
-    読まないため)。読むあいだにスクリプトが足す sys.path は、読み終えたら元に戻す。
-    """
-    if name in sys.modules:
-        return sys.modules[name]
-
-    spec = importlib.util.spec_from_file_location(name, path)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-
-    saved = list(sys.path)
-    try:
-        spec.loader.exec_module(module)
-    except BaseException:
-        del sys.modules[name]
-        raise
-    finally:
-        sys.path[:] = saved
-    return module
-
-
-# 対応表の場所の読み方 (書き方と、場所から型への解決) は、対応表を書くスクリプトと共有する。
-v3_locations = _load_script_module("v3_locations", ROOT.joinpath("scripts/v3_locations.py"))
-
-CONTAINER: str = v3_locations.CONTAINER
-SEGMENT: re.Pattern[str] = v3_locations.SEGMENT
-resolve = v3_locations.resolve
-strip_note = v3_locations.strip_note
+CONTAINER = "(container)"
+SEGMENT = re.compile(r"(\w+)(\[[^\]]*\]|\{[^}]*\})?")
 SCALARS = (str, int, float, bool)
 
 
-def load_script(relative: str) -> ModuleType:
-    """scripts/ の下のスクリプトを module として読む。名前は置き場所から作る (sra と gea の build_mapping を分ける)。"""
-    return _load_script_module(relative.removesuffix(".py").replace("/", "."), ROOT.joinpath(relative))
+def strip_note(location: str) -> str:
+    return re.sub(r" \(.*\)$", "", location)
+
+
+def _unwrap_optional(tp: Any) -> Any:
+    if get_origin(tp) in (Union, UnionType):
+        args = [a for a in get_args(tp) if a is not NoneType]
+        if len(args) != 1:
+            raise TypeError(tp)
+        return args[0]
+    return tp
+
+
+def resolve(location: str) -> Any:
+    """location にある型。モデルに無い場所なら LookupError。"""
+    tp: Any = DdbjRecord
+
+    for segment in strip_note(location).split("."):
+        m = SEGMENT.fullmatch(segment)
+        if not m:
+            raise LookupError(f"{location}: cannot read {segment!r}")
+        name, bracket = m.groups()
+
+        if not (isinstance(tp, type) and issubclass(tp, BaseModel)):
+            raise LookupError(f"{location}: {name} is below a non-model")  # noqa: TRY004 -- the location is wrong, not a type
+        if name not in tp.model_fields:
+            raise LookupError(f"{location}: {tp.__name__} has no field {name!r}")
+
+        # 後で定義されるモデル (RelationTarget, File など) の注釈は文字列のままなので、get_type_hints で解決する。
+        tp = _unwrap_optional(get_type_hints(tp)[name])
+        container = get_origin(tp)
+
+        if bracket is None:
+            if container in (list, dict):
+                raise LookupError(f"{location}: {name} is a {container.__name__}")
+        elif bracket.startswith("["):
+            if container is not list:
+                raise LookupError(f"{location}: {name} is not a list")
+            tp = get_args(tp)[0]
+        else:
+            if container is not dict:
+                raise LookupError(f"{location}: {name} is not a dict")
+            tp = get_args(tp)[1]
+
+    return tp
 
 
 class _UniqueKeyLoader(yaml.SafeLoader):
@@ -69,13 +86,13 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 
 def load_mapping(name: str) -> dict[str, dict[str, str]]:
     return yaml.load(  # type: ignore[no-any-return]
-        ROOT.joinpath("docs", name).read_text(encoding="utf-8"),
+        FIXTURES_V3.joinpath("mapping", name).read_text(encoding="utf-8"),
         Loader=_UniqueKeyLoader,  # noqa: S506 -- a SafeLoader subclass
     )
 
 
 def load_record(name: str) -> Any:
-    return json.loads(ROOT.joinpath("tests/fixtures/v3/records", name).read_text(encoding="utf-8"))
+    return json.loads(FIXTURES_V3.joinpath("records", name).read_text(encoding="utf-8"))
 
 
 def rows(mapping: dict[str, dict[str, str]]) -> dict[str, str]:

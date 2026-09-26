@@ -75,7 +75,7 @@ def test_convert_json_data_v2_to_v1(v2_to_v1_input: dict[str, Any]) -> None:
 
 def test_convert_json_data_unsupported_pair_raises(v1_valid_minimal: dict[str, Any]) -> None:
     with pytest.raises(ValueError, match="Unsupported conversion"):
-        convert_json_data(v1_valid_minimal, "v1", "draft")
+        convert_json_data(v1_valid_minimal, "v1", "v3")
 
 
 # === post-conversion validation ===

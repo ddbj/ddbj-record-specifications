@@ -89,7 +89,6 @@ JGA (Japanese Genotype-phenotype Archive) のメタデータ XML と relation CS
 | `*.date.csv`, `date.csv` | ddbj-search-converter / NIG スパコン (先頭 20 行) |
 
 スキーマ: JGA XSD v1.2
-本番データパス: `/usr/local/shared_data/jga/metadata-history/metadata/`
 
 ### gea/
 
@@ -100,7 +99,7 @@ experiment 単位のサブディレクトリに `.idf.txt` (Investigation Descri
 
 10 experiment: E-GEAD-1005, E-GEAD-1017, E-GEAD-1037, E-GEAD-1039, E-GEAD-1043, E-GEAD-1044, E-GEAD-1047, E-GEAD-1057, E-GEAD-1060, E-GEAD-1096
 
-ほかに、GEA の公開用の写し (a012:/usr/local/resources/gea) から次を取った。
+ほかに、GEA が公開しているファイルから次を取った。
 
 | ファイル | 内容 |
 |---|---|
