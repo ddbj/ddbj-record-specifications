@@ -43,6 +43,30 @@ from ddbj_record.schema.v1 import DdbjRecord as V1Record
 v2_record = v1_to_v2(V1Record.model_validate_json(Path("v1.json").read_text()))
 ```
 
+## v4 のパッケージ
+
+v4 の record は、1 つの zip (パッケージ) で渡す ([v4-schema.md](./v4-schema.md))。`ddbj_record_package` で、パッケージが約束どおりかを確かめ、v3 の record と行き来する。
+
+```bash
+ddbj_record_package check record.ddbj.zip              # 約束どおりかを確かめる。外れたものを標準エラーに書き、1 で終わる
+ddbj_record_package pack record.json record.ddbj.zip   # v3 の record を v4 のパッケージにする
+ddbj_record_package unpack record.ddbj.zip record.json # v4 のパッケージを v3 の record に戻す
+```
+
+Python からは、`record.json` だけを読むことも、JSON Lines を 1 行ずつ読むこともできる。どちらもパッケージ全体をメモリに載せない。
+
+```python
+from pathlib import Path
+
+from ddbj_record.package import iter_objects, read_record
+
+record = read_record(Path("record.ddbj.zip"))  # v4 の DdbjRecord。JSON Lines に置く list は持たない
+for sample in iter_objects(Path("record.ddbj.zip"), "samples.jsonl"):
+    ...
+```
+
+`pack` と `unpack` は record 全体と配列をメモリに載せるので、小さい record と移し替えに使う。
+
 ## JSON Schema
 
 `dump_json_schema` が、major ごとの JSON Schema を標準出力に書く。JSON Schema は repo で管理していないので、要るときにこれで書き出す。
