@@ -1,0 +1,51 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "ST.26 XML"
+  },
+  "submission": {
+    "st26": {
+      "dtd_version": "V1_3",
+      "file_name": "EX-0001配列表.xml",
+      "software_name": "WIPO Sequence",
+      "software_version": "2.3.0",
+      "production_date": "2024-04-08",
+      "original_language": "ja",
+      "non_english_language": "ja",
+      "applicant_file_reference": "EX-0001",
+      "application": {
+        "ip_office_code": "JP",
+        "application_number_text": "2024-135845",
+        "filing_date": "2024-08-16"
+      },
+      "earliest_priority": {
+        "ip_office_code": "US",
+        "application_number_text": "62/867,171",
+        "filing_date": "2019-06-26"
+      },
+      "applicant_name": "見本製薬株式会社",
+      "applicant_name_language_code": "ja",
+      "applicant_name_latin": "MIHON PHARMACEUTICAL CO., LTD.",
+      "inventor_name": "見本　太郎",
+      "inventor_name_language_code": "ja",
+      "inventor_name_latin": "MIHON Taro",
+      "invention_titles": [
+        {
+          "title": "見本の発明",
+          "language_code": "ja"
+        },
+        {
+          "title": "Exemplary invention",
+          "language_code": "en"
+        }
+      ],
+      "sequence_total_quantity": 2,
+      "published_date": "2024-12-03",
+      "priority": {
+        "ip_office_code": "US",
+        "application_number_text": "62/867,171",
+        "filing_date": "2019-06-26"
+      }
+    }
+  }
+}

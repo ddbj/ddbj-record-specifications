@@ -143,9 +143,14 @@ class ApplicationIdentification(BaseModel):
 
 
 class St26Submission(BaseModel):
-    """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。"""
+    """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。
+
+    配列 (SequenceData) より前の全てと、JPO が末尾に足す Bibliography を持つ。
+    """
 
     dtd_version: str | None = Field(None, examples=["V1_3"])
+    # ルート要素の fileName。出願人が付けた名前で、JPO から届くファイルの名前 (公報番号) とは別。
+    file_name: str | None = None
     software_name: str | None = None
     software_version: str | None = None
     production_date: str | None = None
@@ -154,13 +159,24 @@ class St26Submission(BaseModel):
     applicant_file_reference: str | None = None
     application: ApplicationIdentification | None = None
     earliest_priority: ApplicationIdentification | None = None
+    # ST.26 が書く出願人と発明者は、筆頭の 1 人ずつ。language_code は ApplicantName / InventorName の属性。
     applicant_name: str | None = None
+    applicant_name_language_code: str | None = Field(None, examples=["ja"])
     # applicant_name / inventor_name のラテン文字の翻字。
     applicant_name_latin: str | None = None
     inventor_name: str | None = None
+    inventor_name_language_code: str | None = Field(None, examples=["ja"])
     inventor_name_latin: str | None = None
-    # 言語ごとの発明の名称。
+    # 言語ごとの発明の名称。同じ言語のものが 2 つあることもあるので、書かれた順に持つ。
     invention_titles: list[InventionTitle] | None = None
+    # SequenceData の数 ("000" の欠番も数える)。entry の数とは合わないことがあり、配列から数え直せるとは限らない。
+    sequence_total_quantity: int | None = None
+    # 以下は JPO が公報の書誌から足したもの (Bibliography。WIPO の DTD には無い)。
+    # 公報の日付。DDBJ が公開した日 (record に入れない、登録システムの日付) とは別。
+    published_date: str | None = Field(None, examples=["2024-12-03"])
+    # earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは 7 割ほどで、
+    # 別の出願を指すものもあるので、1 つにまとめない。
+    priority: ApplicationIdentification | None = None
 
     model_config = ConfigDict(extra="forbid")
 
