@@ -56,7 +56,7 @@ fingerprint = conn.exec(<<~SQL).first
 SQL
 
 versions = conn.exec(<<~SQL).to_a
-  SELECT m.metadata_id, a.accession, m.metadata_type, m.metadata_version, m.update_date
+  SELECT m.metadata_id, a.accession, m.metadata_type, m.metadata_version, m.update_date, md5(m.metadata) AS md5
   FROM mass.metadata m JOIN mass.accession a USING (accession_id)
   WHERE a.accession IS NOT NULL
   ORDER BY m.metadata_id
@@ -82,10 +82,13 @@ File.open File.join(DIR, 'versions.tsv'), 'wx' do |manifest|
     # The list and the files are read in separate statements; a row that changed in between is not
     # what the list says it is.
     file = conn.exec_params(<<~SQL, [id]).first
-      SELECT metadata, metadata_version, update_date FROM mass.metadata WHERE metadata_id = $1
+      SELECT m.metadata, a.accession, m.metadata_version, m.update_date, md5(m.metadata) AS md5
+      FROM mass.metadata m JOIN mass.accession a USING (accession_id)
+      WHERE m.metadata_id = $1
     SQL
-    unchanged = file&.values_at('metadata_version', 'update_date') == row.values_at('metadata_version', 'update_date')
-    abort "metadata_id #{id} changed while it was read; run again" unless unchanged
+    compared  = %w[accession metadata_version update_date md5]
+    unchanged = file&.values_at(*compared) == row.values_at(*compared)
+    abort "metadata_id #{id} changed while it was read; empty #{DIR} and run again" unless unchanged
 
     FileUtils.mkdir_p File.join(DIR, File.dirname(path))
     # 'x': two rows naming the same version must not overwrite one another.

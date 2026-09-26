@@ -21,7 +21,8 @@ from .mapping_helpers import ROOT, SCALARS, load_mapping, load_record, load_scri
 
 RAW_GEA = ROOT.joinpath("tests/fixtures/v3/raw/gea")
 MAPPING = load_mapping("v3-gea-mapping.yml")
-# 表として読めない SDRF は、表の行と同じ record には現れないので、別の record にした。
+# 表として読めない SDRF は、表の行と同じ record には現れないので、別の record にした。accession を振る前の
+# 版 (IDF の Comment[GEAAccession] が alias) の形でもある。
 RECORDS = [load_record(name) for name in ("gea_full.json", "gea_array_design_full.json", "gea_unread_sdrf.json")]
 
 census_gea = load_script("scripts/gea/census_gea.py")
@@ -478,4 +479,24 @@ def test_census_refuses_a_directory_the_export_did_not_finish(tmp_path: Path, mo
 
 
 def test_an_alias_in_gea_accession_goes_to_alias() -> None:
+    # 対応表の行では注記の中にあるので、場所として確かめられていない。ここで確かめる。
     assert "investigation.alias" in build_mapping.idf_rule("Comment[GEAAccession]")
+    assert resolve("investigation.alias") in SCALARS
+    assert any(values_at(record, "investigation.alias") for record in RECORDS)
+
+
+def test_a_parameter_value_after_a_protocol_ref_is_the_protocols(tmp_path: Path) -> None:
+    # MAGE-TAB の protocol の Parameter Value。データファイルの後でも置き場所の無い列ではなく、v3 に場所が
+    # 無いので規則が無い (現れたら止まる)。
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tArray Data File\tProtocol REF\tParameter Value[x]\tUnit[y]\tDerived Array Data File\n"
+        "s1\tf1\tP-1\t5\tday\tf2\n",
+    )
+
+    items = _census(sdrf)["sdrf"]["items"]
+
+    assert "Parameter Value[*] @ Protocol REF > Derived Array Data File" in items
+    assert "Unit[*] @ Parameter Value[*] @ Protocol REF > Derived Array Data File" in items
+    assert all(build_mapping.sdrf_rule(item) is None for item in items if "Parameter Value" in item)

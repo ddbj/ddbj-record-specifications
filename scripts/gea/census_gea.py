@@ -59,8 +59,8 @@ SDRF_NODES = (
 )
 
 # The data file nodes. After one, MAGE-TAB puts only its comments, the Protocol REF of the next
-# node, and the row's Factor Values; build_mapping.py puts what else is found there into the
-# row's misplaced_columns.
+# node (and that protocol's Parameter Values), and the row's Factor Values; build_mapping.py puts
+# what else is found there into the row's misplaced_columns.
 DATA_FILES = {node for node in SDRF_NODES if node.endswith(("Data File", "Data Matrix File"))}
 
 MAGE_TAB_ADF_HEADER = {
@@ -284,15 +284,23 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     body = [[row[index] for index in headed if index < len(row)] for row in rows[1:]]
 
     node: str | None = None
+    # The Protocol REF the columns now read belong to: its Parameter Values (and their Units)
+    # follow it directly.
+    protocol: str | None = None
     items: list[str] = []
     for index, column in enumerate(header):
         if column in SDRF_NODES:
             node = column
+        if not column.startswith(("Parameter Value[", "Unit[")):
+            protocol = None
         if column == "Protocol REF":
             following = next((c for c in header[index + 1 :] if c in SDRF_NODES), None)
-            items.append(f"Protocol REF > {following}")
+            protocol = f"Protocol REF > {following}"
+            items.append(protocol)
         elif column.startswith("Unit["):
             items.append(f"Unit[*] @ {items[-1] if items else None}")
+        elif protocol and column.startswith("Parameter Value["):
+            items.append(f"Parameter Value[*] @ {protocol}")
         else:
             items.append(_sdrf_item(column, node))
         if m := re.fullmatch(r"(.+?)\[(.*)\]", column):
@@ -334,19 +342,14 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     # value after it would move that value. A Unit goes with the column before it, except where
     # it is a misplaced column of its own.
     segment = 0
-    node = None
-    previous = ""
     groups: dict[tuple[int, str], list[int]] = defaultdict(list)
     for index, column in enumerate(header):
         if column in SDRF_NODES:
             segment += 1
-            node = column
-        misplaced = node in DATA_FILES and not column.startswith(("Comment[", "Protocol REF", "Factor Value["))
-        if column.startswith("Unit["):
-            if previous.startswith("Factor Value[") or not misplaced:
-                continue
-        else:
-            previous = column
+        # What the census puts after a data file, but its comments (build_mapping.py's MISPLACED).
+        misplaced = items[index].rsplit(" @ ", 1)[-1] in DATA_FILES and not column.startswith("Comment[")
+        if column.startswith("Unit[") and not misplaced:
+            continue
         whole_row = column in DATA_FILES or column.startswith("Factor Value[") or misplaced
         groups[(0 if whole_row else segment), column].append(index)
     for indices in groups.values():
@@ -521,7 +524,10 @@ def main() -> None:
 
     found = {kind: sorted(args.dordb_dir.glob(f"{kind}/*/*.{kind}*")) for kind in ("idf", "sdrf", "adf")}
     # A directory an export did not finish (or that holds anything else) is not counted.
-    written = json.loads((args.dordb_dir / "fingerprint.json").read_text(encoding="utf-8"))["written"]
+    fingerprint = args.dordb_dir / "fingerprint.json"
+    if not fingerprint.exists():
+        sys.exit(f"{fingerprint} is missing: {args.dordb_dir} is not what export_dordb.rb writes")
+    written = json.loads(fingerprint.read_text(encoding="utf-8")).get("written", {})
     if {kind: len(paths) for kind, paths in found.items()} != {kind: written.get(kind, 0) for kind in found}:
         sys.exit(f"{args.dordb_dir} does not hold what export_dordb.rb wrote: {written}")
 

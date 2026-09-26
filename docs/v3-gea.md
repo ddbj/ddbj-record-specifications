@@ -64,7 +64,7 @@ IDF は 1 行が 1 つの項目で、値が行に沿って並ぶ。
 - `Comment[GEAAccession]` → `investigation.accession`。accession を振る前の版（2,147 版）は、ここに `ESUB002756_Experiment_1` のような alias を書いていて、それは `investigation.alias` に置く。accession を振った後も IDF を保存し直していない 4 件（E-GEAD-341、1052、1313、1314）は、最新版も alias のまま
 - 他の DB と同じ意味の項目は、他の DB と同じ欄に置く（[下](#他の-db-と同じ意味の欄)）
 - GEA が `Comment[...]` に書く項目は、全て型付きの欄にした（`experiment_type`、`channel_type` など）。CIBEX から移した experiment にしかない `Comment[CIBEX *]` は `investigation.legacy` に置く。対応表に無い `Comment[...]` が現れたら、`build_mapping.py` は止まる
-- 他のオブジェクトへの参照は `relations` に置く。起点は `{"type": "investigation", "accession": E-GEAD}`
+- 他のオブジェクトへの参照は `relations` に置く。起点は `{"type": "investigation", "accession": E-GEAD}`。accession を振る前の版（下の `Comment[GEAAccession]`）は `{"type": "investigation", "alias": ESUB…_Experiment_n}`
   - `Comment[BioProject]` → `part_of`（target.db は `bioproject`）。experiment が BioProject の一部であることを表す。なお v3 の文書と fixture では、BioSample から BioProject への参照に `part_of` と `child_of` の両方が使われていて、揃っていない
   - `Comment[Related study]` → `related_to`。値は `NBDC:hum0600`、`JGA:JGAS000942` のような「DB:番号」なので、`:` の前を target.db、後を target.id にする
 - `Comment[SecondaryAccession]`（CIBEX の CBX）→ `investigation.identifiers[]` の `secondary`
@@ -144,7 +144,7 @@ IDF を v3 の `project` に写さないのは、IDF が研究（project）で�
 
 ### MAGE-TAB がそこに置かない列は見出しごと
 
-MAGE-TAB のデータファイルの列（`Array Data File` など）が持つのは `Comment[x]` だけだが、過去の版には、その後に `Characteristics[x]`、`Parameter Value[x]` と `Unit[y]`、`Replicate` が書かれたものがある（E-GEAD-460、492、639、641、889 の 10 版）。どれも後の版で `Factor Value[x]` に直されるか、消されている。
+MAGE-TAB で、データファイルの列（`Array Data File` など）の後に来るのは、その `Comment[x]`、次のノードの `Protocol REF`（とその `Parameter Value[x]`）、行の `Factor Value[x]` だけだが、過去の版には、その後に `Characteristics[x]`、`Parameter Value[x]` と `Unit[y]`、`Replicate` が書かれたものがある（E-GEAD-460、492、639、641、889 の 10 版）。どれも後の版で `Factor Value[x]` に直されるか、消されている。
 
 これらは `investigation.sdrf[].misplaced_columns[]` に、列の見出しと値の組として、見出しの並びのまま置く。`Unit[y]` の列も見出しごと 1 つの組にし、`Attribute` の `unit` は使わない（前の列の `unit` にすると y を失う）。これらの列は Factor Value の列の間に書かれていることもあるが（E-GEAD-492、889）、`factor_values[]` との間の並びは、種類の違う列の並びとして保たない（[失わないもの](#失わないもの)）。後の版での直し方に合わせて Factor Value と読み替えることはしない。その版を後の版の目で読むことになり、直したという履歴が消える。`Characteristics` を Source のもの、`Parameter Value` を直前の Protocol REF のものと読むことも、どのノードのものかを書いた人に代わって決めることになるので、しない。
 
@@ -181,7 +181,8 @@ SDRF の `Characteristics` や `Comment` は表の列で、名前の違う列ど
 移すときは、`dordb` の版を record の版に組み直す。experiment の IDF と SDRF は別々に版を重ねる（IDF のほうが版の多いものが 749 件、同じものが 238 件、SDRF のほうが多いものが 47 件）。
 
 - 版の順は `metadata_id` の順（`export_dordb.rb` の `versions.tsv`）。`update_date` はそれぞれの版の日時として持つが、順には使わない。版の順と食い違うものがある（E-GEAD-284 の IDF の v5 は、v3、v4 より前の日時を持つ）
-- IDF と SDRF を一緒に保存すると、IDF のすぐ次の `metadata_id` に SDRF が 1 秒以内に書かれる（3,108 組。うち 40 組は同じ日時）。この組は record の 1 つの版にする。それ以外の IDF、SDRF は、それぞれ 1 つの版にし、もう一方はその時点の最新版を使う。1,034 件のうち 1,033 件は、最初の版が IDF と SDRF の組
+- IDF と SDRF を一緒に保存すると、同じ experiment の中で IDF の次の `metadata_id` に、SDRF が 1 秒以内に書かれる（3,109 組。うち 40 組は同じ日時）。この組は record の 1 つの版にする。それ以外の IDF、SDRF は、それぞれ 1 つの版にし、もう一方はその時点の最新版を使う。どの experiment も最初の版はこの組なので、もう一方が無いことは無い。組にならない IDF と SDRF の間は、最も近いもので 58 秒（E-GEAD-416）あり、1 秒との間は十分に離れている
+  - `metadata_id` は DB 全体で振られるので、「次」は同じ experiment の中で数える。別の experiment が同時に保存したものが間に入ることがある（E-GEAD-731 の IDF と SDRF の間に 732 のものがある）
 - これで experiment の record は計 4,906 版になる。アレイ設計は ADF の版がそのまま record の版になる（862 版）
 
 `investigation.legacy.unread_sdrf` と `array_design.file` が指すファイルは、record の外に置く。

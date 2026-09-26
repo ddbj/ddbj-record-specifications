@@ -8,7 +8,6 @@
   },
   "array_design": {
     "accession": "A-GEAD-246",
-    "alias": "xenium-panel",
     "name": "Xenium In Situ Analyzer",
     "version": "1.0",
     "provider": "10x Genomics",

@@ -4,7 +4,7 @@
     "source_format": "MAGE-TAB"
   },
   "investigation": {
-    "accession": "E-GEAD-1",
+    "alias": "ESUB000001_Experiment_1",
     "title": "Transcriptome of leaves",
     "sdrf_file": "E-GEAD-1.sdrf.txt",
     "legacy": {
