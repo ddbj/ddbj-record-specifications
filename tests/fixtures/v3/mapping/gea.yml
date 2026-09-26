@@ -1,128 +1,173 @@
 # GEA のメタデータ（MAGE-TAB の IDF / SDRF、アレイ設計の ADF、CIBEX）の項目を、v3 のどこに置くか。
 # tests/unit/schema/test_v3_gea_mapping.py が、全ての行の場所がモデルに実在すること、
-# gea_full.json / gea_array_design_full.json に全ての行の実例があることを確かめる。
+# gea_full.json / gea_array_design_full.json / gea_unread_sdrf.json に全ての行の実例があることを確かめる。
 # モデルを変えたら、ここも手で直す。
 #
-# 対象は GEA が公開している全てのファイルに現れる項目。
+# 対象は、D-way の GEA の DB (dordb の mass.metadata) にある IDF / SDRF / ADF の全ての版と、CIBEX の
+# ファイル (dordb に無いので、公開用の写しの cibex/ から) に現れる項目。accession が振られていない登録 (151 件) は
+# 作っている途中のものなので含めない (accession を振った登録の、振る前の版は含める)。公開用の写しは、
+# 公開した experiment の、公開したときの版しか持たない。
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
 #           Comment[*] は、別の行にある名前 (Comment[BioSample] など) を除いたもの。
-#           Protocol REF は、直後のノードを > の後に書く
+#           Protocol REF は、直後のノードを > の後に書く。
+#           (unread) は、Source Name で始まるタブ区切りの表でない SDRF (CSV や、SDRF の代わりに保存された
+#           IDF)。表として読まず、ファイルのまま指す
 #   adf     ADF の見出しの行。(table) は見出しの後の表
 #   cibex   CIBEX の「節 / キー」
+#
+# 見出しの読み方:
+#   - `Comment [x]` のような [ の前の空白と、見出しの前後の空白は数えない (MAGE-TAB の見出しは空白を区別しない)
+#   - SDRF の見出しの無い列は読まない。保存されたものには、どれも値が無い
+#   - SDRF のデータファイルの列の後に来るのは、MAGE-TAB ではその Comment と、次のノードの Protocol REF と、
+#     行の Factor Value だけ。過去の版には、そこに Characteristics、Parameter Value と Unit、Replicate を
+#     書いたものがあり (後の版では Factor Value に直されるか、消されている)、その行の member の
+#     misplaced_columns に見出しごと置く。直した後の形に読み替えると、直した履歴が消える
 #
 # 値の読み方は sra.yml と同じ:
 #   (container)          値を持たない入れ物
 #   a.b[]                b は list。[] の中の語は注記で、要素の type と、relation なら target.db
 #   ... (注記)           読み手のための補足
 #
-# 数はその項目を含むファイルの数。
+# 数はその項目を含むファイルの数。IDF / SDRF / ADF は版を 1 つずつ数える。
 #
 # SDRF の行は record に持たない。行の上のノードをオブジェクトにし、ノードの続き方を次のように結ぶ。
 #
-#   Source           samples[]。名前と値が同じ Source は 1 つの sample にし、名前が同じで値が違えば別の sample にする
+#   Source           samples[]
 #   Extract / Labeled Extract
 #                    experiments[].pool.members[]。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つ。
-#                    members[].sample が元の Source を指す。Factor Value は行の値なので、その行の member に置く
+#                    members[].sample が元の Source を指す。Factor Value と misplaced_columns は行の値なので、その行の
+#                    member に置く
 #   Assay            experiments[]
 #   生データのファイル (Array Data File / Array Data Matrix File)
-#                    runs[]。同じ列の同じ名前は 1 つの run にする。relations[part_of experiment] で、その行の Assay を指す
+#                    runs[]。relations[part_of experiment] で、その行の Assay を指す
 #   処理済みデータのファイル (Derived Array Data File / Derived Array Data Matrix File)
 #                    analyses[]。relations[derived_from] で、左隣のファイル (無ければ Assay) と、その行の Assay を指す
 #
-# run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
-# (dual-channel で channel ごとに別のファイルがあるものなど)。
+# どのノードも、列の位置、名前、そのノードに置く値 (属性、Comment、Protocol REF、member なら元の sample と extract、
+# Factor Value、misplaced_columns も) が全て同じものだけを 1 つのオブジェクトにまとめ、どれかが違えば同じ名前の別の
+# オブジェクトにする。同じファイルの名前でも、Comment の md5 が行ごとに違うもの (表計算の連番で書き換わったもの) や、
+# 別の列に書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、list の中の位置 (index) も
+# 書く。
 #
-# 行は、experiments[] の順に、その pool.members[] の順に、member から relations をたどって行き着くファイルの並びごとに
-# 1 つ作る。元の行の順序と、全く同じ行の繰り返しは保たない。1 つの Assay の中で member_name が重なる SDRF
-# (名前を使い回したもの) は、どのファイルがどの member のものかを指せないので、作り直すと行の組み合わせが増える。
+# run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
+# (dual-channel で channel ごとに別のファイルがあるものなど)。1 つの Assay の中で member を名前で指せないもの
+# (member_name の重なるもの、Labeled Extract が無く Extract が複数あるもの) は書かない。
+#
+# 行は、relations や index をたどらずに、次の 2 つだけから作る。relations、members[].sample、
+# data_blocks[].member_name はオブジェクトの間の関係を表すもので、行を作るのには使わない (index は、list の並びが
+# 変わると別のものを指す)。
+#
+#   sdrf_rows    元の行の番号 (0 始まり。見出しの次の行が 0)。samples[]、members[]、runs[]、analyses[] に持つ
+#   sdrf_column  run / analysis の、SDRF のファイルの列の中での位置 (0 始まり。左端のファイルの列が 0)
+#
+# 行 n は、n を持つ sample と member (と、member を含む experiment)、n を持つ run / analysis からなり、ファイルは
+# sdrf_column の順に並ぶ。行は番号の順に作る。全く同じ行の繰り返し (22 版に計 363 行。公開中の E-GEAD-414、415、
+# 416 の最新版にもある) も、番号が違うので別の行として戻る。番号で行を決めるので、オブジェクトの組み合わせから
+# 元に無い行が増えることも無い。sdrf_rows は番号の集まりで、並びに意味は無い。
+#
+# record は次を満たす: 0 から行の数 - 1 までの番号が、それぞれちょうど 1 つの sample と 1 つの member にある。
+# 1 つの番号を持つ run / analysis の sdrf_column は重ならない。
+#
+# 保たないのは、種類の違う列の並び (ノードの中で Comment が Technology Type の前か後か、misplaced_columns の列が
+# Factor Value の前か後か、など)。同じ種類の列の並びは保つ。
 
 idf:
-  Comment[AEExperimentType]:          submission.gea.experiment_type  # 768 ファイル
-  Comment[Array Design REF]:          submission.gea.array_design_ref  # 367 ファイル
-  Comment[BioProject]:                relations[part_of bioproject].target.id  # 768 ファイル
-  Comment[CIBEX Accept Date]:         submission.gea.legacy.cibex_accept_date  # 254 ファイル
-  Comment[CIBEX Public Release Date]: submission.gea.legacy.cibex_public_release_date  # 209 ファイル
-  Comment[CIBEX Submitter]:           submission.gea.legacy.cibex_submitter  # 14 ファイル
-  Comment[DBCLS]:                     submission.gea.dbcls_approval  # 25 ファイル
-  Comment[GEAAccession]:              projects[].accession  # 768 ファイル
-  Comment[Last Update Date]:          submission.gea.last_update_date  # 768 ファイル
-  Comment[NBDC]:                      submission.gea.nbdc_approval  # 13 ファイル
-  Comment[Number of channel]:         submission.gea.channel_type  # 369 ファイル
-  Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 26 ファイル
-  Comment[SecondaryAccession]:        projects[].identifiers[secondary].value  # 254 ファイル
-  Experiment Description:             projects[].description  # 768 ファイル
-  Experimental Design:                projects[].study_types[]  # 768 ファイル
-  Experimental Factor Name:           projects[].experimental_factors[].name  # 768 ファイル
-  Experimental Factor Type:           projects[].experimental_factors[].type  # 768 ファイル
-  Investigation Title:                projects[].title  # 768 ファイル
-  MAGE-TAB Version:                   submission.gea.magetab_version  # 768 ファイル
-  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
-  Person First Name:                  submission.submitters[].first_name  # 768 ファイル
-  Person Last Name:                   submission.submitters[].last_name  # 768 ファイル
-  Person Roles:                       submission.submitters[].role  # 768 ファイル
-  Protocol Description:               projects[].protocols[].description  # 768 ファイル
-  Protocol Name:                      projects[].protocols[].name  # 768 ファイル
-  Protocol Type:                      projects[].protocols[].type  # 768 ファイル
-  PubMed ID:                          projects[].publications[].pubmed_id  # 185 ファイル
-  Public Release Date:                submission.hold_date  # 768 ファイル
-  Publication DOI:                    projects[].publications[].doi  # 22 ファイル
-  SDRF File:                          submission.gea.sdrf_file  # 768 ファイル
+  Comment[AEExperimentType]:          submission.gea.experiment_type  # 4,702 ファイル
+  Comment[AdditionalFile:*]:          submission.gea.additional_files[].filename (角括弧の中のコロンの後が filetype)  # 5 ファイル
+  Comment[Array Design REF]:          submission.gea.array_design_ref  # 2,306 ファイル
+  Comment[BioProject]:                relations[part_of bioproject].target.id  # 4,702 ファイル
+  Comment[CIBEX Accept Date]:         submission.gea.legacy.cibex_accept_date  # 690 ファイル
+  Comment[CIBEX Public Release Date]: submission.gea.legacy.cibex_public_release_date  # 553 ファイル
+  Comment[CIBEX Submitter]:           submission.gea.legacy.cibex_submitter  # 47 ファイル
+  Comment[DBCLS]:                     submission.gea.dbcls_approval  # 109 ファイル
+  Comment[GEAAccession]:              projects[].accession (accession を振る前の版の ESUB…_Experiment_n は projects[].alias)  # 4,702 ファイル
+  Comment[Last Update Date]:          submission.gea.last_update_date  # 1,117 ファイル
+  Comment[NBDC]:                      submission.gea.nbdc_approval  # 47 ファイル
+  Comment[Number of channel]:         submission.gea.channel_type  # 2,314 ファイル
+  Comment[Public Release Date]:       submission.hold_date (過去の版の書き方)  # 37 ファイル
+  Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 108 ファイル
+  Comment[SecondaryAccession]:        projects[].identifiers[secondary].value  # 690 ファイル
+  Experiment Description:             projects[].description  # 4,702 ファイル
+  Experimental Design:                projects[].study_types[]  # 4,702 ファイル
+  Experimental Factor Name:           projects[].experimental_factors[].name  # 4,702 ファイル
+  Experimental Factor Type:           projects[].experimental_factors[].type  # 4,702 ファイル
+  Investigation Title:                projects[].title  # 4,702 ファイル
+  MAGE-TAB Version:                   submission.gea.magetab_version  # 4,702 ファイル
+  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 4,702 ファイル
+  Person First Name:                  submission.submitters[].first_name  # 4,702 ファイル
+  Person Last Name:                   submission.submitters[].last_name  # 4,702 ファイル
+  Person Roles:                       submission.submitters[].role  # 4,702 ファイル
+  Protocol Description:               projects[].protocols[].description  # 4,702 ファイル
+  Protocol Name:                      projects[].protocols[].name  # 4,702 ファイル
+  Protocol Type:                      projects[].protocols[].type  # 4,702 ファイル
+  PubMed ID:                          projects[].publications[].pubmed_id  # 560 ファイル
+  Public Release Date:                submission.hold_date  # 1,080 ファイル
+  Publication DOI:                    projects[].publications[].doi  # 92 ファイル
+  SDRF File:                          submission.gea.sdrf_file  # 4,702 ファイル
 
 sdrf:
-  Array Data File:                               runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 729 ファイル
-  Array Data Matrix File:                        runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 36 ファイル
-  Array Design REF @ Assay Name:                 experiments[].platform.array_design.accession (db は "array_design")  # 368 ファイル
-  Assay Name:                                    experiments[].alias  # 768 ファイル
-  Characteristics[*] @ Source Name:              samples[].attributes[].value (角括弧の中が name)  # 768 ファイル
-  Comment[*] @ Array Data File:                  runs[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Assay Name:                       experiments[].comments[].value (角括弧の中が name)  # 2 ファイル
-  Comment[*] @ Derived Array Data File:          analyses[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Derived Array Data Matrix File:   analyses[].comments[].value (角括弧の中が name)  # 2 ファイル
-  Comment[*] @ Extract Name:                     experiments[].pool.members[].extract.comments[].value (角括弧の中が name)  # 399 ファイル
-  Comment[*] @ Source Name:                      samples[].comments[].value (角括弧の中が name)  # 2 ファイル
-  Comment[BioSample] @ Source Name:              samples[].accession (members[].sample.accession にも同じ値)  # 768 ファイル
-  Comment[SRA_EXPERIMENT] @ Assay Name:          experiments[].accession  # 399 ファイル
-  Comment[SRA_RUN] @ Assay Name:                 runs[].accession (その行の Array Data File の run)  # 399 ファイル
-  Comment[description] @ Source Name:            samples[].description  # 292 ファイル
-  Comment[sample_title] @ Source Name:           samples[].title  # 768 ファイル
-  Derived Array Data File:                       analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 474 ファイル
-  Derived Array Data Matrix File:                analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 222 ファイル
-  Extract Name:                                  experiments[].pool.members[].extract.name  # 768 ファイル
-  Factor Value[*]:                               experiments[].pool.members[].factor_values[].value (角括弧の中が name)  # 767 ファイル
-  Label @ Labeled Extract Name:                  experiments[].pool.members[].label  # 368 ファイル
-  Labeled Extract Name:                          experiments[].pool.members[].member_name  # 368 ファイル
-  Material Type @ Extract Name:                  experiments[].pool.members[].extract.material_type  # 768 ファイル
-  Protocol REF > Array Data File:                runs[].protocol_refs[]  # 330 ファイル
-  Protocol REF > Array Data Matrix File:         runs[].protocol_refs[]  # 36 ファイル
-  Protocol REF > Assay Name:                     experiments[].protocol_refs[]  # 767 ファイル
-  Protocol REF > Derived Array Data File:        analyses[].protocol_refs[]  # 474 ファイル
-  Protocol REF > Derived Array Data Matrix File: analyses[].protocol_refs[]  # 222 ファイル
-  Protocol REF > Extract Name:                   experiments[].pool.members[].extract.protocol_refs[]  # 767 ファイル
-  Protocol REF > Labeled Extract Name:           experiments[].pool.members[].protocol_refs[]  # 368 ファイル
-  Source Name:                                   samples[].alias (members[].sample.id にも同じ値)  # 768 ファイル
-  Technology Type @ Assay Name:                  experiments[].technology_type  # 768 ファイル
-  Unit[*] @ Factor Value[*]:                     experiments[].pool.members[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 23 ファイル
+  (unread):                                                      submission.gea.legacy.unread_sdrf (表でない SDRF をファイルのまま)  # 5 ファイル
+  Array Data File:                                               runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 3,139 ファイル
+  Array Data Matrix File:                                        runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 169 ファイル
+  Array Design REF @ Assay Name:                                 experiments[].platform.array_design.accession (db は "array_design")  # 1,443 ファイル
+  Assay Name:                                                    experiments[].alias  # 3,308 ファイル
+  Characteristics[*] @ Derived Array Data File:                  experiments[].pool.members[].misplaced_columns[].value (name は列の見出し)  # 1 ファイル
+  Characteristics[*] @ Derived Array Data Matrix File:           experiments[].pool.members[].misplaced_columns[].value (name は列の見出し)  # 1 ファイル
+  Characteristics[*] @ Source Name:                              samples[].attributes[].value (角括弧の中が name)  # 3,308 ファイル
+  Comment[*] @ Array Data File:                                  runs[].comments[].value (角括弧の中が name)  # 823 ファイル
+  Comment[*] @ Array Data Matrix File:                           runs[].comments[].value (角括弧の中が name)  # 113 ファイル
+  Comment[*] @ Assay Name:                                       experiments[].comments[].value (角括弧の中が name)  # 10 ファイル
+  Comment[*] @ Derived Array Data File:                          analyses[].comments[].value (角括弧の中が name)  # 1,359 ファイル
+  Comment[*] @ Derived Array Data Matrix File:                   analyses[].comments[].value (角括弧の中が name)  # 656 ファイル
+  Comment[*] @ Extract Name:                                     experiments[].pool.members[].extract.comments[].value (角括弧の中が name)  # 1,863 ファイル
+  Comment[*] @ Source Name:                                      samples[].comments[].value (角括弧の中が name)  # 4 ファイル
+  Comment[BioSample] @ Source Name:                              samples[].accession (members[].sample.accession にも同じ値)  # 3,307 ファイル
+  Comment[SRA_EXPERIMENT] @ Assay Name:                          experiments[].accession  # 1,863 ファイル
+  Comment[SRA_RUN] @ Assay Name:                                 runs[].accession (その行の左端の Array Data File の run)  # 1,863 ファイル
+  Comment[description] @ Source Name:                            samples[].description  # 1,264 ファイル
+  Comment[sample_title] @ Source Name:                           samples[].title  # 3,307 ファイル
+  Derived Array Data File:                                       analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 2,093 ファイル
+  Derived Array Data Matrix File:                                analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 1,033 ファイル
+  Extract Name:                                                  experiments[].pool.members[].extract.name  # 3,308 ファイル
+  Factor Value[*]:                                               experiments[].pool.members[].factor_values[].value (角括弧の中が name)  # 3,306 ファイル
+  Label @ Labeled Extract Name:                                  experiments[].pool.members[].label  # 1,443 ファイル
+  Labeled Extract Name:                                          experiments[].pool.members[].member_name  # 1,443 ファイル
+  Material Type @ Extract Name:                                  experiments[].pool.members[].extract.material_type  # 3,308 ファイル
+  Parameter Value[*] @ Derived Array Data Matrix File:           experiments[].pool.members[].misplaced_columns[].value (name は列の見出し)  # 2 ファイル
+  Protocol REF > Array Data File:                                runs[].protocol_refs[]  # 1,276 ファイル
+  Protocol REF > Array Data Matrix File:                         runs[].protocol_refs[]  # 169 ファイル
+  Protocol REF > Assay Name:                                     experiments[].protocol_refs[]  # 3,306 ファイル
+  Protocol REF > Derived Array Data File:                        analyses[].protocol_refs[]  # 2,093 ファイル
+  Protocol REF > Derived Array Data Matrix File:                 analyses[].protocol_refs[]  # 1,033 ファイル
+  Protocol REF > Extract Name:                                   experiments[].pool.members[].extract.protocol_refs[]  # 3,306 ファイル
+  Protocol REF > Labeled Extract Name:                           experiments[].pool.members[].protocol_refs[]  # 1,443 ファイル
+  Replicate @ Derived Array Data File:                           experiments[].pool.members[].misplaced_columns[].value (name は列の見出し)  # 2 ファイル
+  Replicate @ Derived Array Data Matrix File:                    experiments[].pool.members[].misplaced_columns[].value (name は列の見出し)  # 4 ファイル
+  Source Name:                                                   samples[].alias (members[].sample.id にも同じ値)  # 3,308 ファイル
+  Technology Type @ Assay Name:                                  experiments[].technology_type  # 3,308 ファイル
+  Unit[*] @ Factor Value[*]:                                     experiments[].pool.members[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 80 ファイル
+  Unit[*] @ Parameter Value[*] @ Derived Array Data Matrix File: experiments[].pool.members[].misplaced_columns[].value (Unit の列も見出しごと 1 つの要素)  # 2 ファイル
 
 adf:
-  (table):                            array_design.file (ADF をファイルのまま)  # 242 ファイル
-  Array Design Name:                  array_design.name  # 18 ファイル
-  Comment[CIBEX Public Release Date]: array_design.legacy.cibex_public_release_date  # 4 ファイル
-  Comment[Description]:               array_design.description  # 17 ファイル
-  Comment[GEAAccession]:              array_design.accession  # 242 ファイル
-  Comment[Organism]:                  array_design.organism.name  # 18 ファイル
-  Comment[Public Release Date]:       submission.hold_date  # 13 ファイル
-  Comment[SubmittedName]:             array_design.submitted_name  # 5 ファイル
-  Printing Protocol:                  array_design.printing_protocol  # 18 ファイル
-  Provider:                           array_design.provider  # 18 ファイル
-  Sequence Polymer Type:              array_design.sequence_polymer_type  # 13 ファイル
-  Substrate Type:                     array_design.substrate_type  # 18 ファイル
-  Surface Type:                       array_design.surface_type  # 18 ファイル
-  Technology Type:                    array_design.technology_type  # 18 ファイル
-  Term Source File:                   array_design.term_sources[].file  # 12 ファイル
-  Term Source Name:                   array_design.term_sources[].name  # 12 ファイル
-  Version:                            array_design.version  # 13 ファイル
+  (table):                            array_design.file (ADF をファイルのまま)  # 862 ファイル
+  Array Design Name:                  array_design.name  # 87 ファイル
+  Comment[CIBEX Public Release Date]: array_design.legacy.cibex_public_release_date  # 24 ファイル
+  Comment[Description]:               array_design.description  # 80 ファイル
+  Comment[GEAAccession]:              array_design.accession  # 613 ファイル
+  Comment[Organism]:                  array_design.organism.name  # 87 ファイル
+  Comment[Public Release Date]:       submission.hold_date  # 70 ファイル
+  Comment[SubmittedName]:             array_design.submitted_name  # 27 ファイル
+  Printing Protocol:                  array_design.printing_protocol  # 87 ファイル
+  Provider:                           array_design.provider  # 87 ファイル
+  Sequence Polymer Type:              array_design.sequence_polymer_type  # 60 ファイル
+  Substrate Type:                     array_design.substrate_type  # 87 ファイル
+  Surface Type:                       array_design.surface_type  # 87 ファイル
+  Technology Type:                    array_design.technology_type  # 87 ファイル
+  Term Source File:                   array_design.term_sources[].file  # 56 ファイル
+  Term Source Name:                   array_design.term_sources[].name  # 56 ファイル
+  Version:                            array_design.version  # 60 ファイル
 
 cibex:
   (top) / CIBEX accession:                     submission.gea.legacy.cibex.accession  # 216 ファイル

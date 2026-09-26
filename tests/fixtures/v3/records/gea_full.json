@@ -30,6 +30,12 @@
       "last_update_date": "2025-01-31",
       "nbdc_approval": "The Data Access Committee of NBDC approved that this personal data was made published.",
       "dbcls_approval": "The Data Access Committee of DBCLS approved that this personal data was made published.",
+      "additional_files": [
+        {
+          "filename": "barcode-sample-mapping.txt",
+          "filetype": "txt"
+        }
+      ],
       "legacy": {
         "cibex_accept_date": "2010-01-01",
         "cibex_public_release_date": "2010-03-05",
@@ -253,6 +259,11 @@
           "name": "Library",
           "value": "lib-1"
         }
+      ],
+      "sdrf_rows": [
+        0,
+        2,
+        3
       ]
     },
     {
@@ -272,6 +283,9 @@
           "name": "taxonomy_id",
           "value": "9606"
         }
+      ],
+      "sdrf_rows": [
+        1
       ]
     }
   ],
@@ -326,6 +340,19 @@
                 "unit": "micromolar",
                 "unit_type": "concentration unit"
               }
+            ],
+            "misplaced_columns": [
+              {
+                "name": "Parameter Value[day growth temperature]",
+                "value": "28"
+              },
+              {
+                "name": "Unit[temperature unit]",
+                "value": "degree Celsius"
+              }
+            ],
+            "sdrf_rows": [
+              0
             ]
           },
           {
@@ -358,6 +385,9 @@
                 "unit": "micromolar",
                 "unit_type": "concentration unit"
               }
+            ],
+            "sdrf_rows": [
+              1
             ]
           }
         ]
@@ -411,6 +441,10 @@
                 "unit": "micromolar",
                 "unit_type": "concentration unit"
               }
+            ],
+            "sdrf_rows": [
+              2,
+              3
             ]
           }
         ]
@@ -439,7 +473,11 @@
           "name": "Array Data File md5",
           "value": "0123456789abcdef0123456789abcdef"
         }
-      ]
+      ],
+      "sdrf_rows": [
+        0
+      ],
+      "sdrf_column": 0
     },
     {
       "alias": "hyb1_Cy3.txt",
@@ -456,7 +494,11 @@
       ],
       "protocol_refs": [
         "P-GEAD-5"
-      ]
+      ],
+      "sdrf_rows": [
+        1
+      ],
+      "sdrf_column": 0
     },
     {
       "accession": "DRR000001",
@@ -470,7 +512,12 @@
             }
           ]
         }
-      ]
+      ],
+      "sdrf_rows": [
+        2,
+        3
+      ],
+      "sdrf_column": 0
     }
   ],
   "analyses": [
@@ -494,7 +541,12 @@
           "name": "Derived Array Data File md5",
           "value": "fedcba9876543210fedcba9876543210"
         }
-      ]
+      ],
+      "sdrf_rows": [
+        0,
+        1
+      ],
+      "sdrf_column": 1
     },
     {
       "alias": "normalized_matrix.txt",
@@ -516,7 +568,12 @@
           "name": "Derived Array Data Matrix File md5",
           "value": "00112233445566778899aabbccddeeff"
         }
-      ]
+      ],
+      "sdrf_rows": [
+        0,
+        1
+      ],
+      "sdrf_column": 2
     }
   ],
   "relations": [

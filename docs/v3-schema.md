@@ -33,7 +33,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 
 record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
 
-SRA XSD 1.5 より前の要素のように、形式の古い version にしか無い要素は、そのモデルの `legacy` に置く。GEA の前身の CIBEX の登録は `submission.gea.legacy` に置く。新しい登録が `legacy` を使っていないかは、ddbj-validator のルールで確かめる。
+SRA XSD 1.5 より前の要素のように、形式の古い version にしか無い要素は、そのモデルの `legacy` に置く。GEA の前身の CIBEX の登録と、GEA の過去の版にある表として読めない SDRF は `submission.gea.legacy` に置く。新しい登録が `legacy` を使っていないかは、ddbj-validator のルールで確かめる。
 
 ## 型が保証する範囲
 
@@ -62,7 +62,7 @@ SRA XML や GEA のメタデータから変換した record は、元の形式�
 - 戻せるのは、値、入れ子、繰り返しの数、繰り返しの順序
 - 保たないのは、値を持たない要素、数の書き方、XML の書式 (属性の並び、空白、コメント)。例えば `NOMINAL_SDEV="0.0E0"` は `nominal_sdev: 0.0` になり、`0.0E0` には戻らない
 - 大きな表 (アレイ設計のプローブの表など) とリードファイルは record に入れず、`File` で指す
-- GEA の SDRF の行は record に持たず、オブジェクトと relations から作り直す。行の順序と、全く同じ行の繰り返しは保たない。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
+- GEA の SDRF の行は record に持たず、オブジェクトと relations から作り直す。行の番号を sample、member、run / analysis の `sdrf_rows` に、ファイルの列の位置を run / analysis の `sdrf_column` に持ち、行はこの 2 つだけから作るので、行の順序と全く同じ行の繰り返しも戻り、list の並びが変わっても崩れない。保たないのは、種類の違う列の並び (ノードの中で Comment が属性の前か後か、など)。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
 
 形式の要素を v3 のどこに置くかは、[`tests/fixtures/v3/mapping/`](../tests/fixtures/v3/mapping/) の対応表に 1 行ずつ書いてある。変換そのものは利用側が行う。対応表をどう確かめているかは [tests/README.md](../tests/README.md) にある。
 

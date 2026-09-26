@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field
+
+# 元の SDRF の行の番号 (0 始まり、見出しの次の行が 0)。
+SdrfRowNumber = Annotated[int, Field(ge=0)]
 
 # === Common types ===
 
@@ -369,12 +374,19 @@ class Cibex(BaseModel):
 
 
 class GeaSubmissionLegacy(BaseModel):
-    """CIBEX から移した GEA の experiment にだけある、IDF の Comment[CIBEX *] と、CIBEX の元の登録。"""
+    """移した GEA の experiment にだけあるもの。CIBEX から移したものの IDF の Comment[CIBEX *] と
+    CIBEX の元の登録、表として読めない過去の版の SDRF。
+    """
 
     cibex_accept_date: str | None = None
     cibex_public_release_date: str | None = None
     cibex_submitter: str | None = None
     cibex: Cibex | None = None
+    # SDRF として保存されていたが、Source Name で始まるタブ区切りの表ではないもの (CSV や、
+    # SDRF の代わりに保存された IDF)。ファイルのまま指す (文字列にすると、登録システムが空白を
+    # まとめたときにタブ区切りの欄が壊れる)。filename は IDF の SDRF File の値、checksum は保存された
+    # バイト列のもの。その版の record は SDRF から作るオブジェクトを持たない。
+    unread_sdrf: File | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -392,6 +404,8 @@ class GeaSubmission(BaseModel):
     # ヒトのデータの公開を、NBDC / DBCLS のデータアクセス委員会が承認したことを述べる文。
     nbdc_approval: str | None = None
     dbcls_approval: str | None = None
+    # IDF の Comment[AdditionalFile:x] が挙げる、SDRF の外のファイル。filetype は x。
+    additional_files: list[File] | None = None
     legacy: GeaSubmissionLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -575,6 +589,8 @@ class Sample(BaseModel):
     individual_name: str | None = None
     # MAGE-TAB の Source の Comment[x] の列 (name が x)。Submission.comments のような自由記述ではない。
     comments: list[Attribute] | None = None
+    # この Source が現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -843,6 +859,14 @@ class PoolMember(BaseModel):
     extract: Extract | None = None
     # dual-channel では channel ごとに値が違うので、Assay でなく member に置く。
     factor_values: list[FactorValue] | None = None
+    # SDRF のデータファイルの後に書かれた、MAGE-TAB がそこに置かない列 (Characteristics、
+    # Parameter Value、Replicate)。Factor Value と同じく行の値なので member に置く。name は列の
+    # 見出し、value はその行の値で、見出しの並びのまま。Unit[y] の列も見出しごと 1 つの要素にし、
+    # unit は使わない (前の列の unit にすると y を失う)。移した過去の版にだけある。
+    misplaced_columns: list[Attribute] | None = None
+    # この member が現れる SDRF の行の番号。行は、その番号を持つ sample、member、run / analysis から作り直す
+    # (tests/fixtures/v3/mapping/gea.yml の冒頭)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -972,6 +996,10 @@ class Run(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ) と、SDRF のファイルの列の中での
+    # 位置 (0 始まり。左端のファイルの列が 0)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
+    sdrf_column: int | None = Field(None, ge=0)
     legacy: RunLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -1052,6 +1080,10 @@ class Analysis(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ) と、SDRF のファイルの列の中での
+    # 位置 (0 始まり。左端のファイルの列が 0)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
+    sdrf_column: int | None = Field(None, ge=0)
 
     model_config = ConfigDict(extra="forbid")
 
