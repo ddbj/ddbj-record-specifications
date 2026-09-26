@@ -4,7 +4,8 @@
 書いたもの。行が正しい場所を指しているかは確かめない。それは scripts/gea/build_mapping.py の規則と、
 それを読む人が決める。ここで確かめるのは次のこと。
 
-- 対応表が指す v3 の場所が、どれもモデルに実在し、ADF の表を除いて値の場所である
+- 対応表が指す v3 の場所が、どれもモデルに実在し、ファイルのまま指すもの (ADF の表、表でない SDRF) を
+  除いて値の場所である
 - raw fixture の GEA のファイルに出てくる項目が、どれも対応表にある
 - ファイルの読み方の規則 (scripts/gea/census_gea.py) が、それぞれの癖を持つ raw fixture で働く
 - 対応表の全ての場所に、gea_*.json のどれかの中で値がある
@@ -45,11 +46,13 @@ def test_every_location_exists_in_the_model(location: str) -> None:
     resolve(location)
 
 
-VALUE_ROWS = {row: location for row, location in ROWS.items() if row != "adf:(table)"}
+# ファイルのまま指すもの: ADF の表と、表として読まない SDRF。
+FILE_ROWS = {"adf:(table)", "sdrf:(unread)"}
+VALUE_ROWS = {row: location for row, location in ROWS.items() if row not in FILE_ROWS}
 
 
 @pytest.mark.parametrize("location", VALUE_ROWS.values(), ids=VALUE_ROWS.keys())
-def test_every_item_but_the_adf_table_lands_on_a_value(location: str) -> None:
+def test_every_item_but_the_files_lands_on_a_value(location: str) -> None:
     assert resolve(location) in SCALARS
 
 
@@ -232,20 +235,62 @@ def test_a_space_before_a_bracket_is_not_counted(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "text",
+    ("text", "form"),
     [
         # CSV で保存された版 (E-GEAD-670、856)。
-        '"Source Name","Assay Name"\n"s1","a1"\n',
+        ('"Source Name","Assay Name"\r\n"s1","a1"\r\n', "CSV"),
         # SDRF の代わりに IDF が保存された版 (E-GEAD-324、342)。
-        "Comment[GEAAccession]\tE-GEAD-1\nMAGE-TAB Version\t1.1\n",
+        ("Comment[GEAAccession]\tE-GEAD-1\t\t\nInvestigation Title\tx\nSDRF File\tE-GEAD-1.sdrf.txt\n", "IDF"),
     ],
 )
-def test_an_sdrf_that_is_not_a_table_is_left_unread(tmp_path: Path, text: str) -> None:
+def test_an_sdrf_in_a_known_other_form_is_left_unread(tmp_path: Path, text: str, form: str) -> None:
     census = _census(_write(tmp_path, "x.sdrf.txt", text))
 
-    assert census["sdrf"]["unread"] == 1
+    assert census["sdrf"]["unread"] == {"x.sdrf.txt": form}
     assert census["sdrf"]["items"] == {}
+    assert _unrepresentable(census) == {}
     assert set(build_mapping.items(census)["sdrf"]) <= set(MAPPING["sdrf"])
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # 空白で区切ったもの。CSV でも IDF でもない。
+        "Source Name Assay Name\ns1 a1\n",
+        "# a comment\nSource Name\tAssay Name\ns1\ta1\n",
+    ],
+)
+def test_an_sdrf_in_an_unknown_form_is_unrepresentable(tmp_path: Path, text: str) -> None:
+    census = _census(_write(tmp_path, "x.sdrf.txt", text))
+
+    assert census["sdrf"]["unread"] == {}
+    assert _unrepresentable(census) == {
+        "unrepresentable: SDRFs that neither start with Source Name nor are in a known form": 1
+    }
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "\ufeffSource Name\tAssay Name\ns1\ta1\n",
+        # 見出しの無い列が先頭にある。
+        "\tSource Name\tAssay Name\n\ts1\ta1\n",
+    ],
+)
+def test_a_table_starting_with_source_name_is_read(tmp_path: Path, text: str) -> None:
+    census = _census(_write(tmp_path, "x.sdrf.txt", text))
+
+    assert census["sdrf"]["unread"] == {}
+    assert set(census["sdrf"]["items"]) == {"Source Name", "Assay Name"}
+
+
+def test_a_heading_in_another_case_is_read_and_left_without_a_rule(tmp_path: Path) -> None:
+    # MAGE-TAB の見出しは大文字小文字を区別しないが、保存された SDRF には無い。現れたら規則が無いとして
+    # build_mapping.py が止まる (表でないとして黙って読まずに済ませない)。
+    census = _census(_write(tmp_path, "x.sdrf.txt", "source name\tAssay Name\ns1\ta1\n"))
+
+    assert census["sdrf"]["unread"] == {}
+    assert build_mapping.sdrf_rule("source name") is None
 
 
 def test_an_empty_column_without_a_heading_is_left_out(tmp_path: Path) -> None:
@@ -256,7 +301,20 @@ def test_an_empty_column_without_a_heading_is_left_out(tmp_path: Path) -> None:
 
     assert set(census["sdrf"]["items"]) == {"Source Name", "Assay Name"}
     assert census["sdrf"]["items"]["Assay Name"]["kinds"] == {"str": ["a1"]}
-    assert _unrepresentable(census) == {}
+    assert census["anomalies"] == {"SDRFs with an empty column without a heading": 1}
+
+
+def test_a_row_short_of_its_last_factor_values_loses_nothing(tmp_path: Path) -> None:
+    # 335 行の形: 末尾の Factor Value と Unit の欄が欠けている。
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tAssay Name\tFactor Value[a]\tUnit[time unit]\ns1\ta1\t5\thour\ns2\ta2\n",
+    )
+
+    census = _census(sdrf)
+
+    assert census["anomalies"] == {"rows whose width differs from the header": 1}
 
 
 @pytest.mark.parametrize(
@@ -280,16 +338,72 @@ def test_columns_after_a_data_file_other_than_comments_are_misplaced(tmp_path: P
         tmp_path,
         "x.sdrf.txt",
         "Source Name\tAssay Name\tDerived Array Data File\tComment[md5]\tFactor Value[t]\t"
-        "Parameter Value[temperature]\tUnit[temperature unit]\tReplicate\n"
-        "s1\ta1\tf.txt\t0123\t5\t28\tdegree Celsius\tbiological replicate-1\n",
+        "Parameter Value[temperature]\tUnit[temperature unit]\tReplicate\tCharacteristics[genotype]\n"
+        "s1\ta1\tf.txt\t0123\t5\t28\tdegree Celsius\tbiological replicate-1\twild type\n",
     )
 
     locations = {item: build_mapping.sdrf_rule(item) for item in _census(sdrf)["sdrf"]["items"]}
 
     assert locations["Comment[*] @ Derived Array Data File"].startswith("investigation.sdrf[].data_files[].comments[]")
+    assert locations["Factor Value[*]"].startswith("investigation.sdrf[].factor_values[]")
     for item in (
+        "Characteristics[*] @ Derived Array Data File",
         "Parameter Value[*] @ Derived Array Data File",
         "Unit[*] @ Parameter Value[*] @ Derived Array Data File",
         "Replicate @ Derived Array Data File",
     ):
         assert locations[item].startswith("investigation.sdrf[].misplaced_columns[].value"), item
+
+
+def test_misplaced_columns_of_one_name_are_one_list_for_the_row(tmp_path: Path) -> None:
+    # misplaced_columns は行に 1 つの list なので、別のデータファイルの後の同じ名前の列でも、空の欄の後に
+    # 値があれば値の位置がずれる。
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tArray Data File\tReplicate\tDerived Array Data File\tReplicate\ns1\tf1\t\tf2\t2\n",
+    )
+
+    assert _unrepresentable(_census(sdrf)) == {
+        "unrepresentable: SDRF rows with an empty cell before a value of the same column": 1
+    }
+
+
+def test_idf_tags(tmp_path: Path) -> None:
+    idf = _write(
+        tmp_path,
+        "x.idf.txt",
+        "Comment [GEAAccession]\tE-GEAD-1\nComment[AdditionalFile:txt]\tmap.txt\nComment[Public Release Date]\t2019-03-27\n",
+    )
+
+    tags = set(_census(idf)["idf"])
+
+    assert tags == {"Comment[GEAAccession]", "Comment[AdditionalFile:txt]", "Comment[Public Release Date]"}
+    assert build_mapping.idf_rule("Comment[AdditionalFile:txt]").startswith("investigation.additional_files[].name")
+    assert build_mapping.idf_rule("Comment[Public Release Date]").startswith("submission.hold_date")
+
+
+@pytest.mark.parametrize(
+    ("text", "anomaly"),
+    [
+        (
+            "Public Release Date\t2019-03-27\nComment[Public Release Date]\t2019-04-01\n",
+            "unrepresentable: IDFs with both Public Release Date and Comment[Public Release Date]",
+        ),
+        ("Investigation Title\tx\n\tlost\n", "unrepresentable: IDF values on a line without a tag"),
+        ("# a comment\nInvestigation Title\tx\n", "unrepresentable: IDF comment lines"),
+    ],
+)
+def test_idf_lines_v3_cannot_hold(tmp_path: Path, text: str, anomaly: str) -> None:
+    assert _unrepresentable(_census(_write(tmp_path, "x.idf.txt", text))) == {anomaly: 1}
+
+
+def test_an_adf_header_tag_with_a_space_before_its_bracket(tmp_path: Path) -> None:
+    adf = _write(
+        tmp_path, "x.adf", "Comment [GEAAccession]\tA-GEAD-1\nArray Design Name\tx\n\n[main]\nReporter Name\nr1\n"
+    )
+
+    census = _census(adf)
+
+    assert set(census["adf"]["header"]) == {"Comment[GEAAccession]", "Array Design Name"}
+    assert census["adf"]["forms"] == {"MAGE-TAB ADF": 1}

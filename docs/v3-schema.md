@@ -725,7 +725,7 @@ class SdrfRow(BaseModel):              # SDRF の 1 行
     assay: SdrfAssay | None
     data_files: list[SdrfDataFile] | None
     factor_values: list[SdrfFactorValue] | None
-    misplaced_columns: list[Attribute] | None  # MAGE-TAB がそこに置かない列 (過去の版)。name は列の見出し
+    misplaced_columns: list[Attribute] | None  # MAGE-TAB がそこに置かない列 (過去の版)。name は列の見出し、unit は使わない
 
 class AdditionalFile(BaseModel):       # IDF の Comment[AdditionalFile:type]
     type: str | None
@@ -841,7 +841,7 @@ class InvestigationLegacy(BaseModel):  # 移した experiment にだけあるも
     cibex_public_release_date: str | None
     cibex_submitter: str | None
     cibex: Cibex | None
-    sdrf_as_stored: str | None         # 表でない SDRF (過去の版の CSV など) を保存されたまま
+    unread_sdrf: File | None           # 表でない SDRF (過去の版の CSV など)。ファイルのまま
 
 class Investigation(BaseModel):
     accession: str | None              # E-GEAD
@@ -856,8 +856,8 @@ class Investigation(BaseModel):
     publications: list[Publication] | None
     sdrf_file: str | None
     sdrf: list[SdrfRow] | None
-    additional_files: list[AdditionalFile] | None
     # 以下は GEA が IDF の Comment[...] に書くもの
+    additional_files: list[AdditionalFile] | None
     experiment_type: str | None
     channel_type: str | None           # "single-channel", "dual-channel"
     array_design_ref: str | None       # SDRF の Array Design REF をまとめたもの

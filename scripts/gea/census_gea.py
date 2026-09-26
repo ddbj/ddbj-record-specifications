@@ -12,7 +12,8 @@ Usage:
 DORDB_DIR is what export_dordb.rb wrote: every version of every IDF, SDRF and ADF D-way holds.
 CIBEX_DIR holds the CIBEX files, which D-way does not: the cibex/ of the published GEA tree,
 
-    rsync -a a012:/usr/local/resources/gea/cibex/ CIBEX_DIR/
+    rsync -a -m --include='*/' --include='*.metadata' --exclude='*' \\
+      a012:/usr/local/resources/gea/cibex/ CIBEX_DIR/
 
 For each item the output records how many files have it, how often it repeats in one file, and
 which kinds of value it holds (int / float / bool / empty / str), with a few examples.
@@ -55,6 +56,11 @@ SDRF_NODES = (
     "Derived Array Data Matrix File",
     "Image File",
 )
+
+# The data file nodes, and the columns MAGE-TAB puts after one (build_mapping.py puts any other
+# into the row's misplaced_columns).
+DATA_FILES = {node for node in SDRF_NODES if node.endswith(("Data File", "Data Matrix File"))}
+DATA_FILE_COLUMNS = ("Comment[", "Factor Value[", "Protocol REF")
 
 MAGE_TAB_ADF_HEADER = {
     "Array Design Name",
@@ -139,7 +145,8 @@ def read(path: Path, encodings: Counter[str]) -> str:
         except UnicodeDecodeError:
             continue
         encodings[encoding] += 1
-        return text
+        # A byte order mark is not part of the text (none of the stored files has one).
+        return text.removeprefix("\ufeff")
     raise AssertionError(path)  # latin-1 decodes anything
 
 
@@ -151,8 +158,9 @@ _ESCAPED_QUOTE = "\ue000"
 def rows_of(text: str, *, backslash_quotes: bool = False) -> list[list[str]]:
     """Tab-separated rows, quoted as MAGE-TAB quotes ("" inside a quoted value is a quote).
 
-    With backslash_quotes, \\" is a quote too: 39 IDFs and 2 SDRFs write it so. Any other
-    backslash is kept as it is (ADF tables have values such as D1Bda10\\2).
+    With backslash_quotes, \\" is a quote too: 232 versions of IDFs and 4 of SDRFs write it so.
+    Any other backslash is kept as it is (ADF tables have values such as D1Bda10\\2, and two IDFs
+    write TeX: $\\mu$).
     """
     if backslash_quotes:
         if _ESCAPED_QUOTE in text:
@@ -190,15 +198,28 @@ def tag(cell: str) -> str:
     return re.sub(r"\s+\[", "[", cell.strip())
 
 
-def census_idf(path: Path, tally: Tally, encodings: Counter[str]) -> None:
+# Two tags for the one value v3 holds of them: an IDF must not have both.
+IDF_SAME_VALUE = (("Public Release Date", "Comment[Public Release Date]"),)
+
+
+def census_idf(path: Path, tally: Tally, anomalies: Counter[str], encodings: Counter[str]) -> None:
     occurrences: dict[str, list[str]] = defaultdict(list)
     for row in rows_of(read(path, encodings), backslash_quotes=True):
-        if not row or not row[0].strip() or row[0].startswith("#"):
-            continue
         values = [cell.strip() for cell in row[1:]]
         while values and values[-1] == "":
             values.pop()
+        if not row or not row[0].strip():
+            if values:
+                anomalies["unrepresentable: IDF values on a line without a tag"] += 1
+            continue
+        if row[0].startswith("#"):
+            # A MAGE-TAB comment is not an item, but it is what somebody wrote.
+            anomalies["unrepresentable: IDF comment lines"] += 1
+            continue
         occurrences[tag(row[0])] += values
+    for tags in IDF_SAME_VALUE:
+        if all(occurrences.get(t) for t in tags):
+            anomalies[f"unrepresentable: IDFs with both {' and '.join(tags)}"] += 1
     tally.file(occurrences, path.name)
 
 
@@ -210,6 +231,19 @@ def _sdrf_item(column: str, node: str | None) -> str:
     return f"{general} @ {node}"
 
 
+def unread_form(rows: list[list[str]]) -> str | None:
+    """What an SDRF that is not a table of MAGE-TAB is instead, when it is one of the known forms.
+
+    A CSV is one cell a line, as a tab-separated table; an IDF saved in place of the SDRF has the
+    IDF's tags down its first column.
+    """
+    if all(len(row) == 1 for row in rows) and "," in rows[0][0]:
+        return "CSV"
+    if {"Investigation Title", "SDRF File"} <= {tag(row[0]) for row in rows}:
+        return "IDF"
+    return None
+
+
 def census_sdrf(  # noqa: PLR0913, PLR0917
     path: Path,
     tally: Tally,
@@ -217,15 +251,20 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     per_row: Counter[str],
     anomalies: Counter[str],
     encodings: Counter[str],
-) -> int | None:
+) -> int | str:
     """Tally one SDRF; return its number of rows.
 
-    A file that is not a tab-separated table starting with Source Name (a CSV, or an IDF saved in
-    place of the SDRF) is not read, and None is returned: v3 keeps it as it is stored.
+    A file in a known form other than a table of MAGE-TAB (unread_form) is not read, and the form
+    is returned: v3 keeps the file as it is stored. Anything else that does not start with Source
+    Name is unrepresentable.
     """
     rows = [row for row in rows_of(read(path, encodings), backslash_quotes=True) if any(cell.strip() for cell in row)]
-    if not rows or tag(rows[0][0]) != "Source Name":
-        return None
+    first = next((cell for cell in rows[0] if cell.strip()), "") if rows else ""
+    if re.sub(r"\s", "", first).lower() != "sourcename":
+        if form := unread_form(rows):
+            return form
+        anomalies["unrepresentable: SDRFs that neither start with Source Name nor are in a known form"] += 1
+        return 0
 
     # A column without a heading (an empty one, or cells past the last) is nothing MAGE-TAB can
     # name. The stored ones hold no values, and are left out.
@@ -289,14 +328,18 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     # given twice), and the data file columns across the row (data_files[] is one list). v3 keeps
     # a list's values, not its empty cells, so an empty cell with a value after it would move
     # that value. A Unit is not a list of its own: it goes with the column before it.
+    # Columns MAGE-TAB does not give a data file, after one, go into one list for the row too.
     segment = 0
+    node = None
     groups: dict[tuple[int, str], list[int]] = defaultdict(list)
     for index, column in enumerate(header):
         if column in SDRF_NODES:
             segment += 1
+            node = column
         if column.startswith("Unit["):
             continue
-        groups[(0 if "File" in column and column in SDRF_NODES else segment), column].append(index)
+        whole_row = column in DATA_FILES or (node in DATA_FILES and not column.startswith(DATA_FILE_COLUMNS))
+        groups[(0 if whole_row else segment), column].append(index)
     for indices in groups.values():
         for row in body:
             cells = [row[i].strip() if i < len(row) else "" for i in indices]
@@ -315,16 +358,16 @@ def census_adf(
     index = 0
     while index < len(rows):
         row = rows[index]
-        tag = row[0].strip() if row else ""
-        if any(cell.strip() for cell in row) and not (tag.startswith("Comment[") or tag in MAGE_TAB_ADF_HEADER):
+        name = tag(row[0]) if row else ""
+        if any(cell.strip() for cell in row) and not (name.startswith("Comment[") or name in MAGE_TAB_ADF_HEADER):
             break
-        if tag:
+        if name:
             # Positions matter (Term Source Name / File / Version are parallel), so only the
             # trailing empty cells go.
             values = [cell.strip() for cell in row[1:]]
             while values and values[-1] == "":
                 values.pop()
-            header[tag] += values
+            header[name] += values
         index += 1
 
     rest = rows[index:]
@@ -431,8 +474,10 @@ def census(idfs: list[Path], sdrfs: list[Path], adfs: list[Path], cibexes: list[
     cibex_blocks: dict[str, Counter[int]] = defaultdict(Counter)
 
     for path in idfs:
-        census_idf(path, idf, encodings["idf"])
-    read_rows = [census_sdrf(path, sdrf, sdrf_names, sdrf_per_row, anomalies, encodings["sdrf"]) for path in sdrfs]
+        census_idf(path, idf, anomalies, encodings["idf"])
+    sdrf_read = {
+        path.name: census_sdrf(path, sdrf, sdrf_names, sdrf_per_row, anomalies, encodings["sdrf"]) for path in sdrfs
+    }
     for path in adfs:
         census_adf(path, adf_header, adf_table, adf_forms, encodings["adf"])
     for path in cibexes:
@@ -445,8 +490,8 @@ def census(idfs: list[Path], sdrfs: list[Path], adfs: list[Path], cibexes: list[
         "idf": idf.as_json(),
         "sdrf": {
             "items": sdrf.as_json(),
-            "rows": sum(n for n in read_rows if n is not None),
-            "unread": read_rows.count(None),
+            "rows": sum(n for n in sdrf_read.values() if isinstance(n, int)),
+            "unread": {name: form for name, form in sdrf_read.items() if isinstance(form, str)},
             "most_in_a_row": dict(sorted(sdrf_per_row.items())),
             "bracketed_names": {kind: dict(counter.most_common()) for kind, counter in sdrf_names.items()},
         },

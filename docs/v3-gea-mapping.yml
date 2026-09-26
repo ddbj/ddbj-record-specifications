@@ -54,7 +54,7 @@ idf:
   SDRF File:                          investigation.sdrf_file  # 4,702 ファイル
 
 sdrf:
-  (unread):                                                      investigation.legacy.sdrf_as_stored (SDRF を保存されたまま)  # 5 ファイル
+  (unread):                                                      investigation.legacy.unread_sdrf (SDRF をファイルのまま)  # 5 ファイル
   Array Data File:                                               investigation.sdrf[].data_files[].name (type は列の名前)  # 3,139 ファイル
   Array Data Matrix File:                                        investigation.sdrf[].data_files[].name (type は列の名前)  # 169 ファイル
   Array Design REF @ Assay Name:                                 investigation.sdrf[].assay.array_design_ref  # 1,443 ファイル

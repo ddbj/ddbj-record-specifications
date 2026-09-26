@@ -893,7 +893,8 @@ class SdrfRow(BaseModel):
     data_files: list[SdrfDataFile] | None = None
     factor_values: list[SdrfFactorValue] | None = None
     # MAGE-TAB がそこに置かない列 (データファイルの後の Characteristics や Parameter Value など)。
-    # name は列の見出し、value はその行の値で、見出しの並びのまま。移した過去の版にだけある。
+    # name は列の見出し、value はその行の値で、見出しの並びのまま。Unit[y] の列も見出しごと 1 つの
+    # 要素になり、unit は使わない (直前の列の unit にすると y を失う)。移した過去の版にだけある。
     misplaced_columns: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -1062,8 +1063,9 @@ class InvestigationLegacy(BaseModel):
     cibex_submitter: str | None = None
     cibex: Cibex | None = None
     # SDRF として保存されていたが、Source Name で始まるタブ区切りの表ではないもの (CSV や、
-    # SDRF の代わりに保存された IDF)。保存されたまま。どれも次の版で表に直されている。
-    sdrf_as_stored: str | None = None
+    # SDRF の代わりに保存された IDF)。ADF の表と同じくファイルのまま指す。どれも次の版で表に
+    # 直されている。
+    unread_sdrf: File | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1083,8 +1085,8 @@ class Investigation(BaseModel):
     publications: list[Publication] | None = None
     sdrf_file: str | None = None
     sdrf: list[SdrfRow] | None = None
-    additional_files: list[AdditionalFile] | None = None
     # 以下は GEA が IDF の Comment[...] に書くもの。
+    additional_files: list[AdditionalFile] | None = None
     experiment_type: str | None = Field(None, examples=["transcription profiling by array"])
     channel_type: str | None = Field(None, examples=["single-channel"])
     # SDRF の Array Design REF をまとめたもの。

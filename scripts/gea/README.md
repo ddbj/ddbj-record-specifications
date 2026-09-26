@@ -8,7 +8,7 @@ PGHOST=... PGPORT=... PGUSER=... PGPASSWORD=... PGDATABASE=dordb \
   ruby scripts/gea/export_dordb.rb dordb
 
 #    CIBEX のファイルは dordb に無いので、GEA の公開用の写しから持ってくる
-rsync -a a012:/usr/local/resources/gea/cibex/ cibex/
+rsync -a -m --include='*/' --include='*.metadata' --exclude='*' a012:/usr/local/resources/gea/cibex/ cibex/
 
 # 2. IDF / SDRF / ADF / CIBEX の項目を全て数える（数分）
 uv run scripts/gea/census_gea.py dordb cibex census.json
@@ -17,7 +17,7 @@ uv run scripts/gea/census_gea.py dordb cibex census.json
 uv run scripts/gea/build_mapping.py census.json docs/v3-gea-mapping.yml
 ```
 
-- 1 は Ruby 3.4 以上で動き、実行時に rubygems.org から `pg` を入れる。書き出すのは accession の振られたものだけ（振られる前の登録は移さない）
+- 1 は Ruby 3.4 以上で動き、実行時に rubygems.org から `pg` を入れる。書き出すのは accession の振られたものだけ（振られる前の登録は移さない）。書き出す先は空でなければならない。`versions.tsv` は書き出した版の一覧で、IDF と SDRF の版を `update_date` で並べるのに使う
 - 1 と 2 の出力は登録の中身を含むので、コミットしない。対応表に入るのは項目とファイルの数だけ
 - 2 は、読み方の規則で読めても v3 に置けないもの（同じ名前の列の空の欄の後の値など）を `anomalies` の `unrepresentable:` として数える
 - 3 は、次を確かめ、1 つでも外れれば挙げて何も書かない。新しい項目が現れたら、`build_mapping.py` に規則を足す

@@ -8,7 +8,11 @@
     "title": "Transcriptome of leaves",
     "sdrf_file": "E-GEAD-1.sdrf.txt",
     "legacy": {
-      "sdrf_as_stored": "\"Source Name\",\"Characteristics[organism]\",\"Assay Name\",\"Array Data File\"\n\"leaf_r1\",\"Arabidopsis thaliana\",\"leaf_r1\",\"DRR000001\"\n"
+      "unread_sdrf": {
+        "filename": "E-GEAD-1.sdrf.txt",
+        "checksum_method": "MD5",
+        "checksum": "0f343b0931126a20f133d67c2b018a3b"
+      }
     }
   }
 }

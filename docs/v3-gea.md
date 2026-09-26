@@ -22,7 +22,7 @@ GEA のメタデータの正本は、D-way の GEA の DB（`dordb`）の `mass.
 
 accession の振られる前の登録（151 件。D-way の画面で作っている途中のもの）は移さないので、数えていない。
 
-公開用の写し（`/usr/local/resources/gea`）は、公開した 768 件の最新版だけを持つ。この文書の初めの版はそこから数えたもので、公開前の登録と過去の版を加えて数え直すと、次のものが新たに現れた。どれも過去の版か、公開用の写しに無い登録（公開前のものと取り下げたもの）にだけある。
+公開用の写し（`/usr/local/resources/gea`）は、公開した 768 件の IDF と SDRF を、公開したときの形で書き出したもの。`dordb` の最新版とは限らず、IDF が最新版と同じなのは 353 件で、350 件は空白だけが違い（`Person Affiliation` の空白など）、38 件は 1 つ前の版と同じ（最新版は公開していない直し）、27 件は文言や日付が違う。この文書の初めの版はそこから数えたもので、公開前の登録と過去の版を加えて数え直すと、次のものが新たに現れた。どれも過去の版か、公開用の写しに無い登録（公開前のものと取り下げたもの）にだけある。
 
 - IDF の `Comment[AdditionalFile:x]`、`Comment[Public Release Date]`
 - SDRF の見出しの `[` の前の空白、見出しの無い列、MAGE-TAB がそこに置かない列、表でない SDRF
@@ -37,12 +37,16 @@ GEA では、それに次を加える。
 
 - **1 つのノードの中で、種類の違う列の並び**: `Comment` が `Technology Type` の前か後か、といった並びは SDRF ごとに違うが、保たない。同じ種類の列（`Characteristics` どうし、`Protocol REF` どうし）の並びは保つ
 - **ファイルの文字コード**: Unicode として読む。UTF-8 でないのは CIBEX の 4 件だけで、どれも Windows の cp1252（`±`、`°`、`’`）
+  - `dordb` の IDF のうち 64 件の 97 版は、UTF-8 を 2 度符号化した文字化け（`Ã©`、`Â°` など）を含む。直さずに、読めたとおりの文字として持つ。文字化けかどうかは文字列からは決められず、直すのは登録の中身を変えることだから。公開用の写しも同じ文字化けを持つ
 - **`Comment[Related study]` の値の並び**: E-GEAD-414 は `NBDC`、`JGA` の順、E-GEAD-623 は逆だが、保たない。どちらも同じ種類の参照を並べたもので、並びに意味は無い。v3 では `relations` になり、その並びは保たない（[v3-sra.md](./v3-sra.md#失わないもの)）
 
-`build_mapping.py` は、次のものを見つけたら対応表を書かずに止まる。どれも `dordb` には無い。
+`build_mapping.py` は、次のものを見つけたら対応表を書かずに止まる。どれも数えたファイルには無い。
 
 - SDRF で、同じ名前の列が並ぶところに、空の欄の後に値がある行。v3 の list は空の値を持たないので、値の位置がずれる
 - SDRF で、見出しの無い列にある値。何の値かが分からない
+- Source Name で始まる表でも、CSV でも IDF でもない SDRF。黙ってファイルのまま持つと、読めるはずの表を読み損ねたことに気付けない
+- IDF で、`Public Release Date` と `Comment[Public Release Date]` の両方を持つもの。どちらも `submission.hold_date` の 1 つの値になる
+- IDF で、項目の名前の無い行にある値と、`#` で始まるコメントの行
 - CIBEX で、列の説明の表の続きなのか、その節の 1 つなのかを決められない塊
 
 ## 写し方の約束
@@ -62,7 +66,7 @@ IDF は 1 行が 1 つの項目で、値が行に沿って並ぶ。
   - `Comment[Related study]` → `related_to`。値は `NBDC:hum0600`、`JGA:JGAS000942` のような「DB:番号」なので、`:` の前を target.db、後を target.id にする
 - `Comment[SecondaryAccession]`（CIBEX の CBX）→ `investigation.identifiers[]` の `secondary`
 - `Comment[AdditionalFile:x]` → `investigation.additional_files[]`（`type` は x、`name` は値）。SDRF の外のファイル（バーコードと試料の対応表など）を挙げるもの
-- 58 件の experiment の IDF（232 版）は、値の中の引用符を MAGE-TAB の `""` でなく `\"` と書いている。これも引用符として読む。引用符が何重にも付いた値（書き出しと読み込みを繰り返したものと見られる）も、値のまま持つ。2 版の SDRF（E-GEAD-693、1075 の v3）は、引用符の外の値の末尾に `\"` があり（`CLEA Japan, Inc.\"`）、これも `"` として読む。`\` が引用符の前以外に現れるファイルは IDF と SDRF には無い
+- 58 件の experiment の IDF（232 版）は、値の中の引用符を MAGE-TAB の `""` でなく `\"` と書いている。これも引用符として読む。引用符が何重にも付いた値（書き出しと読み込みを繰り返したものと見られる）も、値のまま持つ。4 版の SDRF も `\"` を書き、うち 2 版（E-GEAD-693、1075 の v3）は引用符の外の値の末尾にある（`CLEA Japan, Inc.\"`）。これも `"` として読む。引用符の前以外の `\` は、そのまま値の一部として読む（E-GEAD-1205、1227 の v1 の IDF は TeX の `$\mu$` を書いている）
 
 ### SDRF
 
@@ -81,7 +85,7 @@ Source → (Protocol REF…) → Extract → (Protocol REF…) → Labeled Extra
 | `Array Data File` など 4 種のデータファイルの列と、その後の `Comment[x]` | `data_files[]`（`type` は列の名前） |
 | `Protocol REF` | 直後のノードの `protocol_refs[]` |
 | `Factor Value[x]` と、その後の `Unit[y]` | `factor_values[]`（`name` は x、`unit` は Unit の値、`unit_type` は y） |
-| データファイルの列の後の、`Comment[x]` でない列 | `misplaced_columns[]`（`name` は列の見出し、`value` はその行の値） |
+| データファイルの列の後の、上のどれでもない列（`Characteristics[x]`、`Parameter Value[x]` など） | `misplaced_columns[]`（`name` は列の見出し、`value` はその行の値） |
 
 - `Comment[x]` は直前のノードのものとして持つ。シーケンスの GEA では、Extract に `LIBRARY_*` が、Assay に `SRA_EXPERIMENT` / `SRA_RUN` が付き、`Array Data File` に DRA の run の accession が入る
   - MAGE-TAB では、`Array Design REF` のすぐ後の `Comment[Array Design REF md5]`（E-GEAD-369）はアレイ設計への参照についてのものだが、これも Assay の `comments[]` に入る。どの列の後にあったかは、種類の違う列の並びとして保たない
@@ -90,7 +94,7 @@ Source → (Protocol REF…) → Extract → (Protocol REF…) → Labeled Extra
 - 見出しの `[` の前の空白は数えない。`Comment [x]`、`Factor Value [x]`、`Unit [x]` は `Comment[x]` などと同じ（MAGE-TAB の見出しは空白を区別しない）。字面なので保たない
 - 見出しの無い列（6 版。E-GEAD-1066 の v1 など）は読まない。どれも値が無い
 - MAGE-TAB がそこに置かない列は、行の `misplaced_columns[]` に見出しごと置く（[下](#mage-tab-がそこに置かない列は見出しごと)）
-- Source Name で始まるタブ区切りの表でない SDRF は、表として読まず、保存されたまま `investigation.legacy.sdrf_as_stored` に置く（[下](#表でない-sdrf-は保存されたまま)）
+- Source Name で始まるタブ区切りの表でない SDRF は、表として読まず、ファイルのまま `investigation.legacy.unread_sdrf` で指す（[下](#表でない-sdrf-はファイルのまま)）
 
 ### ADF（アレイ設計）
 
@@ -101,6 +105,8 @@ Source → (Protocol REF…) → Extract → (Protocol REF…) → Labeled Extra
 | MAGE-TAB の ADF | 20 | 見出しの行（`Array Design Name`、`Provider` など）、`[main]`、プローブの表 |
 | 装置メーカーの表 | 180 | `Comment[GEAAccession]` の 1 行と、メーカーごとの形のプローブの表（Agilent の `FeatureNum`、GAL の `Block` / `Column` / `Row` など） |
 | 中身の無いもの | 49 | `Comment[GEAAccession]` と「This is a dummy array design file.」など |
+
+`Comment[GEAAccession]` の行は、登録者が送ったファイル（v1）には無く、accession を振った後の版で足されている（248 件のうち 247 件の v1 と、2 件の v2 には無い）。
 
 見出しの行は `array_design` の型付きの欄に置く。プローブの表はファイルのまま `array_design.file` で指す。表の列はメーカーごとに違い、行数は中央値で 1 万 2 千、最大で 400 万を超える。DRA のリードファイルと同じく、record には表を写さない。見出しの欄はファイルの見出しから読んだもので、正本はファイル。
 
@@ -137,15 +143,15 @@ IDF を v3 の `project` に写さないのは、IDF が研究（project）で�
 
 MAGE-TAB のデータファイルの列（`Array Data File` など）が持つのは `Comment[x]` だけだが、過去の版には、その後に `Characteristics[x]`、`Parameter Value[x]` と `Unit[y]`、`Replicate` が書かれたものがある（E-GEAD-460、492、639、641、889 の 10 版）。どれも後の版で `Factor Value[x]` に直されるか、消されている。
 
-これらは `investigation.sdrf[].misplaced_columns[]` に、列の見出しと値の組として、見出しの並びのまま置く。後の版での直し方に合わせて Factor Value と読み替えることはしない。その版を後の版の目で読むことになり、直したという履歴が消える。`Characteristics` を Source のもの、`Parameter Value` を直前の Protocol REF のものと読むことも、どのノードのものかを書いた人に代わって決めることになるので、しない。
+これらは `investigation.sdrf[].misplaced_columns[]` に、列の見出しと値の組として、見出しの並びのまま置く。`Unit[y]` の列も見出しごと 1 つの組にし、`Attribute` の `unit` は使わない（前の列の `unit` にすると y を失う）。これらの列は Factor Value の列の間に書かれていることもあるが（E-GEAD-492、889）、`factor_values[]` との間の並びは、種類の違う列の並びとして保たない（[失わないもの](#失わないもの)）。後の版での直し方に合わせて Factor Value と読み替えることはしない。その版を後の版の目で読むことになり、直したという履歴が消える。`Characteristics` を Source のもの、`Parameter Value` を直前の Protocol REF のものと読むことも、どのノードのものかを書いた人に代わって決めることになるので、しない。
 
 新しい登録は MAGE-TAB の検証を通るので、この欄は移した過去の版にだけ現れる。
 
-### 表でない SDRF は保存されたまま
+### 表でない SDRF はファイルのまま
 
 過去の版には、SDRF として保存されていても、Source Name で始まるタブ区切りの表ではないものが 5 版ある（E-GEAD-670、856 の v1 は CSV、1293 の v1 は R が見出しを書き換えた CSV、324 の v3 と 342 の v2 は IDF）。R が書き換えた見出しは `Source.Name`、`Protocol.REF.1` のようなもの。どれも次の版で表に直されている。
 
-これらは表として読まず、保存されたままの文字列を `investigation.legacy.sdrf_as_stored` に置く。その版の record は `investigation.sdrf` を持たない。
+これらは表として読まず、ADF の表と同じくファイルのまま `investigation.legacy.unread_sdrf` で指す。その版の record は `investigation.sdrf` を持たない。文字列として record に入れないのは、canonical JSON が文字列の中の空白をまとめ（canonical-json.md §2.2）、タブで区切った欄の境目と空の欄が消えるから。
 
 ### 他の DB と同じ意味の欄
 
@@ -168,6 +174,8 @@ experiment（E-GEAD）とアレイ設計（A-GEAD）は別の record で、1 つ
 - CIBEX の各 list
 
 SDRF の `Characteristics` や `Comment` は表の列で、名前の違う列どうしの並びも保つ（[失わないもの](#失わないもの)）。SRA の `*_ATTRIBUTE` と違い、SDRF の列はファイル全体で共有する見出しで、その並びが表の形そのものだから。名前で並べ替える `keyed` ではなく、`ordered` にする。IDF の `Protocol *`、`Experimental Factor *`、`PubMed ID` / `Publication DOI` も、n 番目の値どうしが組になる並びなので `ordered` にする（BP の `/project/publications` が `keyed` なのとは違う）。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
+
+移すときは、`dordb` の版を record の版に組み直す。experiment の IDF と SDRF は別々に版を重ねる（IDF のほうが版の多いものが 749 件、同じものが 238 件、SDRF のほうが多いものが 47 件）。`update_date` の順に並べ（`export_dordb.rb` の `versions.tsv`）、どちらかの版が変わるごとに、その時点の IDF と SDRF から record の版を 1 つ作る。アレイ設計は ADF の版がそのまま record の版になる。`investigation.legacy.unread_sdrf` と `array_design.file` が指すファイルは、ADF と同じく record の外に置く。
 
 `canon:fields_check` は Ruby の `DDBJRecord::V3` のデータクラスを登録簿（`schema/canon/v3-fields.yml`）と比べる。`investigation` と `array_design` とその下のクラスを Ruby のクラスに足し、登録簿もそれに合わせる。
 

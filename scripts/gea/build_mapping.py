@@ -171,7 +171,7 @@ DATA_FILES = {node for node, field in NODES.items() if field == "data_files[]"}
 
 def sdrf_rule(item: str) -> str | None:
     if item == SDRF_UNREAD:
-        return "investigation.legacy.sdrf_as_stored (SDRF を保存されたまま)"
+        return "investigation.legacy.unread_sdrf (SDRF をファイルのまま)"
     if item in NODES:
         return f"{SDRF}.{NODES[item]}.name" + (" (type は列の名前)" if NODES[item] == "data_files[]" else "")
     if m := re.fullmatch(r"Protocol REF > (.+)", item):
@@ -186,7 +186,8 @@ def sdrf_rule(item: str) -> str | None:
     column, owner = m.group(1), NODES.get(m.group(2))
     if owner is None:
         return None
-    # A data file carries only comments. Anything else written after one is MAGE-TAB's nowhere.
+    # A data file carries only comments (the Factor Values and Units after it are the row's, above).
+    # Anything else written after one is MAGE-TAB's nowhere.
     if m.group(2) in DATA_FILES and column != "Comment[*]":
         return f"{SDRF}.misplaced_columns[].value (name は列の見出し)"
     node = owner
@@ -241,7 +242,7 @@ def items(census: dict[str, Any]) -> dict[str, dict[str, dict[str, Any]]]:
                 item: {**entry, "most_in_a_row": census["sdrf"]["most_in_a_row"].get(item, 1)}
                 for item, entry in census["sdrf"]["items"].items()
             },
-            **({SDRF_UNREAD: {"files": census["sdrf"]["unread"]}} if census["sdrf"]["unread"] else {}),
+            **({SDRF_UNREAD: {"files": len(census["sdrf"]["unread"])}} if census["sdrf"]["unread"] else {}),
         },
         "adf": {**census["adf"]["header"], ADF_TABLE: {"files": sum(census["adf"]["forms"].values())}},
         "cibex": cibex,
