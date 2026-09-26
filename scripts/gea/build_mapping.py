@@ -56,7 +56,7 @@ IDF = {
     "Public Release Date": "submission.hold_date",
     "Comment[Public Release Date]": "submission.hold_date (古い版の書き方)",
     "SDRF File": "investigation.sdrf_file",
-    "Comment[GEAAccession]": "investigation.accession",
+    "Comment[GEAAccession]": "investigation.accession (accession の前の版の ESUB…_Experiment_n は investigation.alias)",
     "Comment[SecondaryAccession]": "investigation.identifiers[secondary].value",
     "Comment[BioProject]": "relations[part_of bioproject].target.id",
     "Comment[Related study]": 'relations[related_to].target.id (値の "DB:" は target.db に)',
@@ -168,6 +168,10 @@ def idf_rule(tag: str) -> str | None:
 
 DATA_FILES = {node for node, field in NODES.items() if field == "data_files[]"}
 
+# What past versions write after a data file that MAGE-TAB does not put there. Only these: a
+# heading that is not one of them (a node in another case, say) stops the script like any other.
+MISPLACED = {"Characteristics[*]", "Parameter Value[*]", "Unit[*] @ Parameter Value[*]", "Replicate"}
+
 
 def sdrf_rule(item: str) -> str | None:
     if item == SDRF_UNREAD:
@@ -186,9 +190,7 @@ def sdrf_rule(item: str) -> str | None:
     column, owner = m.group(1), NODES.get(m.group(2))
     if owner is None:
         return None
-    # A data file carries only comments (the Factor Values and Units after it are the row's, above).
-    # Anything else written after one is MAGE-TAB's nowhere.
-    if m.group(2) in DATA_FILES and column != "Comment[*]":
+    if m.group(2) in DATA_FILES and column in MISPLACED:
         return f"{SDRF}.misplaced_columns[].value (name は列の見出し)"
     node = owner
     if column == "Characteristics[*]" and node == "source":

@@ -28,7 +28,7 @@ idf:
   Comment[CIBEX Public Release Date]: investigation.legacy.cibex_public_release_date  # 553 ファイル
   Comment[CIBEX Submitter]:           investigation.legacy.cibex_submitter  # 47 ファイル
   Comment[DBCLS]:                     investigation.dbcls_approval  # 109 ファイル
-  Comment[GEAAccession]:              investigation.accession  # 4,702 ファイル
+  Comment[GEAAccession]:              investigation.accession (accession の前の版の ESUB…_Experiment_n は investigation.alias)  # 4,702 ファイル
   Comment[Last Update Date]:          investigation.legacy.last_update_date  # 1,117 ファイル
   Comment[NBDC]:                      investigation.nbdc_approval  # 47 ファイル
   Comment[Number of channel]:         investigation.channel_type  # 2,314 ファイル

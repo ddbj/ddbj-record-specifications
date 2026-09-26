@@ -30,6 +30,7 @@ import csv
 import io
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -57,10 +58,10 @@ SDRF_NODES = (
     "Image File",
 )
 
-# The data file nodes, and the columns MAGE-TAB puts after one (build_mapping.py puts any other
-# into the row's misplaced_columns).
+# The data file nodes. After one, MAGE-TAB puts only its comments, the Protocol REF of the next
+# node, and the row's Factor Values; build_mapping.py puts what else is found there into the
+# row's misplaced_columns.
 DATA_FILES = {node for node in SDRF_NODES if node.endswith(("Data File", "Data Matrix File"))}
-DATA_FILE_COLUMNS = ("Comment[", "Factor Value[", "Protocol REF")
 
 MAGE_TAB_ADF_HEADER = {
     "Array Design Name",
@@ -259,7 +260,10 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     Name is unrepresentable.
     """
     rows = [row for row in rows_of(read(path, encodings), backslash_quotes=True) if any(cell.strip() for cell in row)]
-    first = next((cell for cell in rows[0] if cell.strip()), "") if rows else ""
+    if not rows:
+        anomalies["unrepresentable: empty SDRFs"] += 1
+        return 0
+    first = next(cell for cell in rows[0] if cell.strip())
     if re.sub(r"\s", "", first).lower() != "sourcename":
         if form := unread_form(rows):
             return form
@@ -325,20 +329,25 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
             anomalies[f"files where one {column} carries different attributes on different rows"] += 1
 
     # Columns of the same name hold a list: within one node (several Protocol REFs, a Comment
-    # given twice), and the data file columns across the row (data_files[] is one list). v3 keeps
-    # a list's values, not its empty cells, so an empty cell with a value after it would move
-    # that value. A Unit is not a list of its own: it goes with the column before it.
-    # Columns MAGE-TAB does not give a data file, after one, go into one list for the row too.
+    # given twice), and across the row for the lists the row has (data_files[], factor_values[],
+    # misplaced_columns[]). v3 keeps a list's values, not its empty cells, so an empty cell with a
+    # value after it would move that value. A Unit goes with the column before it, except where
+    # it is a misplaced column of its own.
     segment = 0
     node = None
+    previous = ""
     groups: dict[tuple[int, str], list[int]] = defaultdict(list)
     for index, column in enumerate(header):
         if column in SDRF_NODES:
             segment += 1
             node = column
+        misplaced = node in DATA_FILES and not column.startswith(("Comment[", "Protocol REF", "Factor Value["))
         if column.startswith("Unit["):
-            continue
-        whole_row = column in DATA_FILES or (node in DATA_FILES and not column.startswith(DATA_FILE_COLUMNS))
+            if previous.startswith("Factor Value[") or not misplaced:
+                continue
+        else:
+            previous = column
+        whole_row = column in DATA_FILES or column.startswith("Factor Value[") or misplaced
         groups[(0 if whole_row else segment), column].append(index)
     for indices in groups.values():
         for row in body:
@@ -510,12 +519,13 @@ def main() -> None:
     parser.add_argument("out", type=Path)
     args = parser.parse_args()
 
-    out = census(
-        sorted(args.dordb_dir.glob("idf/*/*.idf.txt")),
-        sorted(args.dordb_dir.glob("sdrf/*/*.sdrf.txt")),
-        sorted(args.dordb_dir.glob("adf/*/*.adf")),
-        sorted(args.cibex_dir.glob("*/*.metadata")),
-    )
+    found = {kind: sorted(args.dordb_dir.glob(f"{kind}/*/*.{kind}*")) for kind in ("idf", "sdrf", "adf")}
+    # A directory an export did not finish (or that holds anything else) is not counted.
+    written = json.loads((args.dordb_dir / "fingerprint.json").read_text(encoding="utf-8"))["written"]
+    if {kind: len(paths) for kind, paths in found.items()} != {kind: written.get(kind, 0) for kind in found}:
+        sys.exit(f"{args.dordb_dir} does not hold what export_dordb.rb wrote: {written}")
+
+    out = census(found["idf"], found["sdrf"], found["adf"], sorted(args.cibex_dir.glob("*/*.metadata")))
 
     args.out.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 

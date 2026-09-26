@@ -35,9 +35,9 @@ accession の振られる前の登録（151 件。D-way の画面で作ってい
 
 GEA では、それに次を加える。
 
-- **1 つのノードの中で、種類の違う列の並び**: `Comment` が `Technology Type` の前か後か、といった並びは SDRF ごとに違うが、保たない。同じ種類の列（`Characteristics` どうし、`Protocol REF` どうし）の並びは保つ
+- **種類の違う列の並び**: 1 つのノードの中で `Comment` が `Technology Type` の前か後か、行の中で置き場所の無い列が Factor Value の前か後か（[下](#mage-tab-がそこに置かない列は見出しごと)）、といった並びは SDRF ごとに違うが、保たない。同じ種類の列（`Characteristics` どうし、`Protocol REF` どうし、`Factor Value` どうし）の並びは保つ
 - **ファイルの文字コード**: Unicode として読む。UTF-8 でないのは CIBEX の 4 件だけで、どれも Windows の cp1252（`±`、`°`、`’`）
-  - `dordb` の IDF のうち 64 件の 97 版は、UTF-8 を 2 度符号化した文字化け（`Ã©`、`Â°` など）を含む。直さずに、読めたとおりの文字として持つ。文字化けかどうかは文字列からは決められず、直すのは登録の中身を変えることだから。公開用の写しも同じ文字化けを持つ
+  - `dordb` の IDF のうち 64 件の 97 版と、SDRF の 1 版（E-GEAD-1220 の v3）は、UTF-8 を 2 度符号化した文字化け（`Ã©`、`Â°` など）を含む。直さずに、読めたとおりの文字として持つ。文字化けかどうかは文字列からは決められず、直すのは登録の中身を変えることだから。公開用の写しも同じ文字化けを持つ
 - **`Comment[Related study]` の値の並び**: E-GEAD-414 は `NBDC`、`JGA` の順、E-GEAD-623 は逆だが、保たない。どちらも同じ種類の参照を並べたもので、並びに意味は無い。v3 では `relations` になり、その並びは保たない（[v3-sra.md](./v3-sra.md#失わないもの)）
 
 `build_mapping.py` は、次のものを見つけたら対応表を書かずに止まる。どれも数えたファイルには無い。
@@ -47,6 +47,8 @@ GEA では、それに次を加える。
 - Source Name で始まる表でも、CSV でも IDF でもない SDRF。黙ってファイルのまま持つと、読めるはずの表を読み損ねたことに気付けない
 - IDF で、`Public Release Date` と `Comment[Public Release Date]` の両方を持つもの。どちらも `submission.hold_date` の 1 つの値になる
 - IDF で、項目の名前の無い行にある値と、`#` で始まるコメントの行
+- 空の SDRF
+- データファイルの後の、置き場所の無い列として知っているもの（[下](#mage-tab-がそこに置かない列は見出しごと)）でない列
 - CIBEX で、列の説明の表の続きなのか、その節の 1 つなのかを決められない塊
 
 ## 写し方の約束
@@ -59,6 +61,7 @@ IDF は 1 行が 1 つの項目で、値が行に沿って並ぶ。
   - 組の中で値の数は揃っていなくてよい。`Person Affiliation` は 4,702 版の IDF の全てで 1 つだけで、1 人目の `organizations[0].name` に入る
   - PubMed ID と DOI の両方を持つ IDF は 2 件（E-GEAD-592、1086）の 6 版で、どれも 1 つずつなので、組み合わせに迷うものは無い
 - 人は v3 の `Person`、論文は `Publication` を使う
+- `Comment[GEAAccession]` → `investigation.accession`。accession を振る前の版（2,147 版）は、ここに `ESUB002756_Experiment_1` のような alias を書いていて、それは `investigation.alias` に置く。accession を振った後も IDF を保存し直していない 4 件（E-GEAD-341、1052、1313、1314）は、最新版も alias のまま
 - 他の DB と同じ意味の項目は、他の DB と同じ欄に置く（[下](#他の-db-と同じ意味の欄)）
 - GEA が `Comment[...]` に書く項目は、全て型付きの欄にした（`experiment_type`、`channel_type` など）。CIBEX から移した experiment にしかない `Comment[CIBEX *]` は `investigation.legacy` に置く。対応表に無い `Comment[...]` が現れたら、`build_mapping.py` は止まる
 - 他のオブジェクトへの参照は `relations` に置く。起点は `{"type": "investigation", "accession": E-GEAD}`
@@ -106,7 +109,7 @@ Source → (Protocol REF…) → Extract → (Protocol REF…) → Labeled Extra
 | 装置メーカーの表 | 180 | `Comment[GEAAccession]` の 1 行と、メーカーごとの形のプローブの表（Agilent の `FeatureNum`、GAL の `Block` / `Column` / `Row` など） |
 | 中身の無いもの | 49 | `Comment[GEAAccession]` と「This is a dummy array design file.」など |
 
-`Comment[GEAAccession]` の行は、登録者が送ったファイル（v1）には無く、accession を振った後の版で足されている（248 件のうち 247 件の v1 と、2 件の v2 には無い）。
+`Comment[GEAAccession]` の行は、登録者が送ったファイル（v1）には無く、accession を振った後の版で足されている（248 件のうち 247 件の v1 と、2 件の v2 には無い）。その版の record は `array_design.accession` を持たない。record がどの登録のものかは ddbj-repository が持つ（`dordb` の `mass.accession`）ので、ファイルが書いていないものを record に書き足さない。IDF の `Comment[GEAAccession]` が alias の版も同じ。
 
 見出しの行は `array_design` の型付きの欄に置く。プローブの表はファイルのまま `array_design.file` で指す。表の列はメーカーごとに違い、行数は中央値で 1 万 2 千、最大で 400 万を超える。DRA のリードファイルと同じく、record には表を写さない。見出しの欄はファイルの見出しから読んだもので、正本はファイル。
 
@@ -145,13 +148,13 @@ MAGE-TAB のデータファイルの列（`Array Data File` など）が持つ�
 
 これらは `investigation.sdrf[].misplaced_columns[]` に、列の見出しと値の組として、見出しの並びのまま置く。`Unit[y]` の列も見出しごと 1 つの組にし、`Attribute` の `unit` は使わない（前の列の `unit` にすると y を失う）。これらの列は Factor Value の列の間に書かれていることもあるが（E-GEAD-492、889）、`factor_values[]` との間の並びは、種類の違う列の並びとして保たない（[失わないもの](#失わないもの)）。後の版での直し方に合わせて Factor Value と読み替えることはしない。その版を後の版の目で読むことになり、直したという履歴が消える。`Characteristics` を Source のもの、`Parameter Value` を直前の Protocol REF のものと読むことも、どのノードのものかを書いた人に代わって決めることになるので、しない。
 
-新しい登録は MAGE-TAB の検証を通るので、この欄は移した過去の版にだけ現れる。
+置き場所の無い列として受け付けるのは、今ある 4 種（`Characteristics[x]`、`Parameter Value[x]`、その後の `Unit[y]`、`Replicate`）だけで、データファイルの後に別の見出し（大文字小文字の違うノードの名前など）が現れたら、`build_mapping.py` は止まる。新しい登録は MAGE-TAB の検証を通るので、この欄は移した過去の版にだけ現れる。
 
 ### 表でない SDRF はファイルのまま
 
 過去の版には、SDRF として保存されていても、Source Name で始まるタブ区切りの表ではないものが 5 版ある（E-GEAD-670、856 の v1 は CSV、1293 の v1 は R が見出しを書き換えた CSV、324 の v3 と 342 の v2 は IDF）。R が書き換えた見出しは `Source.Name`、`Protocol.REF.1` のようなもの。どれも次の版で表に直されている。
 
-これらは表として読まず、ADF の表と同じくファイルのまま `investigation.legacy.unread_sdrf` で指す。その版の record は `investigation.sdrf` を持たない。文字列として record に入れないのは、canonical JSON が文字列の中の空白をまとめ（canonical-json.md §2.2）、タブで区切った欄の境目と空の欄が消えるから。
+これらは表として読まず、ADF の表と同じくファイルのまま `investigation.legacy.unread_sdrf` で指す。`filename` は同じ版の IDF の `SDRF File` の値（IDF の全ての版にある）、`checksum` は保存されたバイト列の MD5。その版の record は `investigation.sdrf` を持たない。文字列として record に入れないのは、canonical JSON が文字列の中の空白をまとめ（canonical-json.md §2.2）、タブで区切った欄の境目と空の欄が消えるから。
 
 ### 他の DB と同じ意味の欄
 
@@ -175,7 +178,13 @@ experiment（E-GEAD）とアレイ設計（A-GEAD）は別の record で、1 つ
 
 SDRF の `Characteristics` や `Comment` は表の列で、名前の違う列どうしの並びも保つ（[失わないもの](#失わないもの)）。SRA の `*_ATTRIBUTE` と違い、SDRF の列はファイル全体で共有する見出しで、その並びが表の形そのものだから。名前で並べ替える `keyed` ではなく、`ordered` にする。IDF の `Protocol *`、`Experimental Factor *`、`PubMed ID` / `Publication DOI` も、n 番目の値どうしが組になる並びなので `ordered` にする（BP の `/project/publications` が `keyed` なのとは違う）。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
 
-移すときは、`dordb` の版を record の版に組み直す。experiment の IDF と SDRF は別々に版を重ねる（IDF のほうが版の多いものが 749 件、同じものが 238 件、SDRF のほうが多いものが 47 件）。`update_date` の順に並べ（`export_dordb.rb` の `versions.tsv`）、どちらかの版が変わるごとに、その時点の IDF と SDRF から record の版を 1 つ作る。アレイ設計は ADF の版がそのまま record の版になる。`investigation.legacy.unread_sdrf` と `array_design.file` が指すファイルは、ADF と同じく record の外に置く。
+移すときは、`dordb` の版を record の版に組み直す。experiment の IDF と SDRF は別々に版を重ねる（IDF のほうが版の多いものが 749 件、同じものが 238 件、SDRF のほうが多いものが 47 件）。
+
+- 版の順は `metadata_id` の順（`export_dordb.rb` の `versions.tsv`）。`update_date` はそれぞれの版の日時として持つが、順には使わない。版の順と食い違うものがある（E-GEAD-284 の IDF の v5 は、v3、v4 より前の日時を持つ）
+- IDF と SDRF を一緒に保存すると、IDF のすぐ次の `metadata_id` に SDRF が 1 秒以内に書かれる（3,108 組。うち 40 組は同じ日時）。この組は record の 1 つの版にする。それ以外の IDF、SDRF は、それぞれ 1 つの版にし、もう一方はその時点の最新版を使う。1,034 件のうち 1,033 件は、最初の版が IDF と SDRF の組
+- これで experiment の record は計 4,906 版になる。アレイ設計は ADF の版がそのまま record の版になる（862 版）
+
+`investigation.legacy.unread_sdrf` と `array_design.file` が指すファイルは、record の外に置く。
 
 `canon:fields_check` は Ruby の `DDBJRecord::V3` のデータクラスを登録簿（`schema/canon/v3-fields.yml`）と比べる。`investigation` と `array_design` とその下のクラスを Ruby のクラスに足し、登録簿もそれに合わせる。
 

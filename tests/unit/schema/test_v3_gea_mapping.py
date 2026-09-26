@@ -11,6 +11,7 @@
 - 対応表の全ての場所に、gea_*.json のどれかの中で値がある
 """
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -290,7 +291,12 @@ def test_a_heading_in_another_case_is_read_and_left_without_a_rule(tmp_path: Pat
     census = _census(_write(tmp_path, "x.sdrf.txt", "source name\tAssay Name\ns1\ta1\n"))
 
     assert census["sdrf"]["unread"] == {}
-    assert build_mapping.sdrf_rule("source name") is None
+    assert [item for item in census["sdrf"]["items"] if build_mapping.sdrf_rule(item) is None] == ["source name @ None"]
+
+
+@pytest.mark.parametrize("text", ["", "\n\t\n"])
+def test_an_empty_sdrf_is_unrepresentable(tmp_path: Path, text: str) -> None:
+    assert _unrepresentable(_census(_write(tmp_path, "x.sdrf.txt", text))) == {"unrepresentable: empty SDRFs": 1}
 
 
 def test_an_empty_column_without_a_heading_is_left_out(tmp_path: Path) -> None:
@@ -315,6 +321,9 @@ def test_a_row_short_of_its_last_factor_values_loses_nothing(tmp_path: Path) -> 
     census = _census(sdrf)
 
     assert census["anomalies"] == {"rows whose width differs from the header": 1}
+    # 欠けた欄は値として数えない (空の値と同じく、無いもの)。
+    assert census["sdrf"]["items"]["Factor Value[*]"]["kinds"] == {"int": ["5"]}
+    assert _unrepresentable(census) == {}
 
 
 @pytest.mark.parametrize(
@@ -338,14 +347,15 @@ def test_columns_after_a_data_file_other_than_comments_are_misplaced(tmp_path: P
         tmp_path,
         "x.sdrf.txt",
         "Source Name\tAssay Name\tDerived Array Data File\tComment[md5]\tFactor Value[t]\t"
-        "Parameter Value[temperature]\tUnit[temperature unit]\tReplicate\tCharacteristics[genotype]\n"
-        "s1\ta1\tf.txt\t0123\t5\t28\tdegree Celsius\tbiological replicate-1\twild type\n",
+        "Parameter Value[temperature]\tUnit[temperature unit]\tReplicate\tCharacteristics[genotype]\tTerm Source REF\n"
+        "s1\ta1\tf.txt\t0123\t5\t28\tdegree Celsius\tbiological replicate-1\twild type\tEFO\n",
     )
 
     locations = {item: build_mapping.sdrf_rule(item) for item in _census(sdrf)["sdrf"]["items"]}
 
     assert locations["Comment[*] @ Derived Array Data File"].startswith("investigation.sdrf[].data_files[].comments[]")
     assert locations["Factor Value[*]"].startswith("investigation.sdrf[].factor_values[]")
+    assert locations["Term Source REF @ Derived Array Data File"] is None
     for item in (
         "Characteristics[*] @ Derived Array Data File",
         "Parameter Value[*] @ Derived Array Data File",
@@ -407,3 +417,65 @@ def test_an_adf_header_tag_with_a_space_before_its_bracket(tmp_path: Path) -> No
 
     assert set(census["adf"]["header"]) == {"Comment[GEAAccession]", "Array Design Name"}
     assert census["adf"]["forms"] == {"MAGE-TAB ADF": 1}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # 置き場所の無い Unit も、行に 1 つの list の要素。
+        (
+            "Source Name\tArray Data File\tParameter Value[t]\tUnit[time unit]\tDerived Array Data File\t"
+            "Parameter Value[t]\tUnit[time unit]\ns1\tf1\t5\t\tf2\t6\thour\n"
+        ),
+        # factor_values も行に 1 つの list。
+        "Source Name\tFactor Value[t]\tAssay Name\tFactor Value[t]\ns1\t\ta1\t5\n",
+        "Source Name\tArray Data File\tFactor Value[t]\tDerived Array Data File\tFactor Value[t]\ns1\tf1\t\tf2\t5\n",
+    ],
+)
+def test_lists_of_the_row_are_checked_across_the_row(tmp_path: Path, text: str) -> None:
+    assert _unrepresentable(_census(_write(tmp_path, "x.sdrf.txt", text))) == {
+        "unrepresentable: SDRF rows with an empty cell before a value of the same column": 1
+    }
+
+
+def test_a_node_in_another_case_after_a_data_file_has_no_rule(tmp_path: Path) -> None:
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tArray Data File\tDerived array data file\ns1\tf1\tf2\n",
+    )
+
+    items = _census(sdrf)["sdrf"]["items"]
+
+    assert build_mapping.sdrf_rule("Derived array data file @ Array Data File") is None
+    assert "Derived array data file @ Array Data File" in items
+
+
+def test_build_mapping_writes_nothing_while_anything_is_unrepresentable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    census = _census(_write(tmp_path, "x.sdrf.txt", "Source Name\t\tAssay Name\ns1\tlost\ta1\n"))
+    census_path = _write(tmp_path, "census.json", json.dumps(census))
+    out = tmp_path / "mapping.yml"
+    monkeypatch.setattr("sys.argv", ["build_mapping.py", str(census_path), str(out)])
+
+    with pytest.raises(SystemExit) as exit_info:
+        build_mapping.main()
+
+    assert exit_info.value.code == 1
+    assert not out.exists()
+
+
+def test_census_refuses_a_directory_the_export_did_not_finish(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    dordb = tmp_path / "dordb"
+    (dordb / "idf" / "E-GEAD-1").mkdir(parents=True)
+    _write(dordb / "idf" / "E-GEAD-1", "E-GEAD-1_v1.idf.txt", "Investigation Title\tx\n")
+    _write(dordb, "fingerprint.json", json.dumps({"written": {"idf": 2}}))
+    monkeypatch.setattr("sys.argv", ["census_gea.py", str(dordb), str(tmp_path), str(tmp_path / "census.json")])
+
+    with pytest.raises(SystemExit, match=r"does not hold what export_dordb\.rb wrote"):
+        census_gea.main()
+
+
+def test_an_alias_in_gea_accession_goes_to_alias() -> None:
+    assert "investigation.alias" in build_mapping.idf_rule("Comment[GEAAccession]")
