@@ -18,7 +18,7 @@ docker compose exec app uv run pytest
 
 - 対応表の全ての場所が、v3 のモデルに実在する
 - 値を持つ要素と属性は、値 (str / int / float / bool) のフィールドを指す
-- 対応表の全ての場所に、`sra_full.json`・`gea_full.json`・`gea_array_design_full.json` のどれかで値がある
+- 対応表の全ての場所に、`sra_full.json`・`gea_full.json`・`gea_array_design_full.json`・`gea_unread_sdrf.json` のどれかで値がある
 - SRA は、[`tests/fixtures/v3/raw/dra/`](./fixtures/v3/raw/dra/) の XML に出てくる全ての要素と属性が、対応表にある
 
 対応表の行が正しい場所を指しているか (TAG を value に置いていないか、など) は確かめない。それは対応表を読む人が決める。

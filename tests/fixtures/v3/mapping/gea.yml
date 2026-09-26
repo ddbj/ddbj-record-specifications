@@ -4,8 +4,9 @@
 # モデルを変えたら、ここも手で直す。
 #
 # 対象は、D-way の GEA の DB (dordb の mass.metadata) にある IDF / SDRF / ADF の全ての版と、CIBEX の
-# ファイル (dordb に無いので、公開用の写しの cibex/ から) に現れる項目。accession を振る前の登録は
-# 作っている途中のものなので含めない。公開用の写しは、公開した experiment の、公開したときの版しか持たない。
+# ファイル (dordb に無いので、公開用の写しの cibex/ から) に現れる項目。accession が振られていない登録 (151 件) は
+# 作っている途中のものなので含めない (accession を振った登録の、振る前の版は含める)。公開用の写しは、
+# 公開した experiment の、公開したときの版しか持たない。
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
@@ -17,7 +18,7 @@
 #   cibex   CIBEX の「節 / キー」
 #
 # 見出しの読み方:
-#   - `Comment [x]` のような [ の前の空白は数えない (MAGE-TAB の見出しは空白を区別しない)
+#   - `Comment [x]` のような [ の前の空白と、見出しの前後の空白は数えない (MAGE-TAB の見出しは空白を区別しない)
 #   - SDRF の見出しの無い列は読まない。保存されたものには、どれも値が無い
 #   - SDRF のデータファイルの列の後に来るのは、MAGE-TAB ではその Comment と、次のノードの Protocol REF と、
 #     行の Factor Value だけ。過去の版には、そこに Characteristics、Parameter Value と Unit、Replicate を
@@ -33,24 +34,33 @@
 #
 # SDRF の行は record に持たない。行の上のノードをオブジェクトにし、ノードの続き方を次のように結ぶ。
 #
-#   Source           samples[]。名前と値が同じ Source は 1 つの sample にし、名前が同じで値が違えば別の sample にする
+#   Source           samples[]
 #   Extract / Labeled Extract
 #                    experiments[].pool.members[]。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つ。
-#                    members[].sample が元の Source を指す。Factor Value は行の値なので、その行の member に置く
+#                    members[].sample が元の Source を指す。Factor Value と misplaced_columns は行の値なので、その行の
+#                    member に置く
 #   Assay            experiments[]
 #   生データのファイル (Array Data File / Array Data Matrix File)
-#                    runs[]。同じ列の同じ名前は 1 つの run にする。relations[part_of experiment] で、その行の Assay を指す
+#                    runs[]。relations[part_of experiment] で、その行の Assay を指す
 #   処理済みデータのファイル (Derived Array Data File / Derived Array Data Matrix File)
 #                    analyses[]。relations[derived_from] で、左隣のファイル (無ければ Assay) と、その行の Assay を指す
+#
+# どのノードも、列の位置、名前、そのノードに置く値 (属性、Comment、Protocol REF、member なら Factor Value と
+# misplaced_columns も) が全て同じものだけを 1 つのオブジェクトにまとめ、どれかが違えば同じ名前の別のオブジェクト
+# にする。同じファイルの名前でも、Comment の md5 が行ごとに違うもの (表計算の連番で書き換わったもの) や、別の列に
+# 書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、list の中の位置 (index) も書く。
 #
 # run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
 # (dual-channel で channel ごとに別のファイルがあるものなど)。
 #
-# 行は、experiments[] の順に、その pool.members[] の順に、member から relations をたどって行き着くファイルの並びごとに
-# 1 つ作る。これだけでは、元の行の順序と、全く同じ行の繰り返し (22 版に計 363 行。公開中の E-GEAD-414、415、416 の
-# 最新版にもある) は戻らず、1 つの Assay の中で member_name が重なる SDRF (名前を使い回したもの) は、どのファイルが
-# どの member のものかを指せないので、行の組み合わせが増える。submission.gea.sdrf_row_order は、元の行を上から順に、
-# 作り直した行の何番目かで並べたもので、これがあれば、それをたどって元の行に戻す。
+# 行の番号 (0 始まり。見出しの次の行が 0) を、member と run / analysis の sdrf_rows に書く。行 n は、n を持つ
+# member (と、その sample と experiment) と、n を持つ run / analysis からなり、その中のファイルは derived_from を
+# 左からたどる順に並ぶ。行は番号の順に作る。全く同じ行の繰り返し (22 版に計 363 行。公開中の E-GEAD-414、415、416
+# の最新版にもある) も、番号が違うので別の行として戻る。番号で行を決めるので、オブジェクトの組み合わせから元に
+# 無い行が増えることも無い。sdrf_rows は番号の集まりで、並びに意味は無い。
+#
+# 保たないのは、種類の違う列の並び (ノードの中で Comment が Technology Type の前か後か、misplaced_columns の列が
+# Factor Value の前か後か、など)。同じ種類の列の並びは保つ。
 
 idf:
   Comment[AEExperimentType]:          submission.gea.experiment_type  # 4,702 ファイル

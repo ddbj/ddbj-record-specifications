@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field
+
+# 元の SDRF の行の番号 (0 始まり、見出しの次の行が 0)。
+SdrfRowNumber = Annotated[int, Field(ge=0)]
 
 # === Common types ===
 
@@ -379,7 +384,8 @@ class GeaSubmissionLegacy(BaseModel):
     cibex: Cibex | None = None
     # SDRF として保存されていたが、Source Name で始まるタブ区切りの表ではないもの (CSV や、
     # SDRF の代わりに保存された IDF)。ファイルのまま指す (文字列にすると、登録システムが空白を
-    # まとめたときにタブ区切りの欄が壊れる)。その版の record は SDRF から作るオブジェクトを持たない。
+    # まとめたときにタブ区切りの欄が壊れる)。filename は IDF の SDRF File の値、checksum は保存された
+    # バイト列のもの。その版の record は SDRF から作るオブジェクトを持たない。
     unread_sdrf: File | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -400,11 +406,6 @@ class GeaSubmission(BaseModel):
     dbcls_approval: str | None = None
     # IDF の Comment[AdditionalFile:x] が挙げる、SDRF の外のファイル。filetype は x。
     additional_files: list[File] | None = None
-    # 元の SDRF の行を上から順に、作り直した行 (tests/fixtures/v3/mapping/gea.yml の冒頭) の何番目
-    # (0 始まり) にあたるかで並べたもの。作り直した行の並びが元と違うもの、全く同じ行を繰り返すもの、
-    # 作り直すと元に無い行の組み合わせができるものが、元の行に戻せるようにする。作り直したままで
-    # 元の行になるなら省く。
-    sdrf_row_order: list[int] | None = None
     legacy: GeaSubmissionLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -861,6 +862,9 @@ class PoolMember(BaseModel):
     # 見出し、value はその行の値で、見出しの並びのまま。Unit[y] の列も見出しごと 1 つの要素にし、
     # unit は使わない (前の列の unit にすると y を失う)。移した過去の版にだけある。
     misplaced_columns: list[Attribute] | None = None
+    # この member が現れる SDRF の行の番号。行は、その番号を持つ member と run / analysis から作り直す
+    # (tests/fixtures/v3/mapping/gea.yml の冒頭)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -990,6 +994,8 @@ class Run(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
     legacy: RunLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -1070,6 +1076,8 @@ class Analysis(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
