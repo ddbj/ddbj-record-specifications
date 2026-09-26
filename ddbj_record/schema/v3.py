@@ -169,14 +169,16 @@ class St26Submission(BaseModel):
     inventor_name_latin: str | None = None
     # 言語ごとの発明の名称。同じ言語のものが 2 つあることもあるので、書かれた順に持つ。
     invention_titles: list[InventionTitle] | None = None
-    # SequenceData の数 ("000" の欠番も数える)。entry の数とは合わないことがあり、配列から数え直せるとは限らない。
+    # SequenceData の数 ("000" の欠番も数える)。entry の数とは合わないことがあり (手で直されたファイルには、
+    # 4 と書いて 8 つ持つものがある)、配列から数え直せるとは限らない。int にするのは、DTD は #PCDATA だが
+    # ST.26 が配列の数と定めていて、保存された全ての値 (21,452 件) が ASCII の整数として読めるから。
     sequence_total_quantity: int | None = None
     # 以下は JPO が公報の書誌から足したもの (Bibliography。WIPO の DTD には無い)。
     # 公報の日付。DDBJ が公開した日 (record に入れない、登録システムの日付) とは別。
     published_date: str | None = Field(None, examples=["2024-12-03"])
-    # earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは 7 割ほどで、
-    # 別の出願を指すものもあるので、1 つにまとめない。
-    priority: ApplicationIdentification | None = None
+    # 公報の書誌の優先権。earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは
+    # 7 割ほどで、別の出願を指すものもあるので、1 つにまとめない。
+    bibliography_priority: ApplicationIdentification | None = None
 
     model_config = ConfigDict(extra="forbid")
 

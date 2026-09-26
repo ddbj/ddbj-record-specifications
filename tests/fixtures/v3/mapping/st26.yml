@@ -11,51 +11,53 @@
 # に集計、JPO から受け取った 20,731 件と MOIP の 723 件のうち、XML として読めた 21,452 件）に
 # 現れる項目。
 #
-#   @name        ルート要素（ST26SequenceListing）の属性
 #   A/B          A の中の B
-#   A@name       A の属性
+#   A/@name      A の属性
 #
 # 値の読み方:
 #   (container)          値を持たない入れ物。子が値を持つ
 #   a.b[]                b は list
 #   ... (注記)           読み手のための補足
 #
-# 日付は ISO 8601 にする。Bibliography の日付は YYYYMMDD（20241203）と書かれているので書き直す。
-# 決まった書かれ方でない日付（EarliestPriorityApplicationIdentification/FilingDate の 4/28/2023
-# が 1 件）は、書き直すには書かれ方を推し量ることになるので、書かれたまま持ち、検証で止める。
-# 空の要素と空の languageCode は、値が無いものとして持たない。
+# 日付は ISO 8601 にする。Bibliography の日付は YYYYMMDD（20241203）と書かれているので書き直し、
+# XML に戻すときは YYYYMMDD に戻す。決まった書かれ方でない日付（EarliestPriorityApplicationIdentification/
+# FilingDate の 4/28/2023 が 1 件）は、書き直すには書かれ方を推し量ることになるので、書かれたまま持ち、
+# 戻すときもそのまま書く。そのような日付は検証で止める（submission-bulk-st26 の PAT_R0008 /
+# PAT_R0028、ddbj-validator のルール）。
+# 空の要素と空の languageCode は、値が無いものとして持たない。ただし、中身が空で languageCode のある
+# InventionTitle（1 件）は、発明の名称の数を保つために {"language_code": "ja"} として持つ。
 #
 # 数はその項目を含むファイルの数。
 
 header:
-  '@dtdVersion':                                                   submission.st26.dtd_version  # 21,452 ファイル
-  '@fileName':                                                     submission.st26.file_name  # 21,442 ファイル
-  '@softwareName':                                                 submission.st26.software_name  # 21,446 ファイル
-  '@softwareVersion':                                              submission.st26.software_version  # 21,446 ファイル
-  '@productionDate':                                               submission.st26.production_date  # 21,447 ファイル
-  '@originalFreeTextLanguageCode':                                 submission.st26.original_language  # 3,796 ファイル
-  '@nonEnglishFreeTextLanguageCode':                               submission.st26.non_english_language  # 208 ファイル
-  ApplicationIdentification:                                       (container)  # 20,919 ファイル
-  ApplicationIdentification/IPOfficeCode:                          submission.st26.application.ip_office_code  # 20,919 ファイル
-  ApplicationIdentification/ApplicationNumberText:                 submission.st26.application.application_number_text  # 20,919 ファイル
-  ApplicationIdentification/FilingDate:                            submission.st26.application.filing_date  # 20,919 ファイル
-  ApplicantFileReference:                                          submission.st26.applicant_file_reference  # 20,873 ファイル
-  EarliestPriorityApplicationIdentification:                       (container)  # 18,552 ファイル
-  EarliestPriorityApplicationIdentification/IPOfficeCode:          submission.st26.earliest_priority.ip_office_code  # 18,552 ファイル
-  EarliestPriorityApplicationIdentification/ApplicationNumberText: submission.st26.earliest_priority.application_number_text  # 18,552 ファイル
-  EarliestPriorityApplicationIdentification/FilingDate:            submission.st26.earliest_priority.filing_date  # 18,552 ファイル
-  ApplicantName:                                                   submission.st26.applicant_name  # 21,452 ファイル
-  ApplicantName@languageCode:                                      submission.st26.applicant_name_language_code  # 21,452 ファイル
-  ApplicantNameLatin:                                              submission.st26.applicant_name_latin  # 5,207 ファイル
-  InventorName:                                                    submission.st26.inventor_name  # 3,259 ファイル
-  InventorName@languageCode:                                       submission.st26.inventor_name_language_code  # 3,259 ファイル
-  InventorNameLatin:                                               submission.st26.inventor_name_latin  # 942 ファイル
-  InventionTitle:                                                  submission.st26.invention_titles[].title  # 21,452 ファイル
-  InventionTitle@languageCode:                                     submission.st26.invention_titles[].language_code  # 21,452 ファイル
-  SequenceTotalQuantity:                                           submission.st26.sequence_total_quantity  # 21,452 ファイル
-  SequenceData:                                                    sequences.entries[] (中身はこの表の外)  # 21,452 ファイル
-  Bibliography:                                                    (container)  # 20,729 ファイル
-  Bibliography/PublishedDate:                                      submission.st26.published_date (YYYYMMDD を ISO 8601 に)  # 20,729 ファイル
-  Bibliography/PriorityCountry:                                    submission.st26.priority.ip_office_code  # 18,075 ファイル
-  Bibliography/PriorityNumber:                                     submission.st26.priority.application_number_text  # 18,075 ファイル
-  Bibliography/PriorityDate:                                       submission.st26.priority.filing_date (YYYYMMDD を ISO 8601 に)  # 18,075 ファイル
+  ST26SequenceListing/@dtdVersion:                                                     submission.st26.dtd_version  # 21,452 ファイル
+  ST26SequenceListing/@fileName:                                                       submission.st26.file_name  # 21,442 ファイル
+  ST26SequenceListing/@softwareName:                                                   submission.st26.software_name  # 21,446 ファイル
+  ST26SequenceListing/@softwareVersion:                                                submission.st26.software_version  # 21,446 ファイル
+  ST26SequenceListing/@productionDate:                                                 submission.st26.production_date  # 21,447 ファイル
+  ST26SequenceListing/@originalFreeTextLanguageCode:                                   submission.st26.original_language  # 3,796 ファイル
+  ST26SequenceListing/@nonEnglishFreeTextLanguageCode:                                 submission.st26.non_english_language  # 208 ファイル
+  ST26SequenceListing/ApplicationIdentification:                                       (container)  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/IPOfficeCode:                          submission.st26.application.ip_office_code  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/ApplicationNumberText:                 submission.st26.application.application_number_text  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/FilingDate:                            submission.st26.application.filing_date  # 20,919 ファイル
+  ST26SequenceListing/ApplicantFileReference:                                          submission.st26.applicant_file_reference  # 20,873 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification:                       (container)  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/IPOfficeCode:          submission.st26.earliest_priority.ip_office_code  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/ApplicationNumberText: submission.st26.earliest_priority.application_number_text  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/FilingDate:            submission.st26.earliest_priority.filing_date  # 18,552 ファイル
+  ST26SequenceListing/ApplicantName:                                                   submission.st26.applicant_name  # 21,452 ファイル
+  ST26SequenceListing/ApplicantName/@languageCode:                                     submission.st26.applicant_name_language_code  # 21,452 ファイル
+  ST26SequenceListing/ApplicantNameLatin:                                              submission.st26.applicant_name_latin  # 5,207 ファイル
+  ST26SequenceListing/InventorName:                                                    submission.st26.inventor_name  # 3,259 ファイル
+  ST26SequenceListing/InventorName/@languageCode:                                      submission.st26.inventor_name_language_code  # 3,259 ファイル
+  ST26SequenceListing/InventorNameLatin:                                               submission.st26.inventor_name_latin  # 942 ファイル
+  ST26SequenceListing/InventionTitle:                                                  submission.st26.invention_titles[].title  # 21,452 ファイル
+  ST26SequenceListing/InventionTitle/@languageCode:                                    submission.st26.invention_titles[].language_code  # 21,452 ファイル
+  ST26SequenceListing/SequenceTotalQuantity:                                           submission.st26.sequence_total_quantity  # 21,452 ファイル
+  ST26SequenceListing/SequenceData:                                                    sequences.entries[] (中身はこの表の外)  # 21,452 ファイル
+  ST26SequenceListing/Bibliography:                                                    (container)  # 20,729 ファイル
+  ST26SequenceListing/Bibliography/PublishedDate:                                      submission.st26.published_date (YYYYMMDD を ISO 8601 に)  # 20,729 ファイル
+  ST26SequenceListing/Bibliography/PriorityCountry:                                    submission.st26.bibliography_priority.ip_office_code  # 18,075 ファイル
+  ST26SequenceListing/Bibliography/PriorityNumber:                                     submission.st26.bibliography_priority.application_number_text  # 18,075 ファイル
+  ST26SequenceListing/Bibliography/PriorityDate:                                       submission.st26.bibliography_priority.filing_date (YYYYMMDD を ISO 8601 に)  # 18,075 ファイル

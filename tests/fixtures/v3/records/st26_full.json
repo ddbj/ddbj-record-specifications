@@ -15,12 +15,12 @@
       "applicant_file_reference": "EX-0001",
       "application": {
         "ip_office_code": "JP",
-        "application_number_text": "2024-135845",
+        "application_number_text": "2024-000001",
         "filing_date": "2024-08-16"
       },
       "earliest_priority": {
         "ip_office_code": "US",
-        "application_number_text": "62/867,171",
+        "application_number_text": "62/000,001",
         "filing_date": "2019-06-26"
       },
       "applicant_name": "見本製薬株式会社",
@@ -41,9 +41,9 @@
       ],
       "sequence_total_quantity": 2,
       "published_date": "2024-12-03",
-      "priority": {
+      "bibliography_priority": {
         "ip_office_code": "US",
-        "application_number_text": "62/867,171",
+        "application_number_text": "62/000,001",
         "filing_date": "2019-06-26"
       }
     }

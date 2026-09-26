@@ -3,13 +3,13 @@
 <ST26SequenceListing dtdVersion="V1_3" fileName="EX-0001配列表.xml" softwareName="WIPO Sequence" softwareVersion="2.3.0" productionDate="2024-04-08" originalFreeTextLanguageCode="ja" nonEnglishFreeTextLanguageCode="ja">
 	<ApplicationIdentification>
 		<IPOfficeCode>JP</IPOfficeCode>
-		<ApplicationNumberText>2024-135845</ApplicationNumberText>
+		<ApplicationNumberText>2024-000001</ApplicationNumberText>
 		<FilingDate>2024-08-16</FilingDate>
 	</ApplicationIdentification>
 	<ApplicantFileReference>EX-0001</ApplicantFileReference>
 	<EarliestPriorityApplicationIdentification>
 		<IPOfficeCode>US</IPOfficeCode>
-		<ApplicationNumberText>62/867,171</ApplicationNumberText>
+		<ApplicationNumberText>62/000,001</ApplicationNumberText>
 		<FilingDate>2019-06-26</FilingDate>
 	</EarliestPriorityApplicationIdentification>
 	<ApplicantName languageCode="ja">見本製薬株式会社</ApplicantName>
@@ -57,7 +57,7 @@
 	<Bibliography>
 		<PublishedDate>20241203</PublishedDate>
 		<PriorityCountry>US</PriorityCountry>
-		<PriorityNumber>62/867,171</PriorityNumber>
+		<PriorityNumber>62/000,001</PriorityNumber>
 		<PriorityDate>20190626</PriorityDate>
 	</Bibliography>
 </ST26SequenceListing>

@@ -30,7 +30,7 @@ def test_every_location_exists_in_the_model(location: str) -> None:
     resolve(location)
 
 
-VALUE_ROWS = {row: location for row, location in ROWS.items() if row != "header:SequenceData"}
+VALUE_ROWS = {row: location for row, location in ROWS.items() if row != "header:ST26SequenceListing/SequenceData"}
 
 
 @pytest.mark.parametrize("location", VALUE_ROWS.values(), ids=VALUE_ROWS.keys())
@@ -47,18 +47,19 @@ def _dtd_header_items(dtd: Path) -> set[str]:
         for name, body in re.findall(r"<!ATTLIST\s+(\S+)(.*?)>", text, flags=re.DOTALL)
     }
 
-    found = {f"@{attribute}" for attribute in attributes.get("ST26SequenceListing", [])}
+    root = "ST26SequenceListing"
+    found = {f"{root}/@{attribute}" for attribute in attributes.get(root, [])}
 
     def walk(element: str, path: str) -> None:
         found.add(path)
         if element == "SequenceData":  # 属性も含めて、配列の側
             return
-        found.update(f"{path}@{attribute}" for attribute in attributes.get(element, []))
+        found.update(f"{path}/@{attribute}" for attribute in attributes.get(element, []))
         for child in re.findall(r"[A-Za-z][\w-]*", models[element].replace("#PCDATA", "")):
             walk(child, f"{path}/{child}")
 
-    for child in re.findall(r"[A-Za-z][\w-]*", models["ST26SequenceListing"]):
-        walk(child, child)
+    for child in re.findall(r"[A-Za-z][\w-]*", models[root]):
+        walk(child, f"{root}/{child}")
 
     return found
 
@@ -67,26 +68,30 @@ def test_every_header_item_the_wipo_dtd_declares_is_mapped() -> None:
     items = _dtd_header_items(RAW_ST26 / "ST26SequenceListing_V1_3.dtd")
 
     # DTD を読めていること。読めなければ、下の確かめが何も確かめない。
-    assert {"@dtdVersion", "ApplicantName@languageCode", "ApplicationIdentification/FilingDate"} <= items
+    assert {
+        "ST26SequenceListing/@dtdVersion",
+        "ST26SequenceListing/ApplicantName/@languageCode",
+        "ST26SequenceListing/ApplicationIdentification/FilingDate",
+    } <= items
 
     assert items - set(MAPPING["header"]) == set()
 
 
 def _header_items(path: Path) -> set[str]:
     root = ET.parse(path).getroot()
-    found = {f"@{name}" for name in root.attrib}
+    found = {f"{root.tag}/@{name}" for name in root.attrib}
 
     def walk(element: ET.Element, prefix: str) -> None:
-        item = f"{prefix}/{element.tag}" if prefix else element.tag
+        item = f"{prefix}/{element.tag}"
         found.add(item)
         if element.tag == "SequenceData":
             return
-        found.update(f"{item}@{name}" for name in element.attrib)
+        found.update(f"{item}/@{name}" for name in element.attrib)
         for child in element:
             walk(child, item)
 
     for child in root:
-        walk(child, "")
+        walk(child, root.tag)
 
     return found
 
@@ -98,7 +103,7 @@ def test_every_header_item_in_the_raw_files_is_mapped(path: Path) -> None:
 
 def test_the_raw_files_include_the_jpo_bibliography() -> None:
     # JPO が足す Bibliography を持つファイルがあること。無ければ、上の確かめがそれを確かめない。
-    assert "Bibliography/PublishedDate" in _header_items(RAW_ST26 / "JPO-bibliography.xml")
+    assert "ST26SequenceListing/Bibliography/PublishedDate" in _header_items(RAW_ST26 / "JPO-bibliography.xml")
 
 
 @pytest.mark.parametrize("location", sorted(set(VALUE_ROWS.values())))
