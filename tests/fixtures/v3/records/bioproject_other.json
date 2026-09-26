@@ -1,0 +1,39 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "BioProject XML"
+  },
+  "project": {
+    "accession": "PRJDB12345",
+    "title": "Metagenomic survey of a hot spring microbial mat",
+    "description": "A survey of the microbial community of a hot spring mat, sampled monthly for two years. Sequencing was combined with an in-house enrichment protocol that does not fit any of the listed methods.",
+    "project_type": "primary",
+    "organism": {
+      "name": "hot springs metagenome",
+      "taxonomy_id": 433727
+    },
+    "relevance": {
+      "other": "Baseline data for a regional conservation programme."
+    },
+    "locus_tag_prefix": [
+      {
+        "prefix": "HSM01",
+        "biosample_id": "SAMD00123456"
+      }
+    ],
+    "target": {
+      "sample_scope": "eOther",
+      "material": "eOther",
+      "capture": "eOther",
+      "method": "eOther",
+      "data_types": [
+        "eOther"
+      ],
+      "description": "Environmental mat communities sampled across a thermal gradient; neither a single isolate nor a defined multispecies set.",
+      "method_description": "In-house enrichment followed by long-read sequencing.",
+      "data_type_descriptions": {
+        "eOther": "Per-sample community composition tables derived from the reads."
+      }
+    }
+  }
+}

@@ -33,7 +33,9 @@
   },
   "project": {
     "locus_tag_prefix": [
-      "ECK12"
+      {
+        "prefix": "ECK12"
+      }
     ],
     "publications": [
       {
