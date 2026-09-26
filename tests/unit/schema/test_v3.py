@@ -3,9 +3,20 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from ddbj_record.schema.v3 import Attribute, DdbjRecord, LocusTagPrefix, Project, ProjectTarget, Sample
+from ddbj_record.schema.v3 import (
+    Attribute,
+    DdbjRecord,
+    LocusTagPrefix,
+    Project,
+    ProjectTarget,
+    RelationSource,
+    RelationTarget,
+    Sample,
+)
 
 RECORDS_DIR = Path(__file__).resolve().parents[2].joinpath("fixtures", "v3", "records")
 
@@ -131,6 +142,67 @@ def test_umbrella_subtype_carries_its_description() -> None:
         }
     )
     assert project.umbrella_subtype_description == "A programme-level grouping."
+
+
+# === relations の index ===
+#
+# accession が無く alias も重なるオブジェクトは、その種類の list の中の位置 (0 始まり) で指す。
+# 起点 (RelationSource) と相手 (RelationTarget、pool.members[].sample) で同じ規則にする。
+
+
+@given(st.integers(min_value=0))
+def test_relation_index_non_negative_is_accepted(index: int) -> None:
+    assert RelationSource.model_validate({"type": "sample", "index": index}).index == index
+    assert RelationTarget.model_validate({"db": "sample", "index": index}).index == index
+
+
+@given(st.integers(max_value=-1))
+def test_relation_source_index_negative_is_rejected(index: int) -> None:
+    with pytest.raises(ValidationError):
+        RelationSource.model_validate({"type": "sample", "index": index})
+
+
+@given(st.integers(max_value=-1))
+def test_relation_target_index_negative_is_rejected(index: int) -> None:
+    with pytest.raises(ValidationError):
+        RelationTarget.model_validate({"db": "sample", "index": index})
+
+
+def test_pool_member_sample_with_index_points_among_samples_sharing_an_alias() -> None:
+    # GEA の SDRF には、名前が同じで値の違う Source がある。別の sample にし、位置で指す。
+    record = DdbjRecord.model_validate(
+        {
+            "schema_version": "v3",
+            "samples": [
+                {"alias": "PDAC3", "attributes": [{"name": "sample_name", "value": "PDAC3_Scr"}]},
+                {"alias": "PDAC3", "attributes": [{"name": "sample_name", "value": "PDAC3_MNX1KD"}]},
+            ],
+            "experiments": [
+                {"alias": "a1", "pool": {"members": [{"sample": {"db": "sample", "id": "PDAC3", "index": 1}}]}},
+            ],
+        }
+    )
+
+    assert record.experiments is not None
+    assert record.experiments[0].pool is not None
+    assert record.experiments[0].pool.members is not None
+    sample = record.experiments[0].pool.members[0].sample
+    assert sample is not None
+    assert sample.index == 1
+
+
+def test_pool_member_sample_with_negative_index_fails_the_whole_record() -> None:
+    record = {
+        "schema_version": "v3",
+        "experiments": [{"pool": {"members": [{"sample": {"db": "sample", "id": "PDAC3", "index": -1}}]}}],
+    }
+
+    with pytest.raises(ValidationError) as excinfo:
+        DdbjRecord.model_validate(record)
+
+    locations = [error["loc"] for error in excinfo.value.errors()]
+
+    assert ("experiments", 0, "pool", "members", 0, "sample", "index") in locations
 
 
 # === extra="forbid" ===

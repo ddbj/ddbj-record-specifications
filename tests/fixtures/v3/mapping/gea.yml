@@ -7,6 +7,7 @@
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
+#           Comment[*] は、別の行にある名前 (Comment[BioSample] など) を除いたもの。
 #           Protocol REF は、直後のノードを > の後に書く
 #   adf     ADF の見出しの行。(table) は見出しの後の表
 #   cibex   CIBEX の「節 / キー」
@@ -17,68 +18,92 @@
 #   ... (注記)           読み手のための補足
 #
 # 数はその項目を含むファイルの数。
+#
+# SDRF の行は record に持たない。行の上のノードをオブジェクトにし、ノードの続き方を次のように結ぶ。
+#
+#   Source           samples[]。名前と値が同じ Source は 1 つの sample にし、名前が同じで値が違えば別の sample にする
+#   Extract / Labeled Extract
+#                    experiments[].pool.members[]。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つ。
+#                    members[].sample が元の Source を指す。Factor Value は行の値なので、その行の member に置く
+#   Assay            experiments[]
+#   生データのファイル (Array Data File / Array Data Matrix File)
+#                    runs[]。同じ列の同じ名前は 1 つの run にする。relations[part_of experiment] で、その行の Assay を指す
+#   処理済みデータのファイル (Derived Array Data File / Derived Array Data Matrix File)
+#                    analyses[]。relations[derived_from] で、左隣のファイル (無ければ Assay) と、その行の Assay を指す
+#
+# run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
+# (dual-channel で channel ごとに別のファイルがあるものなど)。
+#
+# 行は、experiments[] の順に、その pool.members[] の順に、member から relations をたどって行き着くファイルの並びごとに
+# 1 つ作る。元の行の順序と、全く同じ行の繰り返しは保たない。1 つの Assay の中で member_name が重なる SDRF
+# (名前を使い回したもの) は、どのファイルがどの member のものかを指せないので、作り直すと行の組み合わせが増える。
 
 idf:
-  Comment[AEExperimentType]:          investigation.experiment_type  # 768 ファイル
-  Comment[Array Design REF]:          investigation.array_design_ref  # 367 ファイル
+  Comment[AEExperimentType]:          submission.gea.experiment_type  # 768 ファイル
+  Comment[Array Design REF]:          submission.gea.array_design_ref  # 367 ファイル
   Comment[BioProject]:                relations[part_of bioproject].target.id  # 768 ファイル
-  Comment[CIBEX Accept Date]:         investigation.legacy.cibex_accept_date  # 254 ファイル
-  Comment[CIBEX Public Release Date]: investigation.legacy.cibex_public_release_date  # 209 ファイル
-  Comment[CIBEX Submitter]:           investigation.legacy.cibex_submitter  # 14 ファイル
-  Comment[DBCLS]:                     investigation.dbcls_approval  # 25 ファイル
-  Comment[GEAAccession]:              investigation.accession  # 768 ファイル
-  Comment[Last Update Date]:          investigation.last_update_date  # 768 ファイル
-  Comment[NBDC]:                      investigation.nbdc_approval  # 13 ファイル
-  Comment[Number of channel]:         investigation.channel_type  # 369 ファイル
+  Comment[CIBEX Accept Date]:         submission.gea.legacy.cibex_accept_date  # 254 ファイル
+  Comment[CIBEX Public Release Date]: submission.gea.legacy.cibex_public_release_date  # 209 ファイル
+  Comment[CIBEX Submitter]:           submission.gea.legacy.cibex_submitter  # 14 ファイル
+  Comment[DBCLS]:                     submission.gea.dbcls_approval  # 25 ファイル
+  Comment[GEAAccession]:              project.accession  # 768 ファイル
+  Comment[Last Update Date]:          submission.gea.last_update_date  # 768 ファイル
+  Comment[NBDC]:                      submission.gea.nbdc_approval  # 13 ファイル
+  Comment[Number of channel]:         submission.gea.channel_type  # 369 ファイル
   Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 26 ファイル
-  Comment[SecondaryAccession]:        investigation.identifiers[secondary].value  # 254 ファイル
-  Experiment Description:             investigation.description  # 768 ファイル
-  Experimental Design:                investigation.experimental_designs[]  # 768 ファイル
-  Experimental Factor Name:           investigation.experimental_factors[].name  # 768 ファイル
-  Experimental Factor Type:           investigation.experimental_factors[].type  # 768 ファイル
-  Investigation Title:                investigation.title  # 768 ファイル
-  MAGE-TAB Version:                   investigation.magetab_version  # 768 ファイル
-  Person Affiliation:                 investigation.persons[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
-  Person First Name:                  investigation.persons[].first_name  # 768 ファイル
-  Person Last Name:                   investigation.persons[].last_name  # 768 ファイル
-  Person Roles:                       investigation.persons[].role  # 768 ファイル
-  Protocol Description:               investigation.protocols[].description  # 768 ファイル
-  Protocol Name:                      investigation.protocols[].name  # 768 ファイル
-  Protocol Type:                      investigation.protocols[].type  # 768 ファイル
-  PubMed ID:                          investigation.publications[].pubmed_id  # 185 ファイル
-  Public Release Date:                investigation.public_release_date  # 768 ファイル
-  Publication DOI:                    investigation.publications[].doi  # 22 ファイル
-  SDRF File:                          investigation.sdrf_file  # 768 ファイル
+  Comment[SecondaryAccession]:        project.identifiers[secondary].value  # 254 ファイル
+  Experiment Description:             project.description  # 768 ファイル
+  Experimental Design:                project.study_types[]  # 768 ファイル
+  Experimental Factor Name:           project.experimental_factors[].name  # 768 ファイル
+  Experimental Factor Type:           project.experimental_factors[].type  # 768 ファイル
+  Investigation Title:                project.title  # 768 ファイル
+  MAGE-TAB Version:                   submission.gea.magetab_version  # 768 ファイル
+  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
+  Person First Name:                  submission.submitters[].first_name  # 768 ファイル
+  Person Last Name:                   submission.submitters[].last_name  # 768 ファイル
+  Person Roles:                       submission.submitters[].role  # 768 ファイル
+  Protocol Description:               project.protocols[].description  # 768 ファイル
+  Protocol Name:                      project.protocols[].name  # 768 ファイル
+  Protocol Type:                      project.protocols[].type  # 768 ファイル
+  PubMed ID:                          project.publications[].pubmed_id  # 185 ファイル
+  Public Release Date:                submission.hold_date  # 768 ファイル
+  Publication DOI:                    project.publications[].doi  # 22 ファイル
+  SDRF File:                          submission.gea.sdrf_file  # 768 ファイル
 
 sdrf:
-  Array Data File:                               investigation.sdrf[].data_files[].name (type は列の名前)  # 729 ファイル
-  Array Data Matrix File:                        investigation.sdrf[].data_files[].name (type は列の名前)  # 36 ファイル
-  Array Design REF @ Assay Name:                 investigation.sdrf[].assay.array_design_ref  # 368 ファイル
-  Assay Name:                                    investigation.sdrf[].assay.name  # 768 ファイル
-  Characteristics[*] @ Source Name:              investigation.sdrf[].source.characteristics[].value (角括弧の中が name)  # 768 ファイル
-  Comment[*] @ Array Data File:                  investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Assay Name:                       investigation.sdrf[].assay.comments[].value (角括弧の中が name)  # 400 ファイル
-  Comment[*] @ Derived Array Data File:          investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Derived Array Data Matrix File:   investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 2 ファイル
-  Comment[*] @ Extract Name:                     investigation.sdrf[].extract.comments[].value (角括弧の中が name)  # 399 ファイル
-  Comment[*] @ Source Name:                      investigation.sdrf[].source.comments[].value (角括弧の中が name)  # 768 ファイル
-  Derived Array Data File:                       investigation.sdrf[].data_files[].name (type は列の名前)  # 474 ファイル
-  Derived Array Data Matrix File:                investigation.sdrf[].data_files[].name (type は列の名前)  # 222 ファイル
-  Extract Name:                                  investigation.sdrf[].extract.name  # 768 ファイル
-  Factor Value[*]:                               investigation.sdrf[].factor_values[].value (角括弧の中が name)  # 767 ファイル
-  Label @ Labeled Extract Name:                  investigation.sdrf[].labeled_extract.label  # 368 ファイル
-  Labeled Extract Name:                          investigation.sdrf[].labeled_extract.name  # 368 ファイル
-  Material Type @ Extract Name:                  investigation.sdrf[].extract.material_type  # 768 ファイル
-  Protocol REF > Array Data File:                investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 330 ファイル
-  Protocol REF > Array Data Matrix File:         investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 36 ファイル
-  Protocol REF > Assay Name:                     investigation.sdrf[].assay.protocol_refs[] (直後のノードの protocol)  # 767 ファイル
-  Protocol REF > Derived Array Data File:        investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 474 ファイル
-  Protocol REF > Derived Array Data Matrix File: investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 222 ファイル
-  Protocol REF > Extract Name:                   investigation.sdrf[].extract.protocol_refs[] (直後のノードの protocol)  # 767 ファイル
-  Protocol REF > Labeled Extract Name:           investigation.sdrf[].labeled_extract.protocol_refs[] (直後のノードの protocol)  # 368 ファイル
-  Source Name:                                   investigation.sdrf[].source.name  # 768 ファイル
-  Technology Type @ Assay Name:                  investigation.sdrf[].assay.technology_type  # 768 ファイル
-  Unit[*] @ Factor Value[*]:                     investigation.sdrf[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 23 ファイル
+  Array Data File:                               runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 729 ファイル
+  Array Data Matrix File:                        runs[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 36 ファイル
+  Array Design REF @ Assay Name:                 experiments[].platform.array_design.accession (db は "array_design")  # 368 ファイル
+  Assay Name:                                    experiments[].alias  # 768 ファイル
+  Characteristics[*] @ Source Name:              samples[].attributes[].value (角括弧の中が name)  # 768 ファイル
+  Comment[*] @ Array Data File:                  runs[].comments[].value (角括弧の中が name)  # 3 ファイル
+  Comment[*] @ Assay Name:                       experiments[].comments[].value (角括弧の中が name)  # 2 ファイル
+  Comment[*] @ Derived Array Data File:          analyses[].comments[].value (角括弧の中が name)  # 3 ファイル
+  Comment[*] @ Derived Array Data Matrix File:   analyses[].comments[].value (角括弧の中が name)  # 2 ファイル
+  Comment[*] @ Extract Name:                     experiments[].pool.members[].extract.comments[].value (角括弧の中が name)  # 399 ファイル
+  Comment[*] @ Source Name:                      samples[].comments[].value (角括弧の中が name)  # 2 ファイル
+  Comment[BioSample] @ Source Name:              samples[].accession (members[].sample.accession にも同じ値)  # 768 ファイル
+  Comment[SRA_EXPERIMENT] @ Assay Name:          experiments[].accession  # 399 ファイル
+  Comment[SRA_RUN] @ Assay Name:                 runs[].accession (その行の Array Data File の run)  # 399 ファイル
+  Comment[description] @ Source Name:            samples[].description  # 292 ファイル
+  Comment[sample_title] @ Source Name:           samples[].title  # 768 ファイル
+  Derived Array Data File:                       analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 474 ファイル
+  Derived Array Data Matrix File:                analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 222 ファイル
+  Extract Name:                                  experiments[].pool.members[].extract.name  # 768 ファイル
+  Factor Value[*]:                               experiments[].pool.members[].factor_values[].value (角括弧の中が name)  # 767 ファイル
+  Label @ Labeled Extract Name:                  experiments[].pool.members[].label  # 368 ファイル
+  Labeled Extract Name:                          experiments[].pool.members[].member_name  # 368 ファイル
+  Material Type @ Extract Name:                  experiments[].pool.members[].extract.material_type  # 768 ファイル
+  Protocol REF > Array Data File:                runs[].protocol_refs[]  # 330 ファイル
+  Protocol REF > Array Data Matrix File:         runs[].protocol_refs[]  # 36 ファイル
+  Protocol REF > Assay Name:                     experiments[].protocol_refs[]  # 767 ファイル
+  Protocol REF > Derived Array Data File:        analyses[].protocol_refs[]  # 474 ファイル
+  Protocol REF > Derived Array Data Matrix File: analyses[].protocol_refs[]  # 222 ファイル
+  Protocol REF > Extract Name:                   experiments[].pool.members[].extract.protocol_refs[]  # 767 ファイル
+  Protocol REF > Labeled Extract Name:           experiments[].pool.members[].protocol_refs[]  # 368 ファイル
+  Source Name:                                   samples[].alias (members[].sample.id にも同じ値)  # 768 ファイル
+  Technology Type @ Assay Name:                  experiments[].technology_type  # 768 ファイル
+  Unit[*] @ Factor Value[*]:                     experiments[].pool.members[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 23 ファイル
 
 adf:
   (table):                            array_design.file (ADF をファイルのまま)  # 242 ファイル
@@ -87,7 +112,7 @@ adf:
   Comment[Description]:               array_design.description  # 17 ファイル
   Comment[GEAAccession]:              array_design.accession  # 242 ファイル
   Comment[Organism]:                  array_design.organism.name  # 18 ファイル
-  Comment[Public Release Date]:       array_design.public_release_date  # 13 ファイル
+  Comment[Public Release Date]:       submission.hold_date  # 13 ファイル
   Comment[SubmittedName]:             array_design.submitted_name  # 5 ファイル
   Printing Protocol:                  array_design.printing_protocol  # 18 ファイル
   Provider:                           array_design.provider  # 18 ファイル
@@ -100,81 +125,81 @@ adf:
   Version:                            array_design.version  # 13 ファイル
 
 cibex:
-  (top) / CIBEX accession:                     investigation.legacy.cibex.accession  # 216 ファイル
-  (top) / Release date:                        investigation.legacy.cibex.release_date  # 216 ファイル
-  Array design / Array design protocol:        investigation.legacy.cibex.array_designs[].array_design_protocol  # 158 ファイル
-  Array design / Array sesign accession:       investigation.legacy.cibex.array_designs[].accession  # 216 ファイル
-  Array design / Attachment:                   investigation.legacy.cibex.array_designs[].attachment  # 215 ファイル
-  Array design / Description:                  investigation.legacy.cibex.array_designs[].description  # 48 ファイル
-  Array design / Design provider:              investigation.legacy.cibex.array_designs[].design_provider  # 207 ファイル
-  Array design / File:                         investigation.legacy.cibex.array_designs[].file  # 216 ファイル
-  Array design / Model name:                   investigation.legacy.cibex.array_designs[].model_name  # 216 ファイル
-  Array design / Number of features:           investigation.legacy.cibex.array_designs[].number_of_features  # 215 ファイル
-  Array design / Reporter type:                investigation.legacy.cibex.array_designs[].reporter_type  # 214 ファイル
-  Array design / Strand type:                  investigation.legacy.cibex.array_designs[].strand_type  # 186 ファイル
-  Array design / Substrate type:               investigation.legacy.cibex.array_designs[].substrate_type  # 190 ファイル
-  Array design / Surface type:                 investigation.legacy.cibex.array_designs[].surface_type  # 182 ファイル
-  Array design / Technology type:              investigation.legacy.cibex.array_designs[].technology_type  # 212 ファイル
-  Array design text field / (列の名前):        investigation.legacy.cibex.array_designs[].data_fields[].field (キーが field、値が description)  # 144 ファイル
+  (top) / CIBEX accession:                     submission.gea.legacy.cibex.accession  # 216 ファイル
+  (top) / Release date:                        submission.gea.legacy.cibex.release_date  # 216 ファイル
+  Array design / Array design protocol:        submission.gea.legacy.cibex.array_designs[].array_design_protocol  # 158 ファイル
+  Array design / Array sesign accession:       submission.gea.legacy.cibex.array_designs[].accession  # 216 ファイル
+  Array design / Attachment:                   submission.gea.legacy.cibex.array_designs[].attachment  # 215 ファイル
+  Array design / Description:                  submission.gea.legacy.cibex.array_designs[].description  # 48 ファイル
+  Array design / Design provider:              submission.gea.legacy.cibex.array_designs[].design_provider  # 207 ファイル
+  Array design / File:                         submission.gea.legacy.cibex.array_designs[].file  # 216 ファイル
+  Array design / Model name:                   submission.gea.legacy.cibex.array_designs[].model_name  # 216 ファイル
+  Array design / Number of features:           submission.gea.legacy.cibex.array_designs[].number_of_features  # 215 ファイル
+  Array design / Reporter type:                submission.gea.legacy.cibex.array_designs[].reporter_type  # 214 ファイル
+  Array design / Strand type:                  submission.gea.legacy.cibex.array_designs[].strand_type  # 186 ファイル
+  Array design / Substrate type:               submission.gea.legacy.cibex.array_designs[].substrate_type  # 190 ファイル
+  Array design / Surface type:                 submission.gea.legacy.cibex.array_designs[].surface_type  # 182 ファイル
+  Array design / Technology type:              submission.gea.legacy.cibex.array_designs[].technology_type  # 212 ファイル
+  Array design text field / (列の名前):        submission.gea.legacy.cibex.array_designs[].data_fields[].field (キーが field、値が description)  # 144 ファイル
   Array design text field / Field:             (container)  # 144 ファイル
-  Experiment / Common reference:               investigation.legacy.cibex.experiment.common_reference  # 216 ファイル
-  Experiment / Experiment title:               investigation.legacy.cibex.experiment.title  # 216 ファイル
-  Experiment / Experimental description:       investigation.legacy.cibex.experiment.description  # 216 ファイル
-  Experiment / Experimental design type:       investigation.legacy.cibex.experiment.design_type  # 215 ファイル
-  Experiment / Experimental factor:            investigation.legacy.cibex.experiment.factor  # 213 ファイル
-  Experiment / Number of hybridization:        investigation.legacy.cibex.experiment.number_of_hybridizations  # 216 ファイル
-  Experiment / Quality control description:    investigation.legacy.cibex.experiment.quality_control_description  # 216 ファイル
-  Hybridization / Array design accession:      investigation.legacy.cibex.hybridizations[].array_design_accession  # 216 ファイル
-  Hybridization / Description:                 investigation.legacy.cibex.hybridizations[].description  # 37 ファイル
-  Hybridization / File:                        investigation.legacy.cibex.hybridizations[].file  # 216 ファイル
-  Hybridization / Hybridization protocol:      investigation.legacy.cibex.hybridizations[].hybridization_protocol  # 211 ファイル
-  Hybridization / Name:                        investigation.legacy.cibex.hybridizations[].name  # 216 ファイル
-  Hybridization / Scanning protocol:           investigation.legacy.cibex.hybridizations[].scanning_protocol  # 209 ファイル
-  Hybridization data text field / (列の名前):  investigation.legacy.cibex.hybridizations[].data_fields[].field (キーが field、値が description)  # 161 ファイル
+  Experiment / Common reference:               submission.gea.legacy.cibex.experiment.common_reference  # 216 ファイル
+  Experiment / Experiment title:               submission.gea.legacy.cibex.experiment.title  # 216 ファイル
+  Experiment / Experimental description:       submission.gea.legacy.cibex.experiment.description  # 216 ファイル
+  Experiment / Experimental design type:       submission.gea.legacy.cibex.experiment.design_type  # 215 ファイル
+  Experiment / Experimental factor:            submission.gea.legacy.cibex.experiment.factor  # 213 ファイル
+  Experiment / Number of hybridization:        submission.gea.legacy.cibex.experiment.number_of_hybridizations  # 216 ファイル
+  Experiment / Quality control description:    submission.gea.legacy.cibex.experiment.quality_control_description  # 216 ファイル
+  Hybridization / Array design accession:      submission.gea.legacy.cibex.hybridizations[].array_design_accession  # 216 ファイル
+  Hybridization / Description:                 submission.gea.legacy.cibex.hybridizations[].description  # 37 ファイル
+  Hybridization / File:                        submission.gea.legacy.cibex.hybridizations[].file  # 216 ファイル
+  Hybridization / Hybridization protocol:      submission.gea.legacy.cibex.hybridizations[].hybridization_protocol  # 211 ファイル
+  Hybridization / Name:                        submission.gea.legacy.cibex.hybridizations[].name  # 216 ファイル
+  Hybridization / Scanning protocol:           submission.gea.legacy.cibex.hybridizations[].scanning_protocol  # 209 ファイル
+  Hybridization data text field / (列の名前):  submission.gea.legacy.cibex.hybridizations[].data_fields[].field (キーが field、値が description)  # 161 ファイル
   Hybridization data text field / Field:       (container)  # 161 ファイル
-  Labeled Extract / Extraction protocol:       investigation.legacy.cibex.labeled_extracts[].extraction_protocol  # 209 ファイル
-  Labeled Extract / Label:                     investigation.legacy.cibex.labeled_extracts[].label  # 215 ファイル
-  Labeled Extract / Label compound:            investigation.legacy.cibex.labeled_extracts[].label_compound  # 211 ファイル
-  Labeled Extract / Labeling protocol:         investigation.legacy.cibex.labeled_extracts[].labeling_protocol  # 211 ファイル
-  Labeled Extract / Pooling protocol:          investigation.legacy.cibex.labeled_extracts[].pooling_protocol  # 49 ファイル
-  Protocol / Description:                      investigation.legacy.cibex.protocols[].description  # 216 ファイル
-  Protocol / Name:                             investigation.legacy.cibex.protocols[].name  # 216 ファイル
-  Reference / Author:                          investigation.legacy.cibex.references[].author  # 183 ファイル
-  Reference / Issue:                           investigation.legacy.cibex.references[].issue  # 60 ファイル
-  Reference / Journal:                         investigation.legacy.cibex.references[].journal  # 79 ファイル
-  Reference / Page:                            investigation.legacy.cibex.references[].page  # 71 ファイル
-  Reference / Pubmed ID:                       investigation.legacy.cibex.references[].pubmed_id  # 65 ファイル
-  Reference / Title:                           investigation.legacy.cibex.references[].title  # 183 ファイル
-  Reference / Volume:                          investigation.legacy.cibex.references[].volume  # 71 ファイル
-  Reference / Year:                            investigation.legacy.cibex.references[].year  # 84 ファイル
-  Sample / Age:                                investigation.legacy.cibex.samples[].age  # 139 ファイル
-  Sample / Biosource provider:                 investigation.legacy.cibex.samples[].biosource_provider  # 4 ファイル
-  Sample / Cell line:                          investigation.legacy.cibex.samples[].cell_line  # 51 ファイル
-  Sample / Cell type:                          investigation.legacy.cibex.samples[].cell_type  # 49 ファイル
-  Sample / Description:                        investigation.legacy.cibex.samples[].description  # 58 ファイル
-  Sample / Developmental stage:                investigation.legacy.cibex.samples[].developmental_stage  # 38 ファイル
-  Sample / Disease state:                      investigation.legacy.cibex.samples[].disease_state  # 32 ファイル
-  Sample / Genetic modification:               investigation.legacy.cibex.samples[].genetic_modification  # 31 ファイル
-  Sample / Growth condition protocol:          investigation.legacy.cibex.samples[].growth_condition_protocol  # 18 ファイル
-  Sample / Individual:                         investigation.legacy.cibex.samples[].individual  # 9 ファイル
-  Sample / Individual genetic characteristics: investigation.legacy.cibex.samples[].individual_genetic_characteristics  # 11 ファイル
-  Sample / Name:                               investigation.legacy.cibex.samples[].name  # 215 ファイル
-  Sample / Organism:                           investigation.legacy.cibex.samples[].organism  # 211 ファイル
-  Sample / Organism part:                      investigation.legacy.cibex.samples[].organism_part  # 156 ファイル
-  Sample / Sex:                                investigation.legacy.cibex.samples[].sex  # 152 ファイル
-  Sample / Strain or line:                     investigation.legacy.cibex.samples[].strain_or_line  # 151 ファイル
-  Sample / Treatment protocol:                 investigation.legacy.cibex.samples[].treatment_protocol  # 10 ファイル
-  Submitter / Address:                         investigation.legacy.cibex.submitters[].address  # 208 ファイル
-  Submitter / Department:                      investigation.legacy.cibex.submitters[].department  # 208 ファイル
-  Submitter / First name:                      investigation.legacy.cibex.submitters[].first_name  # 216 ファイル
-  Submitter / Laboratory:                      investigation.legacy.cibex.submitters[].laboratory  # 81 ファイル
-  Submitter / Last name:                       investigation.legacy.cibex.submitters[].last_name  # 216 ファイル
-  Submitter / Middle initials:                 investigation.legacy.cibex.submitters[].middle_initials  # 10 ファイル
-  Submitter / Organization:                    investigation.legacy.cibex.submitters[].organization  # 215 ファイル
-  Summary / Description:                       investigation.legacy.cibex.summaries[].description  # 71 ファイル
-  Summary / File:                              investigation.legacy.cibex.summaries[].file  # 106 ファイル
-  Summary / Name:                              investigation.legacy.cibex.summaries[].name  # 106 ファイル
-  Summary / Normalization protocol:            investigation.legacy.cibex.summaries[].normalization_protocol  # 98 ファイル
-  Summary / Transformation protocol:           investigation.legacy.cibex.summaries[].transformation_protocol  # 74 ファイル
-  Summary data text field / (列の名前):        investigation.legacy.cibex.summaries[].data_fields[].field (キーが field、値が description)  # 74 ファイル
+  Labeled Extract / Extraction protocol:       submission.gea.legacy.cibex.labeled_extracts[].extraction_protocol  # 209 ファイル
+  Labeled Extract / Label:                     submission.gea.legacy.cibex.labeled_extracts[].label  # 215 ファイル
+  Labeled Extract / Label compound:            submission.gea.legacy.cibex.labeled_extracts[].label_compound  # 211 ファイル
+  Labeled Extract / Labeling protocol:         submission.gea.legacy.cibex.labeled_extracts[].labeling_protocol  # 211 ファイル
+  Labeled Extract / Pooling protocol:          submission.gea.legacy.cibex.labeled_extracts[].pooling_protocol  # 49 ファイル
+  Protocol / Description:                      submission.gea.legacy.cibex.protocols[].description  # 216 ファイル
+  Protocol / Name:                             submission.gea.legacy.cibex.protocols[].name  # 216 ファイル
+  Reference / Author:                          submission.gea.legacy.cibex.references[].author  # 183 ファイル
+  Reference / Issue:                           submission.gea.legacy.cibex.references[].issue  # 60 ファイル
+  Reference / Journal:                         submission.gea.legacy.cibex.references[].journal  # 79 ファイル
+  Reference / Page:                            submission.gea.legacy.cibex.references[].page  # 71 ファイル
+  Reference / Pubmed ID:                       submission.gea.legacy.cibex.references[].pubmed_id  # 65 ファイル
+  Reference / Title:                           submission.gea.legacy.cibex.references[].title  # 183 ファイル
+  Reference / Volume:                          submission.gea.legacy.cibex.references[].volume  # 71 ファイル
+  Reference / Year:                            submission.gea.legacy.cibex.references[].year  # 84 ファイル
+  Sample / Age:                                submission.gea.legacy.cibex.samples[].age  # 139 ファイル
+  Sample / Biosource provider:                 submission.gea.legacy.cibex.samples[].biosource_provider  # 4 ファイル
+  Sample / Cell line:                          submission.gea.legacy.cibex.samples[].cell_line  # 51 ファイル
+  Sample / Cell type:                          submission.gea.legacy.cibex.samples[].cell_type  # 49 ファイル
+  Sample / Description:                        submission.gea.legacy.cibex.samples[].description  # 58 ファイル
+  Sample / Developmental stage:                submission.gea.legacy.cibex.samples[].developmental_stage  # 38 ファイル
+  Sample / Disease state:                      submission.gea.legacy.cibex.samples[].disease_state  # 32 ファイル
+  Sample / Genetic modification:               submission.gea.legacy.cibex.samples[].genetic_modification  # 31 ファイル
+  Sample / Growth condition protocol:          submission.gea.legacy.cibex.samples[].growth_condition_protocol  # 18 ファイル
+  Sample / Individual:                         submission.gea.legacy.cibex.samples[].individual  # 9 ファイル
+  Sample / Individual genetic characteristics: submission.gea.legacy.cibex.samples[].individual_genetic_characteristics  # 11 ファイル
+  Sample / Name:                               submission.gea.legacy.cibex.samples[].name  # 215 ファイル
+  Sample / Organism:                           submission.gea.legacy.cibex.samples[].organism  # 211 ファイル
+  Sample / Organism part:                      submission.gea.legacy.cibex.samples[].organism_part  # 156 ファイル
+  Sample / Sex:                                submission.gea.legacy.cibex.samples[].sex  # 152 ファイル
+  Sample / Strain or line:                     submission.gea.legacy.cibex.samples[].strain_or_line  # 151 ファイル
+  Sample / Treatment protocol:                 submission.gea.legacy.cibex.samples[].treatment_protocol  # 10 ファイル
+  Submitter / Address:                         submission.gea.legacy.cibex.submitters[].address  # 208 ファイル
+  Submitter / Department:                      submission.gea.legacy.cibex.submitters[].department  # 208 ファイル
+  Submitter / First name:                      submission.gea.legacy.cibex.submitters[].first_name  # 216 ファイル
+  Submitter / Laboratory:                      submission.gea.legacy.cibex.submitters[].laboratory  # 81 ファイル
+  Submitter / Last name:                       submission.gea.legacy.cibex.submitters[].last_name  # 216 ファイル
+  Submitter / Middle initials:                 submission.gea.legacy.cibex.submitters[].middle_initials  # 10 ファイル
+  Submitter / Organization:                    submission.gea.legacy.cibex.submitters[].organization  # 215 ファイル
+  Summary / Description:                       submission.gea.legacy.cibex.summaries[].description  # 71 ファイル
+  Summary / File:                              submission.gea.legacy.cibex.summaries[].file  # 106 ファイル
+  Summary / Name:                              submission.gea.legacy.cibex.summaries[].name  # 106 ファイル
+  Summary / Normalization protocol:            submission.gea.legacy.cibex.summaries[].normalization_protocol  # 98 ファイル
+  Summary / Transformation protocol:           submission.gea.legacy.cibex.summaries[].transformation_protocol  # 74 ファイル
+  Summary data text field / (列の名前):        submission.gea.legacy.cibex.summaries[].data_fields[].field (キーが field、値が description)  # 74 ファイル
   Summary data text field / Field:             (container)  # 74 ファイル

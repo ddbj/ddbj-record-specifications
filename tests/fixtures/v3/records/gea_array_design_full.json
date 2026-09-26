@@ -3,6 +3,9 @@
   "provenance": {
     "source_format": "MAGE-TAB ADF"
   },
+  "submission": {
+    "hold_date": "2026-02-06"
+  },
   "array_design": {
     "accession": "A-GEAD-246",
     "alias": "xenium-panel",
@@ -25,7 +28,6 @@
       "name": "Homo sapiens"
     },
     "description": "https://www.10xgenomics.com/support/in-situ-gene-expression",
-    "public_release_date": "2026-02-06",
     "submitted_name": "Xenium panel",
     "file": {
       "filename": "A-GEAD-246.adf",
