@@ -28,7 +28,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 - GFF は record の要素にせず、入力の形式として扱う。GFF の feature は `features` に入れる
 - 染色体やプラスミドを表すモデルは作らない。`sequences.entries[]` の `name` / `type` / `topology` で表す (例: `{"name": "pPLH-1", "type": "plasmid", "topology": "circular"}`)
 - `array_design` は accession を持つ独立した登録で、多くの experiment から参照されるので、`assembly` と同じくトップレベルに置く
-- 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA の `@target` の無い HOLD の日付も `hold_date` に写し、ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。2 つが食い違っていないかは ddbj-validator のルールで確かめる
+- 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA では、ACTIONS は書かれた順に行うので、`@target` の無い HOLD と RELEASE のうち最後のものが効く。それが `@HoldUntilDate` を持つ HOLD なら、その日付を `hold_date` にも写す。RELEASE や、日付の無い HOLD (期間だけのものなど) なら `hold_date` を置かない。ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。`hold_date` がこの規則で決まるものと同じかは ddbj-validator のルールで確かめる
 - GEA の SDRF の Extract と Labeled Extract は、Assay に入る材料として `experiments[].pool.members[]` に置く。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つで、dual-channel の Assay は member を 2 つ持つ。channel ごとに Source や Factor Value が違うことがあるので、Factor Value も member に置く
 
 record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
