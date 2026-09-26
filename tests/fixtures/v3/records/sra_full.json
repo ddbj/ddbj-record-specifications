@@ -162,7 +162,7 @@
       "organism": {
         "name": "soil metagenome",
         "common_name": "soil",
-        "taxonomy_id": 410658
+        "taxonomy_id": "410658"
       },
       "anonymized_name": "S-A",
       "individual_name": "plot 1",
@@ -213,7 +213,7 @@
       "title": "Soil B",
       "organism": {
         "name": "soil metagenome",
-        "taxonomy_id": 410658
+        "taxonomy_id": "410658"
       }
     },
     {
@@ -221,7 +221,7 @@
       "title": "Soil A, second core",
       "organism": {
         "name": "soil metagenome",
-        "taxonomy_id": 410658
+        "taxonomy_id": "410658"
       }
     }
   ],

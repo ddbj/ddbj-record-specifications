@@ -11,7 +11,7 @@
       "project_type": "primary",
       "organism": {
         "name": "hot springs metagenome",
-        "taxonomy_id": 433727
+        "taxonomy_id": "433727"
       },
       "relevance": {
         "other": "Baseline data for a regional conservation programme."

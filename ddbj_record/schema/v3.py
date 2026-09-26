@@ -10,7 +10,9 @@ class Organism(BaseModel):
 
     name: str | None = Field(None, examples=["Homo sapiens"])
     common_name: str | None = Field(None, examples=["human"])
-    taxonomy_id: int | None = Field(None, examples=[9606])
+    # 元の形式では文字列で、前ゼロ・空・"not applicable" も書かれる。書かれたままの文字列を持ち、
+    # taxonomy の番号として正しいかはルールで確かめる。
+    taxonomy_id: str | None = Field(None, examples=["9606"])
 
     model_config = ConfigDict(extra="forbid")
 

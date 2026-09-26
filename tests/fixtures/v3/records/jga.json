@@ -37,7 +37,7 @@
       ],
       "organism": {
         "name": "Homo sapiens",
-        "taxonomy_id": 9606
+        "taxonomy_id": "9606"
       }
     }
   ],
@@ -47,7 +47,7 @@
       "title": "T2D case subject 001",
       "organism": {
         "name": "Homo sapiens",
-        "taxonomy_id": 9606
+        "taxonomy_id": "9606"
       },
       "attributes": [
         {
@@ -76,7 +76,7 @@
       "title": "Healthy control subject 001",
       "organism": {
         "name": "Homo sapiens",
-        "taxonomy_id": 9606
+        "taxonomy_id": "9606"
       },
       "attributes": [
         {

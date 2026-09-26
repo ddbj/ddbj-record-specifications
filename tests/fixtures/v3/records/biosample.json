@@ -10,7 +10,7 @@
       "title": "MIGS Cultured Bacterial/Archaeal sample from Bradyrhizobium sp. DOA9",
       "organism": {
         "name": "Bradyrhizobium sp. DOA9",
-        "taxonomy_id": 1126627
+        "taxonomy_id": "1126627"
       },
       "package": "MIGS.ba",
       "attributes": [

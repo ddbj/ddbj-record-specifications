@@ -11,6 +11,7 @@ from ddbj_record.schema.v3 import (
     Attribute,
     DdbjRecord,
     LocusTagPrefix,
+    Organism,
     Project,
     ProjectTarget,
     RelationSource,
@@ -142,6 +143,23 @@ def test_umbrella_subtype_carries_its_description() -> None:
         }
     )
     assert project.umbrella_subtype_description == "A programme-level grouping."
+
+
+# === organism.taxonomy_id ===
+#
+# 元の形式 (XML / TSV) では文字列で、登録者は前ゼロ・空・"not applicable" も書く。
+# それを指摘するのはルールなので、型は書かれたままの文字列を持つ。
+
+
+@pytest.mark.parametrize("value", ["9606", "009606", "", "not applicable", " 9606 "])
+def test_organism_taxonomy_id_as_written_is_kept(value: str) -> None:
+    assert Organism.model_validate({"taxonomy_id": value}).taxonomy_id == value
+
+
+@given(st.integers())
+def test_organism_taxonomy_id_as_a_number_is_rejected(value: int) -> None:
+    with pytest.raises(ValidationError):
+        Organism.model_validate({"taxonomy_id": value})
 
 
 # === relations の index ===

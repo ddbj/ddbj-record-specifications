@@ -42,6 +42,7 @@ v3 の型が保証するのは、JSON として読めて型に合うこと (well
 - 全てのフィールドを optional (`T | None`) にし、どの形式から変換した record も読めるようにする。例外は `Attribute.name` で、名前の無い属性は何の値か分からないので必須にしている
 - 「何の record か」を示すフィールド (record_type のようなもの) は持たない。何として正しいかは、どのルールを通るかで決まる。変換元の形式と分類 (WGS / GNM など) は `provenance` に置く
 - 選択肢のある値も `str` にし、許す値はルールで決める ([versioning.md](./versioning.md))
+- 登録者が書く値は、数に見えても `str` にする。例えば `organism.taxonomy_id` は、元の形式では文字列で、`"009606"`、空、`"not applicable"` も書かれる。数にすると record として読めなくなり、ルールがそれを指摘できない。数や真偽値の型にするのは、元の形式 (SRA XSD、GFF など) が数と決めていて、保存されている値がどれも数として読めるものだけ
 - BioSample の属性は約 960 種あり、全てを型付きのフィールドにはしない。型付きのフィールドがあるものはそこに置き、残りを `attributes` (name / value / unit) に置く。必須かどうかはルールで決める
 
 例えば次の record は v3 の型で読める。ST.26 として必須の出願情報 (`submission.st26`) が無いことは、ddbj-validator のルールが指摘する。
@@ -88,7 +89,9 @@ record の中で accession と alias を持つもの (`projects[]`、`samples[]`
 
 ## オブジェクトの間の関係
 
-オブジェクトの間の関係と、外部への参照は `relations` に置く。ただし、値の一部として別のものを指す参照は、その場に置く (`experiments[].pool.members[].sample`、`experiments[].platform.array_design`、`features[].sequence_id`、`features[].parent_ids`、`ExternalRef` を使うフィールドなど)。
+オブジェクトの間の関係と、外部への参照は `relations` に置く。SRA の experiment -> sample や run -> experiment のように、元の形式で必ず 1 本ある参照も `relations` に置く。型は全てのフィールドを optional にするので、フィールドにしても「必ずある」は表せず、GEA の run のように複数の experiment に属するものもあるためである。
+
+ただし、参照に別の値が付くものと、値の一部として別のものを指すものは、その場に置く。例えば `experiments[].pool.members[].sample` は、member が割合や label を持つのでその場に置く。ほかに `experiments[].platform.array_design`、`features[].sequence_id`、`features[].parent_ids`、`ExternalRef` を使うフィールドがこれに当たる。
 
 | type | 意味 | 例 |
 |---|---|---|

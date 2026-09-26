@@ -11,7 +11,7 @@
       "project_type": "umbrella",
       "organism": {
         "name": "Oryza sativa",
-        "taxonomy_id": 4530
+        "taxonomy_id": "4530"
       },
       "keywords": [
         "rice",

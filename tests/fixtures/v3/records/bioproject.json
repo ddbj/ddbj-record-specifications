@@ -11,7 +11,7 @@
       "project_type": "primary",
       "organism": {
         "name": "Acetobacteraceae",
-        "taxonomy_id": 433
+        "taxonomy_id": "433"
       },
       "grants": [
         {
