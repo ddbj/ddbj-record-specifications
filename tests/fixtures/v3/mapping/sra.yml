@@ -40,7 +40,7 @@ submission:
   SUBMISSION/ACTIONS/ACTION/ADD/@source:                       submission.sra.actions[].source
   SUBMISSION/ACTIONS/ACTION/HOLD:                              submission.sra.actions[].type (要素名が値)
   SUBMISSION/ACTIONS/ACTION/HOLD/@HoldForPeriod:               submission.sra.actions[].legacy.hold_for_period  # XSD に無い。D-way で 1,123 文書
-  SUBMISSION/ACTIONS/ACTION/HOLD/@HoldUntilDate:               submission.sra.actions[].hold_until_date (@target が無ければ submission.hold_date にも同じ値)
+  SUBMISSION/ACTIONS/ACTION/HOLD/@HoldUntilDate:               submission.sra.actions[].hold_until_date (@target の無い HOLD と RELEASE のうち最後のものなら、submission.hold_date にも同じ値)
   SUBMISSION/ACTIONS/ACTION/HOLD/@notes:                       submission.sra.actions[].legacy.notes  # XSD に無い。D-way で 495 文書
   SUBMISSION/ACTIONS/ACTION/HOLD/@target:                      submission.sra.actions[].target
   SUBMISSION/ACTIONS/ACTION/MODIFY:                            submission.sra.actions[].type (要素名が値)
