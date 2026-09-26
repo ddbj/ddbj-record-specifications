@@ -369,12 +369,18 @@ class Cibex(BaseModel):
 
 
 class GeaSubmissionLegacy(BaseModel):
-    """CIBEX から移した GEA の experiment にだけある、IDF の Comment[CIBEX *] と、CIBEX の元の登録。"""
+    """移した GEA の experiment にだけあるもの。CIBEX から移したものの IDF の Comment[CIBEX *] と
+    CIBEX の元の登録、表として読めない過去の版の SDRF。
+    """
 
     cibex_accept_date: str | None = None
     cibex_public_release_date: str | None = None
     cibex_submitter: str | None = None
     cibex: Cibex | None = None
+    # SDRF として保存されていたが、Source Name で始まるタブ区切りの表ではないもの (CSV や、
+    # SDRF の代わりに保存された IDF)。ファイルのまま指す (文字列にすると、登録システムが空白を
+    # まとめたときにタブ区切りの欄が壊れる)。その版の record は SDRF から作るオブジェクトを持たない。
+    unread_sdrf: File | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -392,6 +398,13 @@ class GeaSubmission(BaseModel):
     # ヒトのデータの公開を、NBDC / DBCLS のデータアクセス委員会が承認したことを述べる文。
     nbdc_approval: str | None = None
     dbcls_approval: str | None = None
+    # IDF の Comment[AdditionalFile:x] が挙げる、SDRF の外のファイル。filetype は x。
+    additional_files: list[File] | None = None
+    # 元の SDRF の行を上から順に、作り直した行 (tests/fixtures/v3/mapping/gea.yml の冒頭) の何番目
+    # (0 始まり) にあたるかで並べたもの。作り直した行の並びが元と違うもの、全く同じ行を繰り返すもの、
+    # 作り直すと元に無い行の組み合わせができるものが、元の行に戻せるようにする。作り直したままで
+    # 元の行になるなら省く。
+    sdrf_row_order: list[int] | None = None
     legacy: GeaSubmissionLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -843,6 +856,11 @@ class PoolMember(BaseModel):
     extract: Extract | None = None
     # dual-channel では channel ごとに値が違うので、Assay でなく member に置く。
     factor_values: list[FactorValue] | None = None
+    # SDRF のデータファイルの後に書かれた、MAGE-TAB がそこに置かない列 (Characteristics、
+    # Parameter Value、Replicate)。Factor Value と同じく行の値なので member に置く。name は列の
+    # 見出し、value はその行の値で、見出しの並びのまま。Unit[y] の列も見出しごと 1 つの要素にし、
+    # unit は使わない (前の列の unit にすると y を失う)。移した過去の版にだけある。
+    misplaced_columns: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="forbid")
 

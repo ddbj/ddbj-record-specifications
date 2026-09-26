@@ -30,6 +30,17 @@
       "last_update_date": "2025-01-31",
       "nbdc_approval": "The Data Access Committee of NBDC approved that this personal data was made published.",
       "dbcls_approval": "The Data Access Committee of DBCLS approved that this personal data was made published.",
+      "additional_files": [
+        {
+          "filename": "barcode-sample-mapping.txt",
+          "filetype": "txt"
+        }
+      ],
+      "sdrf_row_order": [
+        1,
+        0,
+        0
+      ],
       "legacy": {
         "cibex_accept_date": "2010-01-01",
         "cibex_public_release_date": "2010-03-05",
@@ -325,6 +336,16 @@
                 "value": "10",
                 "unit": "micromolar",
                 "unit_type": "concentration unit"
+              }
+            ],
+            "misplaced_columns": [
+              {
+                "name": "Parameter Value[day growth temperature]",
+                "value": "28"
+              },
+              {
+                "name": "Unit[temperature unit]",
+                "value": "degree Celsius"
               }
             ]
           },
