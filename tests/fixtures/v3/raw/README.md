@@ -1,9 +1,7 @@
-# v3 Raw Test Data
+# v3 の実データ
 
-v3 converter の変換元となる実データを収集したディレクトリ。
-各サブディレクトリは DDBJ の登録種別 (データベース/フォーマット) に対応する。
-
-converter 実装時に、ここの入力データに対応する期待出力 (DdbjRecord v3 JSON) を別途追加する想定である。
+各形式の実データ。サブディレクトリは DDBJ の登録の種類 (DB / 形式) に対応する。
+`dra/` は SRA の対応表のテスト (`tests/unit/schema/test_v3_sra_mapping.py`) が読む。ほかのディレクトリはテストから読まない。
 
 ## ディレクトリ構成
 
@@ -21,7 +19,7 @@ raw/
 └── assembly/        Assembly report + AGP + ENA XML
 ```
 
-## データ出自
+## 出どころ
 
 ### bioproject/
 
@@ -117,7 +115,7 @@ experiment 単位のサブディレクトリに `.idf.txt` (Investigation Descri
 
 ### metabobank/
 
-MetaboBank の IDF/SDRF ファイル (MAGE-TAB 形式)。
+MetaboBank の IDF/SDRF ファイル (MAGE-TAB 形式)。v3 はまだ MetaboBank に対応していない。
 `ddbj-search-converter` テストデータから流用。
 
 study 単位のサブディレクトリに `.idf.txt` と `.sdrf.txt` を格納。
@@ -126,12 +124,12 @@ study 単位のサブディレクトリに `.idf.txt` と `.sdrf.txt` を格納�
 
 ### trad/
 
-Traditional (Trad) 登録の変換元データ。2 種類のフォーマットを含む。
+Traditional (Trad) の登録データ。2 種類のフォーマットを含む。
 
 #### DFAST annotation (.ann + .fa)
 
 `dr_tools` リポジトリの examples/ から流用。
-DFAST の出力形式であり、v3 converter の主要な入力フォーマットとなる。
+DFAST の出力形式。
 
 | ファイル | 内容 |
 |---|---|
@@ -141,7 +139,6 @@ DFAST の出力形式であり、v3 converter の主要な入力フォーマッ�
 #### DDBJ flat file (.seq)
 
 DDBJ getentry API から取得した GenBank/DDBJ 形式の公開データ。
-既存公開データから DdbjRecord への逆変換テストに使用する。
 各登録カテゴリ (一般、WGS、TSA、TPA、complete genome) の代表サンプルを含む。
 
 | ファイル | カテゴリ | 内容 |
@@ -237,26 +234,3 @@ ENA REST API から取得した Assembly XML。
 | `GCA_000010525.1_ena_assembly.xml` | Azorhizobium caulinodans ORS 571 完全ゲノム (3.3 KB) |
 
 ソース: https://www.ebi.ac.uk/ena/browser/api/xml/
-
-## 統計
-
-| ディレクトリ | ファイル数 | サイズ |
-|---|---|---|
-| bioproject | 2 | 144 KB |
-| biosample | 2 | 12 KB |
-| dra | 164 | 3.2 MB |
-| jga | 26 | 628 KB |
-| gea | 20 | 240 KB |
-| metabobank | 20 | 512 KB |
-| trad | 15 | 3.2 MB |
-| st26 | 8 | 52 KB |
-| gff | 2 | 3.0 MB |
-| assembly | 5 | 68 KB |
-| **合計** | **264** | **11 MB** |
-
-## TODO
-
-以下のデータは今後必要に応じて追加する。
-
-- [ ] GEA/MetaboBank の livelist ファイル (ローカルリポジトリに見つからなかった)
-- [ ] JGA の sample XML (jga-sample.xml はスパコン上にも存在しなかった)

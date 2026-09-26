@@ -399,7 +399,7 @@
   },
   "relations": [
     {
-      "type": "child_of",
+      "type": "part_of",
       "source": {
         "type": "sample",
         "alias": "p-hokkaidonensis-looc260"

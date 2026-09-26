@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Organism(BaseModel):
+    """生物種。最小限の項目だけを持ち、strain や isolate などは attributes に置く。"""
+
     name: str | None = Field(None, examples=["Homo sapiens"])
     common_name: str | None = Field(None, examples=["human"])
     taxonomy_id: int | None = Field(None, examples=[9606])
@@ -39,6 +41,8 @@ class Organization(BaseModel):
 
 
 class Person(BaseModel):
+    """人。role はこの場所での役割で、同じ人が複数の役割を持つときは Person を役割の数だけ書く。"""
+
     name: str | None = Field(None, examples=["Hanako Mishima"])
     first_name: str | None = Field(None, examples=["Hanako"])
     last_name: str | None = Field(None, examples=["Mishima"])
@@ -97,6 +101,8 @@ class ExternalRef(BaseModel):
 
 
 class GffMeta(BaseModel):
+    """GFF の record 全体の情報。feature ごとの値 (source 列、score 列など) は Feature に置く。"""
+
     version: str | None = Field(None, examples=["3"])
     pragmas: list[str] | None = None
     source_tool: str | None = Field(None, examples=["DFAST"])
@@ -105,7 +111,13 @@ class GffMeta(BaseModel):
 
 
 class Provenance(BaseModel):
+    """record の来歴。変換元の形式と分類、GFF の record 全体の情報。
+
+    変換元ごとに持つ情報が違うので、知らないキーも受け取る (extra="allow")。分かっている情報は型付きのフィールドに置く。
+    """
+
     source_format: str | None = Field(None, examples=["GFF"])
+    # WGS / GNM / MAG など。record は「何の record か」を示すフィールドを持たないので、変換元の分類はここに置く。
     submission_category: str | None = Field(
         None, examples=["WGS"]
     )
@@ -133,6 +145,8 @@ class ApplicationIdentification(BaseModel):
 
 
 class St26Meta(BaseModel):
+    """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。"""
+
     dtd_version: str | None = Field(None, examples=["V1_3"])
     software_name: str | None = None
     software_version: str | None = None
@@ -143,9 +157,11 @@ class St26Meta(BaseModel):
     application: ApplicationIdentification | None = None
     earliest_priority: ApplicationIdentification | None = None
     applicant_name: str | None = None
+    # applicant_name / inventor_name のラテン文字の翻字。
     applicant_name_latin: str | None = None
     inventor_name: str | None = None
     inventor_name_latin: str | None = None
+    # 言語ごとの発明の名称。
     invention_titles: list[InventionTitle] | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -216,6 +232,7 @@ class Submission(BaseModel):
     accession: str | None = Field(None, examples=["DRA000001"])
     alias: str | None = None
     title: str | None = None
+    # 先頭の人が連絡先。
     submitters: list[Person] | None = None
     hold_date: str | None = Field(None, examples=["2025-01-01"])
     comments: list[str] | None = None
@@ -300,22 +317,28 @@ class ProjectLegacy(BaseModel):
 class Project(BaseModel):
     accession: str | None = Field(None, examples=["PRJDB12345"])
     alias: str | None = None
+    # BioProject の ProjectDescr/Name。title とは別の短い名前。
     name: str | None = None
     title: str | None = None
     description: str | None = None
+    # BioProject の構造の種類 ("primary" / "umbrella")。研究の種類は study_types に置く。
     project_type: str | None = Field(None, examples=["primary"])
+    # project_type が "umbrella" のときの種類。
     umbrella_subtype: str | None = Field(
         None, examples=["eComparativeGenomics"]
     )
     # umbrella_subtype が "other" のときの説明（BP_R0008）。
     umbrella_subtype_description: str | None = None
+    # SRA / JGA の研究の種類 ("WGS"、"Case-Control" など)。
     study_types: list[str] | None = None
     organism: Organism | None = None
     publications: list[Publication] | None = None
     grants: list[Grant] | None = None
     keywords: list[str] | None = None
+    # BioProject の Relevance。選んだ分野と、その説明 (BP は分野ごとに文字列を書ける)。
     relevance: dict[str, str] | None = None
     locus_tag_prefix: list[LocusTagPrefix] | None = None
+    # BioProject の ProjectTypeSubmission の Target と Method。
     target: ProjectTarget | None = None
     attributes: list[Attribute] | None = None
     identifiers: list[Identifier] | None = None
@@ -340,10 +363,13 @@ class Sample(BaseModel):
     accession: str | None = Field(None, examples=["SAMD00123456"])
     alias: str | None = None
     title: str | None = None
+    # SRA の DESCRIPTION、BioSample の Comment/Paragraph。
     description: str | None = None
     organism: Organism | None = None
     attributes: list[Attribute] | None = None
+    # BioSample の package。
     package: str | None = Field(None, examples=["MIGS.ba"])
+    # JGA の sample の提供者と、群 ("case" / "control" など)。
     donor_id: str | None = None
     sample_group_type: str | None = Field(None, examples=["case"])
     identifiers: list[Identifier] | None = None
@@ -373,7 +399,9 @@ class LibraryDescriptor(BaseModel):
     strategy: str | None = Field(None, examples=["WGS"])
     source: str | None = Field(None, examples=["GENOMIC"])
     selection: str | None = Field(None, examples=["RANDOM"])
+    # "single" / "paired"。
     layout: str | None = Field(None, examples=["paired"])
+    # paired の insert size とその標準偏差。
     nominal_length: int | None = None
     nominal_sdev: float | None = None
     construction_protocol: str | None = None
@@ -420,6 +448,7 @@ class Platform(BaseModel):
     instrument_model: str | None = Field(
         None, examples=["Illumina HiSeq 2500"]
     )
+    # JGA の array の名前・説明・提供元。
     array_name: str | None = None
     array_description: str | None = None
     array_provider: str | None = None
@@ -509,6 +538,7 @@ class SpotDescriptor(BaseModel):
 
 class PipelineStep(BaseModel):
     step_index: str | None = None
+    # 前の step の step_index。最初の step は "NIL"。
     prev_step_indexes: list[str] | None = None
     program: str | None = None
     version: str | None = None
@@ -599,6 +629,7 @@ class Experiment(BaseModel):
     accession: str | None = Field(None, examples=["DRX000001"])
     alias: str | None = None
     title: str | None = None
+    # SRA の DESIGN_DESCRIPTION。
     description: str | None = None
     library: LibraryDescriptor | None = None
     platform: Platform | None = None
@@ -632,6 +663,7 @@ class File(BaseModel):
     filetype: str | None = Field(None, examples=["fastq"])
     checksum_method: str | None = Field(None, examples=["MD5"])
     checksum: str | None = None
+    # JGA の、暗号化する前のファイルの checksum。
     unencrypted_checksum: str | None = None
     # fastq の品質値の読み方。SRA 形式への変換に要る。
     quality_scoring_system: str | None = Field(None, examples=["phred"])
@@ -690,6 +722,7 @@ class Run(BaseModel):
     alias: str | None = None
     title: str | None = None
     run_date: str | None = None
+    # JGA の data の種類 ("sequencing"、"array"、"metabolite"、"image")。
     data_type: str | None = Field(None, examples=["sequencing"])
     data_blocks: list[DataBlock] | None = None
     attributes: list[Attribute] | None = None
@@ -768,6 +801,7 @@ class Analysis(BaseModel):
     alias: str | None = None
     title: str | None = None
     description: str | None = None
+    # SRA と JGA の analysis の種類を、1 つの語彙で持つ。
     analysis_type: str | None = Field(
         None, examples=["de_novo_assembly"]
     )
@@ -1129,6 +1163,8 @@ class ArrayDesign(BaseModel):
 
 
 class Qualifier(BaseModel):
+    """INSDC の qualifier の値。alias は record の中での識別子。"""
+
     alias: str | None = None
     value: str | None = None
 
@@ -1144,6 +1180,11 @@ class Source(BaseModel):
 
 
 class SourceFeature(BaseModel):
+    """INSDC の source feature。
+
+    definition は DEFINITION 行 (ff_definition) をそのまま持つ。`@@[organism]@@` のような template は展開しない。展開は record を読む側が行う。
+    """
+
     alias: str | None = None
     location: str | None = Field(None, examples=["1..2277985"])
     source: Source | None = None
@@ -1153,11 +1194,13 @@ class SourceFeature(BaseModel):
 
 
 class Entry(BaseModel):
+    # version を含む ("AB123456.1")。alias は登録者が付けた名前。
     accession: str | None = Field(None, examples=["AB123456.1"])
     alias: str | None = Field(None, examples=["contig_001"])
     name: str | None = None
     type: str | None = Field(None, examples=["chromosome"])
     topology: str | None = Field(None, examples=["circular"])
+    # GenBank の division。
     division: str | None = Field(None, examples=["BCT"])
     sequence: str | None = None
     comments: list[str] | None = None
@@ -1167,6 +1210,8 @@ class Entry(BaseModel):
 
 
 class StructuredComment(BaseModel):
+    """Trad の ST_COMMENT の 1 つ。tagset_id がブロックの種類で、fields はその中の項目と値。"""
+
     tagset_id: str | None = Field(
         None, examples=["Genome-Assembly-Data"]
     )
@@ -1177,6 +1222,7 @@ class StructuredComment(BaseModel):
 
 class Sequences(BaseModel):
     seq_prefix: str | None = Field(None, examples=["contig"])
+    # 全ての entry の source feature に共通する値。Sample.organism とは別に持つ。
     common_source: Source | None = None
     entries: list[Entry] | None = None
     structured_comments: list[StructuredComment] | None = None
@@ -1192,12 +1238,15 @@ class Feature(BaseModel):
     alias: str | None = None
     type: str | None = Field(None, examples=["CDS"])
     location: str | None = Field(None, examples=["1..2277985"])
+    # この feature が載る Entry の alias。
     sequence_id: str | None = None
     qualifiers: dict[str, list[Qualifier]] | None = None
     locus_tag_id: str | None = None
+    # GFF の source 列・score 列・phase 列 (0 / 1 / 2)。phase は INSDC の /codon_start と対応する (phase 0 が codon_start 1)。
     source_tool: str | None = None
     score: float | None = None
     phase: int | None = None
+    # GFF の Parent 属性。親の Feature の alias。
     parent_ids: list[str] | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -1223,6 +1272,8 @@ class Assembly(BaseModel):
 
 
 class Dataset(BaseModel):
+    """JGA の dataset。含む run / analysis と従う policy は relations で指す。"""
+
     accession: str | None = Field(None, examples=["JGAD000001"])
     alias: str | None = None
     title: str | None = None
@@ -1257,6 +1308,8 @@ class Dac(BaseModel):
 
 
 class AccessControl(BaseModel):
+    """JGA の policy と DAC。"""
+
     policy: Policy | None = None
     dac: Dac | None = None
 
@@ -1304,6 +1357,12 @@ class RelationTarget(BaseModel):
 
 
 class Relation(BaseModel):
+    """オブジェクトの間の関係と、外部への参照。
+
+    type は "reference" (URL)、"xref" (外部 DB)、"part_of"、"child_of"、"derived_from"、"related_to"、"governed_by"、"managed_by"、"contains"。
+    source を省くと、record 全体が起点になる。
+    """
+
     type: str | None = Field(None, examples=["child_of"])
     source: RelationSource | None = None
     target: RelationTarget | None = None

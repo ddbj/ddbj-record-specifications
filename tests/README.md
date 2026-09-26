@@ -1,130 +1,53 @@
-# Tests
+# テストの方針
 
 ```bash
-uv run pytest
+docker compose exec app uv run pytest
 ```
 
-## テストファイル
+この repo のテストが確かめるのは、型が record を読めること、型と対応表が食い違っていないこと、converter の出力の 3 つである。登録データとしての正しさは確かめない (ddbj-validator のルールが判定する)。
 
-| テスト | 対象 | 仕様書 |
-|---|---|---|
-| `unit/schema/test_v1.py` | v1 スキーマ (Pydantic モデル) | - |
-| `unit/schema/test_v2.py` | v2 スキーマ (Pydantic モデル) | - |
-| `unit/schema/test_init.py` | バージョン定数・正規化 | - |
-| `unit/schema/test_cli.py` | `dump_json_schema` CLI | - |
-| `unit/schema/test_pbt.py` | スキーマの PBT (hypothesis) | - |
-| `unit/test_validator.py` | バリデーション | [v2-validator.md](../docs/v2-validator.md) |
-| `unit/converter/test_v1_to_v2.py` | v1->v2 変換 | [v2-converter.md](../docs/v2-converter.md) |
-| `unit/converter/test_v2_to_v1.py` | v2->v1 変換 | [v2-converter.md](../docs/v2-converter.md) |
-| `unit/converter/test_roundtrip.py` | ラウンドトリップ変換 | [v2-converter.md](../docs/v2-converter.md) |
-| `unit/converter/test_cli.py` | `ddbj_record_converter` CLI | [v2-converter.md](../docs/v2-converter.md) |
-| `unit/converter/test_pbt.py` | コンバーターの PBT (hypothesis) | [v2-converter.md](../docs/v2-converter.md) |
-| `unit/test_utils.py` | ユーティリティ関数 | - |
+## 型のテスト
 
-## テストデータの方針
+- 各 major の fixture (`tests/fixtures/v1/`、`v2/`、`v3/records/`) が、その major の型で読めることを確かめる。`invalid_*.json` は読めないことを確かめる
+- v3 の `*_full.json` は、なるべく多くのフィールドに値を入れた record である。v3 のモデルは `extra="forbid"` なので、型からフィールドを消すと `*_full.json` が読めなくなり、テストが落ちる。フィールドを消すときは、`*_full.json` も直す
+- v2 の型が受け付ける値の範囲は、PBT (hypothesis) でも確かめる
 
-テストデータは以下の 2 種類に分類する。
+## 対応表のテスト
 
-### 1. 手書きの最小 JSON（スキーマバリデーション・変換テスト用）
+[`tests/fixtures/v3/mapping/`](./fixtures/v3/mapping/) の対応表 (SRA / GEA) について、次を確かめる。
 
-スキーマ定義 (Pydantic モデル) を見ながら、手動で作成する最小限の JSON ファイル。
-ツール (dr_tools, converter) に依存せず、テスト対象の仕様を直接検証できる。
+- 対応表の全ての場所が、v3 のモデルに実在する
+- 値を持つ要素と属性は、値 (str / int / float / bool) のフィールドを指す
+- 対応表の全ての場所に、`sra_full.json`・`gea_full.json`・`gea_array_design_full.json` のどれかで値がある
+- SRA は、[`tests/fixtures/v3/raw/dra/`](./fixtures/v3/raw/dra/) の XML に出てくる全ての要素と属性が、対応表にある
 
-- 必須フィールドのみの最小構成
-- DFAST ワークフロー別の典型的な構成 (DFC GNM / DFC WGS / DFV)
-- 不正な値・欠損フィールドを含む異常系
-- GenBank 形式由来の特殊ケース (複数 source feature、複雑な location 等)
-- レガシー `schema_version` ("0.1", "v1" など) の互換性
-- converter の入出力ペア
+対応表の行が正しい場所を指しているか (TAG を value に置いていないか、など) は確かめない。それは対応表を読む人が決める。
+型を変えたら、対応表も手で直す。
 
-テストデータが生物学的に正しい必要はない。
-スキーマの制約が正しく検証・変換されることを確認するのが目的である。
+## converter のテスト
 
-Note: sequence と location の不整合について:
+- 入力と期待する出力の組 ([`tests/fixtures/converter/`](./fixtures/converter/)) を持つ。converter の出力を `model_dump(exclude_none=True, by_alias=True)` した結果が、期待する出力と一致することを確かめる
+- v1 -> v2 -> v1 と v2 -> v1 -> v2 の往復で、値が保たれることを確かめる
+- PBT で、生成した record を変換した結果が、変換先の型で読めることを確かめる
 
-トリミング fixtures (`valid_dfc_*.json`, `valid_dfv.json`) では、sequence を先頭 100bp に切り詰めている一方、entry の source_features.location や features の location はオリジナルの座標をそのまま保持している (例: `sequence` が 100bp なのに `location: "1..2277985"`)。
-現在の Pydantic スキーマでは location は `str` 型のため validation は通るが、将来ロジックレベルバリデーション (sequence 長と location の整合性チェック) を追加した場合はこれらの fixtures の更新が必要になる。
+## テストデータ
 
-### 2. 実データスナップショット（回帰テスト用）
+テストデータは、手書きの小さな JSON と、実データから作ったものの 2 種類を使う。
 
-genbank/annotation ファイルなどの既存データから、dr_tools や converter を使って生成した JSON を**スナップショットとして凍結**したもの。
-リファクタリング前後で出力が変わらないことを検証する回帰テストに使う。
+- 手書きの小さな JSON: 型を見ながら作り、必須のフィールド、典型的な構成、異常系、特殊なケースを 1 つずつ確かめる。生物学的に正しい必要はない
+- 実データから作ったもの: 一度 commit したら、型を意図して変えない限り変えない
 
-- 生成元: DFAST 出力 -> dr_tools で v1 JSON 化 -> converter で v2 JSON 化
-- 一度コミットしたら、意図的な仕様変更がない限り変更しない
-- 現行バージョンの出力を凍結するため、循環依存は発生しない
+v1 / v2 の実データの出どころは次のとおり。DFC は細菌・古細菌向けの dfast_core、DFV はウイルス向けの DFAST_VRL である。
 
-## fixtures のデータ出自
-
-fixtures の `valid_dfc_*.json` / `valid_dfv.json` は、実データを dr_tools (`drt_ann2json`) で変換しトリミング (entries <=3, features <=5/entry, sequence <=100bp) したものである。
-データの出自は以下の 2 系統に分かれる。
-
-### ゴールデンデータ (dr_tools examples)
-
-dr_tools リポジトリの `examples/` に同梱されているサンプル ann+fa から生成。
-フィールドが全て埋まった完全なデモデータであり、リファレンスとして扱う。
-
-| fixture | 元データ |
+| fixture | 元のデータ |
 |---|---|
-| `v1/valid_dfc_gnm.json`, `v2/valid_dfc_gnm.json` | `dr_tools/examples/complete_genome.{ann,fa}` |
-| `v2/valid_dfv.json` | `dr_tools/examples/vrl_result.{ann,fa}` |
+| `v1/valid_dfc_gnm.json`、`v2/valid_dfc_gnm.json` | dr_tools の `examples/complete_genome.{ann,fa}` (DFC) |
+| `v2/valid_dfv.json` | dr_tools の `examples/vrl_result.{ann,fa}` (DFV) |
+| `v1/valid_wf_dfc_wgs.json`、`v2/valid_wf_dfc_wgs.json` | DFAST の DFC の実行結果 |
+| `v2/valid_wf_dfv.json` | DFAST の DFV の実行結果 |
 
-### DFAST 実行結果データ (WF テンプレート)
+- どれも dr_tools の `drt_ann2json` で JSON にし、entry は最大 3 つ、feature は entry ごとに最大 5 つ、sequence は 100bp までに切り詰めた。location は元の座標のままなので、sequence より長い location がある
+- `valid_wf_*` は template のまま実行した結果なので、submitter や organism が空文字列のものがある。実際の DFAST の出力の姿なので、そのまま許している
+- v1 は DFC 専用の古い形式で、`trad_submission_category` が `Literal["WGS", "GNM"]` なので、DFV のデータは v2 にだけ置く
 
-DFAST ワークフローの実行結果から生成。ファイル名は `valid_wf_*` プレフィックスで統一。
-テンプレート状態のまま実行されたデータであり、submitter 情報・organism 等が空文字列のケースが含まれる。
-これは実際の DFAST 出力の姿をそのまま反映しており、意図的に許容している。
-
-| fixture | WF | 元データ |
-|---|---|---|
-| `v1/valid_wf_dfc_wgs.json`, `v2/valid_wf_dfc_wgs.json` | DFC | `mss.{ann,fasta}` |
-| `v2/valid_wf_dfv.json` | DFV | `dfv/DDBJ.{annt.tsv,seq.fa}` |
-
-VADR 単体 WF の ann+fa 出力は DFAST 実行結果に存在しなかった（VADR は DFV の内部ステップとして動作する）。
-
-## fixtures ディレクトリ構成
-
-### v1
-
-v1 は DFC (dfast_core) 専用のレガシー形式。`trad_submission_category` が `Literal["WGS", "GNM"]` のため DFV データは対象外。
-特殊ケース (複数 source feature 等) は v2 で作成し、converter テストで v1 との変換を検証する。
-
-| ファイル | 内容 |
-|---|---|
-| `valid_minimal.json` | 必須フィールドのみの最小構成 (手書き) |
-| `valid_dfc_gnm.json` | DFC 完全ゲノム (chromosome circular + plasmid)。ゴールデンデータ |
-| `valid_wf_dfc_wgs.json` | DFC ドラフトゲノム (unplaced linear × 複数 contig)。WF テンプレートデータ |
-| `invalid_missing_required.json` | 必須フィールドの欠損 (手書き) |
-| `invalid_wrong_type.json` | Literal 値の不正 (`trad_submission_category: "VRL"`) (手書き) |
-| `legacy_schema_version.json` | `schema_version: "0.1"` での読み込み互換テスト (手書き) |
-
-### v2
-
-v2 は現行形式。DFC / DFV の両方をカバーし、GenBank 形式由来の特殊ケースもここで扱う。
-
-| ファイル | 内容 |
-|---|---|
-| `valid_minimal.json` | 必須フィールドのみの最小構成 (手書き) |
-| `valid_dfc_gnm.json` | DFC 完全ゲノム (chromosome circular + plasmid circular/linear)。ゴールデンデータ |
-| `valid_dfv.json` | DFV ウイルスゲノム (mol_type: genomic RNA)。ゴールデンデータ |
-| `valid_wf_dfc_wgs.json` | DFC ドラフトゲノム (unplaced linear × 複数 contig)。WF テンプレートデータ |
-| `valid_wf_dfv.json` | DFV ウイルス (source feature のみ)。WF テンプレートデータ |
-| `valid_multi_source.json` | 1 entry に複数の source_features (キメラ配列等) (手書き) |
-| `valid_complex_location.json` | join, complement(join(...)), order, fuzzy (<, >) (手書き) |
-| `valid_boolean_qualifier.json` | /pseudo, /trans_splicing 等の値なし qualifier (手書き) |
-| `invalid_missing_required.json` | 必須フィールドの欠損 (手書き) |
-| `invalid_wrong_type.json` | Literal 値の不正 (Xref.db: "invalid_db", Entry.type: "unknown") (手書き) |
-| `invalid_extra_field.json` | extra="forbid" のモデルに余計なフィールド (手書き) |
-| `legacy_schema_version.json` | `schema_version: "0.2"` での読み込み互換テスト (手書き) |
-
-### converter
-
-converter の入出力ペア。入力を converter に通した結果が expected と一致することを検証する。
-expected は `model_dump_json(exclude_none=True)` で生成している。
-
-| ファイル | 内容 |
-|---|---|
-| `v1_to_v2_input.json` | v1 形式の有効な JSON (= `v1/valid_dfc_gnm.json` と同一内容) |
-| `v1_to_v2_expected.json` | v1→v2 変換の期待出力 |
-| `v2_to_v1_input.json` | v2 形式の有効な JSON (= `v2/valid_dfc_gnm.json` と同一内容) |
-| `v2_to_v1_expected.json` | v2→v1 変換の期待出力 |
+v3 の実データ (`tests/fixtures/v3/raw/`) の出どころは、[`tests/fixtures/v3/raw/README.md`](./fixtures/v3/raw/README.md) にある。
