@@ -37,6 +37,7 @@ GEA では、それに次を加える。
 
 - **1 つのノードの中で、種類の違う列の並び**: `Comment` が `Technology Type` の前か後か、といった並びは SDRF ごとに違うが、保たない。同じ種類の列（`Characteristics` どうし、`Protocol REF` どうし）の並びは保つ
 - **ファイルの文字コード**: Unicode として読む。UTF-8 でないのは CIBEX の 4 件だけで、どれも Windows の cp1252（`±`、`°`、`’`）
+- **`Comment[Related study]` の値の並び**: E-GEAD-414 は `NBDC`、`JGA` の順、E-GEAD-623 は逆だが、保たない。どちらも同じ種類の参照を並べたもので、並びに意味は無い。v3 では `relations` になり、その並びは保たない（[v3-sra.md](./v3-sra.md#失わないもの)）
 
 `build_mapping.py` は、次のものを見つけたら対応表を書かずに止まる。どれも今の写しには無い。
 
@@ -49,10 +50,11 @@ GEA では、それに次を加える。
 
 IDF は 1 行が 1 つの項目で、値が行に沿って並ぶ。
 
-- 同じ組の項目（`Person *`、`Protocol *`、`Experimental Factor *`）は、n 番目の値どうしが n 番目のものを表す。v3 では組ごとに list にし、n 番目の値を n 番目の要素に置く（`Person Last Name` と `Person First Name` → `persons[].last_name` / `.first_name`）
+- 同じ組の項目（`Person *`、`Protocol *`、`Experimental Factor *`）は、n 番目の値どうしが n 番目のものを表す。v3 では組ごとに list にし、n 番目の値を n 番目の要素に置く（`Person Last Name` と `Person First Name` → `submission.submitters[].last_name` / `.first_name`）
   - 組の中で値の数は揃っていなくてよい。`Person Affiliation` は 768 件の IDF の全てで 1 つだけで、1 人目の `organizations[0].name` に入る
   - PubMed ID と DOI の両方を持つ IDF は 2 件（E-GEAD-592、1086）で、どちらも 1 つずつなので、組み合わせに迷うものは無い
 - 人は v3 の `Person`、論文は `Publication` を使う
+- 他の DB と同じ意味の項目は、他の DB と同じ欄に置く（[下](#他の-db-と同じ意味の欄)）
 - GEA が `Comment[...]` に書く項目は、全て型付きの欄にした（`experiment_type`、`channel_type` など）。CIBEX から移した experiment にしかない `Comment[CIBEX *]` は `investigation.legacy` に置く。対応表に無い `Comment[...]` が現れたら、`build_mapping.py` は止まる
 - 他のオブジェクトへの参照は `relations` に置く。起点は `{"type": "investigation", "accession": E-GEAD}`
   - `Comment[BioProject]` → `part_of`（target.db は `bioproject`）。experiment が BioProject の一部であることを表す。なお v3 の文書と fixture では、BioSample から BioProject への参照に `part_of` と `child_of` の両方が使われていて、揃っていない
@@ -114,11 +116,11 @@ CIBEX のファイルは、移す前の元の登録として `investigation.lega
 
 GEA は MAGE-TAB の形のまま `investigation` に持ち、SDRF は 1 行ずつ `investigation.sdrf[]` に置く。v3 の `samples` / `experiments` には写さない。
 
-- 試料と experiment そのものは BioSample と DRA にあり、SDRF はそれを `Comment[BioSample]` や `Comment[SRA_EXPERIMENT]` / `Comment[SRA_RUN]` で指している。SDRF の Source の `Characteristics[x]` や Assay の `LIBRARY_*` は、その写し。`samples` / `experiments` に写すと、BioSample と DRA の record と並ぶ 2 つ目の写しができ、どちらが正しいかを決めることになる
+- 試料と experiment そのものは BioSample と DRA にあり、SDRF はそれを `Comment[BioSample]` や `Comment[SRA_EXPERIMENT]` / `Comment[SRA_RUN]` で指している。SDRF の Source の `Characteristics[x]` や、シーケンスの GEA（768 件のうち 399 件）の Extract の `Comment[LIBRARY_*]` / `INSTRUMENT_MODEL` は、その写し。`samples` / `experiments` に写すと、BioSample と DRA の record と並ぶ 2 つ目の写しができ、どちらが正しいかを決めることになる
 - 試料や実験を DB をまたいで探すときは、SDRF が指す BioSample と DRA の record を見る
 - ノードの値を行ごとに繰り返す（E-GEAD-648 は 78 行全てが同じ Extract を通る）のは、SDRF を失わずに戻すための代償として受け入れる
 
-IDF を v3 の `project` に写さないのは、E-GEAD が自分の BioProject（`Comment[BioProject]`、全 768 件にある）を別に持つため。
+IDF を v3 の `project` に写さないのは、IDF が研究（project）ではなく 1 つの実験の記述だから。その実験が属する研究は、`Comment[BioProject]`（全 768 件にある）が指す BioProject にある。
 
 ### ADF のプローブの表はファイルのまま
 
@@ -126,28 +128,32 @@ IDF を v3 の `project` に写さないのは、E-GEAD が自分の BioProject�
 
 ### 他の DB と同じ意味の欄
 
-IDF に書かれたとおり `investigation` に持ち、他の DB と同じ意味の欄にも写す。2 つが一致することは検証で確かめる。SRA の HOLD と `hold_date` と同じやり方（[v3-sra.md](./v3-sra.md#hold_date-と-actions-の-hold)）。
+IDF と ADF の項目のうち、v3 が他の DB でも持つ欄と同じ意味のものは、その欄にだけ置く。IDF や ADF に戻すときは、そこから読む。
 
-- `Public Release Date` → `submission.hold_date` にも写す
-- `Person *` → `submission.submitters` にも写す。役割（`Person Roles`）が書かれた人は全て `submitter`（1,226）で、IDF の Person は GEA に登録した人の欄なので、役割が書かれていない人（83 件の IDF、E-GEAD-338 は 4 人に役割 1 つ）も含め、全員を写す。役割は `investigation.persons[].role` に書かれたままにする
-- `Comment[Last Update Date]` は公開用の写しが書いている archive の日付。移行した record には書かれたまま持ち（失わないため）、ddbj-repository で受ける新しい登録には書かない。更新日時は ddbj-repository が持つ（[v3-schema.md](./v3-schema.md) の Date）
-
-`Comment[Related study]` の値の並び（E-GEAD-414 は `NBDC`、`JGA` の順、E-GEAD-623 は逆）は保たない。どちらも同じ種類の参照で、並びに意味は無い。
+- `Public Release Date`（IDF）と `Comment[Public Release Date]`（ADF、13 件）→ `submission.hold_date`。BP の `Hold/@release_date` と同じく、共通の欄にだけ置く
+- `Person *` → `submission.submitters[]`。役割（`Person Roles`）は書かれたとおり `role` に置く。役割が書かれていない人（83 件の IDF、E-GEAD-338 は 4 人に役割 1 つ）は `role` を空のままにし、推し量って埋めない。書かれた役割は全て `submitter`（1,226）
+- `Comment[Last Update Date]` は、公開用の写しが書いている archive の更新日。v3 は archive 管理の日付を record に入れない（[v3-schema.md](./v3-schema.md) の Date）が、移した record では失わないために `investigation.legacy.last_update_date` に書かれたまま持つ。新しい登録には無い。更新日時は ddbj-repository が持つ
 
 ## ddbj-repository の側でやること
 
 [v3-sra.md](./v3-sra.md#ddbj-repository-の側でやること)と同じ canonical JSON の版上げで、GEA の次の list を `ordered` として登録する。
 
 - `investigation.sdrf`、その中の `protocol_refs`、`data_files`、`characteristics`、`comments`、`factor_values`
-- `investigation.persons`、`protocols`、`experimental_designs`、`experimental_factors`、`publications`
+- `investigation.protocols`、`experimental_designs`、`experimental_factors`、`publications`
 - `array_design.term_sources`
 - CIBEX の各 list
 
-`Characteristics` や `Comment` は同じ名前が繰り返されることがあり（E-GEAD-424 の Extract は `Comment[LIBRARY_*]` を 2 回ずつ持つ。E-GEAD-455、458、1085 は同じ名前の Factor Value を持つ）、`[name, unit]` をキーにする `keyed` では順序が決まらない。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
+`Characteristics` や `Comment` は同じ名前が繰り返されることがあり（E-GEAD-424 の Extract は `Comment[LIBRARY_*]` を 2 回ずつ持つ。E-GEAD-455、458、1085 は同じ名前の Factor Value を持つ）、`[name, unit]` をキーにする `keyed` では書かれた順が保たれない。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
+
+`schema/canon/v3-fields.yml` の Root に `investigation` と `array_design` が無いので、足す（`canon:fields_check` のため）。`investigation.legacy.last_update_date` は移し直すたびに変わりうるので、差分から外す（volatile）。
 
 ## 選ばなかった案
 
 - **samples / experiments に写す。** v3 の概念の共通化には沿うが、BioSample と DRA にある試料と実験の 2 つ目の写しになる。SDRF の列と v3 の欄の対応を 1 つずつ決め、書き戻す規則も複雑になる
 - **MAGE-TAB の ADF（18 件）の表を型付きで持つ。** 最大 400 万行の表が record に入り、残りの 224 件はファイルのままなので、表の持ち方が 2 通りになる
-- **同じ意味の欄を、他の DB の欄にだけ置く（`investigation` から除く）。** IDF に戻すときに別の場所から読むことになり、IDF の項目と v3 の欄の対応が崩れる。写しを持って検証で一致を確かめる方が、IDF の形も共通の欄も保てる
+- **同じ意味の欄を `investigation` にも持ち、共通の欄に写す。** 同じ値が 2 か所にあり、どちらが正しいかを決めることになる。SRA の HOLD は `actions` の並びを失わないために写しを持つが、IDF の項目は単独の値で、共通の欄にだけ置いても失うものが無い
+- **役割の書かれていない人を submitter と見なす。** IDF の Person は研究の連絡先で、登録した本人とは限らない。書かれていない役割は埋めない
 
+## MetaboBank
+
+MetaboBank も MAGE-TAB で登録される（`tests/fixtures/v3/raw/metabobank`）。`investigation` をそのまま使えるかどうかは、同じように全件を数えて確かめる必要がある。

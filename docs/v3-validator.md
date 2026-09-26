@@ -180,7 +180,7 @@ format_rules:
 | Submission | ST.26: `invention_title` 必須 / TradAnnotation: `trad_submission_category` 必須 |
 | Source | ST.26: `tax_id` は補助情報として許容 |
 | Entry | ST.26: `division` は `"PAT"` 固定 |
-| Feature | ST.26: INSDC のサブセット（使用可能な feature/qualifier が制��される） |
+| Feature | ST.26: INSDC のサブセット（使用可能な feature/qualifier が制限される） |
 
 forbidden フィールドに値が入っていた場合の severity（error / warning）は consumer の config で指定する。
 
@@ -195,8 +195,8 @@ validation rule 実装時の参考データ。
 | packages 数 | 229 (NCBI) / 228 (DDBJ) |
 | 全 packages 共通の core attributes | 8 (sample_name, organism, taxonomy_id, bioproject_id, collection_date, geo_loc_name, sample_title, description) |
 | 1 package あたりの最大属性数 | 203 (MIGS.eu.built) |
-| 1 package あたりの平均属性��� | ~88 |
-| いず���かの package で mandatory な属性数 | 103 |
+| 1 package あたりの平均属性数 | ~88 |
+| いずれかの package で mandatory な属性数 | 103 |
 | 常に optional な属性数 | 765 |
 
 既存の typed 化の試み:

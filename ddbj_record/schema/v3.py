@@ -1039,8 +1039,10 @@ class Cibex(BaseModel):
 
 
 class InvestigationLegacy(BaseModel):
-    """CIBEX から移した experiment にだけある、IDF の Comment[CIBEX *] と、CIBEX の元の登録。"""
+    """移した experiment にだけあるもの。IDF の Comment[CIBEX *] と CIBEX の元の登録、公開用の写しの更新日。"""
 
+    # 公開用の写しが IDF の Comment[Last Update Date] に書いた、archive の更新日。新しい登録には無い。
+    last_update_date: str | None = None
     cibex_accept_date: str | None = None
     cibex_public_release_date: str | None = None
     cibex_submitter: str | None = None
@@ -1060,10 +1062,8 @@ class Investigation(BaseModel):
     magetab_version: str | None = Field(None, examples=["1.1"])
     experimental_designs: list[str] | None = None
     experimental_factors: list[ExperimentalFactor] | None = None
-    persons: list[Person] | None = None
     protocols: list[Protocol] | None = None
     publications: list[Publication] | None = None
-    public_release_date: str | None = None
     sdrf_file: str | None = None
     sdrf: list[SdrfRow] | None = None
     # 以下は GEA が IDF の Comment[...] に書くもの。
@@ -1071,7 +1071,6 @@ class Investigation(BaseModel):
     channel_type: str | None = Field(None, examples=["single-channel"])
     # SDRF の Array Design REF をまとめたもの。
     array_design_ref: str | None = None
-    last_update_date: str | None = None
     # ヒトのデータの公開を、NBDC / DBCLS のデータアクセス委員会が承認したことを述べる文。
     nbdc_approval: str | None = None
     dbcls_approval: str | None = None
@@ -1117,7 +1116,6 @@ class ArrayDesign(BaseModel):
     term_sources: list[TermSource] | None = None
     organism: Organism | None = None
     description: str | None = None
-    public_release_date: str | None = None
     submitted_name: str | None = None
     file: File | None = None
     legacy: ArrayDesignLegacy | None = None

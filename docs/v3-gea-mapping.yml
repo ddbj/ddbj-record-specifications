@@ -26,7 +26,7 @@ idf:
   Comment[CIBEX Submitter]:           investigation.legacy.cibex_submitter  # 14 ファイル
   Comment[DBCLS]:                     investigation.dbcls_approval  # 25 ファイル
   Comment[GEAAccession]:              investigation.accession  # 768 ファイル
-  Comment[Last Update Date]:          investigation.last_update_date  # 768 ファイル
+  Comment[Last Update Date]:          investigation.legacy.last_update_date  # 768 ファイル
   Comment[NBDC]:                      investigation.nbdc_approval  # 13 ファイル
   Comment[Number of channel]:         investigation.channel_type  # 369 ファイル
   Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 26 ファイル
@@ -37,15 +37,15 @@ idf:
   Experimental Factor Type:           investigation.experimental_factors[].type  # 768 ファイル
   Investigation Title:                investigation.title  # 768 ファイル
   MAGE-TAB Version:                   investigation.magetab_version  # 768 ファイル
-  Person Affiliation:                 investigation.persons[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
-  Person First Name:                  investigation.persons[].first_name  # 768 ファイル
-  Person Last Name:                   investigation.persons[].last_name  # 768 ファイル
-  Person Roles:                       investigation.persons[].role  # 768 ファイル
+  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
+  Person First Name:                  submission.submitters[].first_name  # 768 ファイル
+  Person Last Name:                   submission.submitters[].last_name  # 768 ファイル
+  Person Roles:                       submission.submitters[].role  # 768 ファイル
   Protocol Description:               investigation.protocols[].description  # 768 ファイル
   Protocol Name:                      investigation.protocols[].name  # 768 ファイル
   Protocol Type:                      investigation.protocols[].type  # 768 ファイル
   PubMed ID:                          investigation.publications[].pubmed_id  # 185 ファイル
-  Public Release Date:                investigation.public_release_date  # 768 ファイル
+  Public Release Date:                submission.hold_date  # 768 ファイル
   Publication DOI:                    investigation.publications[].doi  # 22 ファイル
   SDRF File:                          investigation.sdrf_file  # 768 ファイル
 
@@ -86,7 +86,7 @@ adf:
   Comment[Description]:               array_design.description  # 17 ファイル
   Comment[GEAAccession]:              array_design.accession  # 242 ファイル
   Comment[Organism]:                  array_design.organism.name  # 18 ファイル
-  Comment[Public Release Date]:       array_design.public_release_date  # 13 ファイル
+  Comment[Public Release Date]:       submission.hold_date  # 13 ファイル
   Comment[SubmittedName]:             array_design.submitted_name  # 5 ファイル
   Printing Protocol:                  array_design.printing_protocol  # 18 ファイル
   Provider:                           array_design.provider  # 18 ファイル

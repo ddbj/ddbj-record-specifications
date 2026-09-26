@@ -54,6 +54,8 @@ XSD の package / annotation / reference の文書は D-way に保存されて�
 - **値を 1 つも持たない要素や属性**: `<PROCESSING/>`、`<LABEL/>`、`notes=""`、空白だけの文字列は、その要素や属性が無いのと同じに扱う。ただし要素の名前が値になるもの（[下](#要素の名前が値になるもの)）は、中身が空でもその名前という値を持つ。`<LIBRARY_LAYOUT><SINGLE/></LIBRARY_LAYOUT>` や `<ACTION><PROTECT/></ACTION>` は空ではない
 - **数と真偽値の字面**: `"0.0E0"` と `"0"`、`"1"` と `"true"` は、同じ数・同じ真偽値として持つ
 - **XML としての書き方**: 名前空間の接頭辞、属性の並び、空白による整形、コメント
+- **`TAG` の違う `*_ATTRIBUTE` どうしの並び**: 属性は名前で引くもので、名前の違う属性の前後に意味は無い。同じ `TAG` を繰り返したものの並びは保つ
+- **参照とリンクの並び**: `*_LINKS` の `URL_LINK` / `XREF_LINK`、`ANALYSIS/TARGETS`、`RELATED_STUDIES` は v3 の `relations` になり、その並びは保たない。どれも同じ種類の参照を並べたもので、並びに意味は無い
 
 `int` / `float` / `bool` にした項目は、drmdb に保存された全ての値がその型で読める（読めない値は 1 つも無かった）。対応表を書く `build_mapping.py` が毎回これを確かめる。
 `TAG` が空の `*_ATTRIBUTE` は drmdb に 172 あるが、どれも `VALUE` と `UNITS` も空で、値を持たない。`Attribute.name` を必須とすることと食い違わない。
@@ -184,29 +186,36 @@ SRA XML では、選択肢を子要素の名前で表すところがある。v3 
 
 ### 複数の study を持つ submission
 
-study が 1 つなら、今までどおり同じ record の `project` に置く。2 つ以上なら、study をそれぞれ `project` だけを持つ別の record にし、submission の record は `project` を持たない。experiment から study への参照は relation のままで、相手を accession で指す（relation は別の record のものを指せる）。これらの record は同じセットに入れる。
+study が 1 つなら、今までどおり同じ record の `project` に置く。2 つ以上なら、study をそれぞれ `project` だけを持つ別の record にし、submission の record は `project` を持たない。
 
 - `project` を 1 つのままにでき、BP を含む読む側を変えずに済む
-- SUBMISSION、experiment、run、sample は 1 つの record に留まるので、どれも写し分けない
+- SUBMISSION、experiment、run、analysis、sample は 1 つの record に留まるので、どれも写し分けない
 - どれか 1 つを主な study に選ぶ規則は置かない。元の XML にその区別が無いので、全て同じ扱いにする
+- study の record の `submission` には、その submission の `accession`（DRA）と `hold_date` だけを置く。どの submission の study かがデータ自体に残り、`@target` の無い HOLD は study にも効くので、公開保留日も同じに読める
+- experiment や analysis から study への参照は、XML に書かれたまま relation に置く（refname は `target.id`、accession は `target.accession`。[オブジェクトの間の参照](#オブジェクトの間の参照)）。相手が別の record にあっても変わらない。読む側は、同じ `submission.accession` を持つ record の中で、accession か（`center_name`、alias）で相手を探す
+- どれかの版で study が 2 つ以上になった submission は、全ての版で分ける。版によって形を変えると、履歴の途中で project が record の外へ移る
 
-該当するのは、experiment の `STUDY_REF` で数えて 35,944 submission のうち 5、`mass.accession_relation` の親子で数えて 385 のうち 37（最大 59 study）。
+該当するのは少なくとも次のとおり。どちらの数え方にも漏れがある。
+
+- experiment の `STUDY_REF` に書かれた study の accession（各 experiment の最新版）で数えると、35,944 submission のうち 5 が 2 つの study を指す。study を refname だけで指す 27,669 の experiment はこれに数えていない
+- `mass.accession_relation` で submission（DRA）を親に持つ study（DRP）を数えると、そう記録された 385 submission のうち 37 が 2 つ以上を持ち、最大は 59。削除されていない DRP 17,972 の多くは、この親子として記録されていない
 
 ### `hold_date` と `actions` の HOLD
 
-`ACTIONS/ACTION/HOLD` は書かれたとおり（順序も）`submission.sra.actions[]` に置き、`@target` の無い HOLD の `@HoldUntilDate` を `submission.hold_date` にも写す。2 つが一致することは検証で確かめる。
+`ACTIONS/ACTION/HOLD` は書かれたとおり（順序も）`submission.sra.actions[]` に置き、`@target` が無く `@HoldUntilDate` を持つ HOLD のうち最後のものの日付を、`submission.hold_date` にも写す（ACTIONS は書かれた順に行うので、最後のものが効く）。検証は、`hold_date` がその日付と同じことを確かめる。
 
-- 公開保留日は、DB によらず `hold_date` から読める（ddbj-repository の公開予告も `hold_date` を見る）
-- HOLD を `actions` から除くと、ACTIONS の並びを失う
+- 公開保留日は、DB によらず `hold_date` から読める。ddbj-repository の BP の公開予告は、record の `submission.hold_date` を写した列を見ている。DRA に広げるときも同じ欄を読めばよい
+- HOLD を `actions` から除くと、ACTIONS の並びを失う。同じ値を 2 か所に持つのは、そのための代償（GEA の `Public Release Date` は単独の値なので、共通の欄にだけ置く。[v3-gea.md](./v3-gea.md#他の-db-と同じ意味の欄)）
 - `@target` の付いた HOLD は、オブジェクトごとの保留なので `actions` にだけ置く
+- 日付の無い HOLD と、日付の代わりに期間だけを書いた HOLD（`legacy.hold_for_period`、1,123 文書）は写さない。`hold_date` は日付の欄で、期間から日付を作ると、何を起点にしたかを推し量ることになる
 
 ## ddbj-repository の側でやること
 
 canonical JSON（`ddbj-canon/v2`）の版を上げ、登録簿を次のように直す。
 
-- **順序**: 書かれた順に意味がある list を `ordered` として登録する。`experiments` / `runs` / `analyses`（relation が `index` で指すので、並べ替えると別のオブジェクトを指すことになる）、run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` など
-- **繰り返す名前**: SRA の `*_ATTRIBUTE` は同じ `TAG` を繰り返してよいので、`keyed` でなく `ordered` にする。`/samples` の key は `[alias, accession]` にする（SRA の sample は alias が重なる。`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）
-- **relations の key**: `source/db` と `source/id` は v3 の `RelationSource` に無く、常に空になる。`RelationSource` が持つ `type` / `alias` / `accession` / `index` と `target` で key を作る
+- **順序**: 書かれた順に意味がある list を `ordered` として登録する。`samples` / `experiments` / `runs` / `analyses`（relation が `index` で指すので、並べ替えると別のオブジェクトを指すことになる。SRA の sample は alias も重なる。`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）、run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` など。BS の sample も同じ扱いになるが、BS の record の sample の並びは作る側（converter、TSV の取り込み）で決まっているので、差分が揺れることは無い
+- **同点の順**: `keyed` の list で key が同じ要素は、書かれた順に並べる（今は sha256 で並べ直している。canonical-json.md §3.1）。SRA の `*_ATTRIBUTE` は同じ `TAG` を繰り返してよく、`[name, unit]` が同じ属性の順は保つ必要がある。`attributes` を `ordered` にすると、BS の差分から並べ替えの揺れを除いた §3.3 の効果が無くなるので、`keyed` のまま同点の順だけを保つ
+- **relations の key**: `source/db` と `source/id` は v3 の `RelationSource` に無く、常に空になる。key を `[type, label, source/type, source/accession, source/alias, source/index, target/db, target/id, target/accession, target/center_name, target/url]` にし、同点は書かれた順に並べる。canonical-json.md §3.1 の表と `array-modes.yml` の `/relations` の行も食い違っているので、揃える
 - **登録簿の古い行**: `/runs/*/files` と `/analyses/*/files` を除き、`data_blocks` の下に置き直す
 - **小数**: `proportion`、`legacy.gaps[].mean` / `stdev`、`legacy.quality_scoring[].multiplier` を `floats` に加える
 - **文字列**: NFC と空白の畳み込み（§2.2）は BP / BS と同じに SRA にも掛ける。`*_ATTRIBUTE/TAG` の前後の空白も畳まれるが、字面なので失うものは無い
@@ -214,6 +223,7 @@ canonical JSON（`ddbj-canon/v2`）の版を上げ、登録簿を次のように
 ## 選ばなかった案
 
 - **字面まで保つ。** 上のとおり、v3 の型が XML の書き方を持ち込む
-- **`projects: list[Project]` にする。** 1 submission = 1 record は保てるが、37 件のために BP を含む全ての読む側が list を扱うことになる
+- **`projects: list[Project]` にする。** 1 submission = 1 record は保てるが、少なくとも 37 件のために BP を含む全ての読む側が list を扱うことになる
+- **study を常に別の record にする。** 形は study の数によらず 1 つになるが、study が 1 つの大多数の submission まで分かれ、BP と同じ「record が自分の project を持つ」形から外れる
 - **study ごとに record を分け、experiment や run も study ごとに写し分ける。** SUBMISSION を複数の record に写すことになり、複数の study の experiment が同じ sample を指すと、sample も写すことになる
 - **SRA では `hold_date` を使わない。** 公開保留日を読む側が、SRA だけ別の場所を見ることになる

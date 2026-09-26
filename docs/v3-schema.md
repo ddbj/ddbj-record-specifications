@@ -95,7 +95,7 @@ class Organism(BaseModel):
 
 ### Date
 
-型は `str | None`。ISO 8601 形式で精度のバリエーションを許容（`"2024-01-15T09:00:00Z"`, `"2024-01-15"`, `"2024-01"`, `"2024"`）。形式の検証は validation rule で行う。submitter 指定の date のみ record に含め、archive 管理の日付（created, modified, published 等）は外部メタデータ。
+型は `str | None`。ISO 8601 形式で精度のバリエーションを許容（`"2024-01-15T09:00:00Z"`, `"2024-01-15"`, `"2024-01"`, `"2024"`）。形式の検証は validation rule で行う。submitter 指定の date のみ record に含め、archive 管理の日付（created, modified, published 等）は外部メタデータ。例外は、移した record が元の archive の日付を書いていたもの（GEA の `investigation.legacy.last_update_date`）で、失わないために `legacy` に書かれたまま持つ。
 
 ### Person / Organization / Address
 
@@ -331,8 +331,8 @@ class ProjectLegacy(BaseModel):
 
 - **project_type と study_types を分離**: BP の構造種別（primary/umbrella）と SRA/JGA の研究手法/デザインは別概念
 - **description と study_description**: `description` は BP の Description と SRA の STUDY_ABSTRACT（研究の要旨）、`study_description` は SRA の STUDY_DESCRIPTION（研究の説明）。SRA は両方を別に書ける
-- **Umbrella**: 1 JSON = 1 Project。umbrella は `project_type: "umbrella"` ��表現し、親子関係は `relations` で
-- **複数の study を持つ SRA submission**: `project` は 1 つのまま。study が 2 つ以上なら、study ごとに `project` だけの record に分け、experiment からは accession で指す（[v3-sra.md](./v3-sra.md#複数の-study-を持つ-submission)）
+- **Umbrella**: 1 JSON = 1 Project。umbrella は `project_type: "umbrella"` で表現し、親子関係は `relations` で
+- **複数の study を持つ SRA submission**: `project` は 1 つのまま。study が 2 つ以上なら、study ごとに `project` だけの record に分け、どれも同じ `submission.accession`（DRA）を持つ。experiment からの参照は書かれたまま relation に置く（[v3-sra.md](./v3-sra.md#複数の-study-を持つ-submission)）
 - **target**: BP ProjectTypeSubmission 固有の概念を `ProjectTarget` としてネスト
 - **division**: project には含めない（Entry レベル or validator 導出）
 - **datatype**: project には含めない（assembly.submission_category に統合）
@@ -830,7 +830,8 @@ class Cibex(BaseModel):                # GEA に移す前の CIBEX の登録（C
     hybridizations: list[CibexHybridization] | None
     summaries: list[CibexSummary] | None
 
-class InvestigationLegacy(BaseModel):  # CIBEX から移した experiment にだけあるもの
+class InvestigationLegacy(BaseModel):  # 移した experiment にだけあるもの
+    last_update_date: str | None       # 公開用の写しが Comment[Last Update Date] に書いた archive の更新日
     cibex_accept_date: str | None
     cibex_public_release_date: str | None
     cibex_submitter: str | None
@@ -845,17 +846,14 @@ class Investigation(BaseModel):
     magetab_version: str | None
     experimental_designs: list[str] | None
     experimental_factors: list[ExperimentalFactor] | None
-    persons: list[Person] | None
     protocols: list[Protocol] | None
     publications: list[Publication] | None
-    public_release_date: str | None
     sdrf_file: str | None
     sdrf: list[SdrfRow] | None
     # 以下は GEA が IDF の Comment[...] に書くもの
     experiment_type: str | None
     channel_type: str | None           # "single-channel", "dual-channel"
     array_design_ref: str | None       # SDRF の Array Design REF をまとめたもの
-    last_update_date: str | None
     nbdc_approval: str | None          # NBDC のデータアクセス委員会の承認を述べる文
     dbcls_approval: str | None         # 同じく DBCLS
     legacy: InvestigationLegacy | None
@@ -894,7 +892,6 @@ class ArrayDesign(BaseModel):          # 見出しの欄は file の見出しか
     term_sources: list[TermSource] | None
     organism: Organism | None
     description: str | None
-    public_release_date: str | None
     submitted_name: str | None
     file: File | None                  # ADF そのもの（プローブの表を含む）
     legacy: ArrayDesignLegacy | None
@@ -990,7 +987,7 @@ class Assembly(BaseModel):
 
 ## Dataset
 
-JGA 固有。独立したトップレベル���念。Run/Analysis/Policy への参照は `relations` で表現。
+JGA 固有。独立したトップレベル概念。Run/Analysis/Policy への参照は `relations` で表現。
 
 ```python
 class Dataset(BaseModel):

@@ -3,6 +3,25 @@
   "provenance": {
     "source_format": "MAGE-TAB"
   },
+  "submission": {
+    "submitters": [
+      {
+        "first_name": "Hanako",
+        "last_name": "Mishima",
+        "role": "submitter",
+        "organizations": [
+          {
+            "name": "National Institute of Genetics"
+          }
+        ]
+      },
+      {
+        "first_name": "Taro",
+        "last_name": "Mishima"
+      }
+    ],
+    "hold_date": "2025-01-31"
+  },
   "investigation": {
     "accession": "E-GEAD-1",
     "alias": "dex-series",
@@ -29,22 +48,6 @@
         "type": "dose"
       }
     ],
-    "persons": [
-      {
-        "first_name": "Hanako",
-        "last_name": "Mishima",
-        "role": "submitter",
-        "organizations": [
-          {
-            "name": "National Institute of Genetics"
-          }
-        ]
-      },
-      {
-        "first_name": "Taro",
-        "last_name": "Mishima"
-      }
-    ],
     "protocols": [
       {
         "name": "P-GEAD-1",
@@ -63,12 +66,10 @@
         "doi": "10.1000/example.1"
       }
     ],
-    "public_release_date": "2025-01-31",
     "sdrf_file": "E-GEAD-1.sdrf.txt",
     "experiment_type": "transcription profiling by array",
     "channel_type": "single-channel",
     "array_design_ref": "A-GEAD-246",
-    "last_update_date": "2025-01-31",
     "nbdc_approval": "The Data Access Committee of NBDC approved that this personal data was made published.",
     "dbcls_approval": "The Data Access Committee of DBCLS approved that this personal data was made published.",
     "sdrf": [
@@ -358,6 +359,7 @@
       }
     ],
     "legacy": {
+      "last_update_date": "2025-01-31",
       "cibex_accept_date": "2010-01-01",
       "cibex_public_release_date": "2010-03-05",
       "cibex_submitter": "Hanako Mishima",
