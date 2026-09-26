@@ -34,15 +34,15 @@ from collections import Counter
 from collections.abc import Iterable, Iterator
 from decimal import Decimal
 from pathlib import Path, PurePosixPath
-from typing import IO, Any, Literal, TypeVar, overload
+from typing import IO, Any, Final, Literal, TypeVar, overload
 
 from pydantic import BaseModel, ValidationError
 
 from ddbj_record.schema import v3, v4
 
 MIMETYPE = "application/vnd.ddbj.record+zip"
-MIMETYPE_NAME = "mimetype"
-RECORD_NAME = "record.json"
+MIMETYPE_NAME: Final = "mimetype"
+RECORD_NAME: Final = "record.json"
 # major だけで、minor は付けない (docs/versioning.md)。
 SCHEMA_VERSION = "v4"
 V3_SCHEMA_VERSION = "v3"
@@ -58,13 +58,13 @@ COLLECTIONS: dict[str, tuple[tuple[str, ...], type[BaseModel]]] = {
     "features.jsonl": (("features",), v3.Feature),
     "relations.jsonl": (("relations",), v3.Relation),
 }
-ENTRIES_NAME = "entries.jsonl"
+ENTRIES_NAME: Final = "entries.jsonl"
 RESERVED_NAMES = frozenset({MIMETYPE_NAME, RECORD_NAME, *COLLECTIONS})
 
 # 配列を置く FASTA。sequences/ のすぐ下に幾つでも置いてよく、分け方は record に書かない。
 # 名前は、どの OS のファイル名にもなる文字に限る(大文字小文字だけが違う名前も重ねない)。
 FASTA_NAME = re.compile(r"sequences/[A-Za-z0-9_-][A-Za-z0-9_.-]*\.fa")
-DEFAULT_FASTA = "sequences/entries.fa"
+DEFAULT_FASTA: Final = "sequences/entries.fa"
 
 # 配列を持つ entry の alias は FASTA の見出しになるので、空白の無い印字可能な ASCII に限る。
 # メンバーの名前も同じ。ASCII に限れば、zip の名前の文字コードを取り違えることがない。
@@ -107,8 +107,10 @@ READ_ERRORS = (
 )
 
 
-# I-JSON (RFC 7493 §2.2) の整数の範囲。IEEE 754 の倍精度で正しく表せる整数。
+# I-JSON (RFC 7493 §2.2) の数の範囲。整数は IEEE 754 の倍精度で正しく表せるもの、小数は倍精度が区別できる
+# 有効数字 17 桁まで。
 MAX_SAFE_INTEGER = 2**53 - 1
+MAX_SIGNIFICANT_DIGITS = 17
 
 Model = TypeVar("Model", bound=BaseModel)
 
@@ -439,15 +441,7 @@ def _parse(where: str, data: bytes, model: type[Model], problems: _Problems) -> 
         problems.add(f"{where}: begins with a byte order mark")
         return None
     try:
-        obj = json.loads(
-            text,
-            parse_constant=_reject_constant,
-            parse_float=_interoperable_float,
-            parse_int=_interoperable_int,
-            object_pairs_hook=_unique_keys,
-        )
-        # \ud800 のように書いた、対になっていないサロゲートは UTF-8 にできない(I-JSON で断るもの)。
-        json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        obj = _loads(text)
     except (ValueError, RecursionError) as e:
         problems.add(f"{where}: not JSON: {_quote(str(e))}")
         return None
@@ -460,6 +454,20 @@ def _parse(where: str, data: bytes, model: type[Model], problems: _Problems) -> 
     except ValidationError as e:
         problems.add(_validation_problem(where, e))
         return None
+
+
+def _loads(text: str) -> Any:
+    """I-JSON (RFC 7493) の JSON を読む。I-JSON でなければ ValueError。"""
+    obj = json.loads(
+        text,
+        parse_constant=_reject_constant,
+        parse_float=_interoperable_float,
+        parse_int=_interoperable_int,
+        object_pairs_hook=_unique_keys,
+    )
+    # \ud800 のように書いた、対になっていないサロゲートは UTF-8 にできない(I-JSON で断るもの)。
+    json.dumps(obj, ensure_ascii=False).encode("utf-8")
+    return obj
 
 
 def _strict(where: str, data: bytes, model: type[Model]) -> Model:
@@ -475,16 +483,17 @@ def _reject_constant(name: str) -> None:
 
 
 def _interoperable_float(text: str) -> float:
-    """I-JSON の数: 倍精度で表せない数は、読む側によって値が変わるので受けない。
+    """I-JSON の数: 倍精度より大きいか精度の高い数は、読む側によって値が変わるので受けない (RFC 7493 §2.2)。
 
-    範囲を超えるもの (1e400) と、倍精度で丸めると値の変わる桁を持つもの (1.00000000000000000001) を断る。
-    0.1 のように、倍精度の最も短い表記で書いたものは受ける。
+    有効数字 (前後の 0 を除いた桁) が 17 桁を超えるものと、倍精度の範囲を外れるもの (1e400、1e-400) を断る。
+    17 桁までなら、倍精度の最も短い表記でなくても受ける (0.10000000000000001、1.10、1E+2)。
     """
     value = float(text)
-    if value in (float("inf"), float("-inf")):
+    exact = Decimal(text)
+    if value in (float("inf"), float("-inf")) or (value == 0 and exact != 0):
         raise ValueError(f"{_quote(text)} is out of range")
-    if Decimal(repr(value)) != Decimal(text):
-        raise ValueError(f"{_quote(text)} has more precision than a double holds")
+    if len(exact.normalize().as_tuple().digits) > MAX_SIGNIFICANT_DIGITS:
+        raise ValueError(f"{_quote(text)} has more significant digits than a double holds")
     return value
 
 
@@ -960,7 +969,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.command == "pack":
-            pack(json.loads(args.record.read_bytes().decode("utf-8")), args.out)
+            pack(_loads(args.record.read_bytes().decode("utf-8")), args.out)
         elif args.command == "unpack":
             _write_atomically(args.out, _dumps(unpack(args.path), indent=2) + b"\n")
         else:

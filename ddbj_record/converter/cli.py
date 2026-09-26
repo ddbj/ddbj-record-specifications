@@ -20,6 +20,10 @@ from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
 from ddbj_record.utils import resolve_record_model
 
+# v4 の record は 1 つの JSON ではなく zip のパッケージなので、ここでは扱わない。
+PACKAGE_VERSIONS = frozenset({"v4"})
+PACKAGE_MESSAGE = "a v4 record is a package, not a JSON file; use ddbj_record_package (pack / unpack / check)"
+
 
 class Args(BaseModel):
     """Command line arguments for the converter."""
@@ -40,7 +44,7 @@ def parse_args(args: list[str] | None = None) -> Args:
         "--from",
         type=str,
         required=True,
-        help="Schema version to convert from. If not specified, the version will be inferred from the input file.",
+        help="Schema version to convert from (e.g., 'v1' or 'v2')",
         dest="from_",
     )
     parser.add_argument("--to", type=str, required=True, help="Schema version to convert to (e.g., 'v1' or 'v2')")
@@ -62,6 +66,9 @@ def parse_args(args: list[str] | None = None) -> Args:
         parser.error(
             f"Invalid schema version for 'to': {parsed_args.to}. Supported versions are: {', '.join(SCHEMA_VERSIONS)}"
         )
+    # 入力を読む前に断る。v4 のパッケージを JSON として読むと、分かりにくい誤りになる。
+    if PACKAGE_VERSIONS & {normalized_from, normalized_to}:
+        parser.error(PACKAGE_MESSAGE)
     if not parsed_args.input.exists():
         parser.error(f"Input JSON file does not exist: {parsed_args.input}")
 
@@ -73,9 +80,8 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
     # もう少しかっこよく出来る気もしているが、増えてきてから考える
     # schema の class に変換系の method を持たせるのは可読性が落ちそうなため、やめておく
 
-    # v4 の record は 1 つの JSON ではなく zip のパッケージなので、ここでは扱わない。
-    if "v4" in (from_, to):
-        raise ValueError("a v4 record is a package, not a JSON file; use ddbj_record_package (pack / unpack / check)")
+    if PACKAGE_VERSIONS & {from_, to}:
+        raise ValueError(PACKAGE_MESSAGE)
 
     from_obj = resolve_record_model(from_).model_validate(json_data)
 

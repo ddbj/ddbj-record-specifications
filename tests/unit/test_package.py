@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 import typing
 import zipfile
 from pathlib import Path
@@ -777,6 +778,26 @@ def test_the_cli_reports_a_record_it_cannot_read(tmp_path: Path, content: bytes 
     assert main(["pack", str(source), str(tmp_path / "p.zip")]) == 1
 
 
+@pytest.mark.parametrize(
+    ("content", "problem"),
+    [
+        ('{"schema_version":"v3","schema_version":"v3"}', "appears twice"),
+        ('{"schema_version":"v3","experiments":[{"library":{"nominal_sdev":0.100000000000000000001}}]}', "significant"),
+    ],
+    ids=["duplicate key", "too many significant digits"],
+)
+def test_the_cli_packs_only_i_json(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], content: str, problem: str
+) -> None:
+    # 読む側と同じ約束で読む。同じ key の最後を採ったり、数を黙って丸めたりしない。
+    source = tmp_path / "record.json"
+    source.write_text(content, encoding="utf-8")
+
+    assert main(["pack", str(source), str(tmp_path / "p.zip")]) == 1
+    assert problem in capsys.readouterr().err
+    assert not (tmp_path / "p.zip").exists()
+
+
 # --- 読み直しで足したもの
 
 
@@ -835,9 +856,20 @@ def test_v4_covers_every_part_of_a_v3_record() -> None:
         ('{"alias":"a","alias":"b"}', "appears twice"),
         ('{"alias":"s1","x":9007199254740992}', "out of range"),
         ('{"alias":"s1","x":-9007199254740992}', "out of range"),
-        ('{"alias":"s1","x":1.00000000000000000001}', "more precision than a double holds"),
+        ('{"alias":"s1","x":1.00000000000000000001}', "more significant digits than a double holds"),
+        ('{"alias":"s1","x":0.123456789012345678}', "more significant digits than a double holds"),
+        ('{"alias":"s1","x":1e-400}', "out of range"),
     ],
-    ids=["infinity", "lone surrogate", "duplicate key", "integer too large", "integer too small", "too precise"],
+    ids=[
+        "infinity",
+        "lone surrogate",
+        "duplicate key",
+        "integer too large",
+        "integer too small",
+        "19 significant digits",
+        "18 significant digits",
+        "underflow",
+    ],
 )
 def test_a_line_is_i_json(tmp_path: Path, line: str, problem: str) -> None:
     problems = check(_with(tmp_path, "samples.jsonl", line + "\n"))
@@ -943,15 +975,57 @@ def test_trad_fixtures_with_real_sequences_go_there_and_back(tmp_path: Path) -> 
         assert unpack(out) == record, path.stem
 
 
-@pytest.mark.parametrize("number", ["9007199254740991", "-9007199254740991", "0.1", "1e2", "2.5E-3"])
-def test_numbers_a_double_holds_are_read(tmp_path: Path, number: str) -> None:
-    # I-JSON の範囲の端と、倍精度の最も短い表記で書いた数。
-    field = "nominal_sdev" if "." in number or "e" in number.lower() else "nominal_length"
-    line = f'{{"alias":"e1","library":{{"{field}":{number}}}}}'
-    path = _with(tmp_path, "experiments.jsonl", line + "\n")
+@pytest.mark.parametrize("number", ["9007199254740991", "-9007199254740991", "0", "-0"])
+def test_integers_a_double_holds_are_read(tmp_path: Path, number: str) -> None:
+    # I-JSON の範囲の端。
+    path = _with(tmp_path, "experiments.jsonl", f'{{"alias":"e1","library":{{"nominal_length":{number}}}}}\n')
 
     assert check(path) == []
-    assert len(list(iter_objects(path, "experiments.jsonl"))) == 1
+    library = next(iter_objects(path, "experiments.jsonl")).library
+    assert library is not None
+    assert library.nominal_length == int(number)
+
+
+@pytest.mark.parametrize(
+    "number",
+    [
+        "0.1",
+        "1e2",
+        "1E+2",
+        "2.5E-3",
+        "1.10",
+        "-0.0",
+        "0E0",
+        "5e-324",
+        "4.9e-324",
+        "0.10000000000000001",
+        "1.7976931348623157e308",
+        "1.0000000000000000000",  # 後ろの 0 は有効数字に数えない
+    ],
+)
+def test_numbers_of_up_to_17_significant_digits_are_read(tmp_path: Path, number: str) -> None:
+    # 倍精度の最も短い表記でなくてもよい (%.17g や Java の Double.toString の書き方)。値は float と同じ。
+    path = _with(tmp_path, "experiments.jsonl", f'{{"alias":"e1","library":{{"nominal_sdev":{number}}}}}\n')
+
+    assert check(path) == []
+    library = next(iter_objects(path, "experiments.jsonl")).library
+    assert library is not None
+    assert library.nominal_sdev == float(number)
+
+
+@pytest.mark.parametrize(
+    ("number", "problem"),
+    [("9007199254740992", "out of range"), ("1e-400", "out of range"), ("0.100000000000000000001", "significant")],
+)
+def test_the_number_rule_holds_in_record_json(tmp_path: Path, number: str, problem: str) -> None:
+    record = _record()
+    record["submission"] = {"gea": {"legacy": {"cibex": {"experiment": {"number_of_hybridizations": 0}}}}}
+    text = json.dumps(record).replace('"number_of_hybridizations": 0', f'"number_of_hybridizations": {number}')
+    path = _zip(tmp_path / "p.zip", [("record.json", text.encode()), *_members()[1:]])
+
+    assert any(problem in p for p in check(path)), check(path)
+    with pytest.raises(PackageError, match=problem):
+        read_record(path)
 
 
 def test_a_too_large_integer_is_not_read(tmp_path: Path) -> None:
@@ -971,3 +1045,13 @@ def test_unpack_refuses_a_length_without_a_sequence(tmp_path: Path) -> None:
     assert check(path) == []
     with pytest.raises(PackageError, match="v3 cannot hold it"):
         unpack(path)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="typing.get_overloads は 3.11 から")
+def test_iter_objects_has_an_overload_for_every_list() -> None:
+    names = set()
+    for overload in typing.get_overloads(iter_objects):
+        annotation = typing.get_type_hints(overload)["name"]
+        if annotation is not str:
+            names |= set(typing.get_args(annotation))
+    assert names == set(package_module.COLLECTIONS)
