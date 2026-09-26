@@ -85,7 +85,7 @@ v3 モデルと各形式のフィールド対応。converter / validation rule �
 
 | v3 フィールド | 対応する各形式の名称 |
 |-------------|-------------------|
-| submission.hold_date | BP: Hold/@release_date、SRA: 未決（[v3-sra.md](./v3-sra.md) の論点 3）、Trad: hold_date |
+| submission.hold_date | BP: Hold/@release_date、SRA: `@target` の無い ACTION/HOLD の @HoldUntilDate（[v3-sra.md](./v3-sra.md#hold_date-と-actions-の-hold)）、GEA: Public Release Date、Trad: hold_date |
 | runs[].run_date | SRA: Run/@run_date���JGA: Data/@data_acquisition_date |
 | analyses[].analysis_date | SRA: Analysis/@analysis_date、JGA: Analysis/@analysis_date |
 | project.publications[].date | BP: Publication/@date |

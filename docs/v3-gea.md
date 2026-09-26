@@ -108,46 +108,35 @@ CIBEX のファイルは、移す前の元の登録として `investigation.lega
 - CBX253 の 1 つの Reference は、キーと値をタブでなく空白で分けている（5 行）。`Reference:` の節に限り、行頭がその節のキーと空白なら、キーと値として読む
 - `Array design:` の節のキー `Array sesign accession` は綴りを誤っているが、全ての CIBEX がこの綴りなので、そのまま読む
 
-## 決めてほしいこと
+## 決めたこと
 
-### 1. v3 の samples / experiments にまとめるか
+### MAGE-TAB の形のまま持つ
 
-この叩き台は、GEA を MAGE-TAB の形のまま `investigation` に持つ。一方、中身は v3 の既存の概念と重なる。
+GEA は MAGE-TAB の形のまま `investigation` に持ち、SDRF は 1 行ずつ `investigation.sdrf[]` に置く。v3 の `samples` / `experiments` には写さない。
 
-- SDRF の Source の `Characteristics[x]` は、ほぼ BioSample の属性の名前（`sample_name`、`organism`、`tissue`…）で、`Comment[BioSample]` で BioSample を指す
-- シーケンスの GEA（768 件のうち 399 件）の Assay は、`Comment[SRA_EXPERIMENT]` / `Comment[SRA_RUN]` で DRA の experiment と run を指し、`LIBRARY_*` と `INSTRUMENT_MODEL` を書き写している
-
-選択肢:
-
-- **(a) このまま**: SDRF は 1 行ずつ `investigation.sdrf[]` に持つ。失わず、SDRF にそのまま戻せる
-  - 代償: ノードの値を行ごとに繰り返す（E-GEAD-648 は 78 行全てが同じ Extract を通る）。試料の属性は BioSample の属性の写しとして別の場所に並び、検索や検証が BioSample / DRA と別になる
-- **(b) samples / experiments に写す**: Source を `samples[]`、Assay を `experiments[]` にし、行は「どの sample / experiment / file を通るか」の並びとして持つ。v3 の概念の共通化に沿う
-  - 名前を使い回した SDRF（上の 5 件）も、同じ alias の別の sample として持てる（relation は list の位置で指せる。[v3-sra.md](./v3-sra.md)）
-  - 代償: SDRF の列と v3 の欄の対応を 1 つずつ決める必要があり、書き戻す規則も複雑になる
+- 試料と experiment そのものは BioSample と DRA にあり、SDRF はそれを `Comment[BioSample]` や `Comment[SRA_EXPERIMENT]` / `Comment[SRA_RUN]` で指している。SDRF の Source の `Characteristics[x]` や Assay の `LIBRARY_*` は、その写し。`samples` / `experiments` に写すと、BioSample と DRA の record と並ぶ 2 つ目の写しができ、どちらが正しいかを決めることになる
+- 試料や実験を DB をまたいで探すときは、SDRF が指す BioSample と DRA の record を見る
+- ノードの値を行ごとに繰り返す（E-GEAD-648 は 78 行全てが同じ Extract を通る）のは、SDRF を失わずに戻すための代償として受け入れる
 
 IDF を v3 の `project` に写さないのは、E-GEAD が自分の BioProject（`Comment[BioProject]`、全 768 件にある）を別に持つため。
 
-### 2. ADF のプローブの表
+### ADF のプローブの表はファイルのまま
 
-- **(a) ファイルのまま**（この叩き台）: 表の列がメーカーごとに違っても、そのまま保てる。代償は、プローブを record から検索できないこと
-- **(b) MAGE-TAB の ADF（18 件）だけでも型付きで持つ**: MAGE-TAB の表の列は決まっているので型にできる。代償は、1 件で最大 400 万行（18 件のうち 3 件は 60 万行を超える）の表が record に入ること、残りの 224 件はファイルのままになること
+表の列はメーカーごとに違い、MAGE-TAB の ADF（18 件）でも 1 件で最大 400 万行（3 件は 60 万行を超える）ある。表は ADF のファイルのまま `array_design.file` で指し、record には入れない。プローブを record から探すことはできないが、そうする使い道は今は無い。
 
-### 3. 他の DB と同じ意味の欄
+### 他の DB と同じ意味の欄
 
-GEA の IDF には、v3 がすでに別の場所で持つものと同じ意味の項目がある。
+IDF に書かれたとおり `investigation` に持ち、他の DB と同じ意味の欄にも写す。2 つが一致することは検証で確かめる。SRA の HOLD と `hold_date` と同じやり方（[v3-sra.md](./v3-sra.md#hold_date-と-actions-の-hold)）。
 
-- `Public Release Date` は、他の DB の `submission.hold_date` と同じ意味
-- `Comment[Last Update Date]` は archive が管理する日付で、v3 は record に入れないとしている（[v3-schema.md](./v3-schema.md) の Date）
-- `Person Roles` の値は全て `submitter`（1,226）。ただし 83 件の IDF は、人の数より役割の値が少ない（全体で 1,445 人。E-GEAD-338 は 4 人に役割 1 つ）ので、役割の無い人を submitter と見なしてよいかは決める必要がある
+- `Public Release Date` → `submission.hold_date` にも写す
+- `Person *` → `submission.submitters` にも写す。役割（`Person Roles`）が書かれた人は全て `submitter`（1,226）で、IDF の Person は GEA に登録した人の欄なので、役割が書かれていない人（83 件の IDF、E-GEAD-338 は 4 人に役割 1 つ）も含め、全員を写す。役割は `investigation.persons[].role` に書かれたままにする
+- `Comment[Last Update Date]` は公開用の写しが書いている archive の日付。移行した record には書かれたまま持ち（失わないため）、ddbj-repository で受ける新しい登録には書かない。更新日時は ddbj-repository が持つ（[v3-schema.md](./v3-schema.md) の Date）
 
-選択肢:
+`Comment[Related study]` の値の並び（E-GEAD-414 は `NBDC`、`JGA` の順、E-GEAD-623 は逆）は保たない。どちらも同じ種類の参照で、並びに意味は無い。
 
-- **(a) このまま `investigation` に持つ**: IDF の形のまま戻せる。代償は、他の DB と同じことを別の欄で探すこと
-- **(b) 他の DB の欄に写す**: `submission.hold_date` や `submission.submitters` に置き、IDF に戻すときにそこから読む
+## ddbj-repository の側でやること
 
-### 4. ddbj-repository の canonical JSON
-
-[v3-sra.md の論点 4](./v3-sra.md#4-ddbj-repository-の-canonical-json-との食い違い)と同じく、この叩き台を ddbj-repository で使うなら canonical JSON（`ddbj-canon/v2`）の版を上げる必要がある。GEA で `ordered` として登録する必要がある list は次のとおり。
+[v3-sra.md](./v3-sra.md#ddbj-repository-の側でやること)と同じ canonical JSON の版上げで、GEA の次の list を `ordered` として登録する。
 
 - `investigation.sdrf`、その中の `protocol_refs`、`data_files`、`characteristics`、`comments`、`factor_values`
 - `investigation.persons`、`protocols`、`experimental_designs`、`experimental_factors`、`publications`
@@ -156,8 +145,9 @@ GEA の IDF には、v3 がすでに別の場所で持つものと同じ意味�
 
 `Characteristics` や `Comment` は同じ名前が繰り返されることがあり（E-GEAD-424 の Extract は `Comment[LIBRARY_*]` を 2 回ずつ持つ。E-GEAD-455、458、1085 は同じ名前の Factor Value を持つ）、`[name, unit]` をキーにする `keyed` では順序が決まらない。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
 
-`Comment[Related study]` の 2 つの値は、E-GEAD-414 では `NBDC`、`JGA` の順、E-GEAD-623 では逆の順だが、`relations` は `keyed` で並べ替えられるので、その順序は保たれない。
+## 選ばなかった案
 
-## MetaboBank
+- **samples / experiments に写す。** v3 の概念の共通化には沿うが、BioSample と DRA にある試料と実験の 2 つ目の写しになる。SDRF の列と v3 の欄の対応を 1 つずつ決め、書き戻す規則も複雑になる
+- **MAGE-TAB の ADF（18 件）の表を型付きで持つ。** 最大 400 万行の表が record に入り、残りの 224 件はファイルのままなので、表の持ち方が 2 通りになる
+- **同じ意味の欄を、他の DB の欄にだけ置く（`investigation` から除く）。** IDF に戻すときに別の場所から読むことになり、IDF の項目と v3 の欄の対応が崩れる。写しを持って検証で一致を確かめる方が、IDF の形も共通の欄も保てる
 
-MetaboBank も MAGE-TAB で登録される（`tests/fixtures/v3/raw/metabobank`）。`investigation` をそのまま使えるかどうかは、同じように全件を数えて確かめる必要がある。

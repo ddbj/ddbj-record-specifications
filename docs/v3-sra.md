@@ -176,43 +176,44 @@ SRA XML では、選択肢を子要素の名前で表すところがある。v3 
 - 「center_name は submission.submitters の Organization から導出可能なため含めない」→ 各オブジェクトが持つ
 - 「anonymized_name は attributes で扱う」→ typed field。attributes に置くと、同じ名前の `SAMPLE_ATTRIBUTE` と見分けられず XML に戻せない
 
-## 決めてほしいこと
+## 決めたこと
 
-### 1. 「失わないもの」の範囲
+### 失わないものの範囲
 
-[失わないもの](#失わないもの)は、この叩き台の前提として置いた。
+[失わないもの](#失わないもの)のとおり、値と構造と順序を保ち、値を持たない要素と XML としての字面は保たない。v3 は XML の中身を写すもので、書き方を写すものではない。字面まで保つには、空の要素ごとに有無の印を持ち、数と真偽値を全て文字列にすることになり、v3 の型が XML の書き方を持ち込む。
 
-- **(a) このままにする**: 値と構造と順序を保ち、値を持たない要素と字面は保たない
-- **(b) 字面まで保つ**: 空の要素ごとに有無の印を持ち、数と真偽値を全て `str` にする。元の XML をほぼ同じ文字列で書き戻せる代わりに、v3 の型が XML の書き方を持ち込む
+### 複数の study を持つ submission
 
-### 2. 1 つの DRA submission に複数の study があるもの
+study が 1 つなら、今までどおり同じ record の `project` に置く。2 つ以上なら、study をそれぞれ `project` だけを持つ別の record にし、submission の record は `project` を持たない。experiment から study への参照は relation のままで、相手を accession で指す（relation は別の record のものを指せる）。これらの record は同じセットに入れる。
 
-v3 の `project` は 1 つで、「1 JSON = 1 Project」としている。
-drmdb には、1 つの submission が複数の study（DRP）を持つものがある。どちらの数え方でも、そういう submission はある。
+- `project` を 1 つのままにでき、BP を含む読む側を変えずに済む
+- SUBMISSION、experiment、run、sample は 1 つの record に留まるので、どれも写し分けない
+- どれか 1 つを主な study に選ぶ規則は置かない。元の XML にその区別が無いので、全て同じ扱いにする
 
-- experiment の `STUDY_REF` に書かれた study の accession（各 experiment の最新版）で数えると、35,944 submission のうち 5 が 2 つの study を指す。study を refname だけで指す 27,669 の experiment はこれに数えていない
-- `mass.accession_relation` で submission（DRA）を親に持つ study（DRP）を数えると、そう記録された 385 submission のうち 37 が 2 つ以上を持ち、最大は 59。experiment を持たず study だけを登録した submission を含む。削除されていない DRP 17,972 の多くは、この親子として記録されていない
+該当するのは、experiment の `STUDY_REF` で数えて 35,944 submission のうち 5、`mass.accession_relation` の親子で数えて 385 のうち 37（最大 59 study）。
 
-選択肢:
+### `hold_date` と `actions` の HOLD
 
-- **(a) `projects: list[Project]` にする**: 1 submission = 1 record が保てる。代償は、BP を含む全ての consumer が list を扱うこと
-- **(b) study ごとに record を分け、set 内の参照でつなぐ**: `project` は 1 つのまま。代償は、1 つの submission の experiment や run を study ごとに分け、SUBMISSION の要素を複数の record に写すこと
+`ACTIONS/ACTION/HOLD` は書かれたとおり（順序も）`submission.sra.actions[]` に置き、`@target` の無い HOLD の `@HoldUntilDate` を `submission.hold_date` にも写す。2 つが一致することは検証で確かめる。
 
-### 3. `hold_date` と `actions` の HOLD
+- 公開保留日は、DB によらず `hold_date` から読める（ddbj-repository の公開予告も `hold_date` を見る）
+- HOLD を `actions` から除くと、ACTIONS の並びを失う
+- `@target` の付いた HOLD は、オブジェクトごとの保留なので `actions` にだけ置く
 
-`ACTIONS/ACTION/HOLD` は `submission.sra.actions[]` にそのまま置く（書かれた順も含めて）。
-他の DB と揃えて公開保留日を `submission.hold_date` にも置くと、同じ値が 2 か所に入る。
+## ddbj-repository の側でやること
 
-- **(a)** `@target` の無い HOLD の `@HoldUntilDate` を `hold_date` にも写し、validation rule で一致を確かめる
-- **(b)** SRA では `hold_date` を使わない
+canonical JSON（`ddbj-canon/v2`）の版を上げ、登録簿を次のように直す。
 
-### 4. ddbj-repository の canonical JSON との食い違い
+- **順序**: 書かれた順に意味がある list を `ordered` として登録する。`experiments` / `runs` / `analyses`（relation が `index` で指すので、並べ替えると別のオブジェクトを指すことになる）、run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` など
+- **繰り返す名前**: SRA の `*_ATTRIBUTE` は同じ `TAG` を繰り返してよいので、`keyed` でなく `ordered` にする。`/samples` の key は `[alias, accession]` にする（SRA の sample は alias が重なる。`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）
+- **relations の key**: `source/db` と `source/id` は v3 の `RelationSource` に無く、常に空になる。`RelationSource` が持つ `type` / `alias` / `accession` / `index` と `target` で key を作る
+- **登録簿の古い行**: `/runs/*/files` と `/analyses/*/files` を除き、`data_blocks` の下に置き直す
+- **小数**: `proportion`、`legacy.gaps[].mean` / `stdev`、`legacy.quality_scoring[].multiplier` を `floats` に加える
+- **文字列**: NFC と空白の畳み込み（§2.2）は BP / BS と同じに SRA にも掛ける。`*_ATTRIBUTE/TAG` の前後の空白も畳まれるが、字面なので失うものは無い
 
-v3 の仕様ではないが、この叩き台を ddbj-repository で使うなら、保存時の canonical JSON（`ddbj-canon/v2`）の版を上げる必要がある。
+## 選ばなかった案
 
-- **順序**: 登録簿に無い list は `bag` として並べ替えられる（canonical-json.md §3）。`experiments` / `runs` / `analyses` も `bag` なので、`*_SET` の中の順序が失われ、それらを `index` で指す relation も別のオブジェクトを指すことになる。書かれた順に意味がある list のうち、experiment と analysis の `processing` と experiment の `reads` はすでに `ordered` だが、run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` などは新たに `ordered` として登録する必要がある
-- **重複**: SRA の `*_ATTRIBUTE` は同じ `TAG` を繰り返してよい。`keyed` の `[name, unit]` が同じ要素は、並べ替えると互いの順序が決まらない。`/samples` も alias で `keyed` だが、SRA の sample は alias が重なる（`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）
-- **relations の key**: `/relations` の key は `source/db` と `source/id` を含むが、v3 の `RelationSource` にその 2 つは無い（あるのは `type` / `alias` と、この叩き台の `accession` / `index`）。`source/db` と `source/id` は常に空になり、同じ相手を指し、起点だけが違う relation の順序が決まらない
-- **登録簿の古い行**: `/runs/*/files` と `/analyses/*/files` は、`data_blocks` への変更で行き先を失う
-- **小数**: 登録簿の `floats` に無い場所の数は整数でなければならない。`proportion`、`legacy.gaps[].mean` / `stdev`、`legacy.quality_scoring[].multiplier` を加える必要がある
-- **文字列の字面**: NFC と空白の畳み込み（§2.2）は BP / BS でも受け入れている。SRA でも同じでよいかの確認だけ。ただし `*_ATTRIBUTE/TAG` の前後の空白も畳まれるので、`keyed` の key が変わる
+- **字面まで保つ。** 上のとおり、v3 の型が XML の書き方を持ち込む
+- **`projects: list[Project]` にする。** 1 submission = 1 record は保てるが、37 件のために BP を含む全ての読む側が list を扱うことになる
+- **study ごとに record を分け、experiment や run も study ごとに写し分ける。** SUBMISSION を複数の record に写すことになり、複数の study の experiment が同じ sample を指すと、sample も写すことになる
+- **SRA では `hold_date` を使わない。** 公開保留日を読む側が、SRA だけ別の場所を見ることになる
