@@ -1,0 +1,126 @@
+CIBEX accession	CBX55
+Release date	2008-02-20
+
+Experiment:
+Experiment title	Identification of conserved microRNAs from Lycopersicon esculentum
+Experimental design type	miRNA_identification_design
+Experimental factor	
+Common reference	YES
+Quality control description	technical_replicate
+Number of hybridization	1
+Experimental description	
+
+Submitter:
+First name	Zhang
+Last name	Jianguang
+Organization	Zhejiang SciTech University
+Laboratory	Institute of Bioengineering
+Address	Xiasha Road 2, Hangzhou , 310018, PR China
+
+First name	Zeng
+Last name	Rong
+Organization	Zhejiang SciTech University
+Laboratory	Institute of Bioengineering
+Address	Xiasha Road 2, Hangzhou , 310018, PR China
+
+First name	Chen
+Last name	Jishuang
+Organization	Zhejiang SciTech University
+Laboratory	Institute of Bioengineering
+Address	Xiasha Road 2, Hangzhou , 310018, PR China
+
+Protocol:
+Name	Array Design Protocol
+Description	294 non-redundant mature miRNA.
+<br>Sequences and 668 non-redundant miRNA sequences from the nine plants (Release 9.0, October 2006; http://microrna.sanger.ac.uk/) were used as microarray probes and each probe repeated four times in one chip. And some control sequences were added as probes for LC internal use. author&#8217;s
+
+
+
+
+Name	Plant growth
+Description	Tomato seedlings (cv. Hezuo903) were grown in a growth chamber at 21-26&deg;C, with a 14 h light and 10 h darkness cycle.
+
+
+
+Name	labeling protocol
+Description	Poly-A tails were added to the small RNAs prepared above at the 3&#8217; ends using a poly(A) polymerase, and Cy3 gain was then ligated to the poly-A tails.
+
+Name	Hybridization protocol
+Description	Total RNAs were extracted and small RNAs (< 200 nucleotides) were size-fractionated by utilizing mirVana kit (Ambion, Japan). The tagged RNAs were hybridized to the microfluidic hybridization chip.
+
+Name	Scanning Protocol
+Description	Hybridization images were scanned, using a GenePix 4000B microarray scanner (Molecular Devices, Sunnyvale, USA) at 445 nm.
+
+Name	Image analysis protocol
+Description	Data extraction and image processing were performed using ArrayPro image analysis software (Media Cybernetics, Silver Spring, USA). The maximum signal level of background probes was set 99.48.
+
+Name	Normalization Protocol
+Description	Normalization was performed with a cyclic LOWESS (locally weighted regression) method. A miRNA detection signal threshold was defined as the maximum background signal plus three times of background standard deviation. The maximum signal level of background probes was set 99.48.
+
+Array design:
+Array sesign accession	CAR180
+Model name	Identification Array
+Technology type	in_situ_oligo_features
+Surface type	unknown_surface_type
+Number of features	3968
+Design provider	Original
+Reporter type	PCR products
+Strand type	reverse
+Substrate type	unknown_substrate_type
+Attachment	covalent
+Array design protocol	Array Design Protocol
+File	miRPlants_ZSTU_070131.txt
+
+Array design text field:
+Field	Description
+Reportor ID	The block number of the feature.
+Reportor Name	The name of the feature.
+Target_Seq (5' to 3')	The sequence of target miRNA.
+Row	The row number of the feature.
+Column	The column number of the feature.
+Group	The feature is used for experimental or control.
+Reporter Control Type	
+Comment	
+
+Sample:
+Name	tomato
+Organism	tomato
+Developmental stage	6- to 8-true leaf stage
+Organism part	leaf tissue
+Strain or line	Hezuo903
+
+Labeled Extract:
+Label	tomato, Cy3
+Labeling protocol	labeling protocol
+Label compound	Cy3
+
+Hybridization:
+Name	070492
+Array design accession	CAR180
+Hybridization protocol	Hybridization protocol
+Scanning protocol	Scanning Protocol
+File	raw_data.txt
+
+Hybridization data text field:
+Field	Description
+Index	The block number of the feature
+Probe_ID	The unique identifier of the feature.
+Target_Seq	The sequence of the target miRNA.
+Row	The row number of the feature.
+Column	The column number of the feature.
+Density (mean)	The mean value of density in the block.
+Density (st.dev.)	The standard deviation value of density in the block.
+Group	The feature is used for experimental or control.
+
+Summary:
+Name	normalized data
+Normalization protocol	Normalization Protocol
+File	normalized_data.txt
+
+Summary data text field:
+Field	Description
+Signal	The signal value of the feature after normalization.
+Probe_ID	The identifier of the feature.
+Index	The index number of the feature.
+StDev	The standard deviation.
+

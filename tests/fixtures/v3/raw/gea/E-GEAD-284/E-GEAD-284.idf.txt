@@ -1,0 +1,19 @@
+Comment[GEAAccession]	E-GEAD-284
+MAGE-TAB Version	1.1
+Investigation Title	Effect of IBS004735, a TAZ activator, on C2C12 myodifferentiation in vitro
+Experiment Description	Expression of transcriptional co-activator with PDZ-binding motif (TAZ) is enhanced during skeletal muscle repair after damage. Enforced expression of TAZ increases muscle mass. These findings implicate that TAZ activators are beneficial to prevent and treat muscle atrophy. We searched for chemical compounds that empower human mammalian epithelial MCF10A cells expressing TAZ to form spheres in defined medium under floating condition. We further selected the compounds to promote myogenesis in mouse myoblast C2C12 cells and obtained several TAZ activators including IBS004735. To obtain better understanding of IBS004735's mode of action, we performed Cap Analysis of Gene Expression (CAGE)-seq using samples of IBS004735-treated differentiating C2C12 cells.
+Experimental Design	compound treatment design
+Experimental Factor Name	Differentiation time	treated compound
+Experimental Factor Type	Differentiation time	treated compound
+Person Last Name	Maruyama
+Person First Name	Junichi
+Person Affiliation	Department of Medical Biochemistry, Graduate School of Medical and Dental Sciences, Tokyo Medical and Dental University
+Person Roles	submitter
+Public Release Date	2018-10-18
+Protocol Name	P-GEAD-29	P-GEAD-30	P-GEAD-31	P-GEAD-32	P-GEAD-33
+Protocol Type	sample collection protocol	nucleic acid extraction protocol	nucleic acid library construction protocol	nucleic acid sequencing protocol	normalization data transformation protocol
+Protocol Description	2x10^5 mouse myoblast C2C12 cells are seeded in 12-well plate. One day after seeding, culture medium was changed into differentiation medium which contained DMSO or IBS004735.	Cells are washed with PBS and harvested using TRI-Reagent. Total RNA samples were prepared according to the vender's protocol.	A multiplexed CAGE library was constructed from 2~5 ug total RNA sample based on nAnT-iCAGE protocol (Murata et al. 2014) (K. K. DNAForm, Yokohama, Japan).	Multiplex deep sequencing of prepared CAGE cDNA libraries was performed on an Illumina NextSeq500 sequencer.	The sequenced CAGE tags were mapped to mouse reference genomes, mm9, using the BWA software without changing any parameters. Unmapped reads are then mapped to mm9 using HiSAT2.  For tag clustering, the CAGE-tag 5'-coordinates were input for CAGEr clustering.
+SDRF File	E-GEAD-284.sdrf.txt
+Comment[AEExperimentType]	RNA-seq of coding RNA
+Comment[BioProject]	PRJDB7534
+Comment[Last Update Date]	2019-08-14

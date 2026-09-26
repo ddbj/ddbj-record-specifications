@@ -90,8 +90,8 @@ ignore = [
 "tests/unit/converter/test_cli.py" = ["S603", "S607"]
 "tests/**/*.py" = ["S101", "PLR2004"]
 "scripts/**/*.py" = ["INP001", "T201", "BLE001", "PLR2004", "PLR0911"]
-# HEADER is Japanese prose for docs/v3-sra-mapping.yml, full-width punctuation included.
-"scripts/sra/build_mapping.py" = ["RUF001"]
+# HEADER and the notes are Japanese prose for docs/v3-*-mapping.yml, full-width punctuation included.
+"scripts/*/build_mapping.py" = ["RUF001"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["ddbj_record"]

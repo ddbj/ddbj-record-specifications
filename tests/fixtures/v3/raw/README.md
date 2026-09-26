@@ -100,6 +100,22 @@ experiment 単位のサブディレクトリに `.idf.txt` (Investigation Descri
 
 10 experiment: E-GEAD-1005, E-GEAD-1017, E-GEAD-1037, E-GEAD-1039, E-GEAD-1043, E-GEAD-1044, E-GEAD-1047, E-GEAD-1057, E-GEAD-1060, E-GEAD-1096
 
+ほかに、GEA の公開用の写し (a012:/usr/local/resources/gea) から次を取った。
+
+| ファイル | 内容 |
+|---|---|
+| `E-GEAD-284/` | SDRF に `Unit[...]` の列と、最後の空の欄が欠けた行がある |
+| `E-GEAD-291/` | IDF の値の中の引用符が `\"` で、何重にも付いている |
+| `E-GEAD-369/` | SDRF の `Array Design REF` の後に `Comment[Array Design REF md5]` がある |
+| `E-GEAD-424/` | SDRF の Extract に同じ名前の `Comment[LIBRARY_*]` が 2 回ずつある |
+| `A-GEAD-246/A-GEAD-246.adf` | アレイ設計 (ADF)。MAGE-TAB の見出しと `[main]` を持つ小さいもの |
+| `A-GEAD-181/A-GEAD-181.adf` | ADF。`Comment[GEAAccession]` の後が装置メーカーの表 |
+| `A-GEAD-21/A-GEAD-21.adf` | ADF。中身の無いもの |
+| `CBX55/CBX55.metadata` | GEA の前身 CIBEX の登録。3 つの `* data text field` 節を持つ |
+| `CBX253/CBX253.metadata` | 同じく CIBEX。Reference の 1 つがタブでなく空白でキーと値を分けている |
+| `CBX27/CBX27.metadata` | 同じく CIBEX。列の説明の表の後に、見出しの無い hybridization が続く |
+| `CBX62/CBX62.metadata` | 同じく CIBEX。列の説明の表の後に、見出しの無い summary が続く |
+
 ### metabobank/
 
 MetaboBank の IDF/SDRF ファイル (MAGE-TAB 形式)。

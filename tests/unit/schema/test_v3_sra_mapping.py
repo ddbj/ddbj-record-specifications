@@ -10,59 +10,19 @@
 - 対応表の全ての場所に、sra_full.json の中で値がある
 """
 
-import importlib.util
-import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any
 
 import pytest
-import yaml
 
-ROOT = Path(__file__).resolve().parents[3]
+from .mapping_helpers import ROOT, SCALARS, load_mapping, load_record, resolve, rows, values_at
+
 RAW_DRA = ROOT.joinpath("tests/fixtures/v3/raw/dra")
-SRA_FULL = json.loads(ROOT.joinpath("tests/fixtures/v3/records/sra_full.json").read_text(encoding="utf-8"))
-
-# 対応表を書くスクリプトの読み方 (場所の書き方と、場所から型への解決) をそのまま使う。
-_spec = importlib.util.spec_from_file_location("build_mapping", ROOT.joinpath("scripts/sra/build_mapping.py"))
-assert _spec is not None
-assert _spec.loader is not None
-build_mapping = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(build_mapping)
-
-CONTAINER = build_mapping.CONTAINER
-SEGMENT = build_mapping.SEGMENT
-resolve = build_mapping.resolve
-strip_note = build_mapping.strip_note
-SCALARS = (str, int, float, bool)
+SRA_FULL = load_record("sra_full.json")
+MAPPING = load_mapping("v3-sra-mapping.yml")
 
 
-class _UniqueKeyLoader(yaml.SafeLoader):
-    """同じ key が 2 度書かれていたら、後の方で黙って上書きせずに失敗する。"""
-
-    def construct_mapping(self, node: yaml.MappingNode, deep: bool = False) -> dict[Any, Any]:
-        keys = [self.construct_object(key, deep=deep) for key, _ in node.value]
-        duplicates = {key for key in keys if keys.count(key) > 1}
-        if duplicates:
-            raise yaml.constructor.ConstructorError(
-                None, None, f"duplicate keys: {sorted(duplicates)}", node.start_mark
-            )
-        return super().construct_mapping(node, deep=deep)
-
-
-MAPPING: dict[str, dict[str, str]] = yaml.load(
-    ROOT.joinpath("docs/v3-sra-mapping.yml").read_text(encoding="utf-8"),
-    Loader=_UniqueKeyLoader,  # noqa: S506 -- a SafeLoader subclass
-)
-
-
-# 対応表の行ごとの v3 の場所。値を持たない入れ物は除く。
-ROWS = {
-    f"{doc}:{path}": location
-    for doc, paths in MAPPING.items()
-    for path, location in paths.items()
-    if location != CONTAINER
-}
+ROWS = rows(MAPPING)
 
 
 @pytest.mark.parametrize("location", ROWS.values(), ids=ROWS.keys())
@@ -103,45 +63,7 @@ def test_every_path_in_raw_sra_xml_is_mapped(doc: str, path: Path) -> None:
     assert found - set(MAPPING[doc]) == set()
 
 
-def _matches(item: Any, annotation: str) -> bool:
-    """`[part_of sample]` や `[primary]` の注記に合う要素か。
-
-    注記の語は順に、要素の type と、relation なら target.db に当たる。
-    """
-    words = annotation.split()
-    if not words:
-        return True
-    if not isinstance(item, dict):
-        return False
-
-    actual = [item.get("type"), (item.get("target") or {}).get("db")]
-    assert len(words) <= len(actual), f"cannot read the note [{annotation}]"
-
-    return words == actual[: len(words)]
-
-
-def _values_at(data: Any, location: str) -> list[Any]:
-    """location にある値を、list の注記に合う全ての要素にわたって集める。"""
-    found = [data]
-
-    for segment in strip_note(location).split("."):
-        m = SEGMENT.fullmatch(segment)
-        assert m, segment
-        name, bracket = m.groups()
-
-        found = [item[name] for item in found if isinstance(item, dict) and item.get(name) not in (None, "")]
-
-        if bracket is not None and bracket.startswith("["):
-            annotation = bracket[1:-1]
-            found = [element for items in found for element in items if _matches(element, annotation)]
-        elif bracket is not None:
-            key = bracket[1:-1]
-            found = [items[key] for items in found if key in items]
-
-    return found
-
-
 @pytest.mark.parametrize("location", sorted(set(ROWS.values())))
 def test_the_full_record_has_a_value_at_every_location(location: str) -> None:
     # 対応表の全ての行が、少なくとも 1 つの実例で書けることを示す。
-    assert _values_at(SRA_FULL, location)
+    assert values_at(SRA_FULL, location)

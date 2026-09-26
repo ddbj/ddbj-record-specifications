@@ -1,0 +1,39 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "MAGE-TAB ADF"
+  },
+  "array_design": {
+    "accession": "A-GEAD-246",
+    "alias": "xenium-panel",
+    "name": "Xenium In Situ Analyzer",
+    "version": "1.0",
+    "provider": "10x Genomics",
+    "printing_protocol": "In situ",
+    "technology_type": "other",
+    "surface_type": "glass",
+    "substrate_type": "glass",
+    "sequence_polymer_type": "DNA",
+    "term_sources": [
+      {
+        "name": "mirbase",
+        "file": "https://www.mirbase.org",
+        "version": "22"
+      }
+    ],
+    "organism": {
+      "name": "Homo sapiens"
+    },
+    "description": "https://www.10xgenomics.com/support/in-situ-gene-expression",
+    "public_release_date": "2026-02-06",
+    "submitted_name": "Xenium panel",
+    "file": {
+      "filename": "A-GEAD-246.adf",
+      "checksum_method": "MD5",
+      "checksum": "0123456789abcdef0123456789abcdef"
+    },
+    "legacy": {
+      "cibex_public_release_date": "2010-03-05"
+    }
+  }
+}

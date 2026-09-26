@@ -1,0 +1,275 @@
+CIBEX accession	CBX27
+Release date	2009-01-28
+
+Experiment:
+Experiment title	Comparison of gene expression profiles of Prevotella intermedia strain 17 in biofilm and in planktonic condition
+Experimental design type	behavioral_design_type
+Experimental factor	Culture conditions
+Common reference	YES
+Quality control description	technical_replicate
+Number of hybridization	4
+Experimental description	The aim of this experiment was to compare gene expression profiles of Prevotella intermedia strain 17 in biofilm to those of strain 17 in planktonic condition. Total RNA was extracted from 12hr cultures of P. intermedia strain 17 on anaerobic blood agar plates as biofilm mode and in enriched trypticase soy broth as planktonic condition, respectively. Then, the total RNA was applied to microarray analysis to compare gene expression profiles.
+
+Submitter:
+First name	Yamanaka
+Last name	Takeshi
+Organization	Osaka Dental University
+Department	Department of Bacteriology
+Address	8-1 Kuzuhahanazono, Hirakata-shi, Osaka, 573-1121 Japan
+
+First name	Fukushima
+Last name	Hisanori
+Organization	Osaka Dental University
+Department	Department of Bacteriology
+Address	8-1 Kuzuhahanazono, Hirakata-shi, Osaka, 573-1121 Japan
+
+Reference:
+Title	Gene expression profile and pathogenicity of biofilm-forming Prevotella intermedia strain 17
+Author	Yamanaka T, Furukawa T, Matsumoto-Mashimo C, Yamane K, Sugimori C, Nambu T, Mori N, Nishikawa H, Walker CB, Leung KP, Fukushima H
+Journal	BMC Microbiology
+Year	2009
+Volume	9
+Issue	1
+Page	11
+Pubmed ID	19146705
+
+Protocol:
+Name	PI-array design
+Description	To create a whole-genome microarray for P. intermedia strain 17, 30 perfect-matched and 30 miss-matched 24-mer probes were designed for all putative open reading frames (ORFs) (2,816 ORFs/array) from a whole genome sequence of P. intermedia strain 17 on the Institute for Genomic Research data base (TIGR: http://cmr.tigr.org/tigr-scripts/CMR/ CmrHomePage.cgi) using a Maskless Array Synthesizer (NimbleGen Systems Inc., Madison, WI, USA).
+
+Name	PI-growth condition
+Description	Grown in the enriched-TSB: trypticase soy broth (TSB; BBL Microbiology Systems, Cockeysville, ND) supplemented with 0.5% yeast extract , hemin (5 mg/l), L-cystine (400 mg/l) and vitamin K1 (10 mg/l) anaerobically in an anaerobic chamber (ANX-3, Hirasawa, Tokyo, Japan) at 37&deg;C in a 5% CO<sub>2</sub>, 10% H<sub>2</sub>, 85% N<sub>2</sub> atmosphere for 12 h.
+
+Name	PI-labeling protocol
+Description	Total RNA (12 &micro;g) was primed with random primer (Invitrogen, Tokyo, Japan), and cDNA was synthesized with reverse transcriptase (Superscript II, Invitrogen). The resulting cDNA was fragmented with DNase I (Promega, Madison, WI, USA) and biotin labeled using terminal deoxynucleotidyl transferase (Promega).
+
+Name	PI-extraction protocol
+Description	Total RNA samples were extracted from 12 h cultures of strains 17 and 17-2 using RNeasy Midi Kit (QIAGEN, Tokyo, Japan) according to the manufacturer&#8217;s protocol.
+
+Name	PI-pooling protocol
+Description	Frozen stock in water at -80&deg;C
+
+Name	PI-hybridization protocol
+Description	Biotin-labeled samples were hybridized onto the strain 17 microarray at 45&deg;C for 16-20 h using NimbleGen&#8217;s Hybriwheel Hybridization chambers (NimbleGen Systems Inc.).
+
+Name	PI-scanning protocol
+Description	Hybridized-microarray slides were imaged with a high resolution array scanner (GenePix 4000B Microarray Scanner, Molecular Devices Corp., Sunnyvale, CA, USA) and the fluorescent signal intensities from each spot were quantified using NimbleScan Software (NimbleGen Systems Inc.).
+
+Name	PI-immage analysis protocol
+Description	Hybridized-microarray slides were imaged with a high resolution array scanner (GenePix 4000B Microarray Scanner, Molecular Devices Corp., Sunnyvale, CA, USA) and the fluorescent signal intensities from each spot were quantified using NimbleScan Software (NimbleGen Systems Inc.).
+
+Name	PI-normalized protocol
+Description	The data set was normalized by means of Robust Multi-chip analaysis algorithm.
+
+Name	PIPLA-growth condition
+Description	Prevotella intermedia strain 17 was cultured in enriched trypticase soy broth at 37&deg;C for 12 hrs anaerobically.
+
+Name	PIBIO-growth condition
+Description	Prevotella intermedia strain 17 was cultured on anaerobic blood agar plates at 37&deg;C for 12 hrs anaerobically.
+
+Array design:
+Array sesign accession	CAR234
+Model name	Original Array PI01
+Technology type	spotted_ss_oligo_features
+Surface type	aminosilane
+Number of features	2816
+Design provider	TIGR
+Reporter type	synthetic oligo-nucleotides
+Strand type	single_stranded
+Substrate type	glass
+Attachment	other
+Array design protocol	PI-array design
+File	2005_09.txt
+
+Array design text field:
+Field	Description
+PROBE_DESIGN_ID	This a unique, composite key consisting of the DESIGN_ID, ROW_NUM and COL_NUM.
+CONTAINER	Probes are arranged in a variety of ways during the design process. To distinguish sets of probes, either physically or informatically, the probes are arranged in different containers. This column holds that name, often used during data analysis.
+DESIGN_NOTE	A comment field suitable for placing information necessary for data analysis, for instance if you want to analyze sets of probes and/or genes together that don’t separate out using SELECTION_CRITERIA, CONTAINER, PROBE_CLASS or other information.
+SELECTION_CRITERIA	For most standard designs, this field will contain some information about how the probe was selected for inclusion on the array.
+SEQ_ID	The NimbleGen sequence identifier. Used to group the probe pairs together to generate average difference values. A SEQ_ID is a 17 character string that looks like: HSAP0001S00001834 The first four letters (HSAP) are the species code. The next four characters (0001) are the sequence build number. The ‘S’ is the designator for sequence (so there’s no confusion with the similar looking PROBE_IDs) The last eight digits are the unique sequence number within the sequence build
+PROBE_SEQUENCE	The DNA sequence synthesized on the array
+MISMATCH	The number of mismatches in the PROBE_SEQUENCE. Generally 0 (for the perfect match probe) or 2 (for the corresponding mismatch probe).
+MATCH_INDEX	Integer number that ties probe pairs together. Using the combination of MATCH_INDEX and MISMATCH you can retrieve and distinguish the members of the probe pair. Many controls have a MATCH_INDEX of ‘0’ since they are not paired with a mismatch probe.
+FEATURE_ID	A unique number used to tie together multiple features that compose a larger entity called a feature cell. For 4:9 format, the four individual features that comprise the larger feature cell will all have the same FEATURE_ID
+ROW_NUM	The Y coordinate of the feature within the CONTAINER holding the feature.
+COL_NUM	The X coordinate of the feature within the CONTAINER holding the feature.
+PROBE_CLASS	Experimental or Control. Useful for queries where you want to pull out only certain classes of probes.
+PROBE_ID	The NimbleGen probe identifier. A PROBE_ID is a 17 character string that looks like: HSAP00P0001724033 The first four letters (HSAP) are the species code. The next two digits designate the mismatch method. ‘00’ means no mismatch. ‘01’ is the standard two mismatches at 25% and 50%  (positions 6 and 12 from the 5’ end in a 24mer). The ‘P’ is the designator for probe (so there’s no confusion with the similar looking SEQ_IDs) The last ten digits are the probe number.
+POSITION	When populated, this contains the position of the probe within the parent sequence
+DESIGN_ID	This is the NimbleGen identifier for the design.
+X	The absolute X coordinate of the feature on the array
+Y	The absolute Y coordinate of the feature on the array
+
+Sample:
+Name	17-1
+Organism	Prevotella intermedia
+Developmental stage	12hr-old culture
+Strain or line	strain 17
+Individual	Prevotella intermedia strain 17 (biofilm-forming)
+Individual genetic characteristics	Wild type
+
+Name	17-2
+Organism	Prevotella intermedia
+Developmental stage	12hr-old culture
+Strain or line	Strain 17-2
+Individual	Prevotella intermedia strain 17-2 (biofilm-non-forming)
+Individual genetic characteristics	Wild type (naturally-occured mutant of strain 17)
+
+Name	PIBIO
+Organism	Prevotella intermedia
+Cell line	Strain 17
+
+Name	PIPLA
+Organism	Prevotella intermedia
+Cell line	Strain 17
+
+Labeled Extract:
+Label	17-1, biotin
+Labeling protocol	PI-labeling protocol
+Extraction protocol	PI-extraction protocol
+Pooling protocol	PI-pooling protocol
+Label compound	biotin
+
+Label	17-2, biotin
+Labeling protocol	PI-labeling protocol
+Extraction protocol	PI-extraction protocol
+Pooling protocol	PI-pooling protocol
+Label compound	biotin
+
+Label	PIBIO, biotin
+Labeling protocol	PI-labeling protocol
+Extraction protocol	PI-extraction protocol
+Pooling protocol	PI-pooling protocol
+Label compound	biotin
+
+Label	PIPLA, biotin
+Labeling protocol	PI-labeling protocol
+Extraction protocol	PI-extraction protocol
+Pooling protocol	PI-pooling protocol
+Label compound	biotin
+
+Hybridization:
+Name	59016_532
+Array design accession	CAR234
+Hybridization protocol	PI-hybridization protocol
+Scanning protocol	PI-scanning protocol
+File	59016_532.txt
+
+Hybridization data text field:
+Field	Description
+IMAGE_ID	The name of the image the data was extracted from, minus the .tif extension.
+SEQ_ID	The NimbleGen sequence identifier. Used to group the probe pairs together for determining gene expression summary values.
+PROBE_PAIRS	The number of probe pairs for this SEQ_ID.
+FILTERED_PROBE_PAIRS	The number of probe pairs for this SEQ_ID and CONTAINER/GENE_EXPR_OPTION combination after filtering outliers. Outliers are those probe values that are greater than 3 standard deviations from the mean of the probe set.
+PM_AVG	The gene expression summary value for the gene calculated as the mean of the signal intensities of the perfect match probes only.
+PM_CV	The coefficient of variation (CV) of the perfect match probes.
+MM_AVG	The mean signal intensity of the mismatch probes only.
+MM_CV	The coefficient of variation (CV) of the mismatch probes.
+DIFF_AVG	The mean signal intensity of the perfect match probes after subtracting the signal of the mismatch probes.
+DIFF_CV	The coefficient of variation (CV) of the values of the perfect match signal minus the mismatch signal.
+GENE_EXPR_OPTION	The CONTAINER name from the design file, if analysis was done &#8217;by container&#8217; or WHOLE_ARRAY if all replicate probe sets were combined into a single set.
+GENE_INFO	ID number of the gene on TIGR data base and annotations for the gene.
+
+Name	59014_532
+Array design accession	CAR234
+Hybridization protocol	PI-hybridization protocol
+Scanning protocol	PI-scanning protocol
+File	59014_532.txt
+
+Hybridization data text field:
+Field	Description
+IMAGE_ID	The name of the image the data was extracted from, minus the .tif extension.
+SEQ_ID	The NimbleGen sequence identifier. Used to group the probe pairs together for determining gene expression summary values.
+PROBE_PAIRS	The number of probe pairs for this SEQ_ID.
+FILTERED_PROBE_PAIRS	The number of probe pairs for this SEQ_ID and CONTAINER/GENE_EXPR_OPTION combination after filtering outliers. Outliers are those probe values that are greater than 3 standard deviations from the mean of the probe set.
+PM_AVG	The gene expression summary value for the gene calculated as the mean of the signal intensities of the perfect match probes only.
+PM_CV	The coefficient of variation (CV) of the perfect match probes.
+MM_AVG	The mean signal intensity of the mismatch probes only.
+MM_CV	The coefficient of variation (CV) of the mismatch probes.
+DIFF_AVG	The mean signal intensity of the perfect match probes after subtracting the signal of the mismatch probes.
+DIFF_CV	The coefficient of variation (CV) of the values of the perfect match signal minus the mismatch signal.
+GENE_EXPR_OPTION	The CONTAINER name from the design file, if analysis was done ‘by container’ or WHOLE_ARRAY if all replicate probe sets were combined into a single set.
+GENE_INFO	ID number of the gene on TIGR data base and annotations for the gene.
+
+Name	PIBIO
+Array design accession	CAR234
+Hybridization protocol	PI-hybridization protocol
+Scanning protocol	PI-scanning protocol
+Description	P. intermedia in biofilim vs planktonic condition
+File	233951_532.txt
+
+Hybridization data text field:
+Field	Description
+IMAGE_ID	The name of the image the data was extracted from, minus the .tif extension.
+SEQ_ID	The NimbleGen sequence identifier. Used to group the probe pairs together for determining gene expression summary values.
+PROBE_PAIRS	The number of probe pairs for this SEQ_ID.
+FILTERED_PROBE_PAIRS	The number of probe pairs for this SEQ_ID and CONTAINER/GENE_EXPR_OPTION combination after filtering outliers. Outliers are those probe values that are greater than 3 standard deviations from the mean of the probe set.
+PM_AVG	The gene expression summary value for the gene calculated as the mean of the signal intensities of the perfect match probes only.
+PM_CV	The coefficient of variation (CV) of the perfect match probes.
+MM_AVG	The mean signal intensity of the mismatch probes only.
+MM_CV	The coefficient of variation (CV) of the mismatch probes.
+DIFF_AVG	The mean signal intensity of the perfect match probes after subtracting the signal of the mismatch probes.
+DIFF_CV	The coefficient of variation (CV) of the values of the perfect match signal minus the mismatch signal.
+GENE_EXPR_OPTION	The CONTAINER name from the design file, if analysis was done ‘by container’ or WHOLE_ARRAY if all replicate probe sets were combined into a single set.
+GENE_INFO	ID number of the gene on TIGR data base and annotations for the gene.
+
+Name	PIPLA
+Array design accession	CAR234
+Hybridization protocol	PI-hybridization protocol
+Scanning protocol	PI-scanning protocol
+Description	P. intermedia in biofilim vs planktonic condition
+File	233291_532.txt
+
+Hybridization data text field:
+Field	Description
+IMAGE_ID	The name of the image the data was extracted from, minus the .tif extension.
+SEQ_ID	The NimbleGen sequence identifier. Used to group the probe pairs together for determining gene expression summary values.
+PROBE_PAIRS	The number of probe pairs for this SEQ_ID.
+FILTERED_PROBE_PAIRS	The number of probe pairs for this SEQ_ID and CONTAINER/GENE_EXPR_OPTION combination after filtering outliers. Outliers are those probe values that are greater than 3 standard deviations from the mean of the probe set.
+PM_AVG	The gene expression summary value for the gene calculated as the mean of the signal intensities of the perfect match probes only.
+PM_CV	The coefficient of variation (CV) of the perfect match probes.
+MM_AVG	The mean signal intensity of the mismatch probes only.
+MM_CV	The coefficient of variation (CV) of the mismatch probes.
+DIFF_AVG	The mean signal intensity of the perfect match probes after subtracting the signal of the mismatch probes.
+DIFF_CV	The coefficient of variation (CV) of the values of the perfect match signal minus the mismatch signal.
+GENE_EXPR_OPTION	The CONTAINER name from the design file, if analysis was done ‘by container’ or WHOLE_ARRAY if all replicate probe sets were combined into a single set.
+GENE_INFO	ID number of the gene on TIGR data base and annotations for the gene.
+
+Summary:
+Name	Summary-01
+Normalization protocol	PI-normalized protocol
+Description	Gene expression profiles of biofilm-forming Prevotella intermedia strain 17 were compared with those of strain 17-2, a variant of strain 17 that does not form biofilm.
+File	Summary-1.txt
+
+Summary data text field:
+Field	Description
+SEQ_ID	The NimbleGen sequence identifier. Used to grounp the probe pairs together for determing gene expression summary values.
+Control	The gene expression value from the control data file.
+Experimental	The gene expression value from the experimental data file.
+Fold change	Fold change of the gene expression value from the experimental data file in comparison with that of control data.
+Up/Down	The relative gene expression level of the experimental data in comparison with the control data.
+p. value	p. value of the t-test
+Bonferroni. p. value	p. value of the t-test with Bonferroni compensation.
+Serial number	Serial number of the comparison of gene expression level.
+Gene	ID number of the gene on TIGR data base.
+Description	Annotation or information of the gene.
+
+Name	Summary-02
+Normalization protocol	PI-normalized protocol
+Description	Genes upregulated in biofilm of Prevotella intermedia strain 17
+File	Summary-2.txt
+
+Summary data text field:
+Field	Description
+SEQ_ID	The NimbleGen sequence identifier. Used to grounp the probe pairs together for determing gene expression summary values.
+Control	The gene expression value from the control data file.
+Experimental	The gene expression value from the experimental data file.
+Fold change	Fold change of the gene expression value from the experimental data file in comparison with that of control data.
+Up/Down	The relative gene expression level of the experimental data in comparison with the control data.
+p. value	p. value of the t-test
+Bonferroni. p. value	p. value of the t-test with Bonferroni compensation.
+Serial number	Serial number of the comparison of gene expression level.
+Gene	ID number of the gene on TIGR data base.
+Description	Annotation or information of the gene.
+
