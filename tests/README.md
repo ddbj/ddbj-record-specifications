@@ -12,6 +12,12 @@ docker compose exec app uv run pytest
 - v3 の `*_full.json` は、なるべく多くのフィールドに値を入れた record である。v3 のモデルは `extra="forbid"` なので、型からフィールドを消すと `*_full.json` が読めなくなり、テストが落ちる。フィールドを消すときは、`*_full.json` も直す
 - v2 の型が受け付ける値の範囲は、PBT (hypothesis) でも確かめる
 
+## v4 のパッケージのテスト
+
+- [`tests/fixtures/v4/packages/`](./fixtures/v4/packages/) の、展開したパッケージを zip にして、`check` を通ること、読む関数が record を組み立てることを確かめる
+- 約束から外れたパッケージ (壊れた zip、I-JSON でない行、配列と entry の食い違いなど) を作り、`check` が例外にせず問題として挙げること、読む関数が読むのを止めることを確かめる
+- v3 の record を `pack` して `unpack` すると元に戻ること、v4 の型が v3 の型の欄を漏れなく写していることを確かめる
+
 ## 対応表のテスト
 
 [`tests/fixtures/v3/mapping/`](./fixtures/v3/mapping/) の対応表 (SRA / GEA) について、次を確かめる。

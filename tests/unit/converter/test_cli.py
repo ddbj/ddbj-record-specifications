@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from ddbj_record.converter.cli import convert_json_data, parse_args
+from ddbj_record.converter.cli import convert_json_data, main, parse_args
 
 # === parse_args ===
 
@@ -80,6 +80,30 @@ def test_convert_json_data_unsupported_pair_raises(v1_valid_minimal: dict[str, A
 
 
 # === post-conversion validation ===
+
+
+@pytest.mark.parametrize(("from_", "to"), [("v4", "v4"), ("v3", "v4"), ("v4", "v3")])
+def test_convert_json_data_refuses_v4(from_: str, to: str) -> None:
+    # v4 の record は zip のパッケージで、ddbj_record_package が扱う。
+    with pytest.raises(ValueError, match="ddbj_record_package"):
+        convert_json_data({"schema_version": "v4"}, from_, to)
+
+
+@pytest.mark.parametrize(("from_", "to"), [("v4", "v3"), ("v3", "v4")])
+def test_converter_cli_points_a_package_to_ddbj_record_package(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch, from_: str, to: str
+) -> None:
+    # 入力を JSON として読む前に断る (zip を UTF-8 として読んだ誤りにしない)。
+    package = tmp_path / "record.ddbj.zip"
+    package.write_bytes(b"PK\x03\x04\xff\xfe")
+    argv = ["ddbj_record_converter", "--from", from_, "--to", to, "-i", str(package), "-o", str(tmp_path / "out.json")]
+    monkeypatch.setattr("sys.argv", argv)
+
+    with pytest.raises(SystemExit) as exit_info:
+        main()
+
+    assert exit_info.value.code == 2
+    assert "ddbj_record_package" in capsys.readouterr().err
 
 
 def test_converter_cli_runs_post_conversion_validation(
