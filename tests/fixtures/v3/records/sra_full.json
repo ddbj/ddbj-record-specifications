@@ -7,6 +7,7 @@
     "accession": "DRA000001",
     "alias": "sub-1",
     "title": "Pooled amplicon sequencing of soil fungi",
+    "hold_date": "2026-12-31",
     "center_name": "NIG",
     "broker_name": "DDBJ",
     "identifiers": [
@@ -67,6 +68,10 @@
         },
         {
           "type": "HOLD",
+          "hold_until_date": "2026-12-31"
+        },
+        {
+          "type": "HOLD",
           "target": "DRX000001",
           "hold_until_date": "2013-04-01",
           "legacy": {
@@ -90,60 +95,62 @@
       }
     }
   },
-  "project": {
-    "accession": "DRP000001",
-    "alias": "study-1",
-    "title": "Soil fungal diversity",
-    "description": "Abstract of the study.",
-    "study_description": "Description of the study.",
-    "study_types": [
-      "Other"
-    ],
-    "new_study_type": "Amplicon survey",
-    "center_name": "NIG",
-    "broker_name": "DDBJ",
-    "center_project_name": "SOIL-ITS",
-    "descriptor_center_name": "NIG",
-    "identifiers": [
-      {
-        "type": "primary",
-        "value": "DRP000001",
-        "label": "primary"
-      },
-      {
-        "type": "secondary",
-        "value": "SRP000001",
-        "label": "NCBI"
-      },
-      {
-        "type": "external",
-        "value": "ERP000001",
-        "label": "ENA",
-        "namespace": "ENA"
-      },
-      {
-        "type": "submitter",
-        "value": "local-DRP000001",
-        "label": "local",
-        "namespace": "NIG"
-      },
-      {
-        "type": "uuid",
-        "value": "b3f8a1c2-0000-4000-8000-000000000001",
-        "label": "internal"
+  "projects": [
+    {
+      "accession": "DRP000001",
+      "alias": "study-1",
+      "title": "Soil fungal diversity",
+      "description": "Abstract of the study.",
+      "study_description": "Description of the study.",
+      "study_types": [
+        "Other"
+      ],
+      "new_study_type": "Amplicon survey",
+      "center_name": "NIG",
+      "broker_name": "DDBJ",
+      "center_project_name": "SOIL-ITS",
+      "descriptor_center_name": "NIG",
+      "identifiers": [
+        {
+          "type": "primary",
+          "value": "DRP000001",
+          "label": "primary"
+        },
+        {
+          "type": "secondary",
+          "value": "SRP000001",
+          "label": "NCBI"
+        },
+        {
+          "type": "external",
+          "value": "ERP000001",
+          "label": "ENA",
+          "namespace": "ENA"
+        },
+        {
+          "type": "submitter",
+          "value": "local-DRP000001",
+          "label": "local",
+          "namespace": "NIG"
+        },
+        {
+          "type": "uuid",
+          "value": "b3f8a1c2-0000-4000-8000-000000000001",
+          "label": "internal"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "funding",
+          "value": "JSPS",
+          "unit": "agency"
+        }
+      ],
+      "legacy": {
+        "project_id": "72881"
       }
-    ],
-    "attributes": [
-      {
-        "name": "funding",
-        "value": "JSPS",
-        "unit": "agency"
-      }
-    ],
-    "legacy": {
-      "project_id": "72881"
     }
-  },
+  ],
   "samples": [
     {
       "accession": "DRS000001",

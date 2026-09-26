@@ -3,22 +3,24 @@
   "provenance": {
     "source_format": "BioProject XML"
   },
-  "project": {
-    "accession": "PRJDB00001",
-    "title": "Japanese rice genome sequencing consortium",
-    "description": "An umbrella project coordinating multiple genome sequencing efforts for Oryza sativa cultivars in Japan.",
-    "project_type": "umbrella",
-    "organism": {
-      "name": "Oryza sativa",
-      "taxonomy_id": 4530
-    },
-    "keywords": [
-      "rice",
-      "genome",
-      "cultivar"
-    ],
-    "relevance": {
-      "agricultural": "crop improvement and breeding"
+  "projects": [
+    {
+      "accession": "PRJDB00001",
+      "title": "Japanese rice genome sequencing consortium",
+      "description": "An umbrella project coordinating multiple genome sequencing efforts for Oryza sativa cultivars in Japan.",
+      "project_type": "umbrella",
+      "organism": {
+        "name": "Oryza sativa",
+        "taxonomy_id": 4530
+      },
+      "keywords": [
+        "rice",
+        "genome",
+        "cultivar"
+      ],
+      "relevance": {
+        "agricultural": "crop improvement and breeding"
+      }
     }
-  }
+  ]
 }

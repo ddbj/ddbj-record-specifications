@@ -40,7 +40,7 @@ submission:
   SUBMISSION/ACTIONS/ACTION/ADD/@source:                       submission.sra.actions[].source
   SUBMISSION/ACTIONS/ACTION/HOLD:                              submission.sra.actions[].type (要素名が値)
   SUBMISSION/ACTIONS/ACTION/HOLD/@HoldForPeriod:               submission.sra.actions[].legacy.hold_for_period  # XSD に無い。D-way で 1,123 文書
-  SUBMISSION/ACTIONS/ACTION/HOLD/@HoldUntilDate:               submission.sra.actions[].hold_until_date
+  SUBMISSION/ACTIONS/ACTION/HOLD/@HoldUntilDate:               submission.sra.actions[].hold_until_date (@target が無ければ submission.hold_date にも同じ値)
   SUBMISSION/ACTIONS/ACTION/HOLD/@notes:                       submission.sra.actions[].legacy.notes  # XSD に無い。D-way で 495 文書
   SUBMISSION/ACTIONS/ACTION/HOLD/@target:                      submission.sra.actions[].target
   SUBMISSION/ACTIONS/ACTION/MODIFY:                            submission.sra.actions[].type (要素名が値)
@@ -97,14 +97,14 @@ submission:
 
 study:
   STUDY:                                                             (container)
-  STUDY/@accession:                                                  project.accession
-  STUDY/@alias:                                                      project.alias
-  STUDY/@broker_name:                                                project.broker_name
-  STUDY/@center_name:                                                project.center_name
+  STUDY/@accession:                                                  projects[].accession
+  STUDY/@alias:                                                      projects[].alias
+  STUDY/@broker_name:                                                projects[].broker_name
+  STUDY/@center_name:                                                projects[].center_name
   STUDY/DESCRIPTOR:                                                  (container)
-  STUDY/DESCRIPTOR/CENTER_NAME:                                      project.descriptor_center_name  # XSD 1.5d2
-  STUDY/DESCRIPTOR/CENTER_PROJECT_NAME:                              project.center_project_name
-  STUDY/DESCRIPTOR/PROJECT_ID:                                       project.legacy.project_id  # XSD に無い。D-way で 1,790 文書
+  STUDY/DESCRIPTOR/CENTER_NAME:                                      projects[].descriptor_center_name  # XSD 1.5d2
+  STUDY/DESCRIPTOR/CENTER_PROJECT_NAME:                              projects[].center_project_name
+  STUDY/DESCRIPTOR/PROJECT_ID:                                       projects[].legacy.project_id  # XSD に無い。D-way で 1,790 文書
   STUDY/DESCRIPTOR/RELATED_STUDIES:                                  (container)
   STUDY/DESCRIPTOR/RELATED_STUDIES/RELATED_STUDY:                    relations[related_to]
   STUDY/DESCRIPTOR/RELATED_STUDIES/RELATED_STUDY/IS_PRIMARY:         relations[related_to].properties{is_primary}
@@ -112,30 +112,30 @@ study:
   STUDY/DESCRIPTOR/RELATED_STUDIES/RELATED_STUDY/RELATED_LINK/DB:    relations[related_to].target.db
   STUDY/DESCRIPTOR/RELATED_STUDIES/RELATED_STUDY/RELATED_LINK/ID:    relations[related_to].target.id
   STUDY/DESCRIPTOR/RELATED_STUDIES/RELATED_STUDY/RELATED_LINK/LABEL: relations[related_to].label
-  STUDY/DESCRIPTOR/STUDY_ABSTRACT:                                   project.description
-  STUDY/DESCRIPTOR/STUDY_DESCRIPTION:                                project.study_description
-  STUDY/DESCRIPTOR/STUDY_TITLE:                                      project.title
+  STUDY/DESCRIPTOR/STUDY_ABSTRACT:                                   projects[].description
+  STUDY/DESCRIPTOR/STUDY_DESCRIPTION:                                projects[].study_description
+  STUDY/DESCRIPTOR/STUDY_TITLE:                                      projects[].title
   STUDY/DESCRIPTOR/STUDY_TYPE:                                       (container)
-  STUDY/DESCRIPTOR/STUDY_TYPE/@existing_study_type:                  project.study_types[]
-  STUDY/DESCRIPTOR/STUDY_TYPE/@new_study_type:                       project.new_study_type
+  STUDY/DESCRIPTOR/STUDY_TYPE/@existing_study_type:                  projects[].study_types[]
+  STUDY/DESCRIPTOR/STUDY_TYPE/@new_study_type:                       projects[].new_study_type
   STUDY/IDENTIFIERS:                                                 (container)
-  STUDY/IDENTIFIERS/EXTERNAL_ID:                                     project.identifiers[external].value
-  STUDY/IDENTIFIERS/EXTERNAL_ID/@label:                              project.identifiers[external].label
-  STUDY/IDENTIFIERS/EXTERNAL_ID/@namespace:                          project.identifiers[external].namespace
-  STUDY/IDENTIFIERS/PRIMARY_ID:                                      project.identifiers[primary].value
-  STUDY/IDENTIFIERS/PRIMARY_ID/@label:                               project.identifiers[primary].label
-  STUDY/IDENTIFIERS/SECONDARY_ID:                                    project.identifiers[secondary].value
-  STUDY/IDENTIFIERS/SECONDARY_ID/@label:                             project.identifiers[secondary].label
-  STUDY/IDENTIFIERS/SUBMITTER_ID:                                    project.identifiers[submitter].value
-  STUDY/IDENTIFIERS/SUBMITTER_ID/@label:                             project.identifiers[submitter].label
-  STUDY/IDENTIFIERS/SUBMITTER_ID/@namespace:                         project.identifiers[submitter].namespace
-  STUDY/IDENTIFIERS/UUID:                                            project.identifiers[uuid].value
-  STUDY/IDENTIFIERS/UUID/@label:                                     project.identifiers[uuid].label
+  STUDY/IDENTIFIERS/EXTERNAL_ID:                                     projects[].identifiers[external].value
+  STUDY/IDENTIFIERS/EXTERNAL_ID/@label:                              projects[].identifiers[external].label
+  STUDY/IDENTIFIERS/EXTERNAL_ID/@namespace:                          projects[].identifiers[external].namespace
+  STUDY/IDENTIFIERS/PRIMARY_ID:                                      projects[].identifiers[primary].value
+  STUDY/IDENTIFIERS/PRIMARY_ID/@label:                               projects[].identifiers[primary].label
+  STUDY/IDENTIFIERS/SECONDARY_ID:                                    projects[].identifiers[secondary].value
+  STUDY/IDENTIFIERS/SECONDARY_ID/@label:                             projects[].identifiers[secondary].label
+  STUDY/IDENTIFIERS/SUBMITTER_ID:                                    projects[].identifiers[submitter].value
+  STUDY/IDENTIFIERS/SUBMITTER_ID/@label:                             projects[].identifiers[submitter].label
+  STUDY/IDENTIFIERS/SUBMITTER_ID/@namespace:                         projects[].identifiers[submitter].namespace
+  STUDY/IDENTIFIERS/UUID:                                            projects[].identifiers[uuid].value
+  STUDY/IDENTIFIERS/UUID/@label:                                     projects[].identifiers[uuid].label
   STUDY/STUDY_ATTRIBUTES:                                            (container)
-  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE:                            project.attributes[]
-  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/TAG:                        project.attributes[].name
-  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/UNITS:                      project.attributes[].unit
-  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/VALUE:                      project.attributes[].value
+  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE:                            projects[].attributes[]
+  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/TAG:                        projects[].attributes[].name
+  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/UNITS:                      projects[].attributes[].unit
+  STUDY/STUDY_ATTRIBUTES/STUDY_ATTRIBUTE/VALUE:                      projects[].attributes[].value
   STUDY/STUDY_LINKS:                                                 (container)
   STUDY/STUDY_LINKS/STUDY_LINK:                                      relations[]
   STUDY/STUDY_LINKS/STUDY_LINK/DDBJ_LINK:                            relations[xref].properties{sra_link_type} (DDBJ_LINK なら "ddbj")  # XSD に無い。D-way で 34 文書

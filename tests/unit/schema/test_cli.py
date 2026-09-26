@@ -26,7 +26,7 @@ def test_parse_args_unknown_version_exits(raw: str) -> None:
     [
         ("v1", ("COMMON", "COMMON_SOURCE", "ENTRIES")),
         ("v2", ("schema_version", "provenance", "submission", "sequences", "features")),
-        ("v3", ("schema_version", "submission", "project", "samples", "relations")),
+        ("v3", ("schema_version", "submission", "projects", "samples", "relations")),
     ],
 )
 def test_dump_schema_has_the_top_level_properties(version: str, keys: tuple[str, ...]) -> None:
@@ -37,7 +37,7 @@ def test_dump_schema_has_the_top_level_properties(version: str, keys: tuple[str,
 def test_dump_schema_keeps_refs_to_defs() -> None:
     schema = json.loads(dump_schema("v3"))
     assert "$defs" in schema
-    assert schema["properties"]["project"]["anyOf"][0] == {"$ref": "#/$defs/Project"}
+    assert schema["properties"]["projects"]["anyOf"][0]["items"] == {"$ref": "#/$defs/Project"}
 
 
 # === main ===

@@ -27,23 +27,25 @@
     ],
     "hold_date": "2026-12-31"
   },
-  "project": {
-    "accession": "PRJDB12345",
-    "alias": "rnaseq-liver-project",
-    "title": "Transcriptome analysis of human liver cancer",
-    "description": "RNA-seq analysis comparing tumor and normal tissue from liver cancer patients.",
-    "project_type": "primary",
-    "organism": {
-      "name": "Homo sapiens",
-      "taxonomy_id": 9606
-    },
-    "target": {
-      "sample_scope": "monoisolate",
-      "material": "transcriptome",
-      "capture": "whole",
-      "method": "sequencing"
+  "projects": [
+    {
+      "accession": "PRJDB12345",
+      "alias": "rnaseq-liver-project",
+      "title": "Transcriptome analysis of human liver cancer",
+      "description": "RNA-seq analysis comparing tumor and normal tissue from liver cancer patients.",
+      "project_type": "primary",
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      },
+      "target": {
+        "sample_scope": "monoisolate",
+        "material": "transcriptome",
+        "capture": "whole",
+        "method": "sequencing"
+      }
     }
-  },
+  ],
   "samples": [
     {
       "accession": "SAMD00000001",

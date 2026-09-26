@@ -1319,7 +1319,7 @@ class DdbjRecord(BaseModel):
     schema_version: str | None = Field(None, examples=["v3"])
     provenance: Provenance | None = None
     submission: Submission | None = None
-    project: Project | None = None
+    projects: list[Project] | None = None
     samples: list[Sample] | None = None
     experiments: list[Experiment] | None = None
     runs: list[Run] | None = None

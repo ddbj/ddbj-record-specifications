@@ -44,31 +44,33 @@
       "Annotated by DFAST 1.3.4 https://dfast.ddbj.nig.ac.jp/"
     ]
   },
-  "project": {
-    "locus_tag_prefix": [
-      {
-        "prefix": "PLH"
-      }
-    ],
-    "publications": [
-      {
-        "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
-        "status": "unpublished",
-        "date": "2023",
-        "authors": [
-          {
-            "abbreviation": "Mishima,H."
-          },
-          {
-            "abbreviation": "Tanizawa,Y."
-          },
-          {
-            "abbreviation": "Nakamura,Y."
-          }
-        ]
-      }
-    ]
-  },
+  "projects": [
+    {
+      "locus_tag_prefix": [
+        {
+          "prefix": "PLH"
+        }
+      ],
+      "publications": [
+        {
+          "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
+          "status": "unpublished",
+          "date": "2023",
+          "authors": [
+            {
+              "abbreviation": "Mishima,H."
+            },
+            {
+              "abbreviation": "Tanizawa,Y."
+            },
+            {
+              "abbreviation": "Nakamura,Y."
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "sequences": {
     "common_source": {
       "organism": {

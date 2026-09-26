@@ -205,6 +205,30 @@ def test_pool_member_sample_with_negative_index_fails_the_whole_record() -> None
     assert ("experiments", 0, "pool", "members", 0, "sample", "index") in locations
 
 
+# === projects ===
+#
+# SRA の STUDY_SET も BioProject XML も project を繰り返せる。1 つの submission を 1 つの record のまま
+# 持てるように list にし、いくつまで許すかは ddbj-validator のルールで決める。
+
+
+def test_projects_keep_every_study_of_a_submission_in_order() -> None:
+    record = DdbjRecord.model_validate(
+        {
+            "schema_version": "v3",
+            "submission": {"accession": "SRA002148"},
+            "projects": [{"accession": "SRP000285"}, {"accession": "SRP019355"}],
+        }
+    )
+
+    assert record.projects is not None
+    assert [project.accession for project in record.projects] == ["SRP000285", "SRP019355"]
+
+
+def test_projects_given_as_a_single_object_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        DdbjRecord.model_validate({"schema_version": "v3", "projects": {"accession": "PRJDB1"}})
+
+
 # === extra="forbid" ===
 
 
@@ -216,11 +240,12 @@ def test_project_rejects_unknown_fields() -> None:
 def test_bioproject_other_fixture_is_fully_populated(v3_bioproject_other: dict[str, Any]) -> None:
     # BP の "other" 系ルールが要求する説明が一通り載っている fixture であること。
     record = DdbjRecord.model_validate(v3_bioproject_other)
-    assert record.project is not None
-    target = record.project.target
+    assert record.projects is not None
+    project = record.projects[0]
+    target = project.target
     assert target is not None
     assert target.description
     assert target.method_description
     assert target.data_type_descriptions
-    assert record.project.locus_tag_prefix is not None
-    assert record.project.locus_tag_prefix[0].biosample_id
+    assert project.locus_tag_prefix is not None
+    assert project.locus_tag_prefix[0].biosample_id

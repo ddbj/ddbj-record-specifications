@@ -25,20 +25,22 @@
       }
     ]
   },
-  "project": {
-    "accession": "PRJDB54321",
-    "alias": "jga-gwas-study",
-    "title": "Genome-wide association study of type 2 diabetes",
-    "description": "A case-control GWAS study investigating genetic risk factors for type 2 diabetes in a Japanese population cohort.",
-    "project_type": "primary",
-    "study_types": [
-      "Case-Control"
-    ],
-    "organism": {
-      "name": "Homo sapiens",
-      "taxonomy_id": 9606
+  "projects": [
+    {
+      "accession": "PRJDB54321",
+      "alias": "jga-gwas-study",
+      "title": "Genome-wide association study of type 2 diabetes",
+      "description": "A case-control GWAS study investigating genetic risk factors for type 2 diabetes in a Japanese population cohort.",
+      "project_type": "primary",
+      "study_types": [
+        "Case-Control"
+      ],
+      "organism": {
+        "name": "Homo sapiens",
+        "taxonomy_id": 9606
+      }
     }
-  },
+  ],
   "samples": [
     {
       "alias": "case-sample-1",

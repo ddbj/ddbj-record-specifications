@@ -14,7 +14,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 
 | v3 のキー | まとめたもの |
 |---|---|
-| `project` | BioProject、SRA の study、JGA の study、GEA の experiment (IDF) |
+| `projects` | BioProject、SRA の study、JGA の study、GEA の experiment (IDF) |
 | `samples` | BioSample、SRA の sample、JGA の sample、GEA の SDRF の Source |
 | `experiments` | SRA の experiment、JGA の experiment、GEA の SDRF の Assay |
 | `runs` | SRA の run、JGA の data、GEA の SDRF の生データのファイル |
@@ -28,6 +28,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 - GFF は record の要素にせず、入力の形式として扱う。GFF の feature は `features` に入れる
 - 染色体やプラスミドを表すモデルは作らない。`sequences.entries[]` の `name` / `type` / `topology` で表す (例: `{"name": "pPLH-1", "type": "plasmid", "topology": "circular"}`)
 - `array_design` は accession を持つ独立した登録で、多くの experiment から参照されるので、`assembly` と同じくトップレベルに置く
+- 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA の `@target` の無い HOLD の日付も `hold_date` に写し、ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。2 つが食い違っていないかは ddbj-validator のルールで確かめる
 - GEA の SDRF の Extract と Labeled Extract は、Assay に入る材料として `experiments[].pool.members[]` に置く。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つで、dual-channel の Assay は member を 2 つ持つ。channel ごとに Source や Factor Value が違うことがあるので、Factor Value も member に置く
 
 record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
@@ -72,12 +73,13 @@ SRA XML や GEA のメタデータから変換した record は、元の形式�
 
 ## 1 つの record の範囲
 
-- `project` と `samples` のように、複数の DB の情報を 1 つの record に入れてよい。登録の途中で accession を書き足しながら、同じ record を更新していく使い方を想定している
-- 1 つの record に project は 1 つ。umbrella の親子関係は `relations` で表す
+- `projects` と `samples` のように、複数の DB の情報を 1 つの record に入れてよい。登録の途中で accession を書き足しながら、同じ record を更新していく使い方を想定している
+- 1 つの登録を 1 つの record のまま持てるように、project も list (`projects`) にする。SRA の submission は study を複数持てて、BioProject XML も project を複数書ける。いくつまで許すかは ddbj-validator のルールで決める
+- umbrella の親子関係は `relations` で表す。親と子を同じ record に入れてもよい
 
 ## オブジェクトの識別子
 
-record の中で accession と alias を持つもの (`project`、`samples[]`、`runs[]`、`sequences.entries[]` など) を、ここではオブジェクトと呼ぶ。登録前は alias だけを書き、登録後に accession を書き足す。
+record の中で accession と alias を持つもの (`projects[]`、`samples[]`、`runs[]`、`sequences.entries[]` など) を、ここではオブジェクトと呼ぶ。登録前は alias だけを書き、登録後に accession を書き足す。
 
 - accession 以外の識別子 (SRA の SECONDARY_ID など) は `identifiers` に置く
 - 元の形式で名前が同じでも値が違うもの (GEA の SDRF の Source など) は、同じ alias の別のオブジェクトにする

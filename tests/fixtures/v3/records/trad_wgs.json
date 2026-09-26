@@ -31,24 +31,26 @@
     ],
     "hold_date": "2026-06-30"
   },
-  "project": {
-    "locus_tag_prefix": [
-      {
-        "prefix": "ECK12"
-      }
-    ],
-    "publications": [
-      {
-        "title": "Draft genome sequence of Escherichia coli K-12",
-        "status": "unpublished",
-        "authors": [
-          {
-            "abbreviation": "Yamada,T."
-          }
-        ]
-      }
-    ]
-  },
+  "projects": [
+    {
+      "locus_tag_prefix": [
+        {
+          "prefix": "ECK12"
+        }
+      ],
+      "publications": [
+        {
+          "title": "Draft genome sequence of Escherichia coli K-12",
+          "status": "unpublished",
+          "authors": [
+            {
+              "abbreviation": "Yamada,T."
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "sequences": {
     "seq_prefix": "contig",
     "common_source": {

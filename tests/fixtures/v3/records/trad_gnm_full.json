@@ -44,45 +44,47 @@
       "Annotated by DFAST 1.3.4 https://dfast.ddbj.nig.ac.jp/"
     ]
   },
-  "project": {
-    "accession": "PRJDB99999",
-    "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis LOOC260",
-    "description": "Paucilactobacillus hokkaidonensis is a psychrotolerant lactic acid bacterium isolated from timothy grass silage in Hokkaido, Japan. We performed complete genome sequencing of the type strain LOOC260 to elucidate the genomic basis of its cold adaptation and silage fermentation capabilities.",
-    "project_type": "primary",
-    "organism": {
-      "name": "Paucilactobacillus hokkaidonensis",
-      "taxonomy_id": 1583098
-    },
-    "publications": [
-      {
-        "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
-        "status": "unpublished",
-        "date": "2023",
-        "authors": [
-          {
-            "abbreviation": "Mishima,H."
-          },
-          {
-            "abbreviation": "Tanizawa,Y."
-          },
-          {
-            "abbreviation": "Nakamura,Y."
-          }
-        ]
+  "projects": [
+    {
+      "accession": "PRJDB99999",
+      "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis LOOC260",
+      "description": "Paucilactobacillus hokkaidonensis is a psychrotolerant lactic acid bacterium isolated from timothy grass silage in Hokkaido, Japan. We performed complete genome sequencing of the type strain LOOC260 to elucidate the genomic basis of its cold adaptation and silage fermentation capabilities.",
+      "project_type": "primary",
+      "organism": {
+        "name": "Paucilactobacillus hokkaidonensis",
+        "taxonomy_id": 1583098
+      },
+      "publications": [
+        {
+          "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
+          "status": "unpublished",
+          "date": "2023",
+          "authors": [
+            {
+              "abbreviation": "Mishima,H."
+            },
+            {
+              "abbreviation": "Tanizawa,Y."
+            },
+            {
+              "abbreviation": "Nakamura,Y."
+            }
+          ]
+        }
+      ],
+      "locus_tag_prefix": [
+        {
+          "prefix": "PLH"
+        }
+      ],
+      "target": {
+        "sample_scope": "monoisolate",
+        "material": "genome",
+        "capture": "whole",
+        "method": "sequencing"
       }
-    ],
-    "locus_tag_prefix": [
-      {
-        "prefix": "PLH"
-      }
-    ],
-    "target": {
-      "sample_scope": "monoisolate",
-      "material": "genome",
-      "capture": "whole",
-      "method": "sequencing"
     }
-  },
+  ],
   "samples": [
     {
       "accession": "SAMD999999",
