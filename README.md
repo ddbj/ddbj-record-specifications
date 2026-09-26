@@ -14,11 +14,11 @@ DDBJ の登録データを表す JSON (DDBJ Record) の型を、Pydantic で定�
 
 ## docs
 
-- [docs/usage.md](./docs/usage.md): インストール、record の読み方、major の間の変換
+- [docs/usage.md](./docs/usage.md): インストール、record の読み方、major の間の変換、JSON Schema の書き出し
 - [docs/versioning.md](./docs/versioning.md): major の分け方、major の中の変更、利用側からの PR の受け入れ方
 - [docs/v3-schema.md](./docs/v3-schema.md): v3 のモデルのまとめ方、型が保証する範囲、元の形式との往復、識別子と relations
 - [docs/v1-v2.md](./docs/v1-v2.md): 古い major の v1 / v2 の位置づけ、schema_version の読み方、v1 と v2 の間の変換
-- [docs/development.md](./docs/development.md): 開発環境、JSON Schema の書き出し、型と docs の書き方
+- [docs/development.md](./docs/development.md): 開発環境、CI、依存と Python の範囲、lint、型と docs の書き方
 - [tests/README.md](./tests/README.md): テストが確かめること、テストデータの作り方
 
 ## ライセンス

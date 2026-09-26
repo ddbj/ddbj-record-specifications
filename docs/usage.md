@@ -45,4 +45,10 @@ v2_record = v1_to_v2(V1Record.model_validate_json(Path("v1.json").read_text()))
 
 ## JSON Schema
 
-JSON Schema は、clone した repo の開発環境で書き出す ([development.md](./development.md))。
+`dump_json_schema` が、major ごとの JSON Schema を標準出力に書く。JSON Schema は repo で管理していないので、要るときにこれで書き出す。
+
+```bash
+dump_json_schema --version v3 > ddbj_record.schema.json
+```
+
+pydantic が出す形のままで、共通の型は `$defs` にまとめ、`$ref` で指す。

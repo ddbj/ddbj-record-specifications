@@ -105,8 +105,8 @@ def main() -> None:
         with args.output.open("w", encoding="utf-8") as f:
             json.dump(converted_data, f, indent=2, ensure_ascii=False)
 
-    except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 

@@ -87,7 +87,7 @@ class _UniqueKeyLoader(yaml.SafeLoader):
 def load_mapping(name: str) -> dict[str, dict[str, str]]:
     return yaml.load(  # type: ignore[no-any-return]
         FIXTURES_V3.joinpath("mapping", name).read_text(encoding="utf-8"),
-        Loader=_UniqueKeyLoader,  # noqa: S506 -- a SafeLoader subclass
+        Loader=_UniqueKeyLoader,
     )
 
 

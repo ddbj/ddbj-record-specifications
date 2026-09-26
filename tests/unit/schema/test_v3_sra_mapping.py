@@ -54,7 +54,7 @@ def _documents() -> list[tuple[str, Path]]:
 
 @pytest.mark.parametrize(("doc", "path"), _documents(), ids=lambda v: v.name if isinstance(v, Path) else v)
 def test_every_path_in_raw_sra_xml_is_mapped(doc: str, path: Path) -> None:
-    root = ET.parse(path).getroot()  # noqa: S314 -- fixture in this repository
+    root = ET.parse(path).getroot()
 
     # *_SET は同じ種類の要素を並べるだけの入れ物で、record の中ではリストになる。
     entities = list(root) if root.tag.endswith("_SET") else [root]

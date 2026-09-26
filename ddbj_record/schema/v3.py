@@ -31,9 +31,7 @@ class Organization(BaseModel):
     url: str | None = Field(None, examples=["http://www.ddbj.nig.ac.jp"])
     role: str | None = Field(None, examples=["owner"])
     type: str | None = Field(None, examples=["institution"])
-    department: str | None = Field(
-        None, examples=["DNA Data Bank of Japan"]
-    )
+    department: str | None = Field(None, examples=["DNA Data Bank of Japan"])
     address: Address | None = None
     ror_id: str | None = Field(None, examples=["https://ror.org/01xq5f0"])
 
@@ -118,9 +116,7 @@ class Provenance(BaseModel):
 
     source_format: str | None = Field(None, examples=["GFF"])
     # WGS / GNM / MAG など。record は「何の record か」を示すフィールドを持たないので、変換元の分類はここに置く。
-    submission_category: str | None = Field(
-        None, examples=["WGS"]
-    )
+    submission_category: str | None = Field(None, examples=["WGS"])
     gff: GffMeta | None = None
 
     model_config = ConfigDict(extra="allow")
@@ -324,9 +320,7 @@ class Project(BaseModel):
     # BioProject の構造の種類 ("primary" / "umbrella")。研究の種類は study_types に置く。
     project_type: str | None = Field(None, examples=["primary"])
     # project_type が "umbrella" のときの種類。
-    umbrella_subtype: str | None = Field(
-        None, examples=["eComparativeGenomics"]
-    )
+    umbrella_subtype: str | None = Field(None, examples=["eComparativeGenomics"])
     # umbrella_subtype が "other" のときの説明（BP_R0008）。
     umbrella_subtype_description: str | None = None
     # SRA / JGA の研究の種類 ("WGS"、"Case-Control" など)。
@@ -445,9 +439,7 @@ class PlatformLegacy(BaseModel):
 
 class Platform(BaseModel):
     type: str | None = Field(None, examples=["ILLUMINA"])
-    instrument_model: str | None = Field(
-        None, examples=["Illumina HiSeq 2500"]
-    )
+    instrument_model: str | None = Field(None, examples=["Illumina HiSeq 2500"])
     # JGA の array の名前・説明・提供元。
     array_name: str | None = None
     array_description: str | None = None
@@ -506,9 +498,7 @@ class ReadSpecLegacy(BaseModel):
 class ReadSpec(BaseModel):
     read_index: int | None = None
     read_label: str | None = None
-    read_class: str | None = Field(
-        None, examples=["Application Read"]
-    )
+    read_class: str | None = Field(None, examples=["Application Read"])
     read_type: str | None = Field(None, examples=["Forward"])
     # 読みの位置は次の 3 つ(1.5 より前は legacy の 2 つを加えた 5 つ)のどれか 1 つで決める。
     base_coord: int | None = None
@@ -802,9 +792,7 @@ class Analysis(BaseModel):
     title: str | None = None
     description: str | None = None
     # SRA と JGA の analysis の種類を、1 つの語彙で持つ。
-    analysis_type: str | None = Field(
-        None, examples=["de_novo_assembly"]
-    )
+    analysis_type: str | None = Field(None, examples=["de_novo_assembly"])
     analysis_date: str | None = None
     data_blocks: list[DataBlock] | None = None
     processing: list[PipelineStep] | None = None
@@ -1212,9 +1200,7 @@ class Entry(BaseModel):
 class StructuredComment(BaseModel):
     """Trad の ST_COMMENT の 1 つ。tagset_id がブロックの種類で、fields はその中の項目と値。"""
 
-    tagset_id: str | None = Field(
-        None, examples=["Genome-Assembly-Data"]
-    )
+    tagset_id: str | None = Field(None, examples=["Genome-Assembly-Data"])
     fields: dict[str, str] | None = None
 
     model_config = ConfigDict(extra="forbid")

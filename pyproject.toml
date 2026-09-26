@@ -1,90 +1,42 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-record"
-authors = [{ name = "Bioinformatics and DDBJ Center" }]
+version = "0.0.0"
 description = "Pydantic models of the DDBJ Record JSON format, with converters between its major versions."
-readme = { file = "README.md", content-type = "text/markdown" }
-dynamic = ["version"]
+readme = "README.md"
+authors = [{ name = "Bioinformatics and DDBJ Center" }]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
-dependencies = ["pydantic", "jsonref"]
+dependencies = ["pydantic>=2.10"]
 
 [project.urls]
 Homepage = "https://github.com/ddbj/ddbj-record-specifications"
-Documentation = "https://github.com/ddbj/ddbj-record-specifications/blob/main/README.md"
 Repository = "https://github.com/ddbj/ddbj-record-specifications.git"
-
-[project.optional-dependencies]
-tests = ["hypothesis", "mypy", "pytest", "pytest-mock", "pyyaml", "ruff", "types-PyYAML"]
 
 [project.scripts]
 dump_json_schema = "ddbj_record.schema.cli:main"
 ddbj_record_converter = "ddbj_record.converter.cli:main"
 
-[tool.hatch.version]
-source = "vcs"
-fallback-version = "0.0.0"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "ddbj_record/_version.py"
+[dependency-groups]
+dev = ["hypothesis>=6.160", "mypy>=2", "pytest>=9", "pyyaml>=6", "ruff>=0.16", "types-PyYAML"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["ddbj_record"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
+addopts = ["--strict-markers"]
+xfail_strict = true
 
 [tool.mypy]
-files = ["./ddbj_record/**/*.py"]
-follow_imports = "normal"
+files = ["ddbj_record"]
 strict = true
 plugins = ["pydantic.mypy"]
-mypy_path = "."
-explicit_package_bases = true
 warn_unreachable = true
 
 [tool.ruff]
-target-version = "py310"
 line-length = 120
-src = ["ddbj_record", "tests"]
-exclude = ["ddbj_record/_version.py"]
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "lf"
-docstring-code-format = true
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "D",       # pydocstyle (後回し)
-    "ANN",     # flake8-annotations (mypy strict で代替)
-    "COM812",  # trailing comma missing (ruff format と競合)
-    "ISC001",  # implicit string concat (ruff format と競合)
-    "E501",    # line length (line-length + ruff format で処理)
-    "FIX",     # fixme (TODO/FIXME 検出は不要)
-    "TD",      # flake8-todo (TODO/FIXME 検出は不要)
-    "FBT",     # flake8-boolean-trap
-    "EM",      # flake8-errmsg (例外メッセージの書式)
-    "TRY003",  # long exception messages
-    "RET504",  # unnecessary assignment before return
-    "RET505",  # unnecessary else after return
-    "C901",    # mccabe complexity
-    "PLR0912", # too many branches
-    "PLR0915", # too many statements
-    "TC",      # flake8-type-checking (TYPE_CHECKING block 不使用の方針)
-]
-
-[tool.ruff.lint.per-file-ignores]
-"ddbj_record/schema/cli.py" = ["T201", "BLE001"]
-"ddbj_record/converter/cli.py" = ["T201", "BLE001"]
-"tests/unit/converter/test_cli.py" = ["S603", "S607"]
-"tests/**/*.py" = ["S101", "PLR2004"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["ddbj_record"]

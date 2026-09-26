@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -90,9 +91,9 @@ def test_converter_cli_runs_post_conversion_validation(
     input_file.write_text(json.dumps(v1_to_v2_input))
     result = subprocess.run(
         [
-            "uv",
-            "run",
-            "ddbj_record_converter",
+            sys.executable,
+            "-m",
+            "ddbj_record.converter.cli",
             "--from",
             "v1",
             "--to",
@@ -121,9 +122,9 @@ def test_converter_cli_v2_to_v1_subprocess(
     input_file.write_text(json.dumps(v2_to_v1_input))
     result = subprocess.run(
         [
-            "uv",
-            "run",
-            "ddbj_record_converter",
+            sys.executable,
+            "-m",
+            "ddbj_record.converter.cli",
             "--from",
             "v2",
             "--to",
@@ -150,9 +151,9 @@ def test_converter_cli_invalid_input_returns_exit_1(tmp_path: Path) -> None:
     input_file.write_text('{"invalid": "data"}')
     result = subprocess.run(
         [
-            "uv",
-            "run",
-            "ddbj_record_converter",
+            sys.executable,
+            "-m",
+            "ddbj_record.converter.cli",
             "--from",
             "v1",
             "--to",
