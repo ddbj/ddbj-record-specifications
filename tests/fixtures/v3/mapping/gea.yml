@@ -52,7 +52,8 @@
 # 書く。
 #
 # run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
-# (dual-channel で channel ごとに別のファイルがあるものなど)。
+# (dual-channel で channel ごとに別のファイルがあるものなど)。1 つの Assay の中で member を名前で指せないもの
+# (member_name の重なるもの、Labeled Extract が無く Extract が複数あるもの) は書かない。
 #
 # 行は、relations や index をたどらずに、次の 2 つだけから作る。relations、members[].sample、
 # data_blocks[].member_name はオブジェクトの間の関係を表すもので、行を作るのには使わない (index は、list の並びが
@@ -124,7 +125,7 @@ sdrf:
   Comment[*] @ Source Name:                                      samples[].comments[].value (角括弧の中が name)  # 4 ファイル
   Comment[BioSample] @ Source Name:                              samples[].accession (members[].sample.accession にも同じ値)  # 3,307 ファイル
   Comment[SRA_EXPERIMENT] @ Assay Name:                          experiments[].accession  # 1,863 ファイル
-  Comment[SRA_RUN] @ Assay Name:                                 runs[].accession (その行の Array Data File の run)  # 1,863 ファイル
+  Comment[SRA_RUN] @ Assay Name:                                 runs[].accession (その行の左端の Array Data File の run)  # 1,863 ファイル
   Comment[description] @ Source Name:                            samples[].description  # 1,264 ファイル
   Comment[sample_title] @ Source Name:                           samples[].title  # 3,307 ファイル
   Derived Array Data File:                                       analyses[].alias (data_blocks[].files[].filename にも同じ値。filetype は列の名前)  # 2,093 ファイル
