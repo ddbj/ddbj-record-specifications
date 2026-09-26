@@ -107,6 +107,7 @@ record の中で accession と alias を持つもの (`projects[]`、`samples[]`
 
 - 起点 (`source`) は record の中のオブジェクトで、`type` にその種類 (`run` など) を書く。`accession` で指し、無ければ `alias` で指す。alias も一意でなければ、list の中の位置 (`index`、0 始まり) で指す。SRA や GEA から変換した record には、accession の無いオブジェクトも、alias が重なるものもある
 - `source` を省くと、record 全体が起点になる
+- オブジェクトの種類は、record のキーの単数形で書く (`samples` の要素なら `sample`、`analyses` なら `analysis`、`access_control.policy` なら `policy`)。起点の `type` も相手の `db` も同じ名前を使う
 - 相手 (`target`) は、`url` か、`db` と `id` で指す。`db` がオブジェクトの種類 (`sample` など) のときは、`id` に alias、`accession` に accession を書く。相手がこの record の中にあり、accession が無く alias も一意でないときは、`index` も書く。それ以外では、相手がこの record の中にあるかどうかは表さない
 
 ```json

@@ -270,7 +270,7 @@
         "alias": "dataset-1"
       },
       "target": {
-        "db": "jga.policy",
+        "db": "policy",
         "id": "policy-1"
       }
     },
@@ -281,7 +281,7 @@
         "alias": "policy-1"
       },
       "target": {
-        "db": "jga.dac",
+        "db": "dac",
         "id": "dac-1"
       }
     },

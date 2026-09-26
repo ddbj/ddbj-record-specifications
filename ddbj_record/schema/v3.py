@@ -142,7 +142,7 @@ class ApplicationIdentification(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class St26Meta(BaseModel):
+class St26Submission(BaseModel):
     """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。"""
 
     dtd_version: str | None = Field(None, examples=["V1_3"])
@@ -405,7 +405,7 @@ class Submission(BaseModel):
     submitters: list[Person] | None = None
     hold_date: str | None = Field(None, examples=["2025-01-01"])
     comments: list[str] | None = None
-    st26: St26Meta | None = None
+    st26: St26Submission | None = None
     sra: SraSubmission | None = None
     gea: GeaSubmission | None = None
     attributes: list[Attribute] | None = None
@@ -1259,7 +1259,7 @@ class AccessControl(BaseModel):
 
 
 class RelationSource(BaseModel):
-    """関係の起点。type はオブジェクトの種類。
+    """関係の起点。type はオブジェクトの種類で、record のキーの単数形 ("sample"、"analysis"、"policy" など)。
 
     record 内のオブジェクトを accession で指し、accession が無ければ alias で指す。
     SRA の alias は record の中でも一意とは限らないので、accession が無く alias も
@@ -1278,7 +1278,7 @@ class RelationTarget(BaseModel):
     """関係の相手。
 
     db が外部 DB の名前なら、id はその DB での番号。
-    db がオブジェクトの種類("sample", "experiment", ...)なら、相手はその種類の
+    db がオブジェクトの種類 (RelationSource.type と同じ名前) なら、相手はその種類の
     オブジェクトで、id は alias、accession は accession。相手がこの record の中に
     あるかどうかは表さず、読む側が accession か (center_name, alias) で探す。
     ただし、相手がこの record の中にあり、accession が無く alias も一意でないときは、
