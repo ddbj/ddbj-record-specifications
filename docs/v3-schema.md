@@ -864,6 +864,7 @@ class Investigation(BaseModel):
 - **SDRF は行ごと**: 同じ名前のノードを行の間で共有しない。保存された SDRF には、同じ名前のノードが行ごとに違う値を持つものがあり、共有すると失われる
 - **BioProject / 関連する研究への参照**: IDF の `Comment[BioProject]`（`part_of`）と `Comment[Related study]`（`related_to`）は `relations` に置く。起点は `{"type": "investigation", "accession": ...}`
 - **SDRF の中の参照は値のまま**: SDRF の `Comment[BioSample]`、`Comment[SRA_RUN]`、`Array Design REF` は BioSample や DRA、アレイ設計を指すが、relation にしない。relation の起点になれるのはオブジェクト（accession / alias / list の位置を持つもの）で、SDRF の行のノードはそうでない
+- **他の DB と同じ意味の項目**: IDF の Person と Public Release Date、ADF の Comment[Public Release Date] は、`investigation` / `array_design` ではなく `submission.submitters` / `submission.hold_date` に置く。IDF の Comment[Last Update Date] は `investigation.legacy`（[v3-gea.md](./v3-gea.md#他の-db-と同じ意味の欄)）
 
 ## Array Design (GEA)
 

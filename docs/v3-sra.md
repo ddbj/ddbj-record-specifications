@@ -54,7 +54,8 @@ XSD の package / annotation / reference の文書は D-way に保存されて�
 - **値を 1 つも持たない要素や属性**: `<PROCESSING/>`、`<LABEL/>`、`notes=""`、空白だけの文字列は、その要素や属性が無いのと同じに扱う。ただし要素の名前が値になるもの（[下](#要素の名前が値になるもの)）は、中身が空でもその名前という値を持つ。`<LIBRARY_LAYOUT><SINGLE/></LIBRARY_LAYOUT>` や `<ACTION><PROTECT/></ACTION>` は空ではない
 - **数と真偽値の字面**: `"0.0E0"` と `"0"`、`"1"` と `"true"` は、同じ数・同じ真偽値として持つ
 - **XML としての書き方**: 名前空間の接頭辞、属性の並び、空白による整形、コメント
-- **`TAG` の違う `*_ATTRIBUTE` どうしの並び**: 属性は名前で引くもので、名前の違う属性の前後に意味は無い。同じ `TAG` を繰り返したものの並びは保つ
+- **`TAG` や `UNITS` の違う `*_ATTRIBUTE` どうしの並び**: 属性は名前で引くもので、名前の違う属性の前後に意味は無い。`TAG` と `UNITS` が同じものを繰り返した並びは保つ
+- **`*_SET` の中のオブジェクトの並び**: sample、experiment、run、analysis は accession か alias で指すもので、`*_SET` の中の前後に意味は無い。v3 の list は alias の順に並べ、alias が同じものどうしだけ書かれた順を保つ（`index` はこの並びでの位置）
 - **参照とリンクの並び**: `*_LINKS` の `URL_LINK` / `XREF_LINK`、`ANALYSIS/TARGETS`、`RELATED_STUDIES` は v3 の `relations` になり、その並びは保たない。どれも同じ種類の参照を並べたもので、並びに意味は無い
 
 `int` / `float` / `bool` にした項目は、drmdb に保存された全ての値がその型で読める（読めない値は 1 つも無かった）。対応表を書く `build_mapping.py` が毎回これを確かめる。
@@ -86,7 +87,7 @@ SUBMISSION のうち登録の手続きに関わるもの（`CONTACTS`、`ACTIONS
 
 1. `accession`
 2. accession が無ければ `alias`
-3. alias もその種類の中で一意でなければ `index`（その種類の list の中の位置、0 始まり）
+3. alias もその種類の中で一意でなければ `index`（その種類の list の中の位置、0 始まり。list は alias の順に並べ、alias が同じものは書かれた順に並べる）
 
 accession だけでは足りない。保存された版の多くは accession が付く前のもので、`@accession` を持たない（experiment では 3,450,828 のうち少なくとも 1,411,047）。
 alias だけでも足りない。1 つの record の中で alias が重なることがある（`tests/fixtures/v3/raw/dra/ERA000005` では 65 の experiment が同じ alias を持ち、D-way 自身の登録でも DRP で 12、DRS で 5 の submission に重なりがある）。
@@ -191,9 +192,10 @@ study が 1 つなら、今までどおり同じ record の `project` に置く�
 - `project` を 1 つのままにでき、BP を含む読む側を変えずに済む
 - SUBMISSION、experiment、run、analysis、sample は 1 つの record に留まるので、どれも写し分けない
 - どれか 1 つを主な study に選ぶ規則は置かない。元の XML にその区別が無いので、全て同じ扱いにする
-- study の record の `submission` には、その submission の `accession`（DRA）と `hold_date` だけを置く。どの submission の study かがデータ自体に残り、`@target` の無い HOLD は study にも効くので、公開保留日も同じに読める
-- experiment や analysis から study への参照は、XML に書かれたまま relation に置く（refname は `target.id`、accession は `target.accession`。[オブジェクトの間の参照](#オブジェクトの間の参照)）。相手が別の record にあっても変わらない。読む側は、同じ `submission.accession` を持つ record の中で、accession か（`center_name`、alias）で相手を探す
+- study の record の `submission` には、その submission の `accession`（DRA）と `hold_date` だけを置く。どの submission の study かがデータ自体に残り、`@target` の無い HOLD は study にも効くので、公開保留日も同じに読める。accession が付く前の版でも、移行では drmdb の submission の DRA 番号を使う（XML に書かれていなくても drmdb は持つ）。study だけに効く HOLD（`@target` が study のもの）は、submission の record の `actions` に書かれたまま残る
+- experiment や analysis から study への参照は、XML に書かれたまま relation に置く（refname は `target.id`、accession は `target.accession`。[オブジェクトの間の参照](#オブジェクトの間の参照)）。相手が別の record にあっても変わらない。読む側は、まず同じ `submission.accession` を持つ record の中で、無ければ全体から、accession か（`center_name`、alias）で相手を探す（STUDY_REF は別の submission の study を指すこともある）
 - どれかの版で study が 2 つ以上になった submission は、全ての版で分ける。版によって形を変えると、履歴の途中で project が record の外へ移る
+- 分けた形は、移した submission にだけ現れる。ddbj-repository で受ける新しい DRA の登録は、1 つの submission に study を 1 つとし、2 つ目の study は別の submission で受ける。study が後から増えて、履歴を書き換えることにはならない
 
 該当するのは少なくとも次のとおり。どちらの数え方にも漏れがある。
 
@@ -202,21 +204,23 @@ study が 1 つなら、今までどおり同じ record の `project` に置く�
 
 ### `hold_date` と `actions` の HOLD
 
-`ACTIONS/ACTION/HOLD` は書かれたとおり（順序も）`submission.sra.actions[]` に置き、`@target` が無く `@HoldUntilDate` を持つ HOLD のうち最後のものの日付を、`submission.hold_date` にも写す（ACTIONS は書かれた順に行うので、最後のものが効く）。検証は、`hold_date` がその日付と同じことを確かめる。
+`ACTIONS/ACTION/HOLD` は書かれたとおり（順序も）`submission.sra.actions[]` に置く。`@target` の無い HOLD と RELEASE のうち最後のものが効く（ACTIONS は書かれた順に行う）。それが `@HoldUntilDate` を持つ HOLD なら、その日付を `submission.hold_date` にも写す。そうでなければ（RELEASE、日付の無い HOLD、期間だけの HOLD）写さず、`hold_date` は無い。検証は、`hold_date` がこの規則で決まるものと同じことを確かめる。
 
 - 公開保留日は、DB によらず `hold_date` から読める。ddbj-repository の BP の公開予告は、record の `submission.hold_date` を写した列を見ている。DRA に広げるときも同じ欄を読めばよい
 - HOLD を `actions` から除くと、ACTIONS の並びを失う。同じ値を 2 か所に持つのは、そのための代償（GEA の `Public Release Date` は単独の値なので、共通の欄にだけ置く。[v3-gea.md](./v3-gea.md#他の-db-と同じ意味の欄)）
 - `@target` の付いた HOLD は、オブジェクトごとの保留なので `actions` にだけ置く
-- 日付の無い HOLD と、日付の代わりに期間だけを書いた HOLD（`legacy.hold_for_period`、1,123 文書）は写さない。`hold_date` は日付の欄で、期間から日付を作ると、何を起点にしたかを推し量ることになる
+- 日付の代わりに期間だけを書いた HOLD（`legacy.hold_for_period`、1,123 文書）を写さないのは、`hold_date` が日付の欄で、期間から日付を作ると、何を起点にしたかを推し量ることになるため
 
 ## ddbj-repository の側でやること
 
 canonical JSON（`ddbj-canon/v2`）の版を上げ、登録簿を次のように直す。
 
-- **順序**: 書かれた順に意味がある list を `ordered` として登録する。`samples` / `experiments` / `runs` / `analyses`（relation が `index` で指すので、並べ替えると別のオブジェクトを指すことになる。SRA の sample は alias も重なる。`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）、run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` など。BS の sample も同じ扱いになるが、BS の record の sample の並びは作る側（converter、TSV の取り込み）で決まっているので、差分が揺れることは無い
-- **同点の順**: `keyed` の list で key が同じ要素は、書かれた順に並べる（今は sha256 で並べ直している。canonical-json.md §3.1）。SRA の `*_ATTRIBUTE` は同じ `TAG` を繰り返してよく、`[name, unit]` が同じ属性の順は保つ必要がある。`attributes` を `ordered` にすると、BS の差分から並べ替えの揺れを除いた §3.3 の効果が無くなるので、`keyed` のまま同点の順だけを保つ
+- **オブジェクトの list**: `samples` は今の `keyed [alias]` のまま、`experiments` / `runs` / `analyses` も `bag` から `keyed [alias]` にする。`index` がこの並び（alias の順、同じ alias は書かれた順）での位置を指すので、canonical な並びと `index` がずれない。`ordered` にしないのは、差分が `keyed` の list だけを突き合わせで線形に比べ、`ordered` と `bag` は要素数の 2 乗の比べ方になるため（canonical-json.md §4.2.1。8,000 sample で 181 秒）。BS は 10 万 sample に達する
+- **同点の順**: `keyed` の list で key が同じ要素は、書かれた順に並べる（今は sha256 で並べ直している。canonical-json.md §3.1）。alias が重なる SRA のオブジェクト（`tests/fixtures/v3/raw/dra/SRA012004` の 2 つの `HS0896`）と、`TAG` と `UNITS` が同じ `*_ATTRIBUTE` の順を保つため。`attributes` を `ordered` にすると、BS の差分から並べ替えの揺れを除いた §3.3 の効果が無くなるので、`keyed` のまま同点の順だけを保つ。Ruby の `sort_by` は安定でないので、並べ替えの key の最後に元の位置を入れる。`TreeDiffer` の「同じ key の要素は内容の hash で並べる」という前提も変わる。`source/index` は整数として比べる（今の `ArraySorter.key_component` は文字列にして比べるので、10 が 2 より先に来る）
+- **順序を保つ list**: 書かれた順に意味がある list を `ordered` として登録する。run の `processing` / `reads`、`actions`、`basecalls`、`data_blocks` など
 - **relations の key**: `source/db` と `source/id` は v3 の `RelationSource` に無く、常に空になる。key を `[type, label, source/type, source/accession, source/alias, source/index, target/db, target/id, target/accession, target/center_name, target/url]` にし、同点は書かれた順に並べる。canonical-json.md §3.1 の表と `array-modes.yml` の `/relations` の行も食い違っているので、揃える
 - **登録簿の古い行**: `/runs/*/files` と `/analyses/*/files` を除き、`data_blocks` の下に置き直す
+- **v3 のデータクラス**: `canon:fields_check` は Ruby の `DDBJRecord::V3` のデータクラスを登録簿（`schema/canon/v3-fields.yml`）と比べる。この文書で足した欄（`Submission` の `accession` / `alias` / `sra` / `identifiers` / `center_name` / `broker_name`、SRA の各クラス）を Ruby のクラスに足し、登録簿もそれに合わせる
 - **小数**: `proportion`、`legacy.gaps[].mean` / `stdev`、`legacy.quality_scoring[].multiplier` を `floats` に加える
 - **文字列**: NFC と空白の畳み込み（§2.2）は BP / BS と同じに SRA にも掛ける。`*_ATTRIBUTE/TAG` の前後の空白も畳まれるが、字面なので失うものは無い
 

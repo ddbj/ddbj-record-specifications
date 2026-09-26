@@ -130,8 +130,10 @@ IDF を v3 の `project` に写さないのは、IDF が研究（project）で�
 
 IDF と ADF の項目のうち、v3 が他の DB でも持つ欄と同じ意味のものは、その欄にだけ置く。IDF や ADF に戻すときは、そこから読む。
 
-- `Public Release Date`（IDF）と `Comment[Public Release Date]`（ADF、13 件）→ `submission.hold_date`。BP の `Hold/@release_date` と同じく、共通の欄にだけ置く
-- `Person *` → `submission.submitters[]`。役割（`Person Roles`）は書かれたとおり `role` に置く。役割が書かれていない人（83 件の IDF、E-GEAD-338 は 4 人に役割 1 つ）は `role` を空のままにし、推し量って埋めない。書かれた役割は全て `submitter`（1,226）
+experiment（E-GEAD）とアレイ設計（A-GEAD）は別の record で、1 つの record が `investigation` と `array_design` の両方を持つことは無い。
+
+- `Public Release Date`（IDF）と `Comment[Public Release Date]`（ADF、13 件）→ `submission.hold_date`。BP の `Hold/@release_date` と同じく、共通の欄にだけ置く。ADF の見出しの欄は file から読んだもので正本は file だが（[ADF](#adfアレイ設計)）、公開保留日は登録の後から変えるもので、`submission.hold_date` が正。ADF の file は受け取ったときのまま
+- `Person *` → `submission.submitters[]`。v3 の `submitters` はその登録に関わる人の list で、それぞれが何の役かは `role` で表す（`[0]` が連絡先）。IDF の Person も、その実験の連絡先を役割付きで並べたもの。役割（`Person Roles`）は書かれたとおり `role` に置き、書かれていない人（83 件の IDF、E-GEAD-338 は 4 人に役割 1 つ）は `role` を空のままにして、推し量って埋めない。書かれた役割は全て `submitter`（1,226）
 - `Comment[Last Update Date]` は、公開用の写しが書いている archive の更新日。v3 は archive 管理の日付を record に入れない（[v3-schema.md](./v3-schema.md) の Date）が、移した record では失わないために `investigation.legacy.last_update_date` に書かれたまま持つ。新しい登録には無い。更新日時は ddbj-repository が持つ
 
 ## ddbj-repository の側でやること
@@ -143,9 +145,9 @@ IDF と ADF の項目のうち、v3 が他の DB でも持つ欄と同じ意味�
 - `array_design.term_sources`
 - CIBEX の各 list
 
-`Characteristics` や `Comment` は同じ名前が繰り返されることがあり（E-GEAD-424 の Extract は `Comment[LIBRARY_*]` を 2 回ずつ持つ。E-GEAD-455、458、1085 は同じ名前の Factor Value を持つ）、`[name, unit]` をキーにする `keyed` では書かれた順が保たれない。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
+SDRF の `Characteristics` や `Comment` は表の列で、名前の違う列どうしの並びも保つ（[失わないもの](#失わないもの)）。SRA の `*_ATTRIBUTE` と違い、SDRF の列はファイル全体で共有する見出しで、その並びが表の形そのものだから。名前で並べ替える `keyed` ではなく、`ordered` にする。IDF の `Protocol *`、`Experimental Factor *`、`PubMed ID` / `Publication DOI` も、n 番目の値どうしが組になる並びなので `ordered` にする（BP の `/project/publications` が `keyed` なのとは違う）。`ordered` は空の要素を受け付けない（canonical-json.md §2.5）ので、上の「空の欄の後に値がある行」を止めるのは、この点でも要る。
 
-`schema/canon/v3-fields.yml` の Root に `investigation` と `array_design` が無いので、足す（`canon:fields_check` のため）。`investigation.legacy.last_update_date` は移し直すたびに変わりうるので、差分から外す（volatile）。
+`canon:fields_check` は Ruby の `DDBJRecord::V3` のデータクラスを登録簿（`schema/canon/v3-fields.yml`）と比べる。`investigation` と `array_design` とその下のクラスを Ruby のクラスに足し、登録簿もそれに合わせる。
 
 ## 選ばなかった案
 
