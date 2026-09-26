@@ -1,23 +1,26 @@
 # GEA の対応表を作る
 
-[docs/v3-gea-mapping.yml](../../docs/v3-gea-mapping.yml) は、次の 2 段で作る。手で直さない。
+[docs/v3-gea-mapping.yml](../../docs/v3-gea-mapping.yml) は、次の 3 段で作る。手で直さない。
 
 ```sh
-# 0. GEA の公開用の写しから、メタデータのファイルだけを持ってくる（1.4 GB。ほとんどは ADF）
-rsync -a -m --include='*/' --include='livelist.txt' --include='*.idf.txt' --include='*.sdrf.txt' \
-  --include='*.filelist.txt' --include='*.adf' --include='*.metadata' --exclude='*' \
-  a012:/usr/local/resources/gea/ gea/
+# 1. D-way の GEA の DB（dordb）から、IDF / SDRF / ADF の全ての版をファイルに書き出す（読むだけ。5 GB、ほとんどは ADF）
+PGHOST=... PGPORT=... PGUSER=... PGPASSWORD=... PGDATABASE=dordb \
+  ruby scripts/gea/export_dordb.rb dordb
 
-# 1. IDF / SDRF / ADF / CIBEX の項目を全て数える（十数秒）
-uv run scripts/gea/census_gea.py gea census.json
+#    CIBEX のファイルは dordb に無いので、GEA の公開用の写しから持ってくる
+rsync -a a012:/usr/local/resources/gea/cibex/ cibex/
 
-# 2. 項目それぞれに v3 の場所を割り当てて書く
+# 2. IDF / SDRF / ADF / CIBEX の項目を全て数える（数分）
+uv run scripts/gea/census_gea.py dordb cibex census.json
+
+# 3. 項目それぞれに v3 の場所を割り当てて書く
 uv run scripts/gea/build_mapping.py census.json docs/v3-gea-mapping.yml
 ```
 
-- 1 の出力は値の標本（名前など）を含むので、コミットしない。対応表に入るのは項目とファイルの数だけ
-- 1 は、読み方の規則で読めても v3 に置けないもの（同じ名前の列の空の欄の後の値など）を `anomalies` の `unrepresentable:` として数える
-- 2 は、次を確かめ、1 つでも外れれば挙げて何も書かない。新しい項目が現れたら、`build_mapping.py` に規則を足す
+- 1 は Ruby 3.4 以上で動き、実行時に rubygems.org から `pg` を入れる。書き出すのは accession の振られたものだけ（振られる前の登録は移さない）
+- 1 と 2 の出力は登録の中身を含むので、コミットしない。対応表に入るのは項目とファイルの数だけ
+- 2 は、読み方の規則で読めても v3 に置けないもの（同じ名前の列の空の欄の後の値など）を `anomalies` の `unrepresentable:` として数える
+- 3 は、次を確かめ、1 つでも外れれば挙げて何も書かない。新しい項目が現れたら、`build_mapping.py` に規則を足す
   - `unrepresentable:` が 0
   - 規則がある
   - 行き先が v3 のモデルにある

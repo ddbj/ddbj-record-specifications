@@ -892,6 +892,18 @@ class SdrfRow(BaseModel):
     assay: SdrfAssay | None = None
     data_files: list[SdrfDataFile] | None = None
     factor_values: list[SdrfFactorValue] | None = None
+    # MAGE-TAB がそこに置かない列 (データファイルの後の Characteristics や Parameter Value など)。
+    # name は列の見出し、value はその行の値で、見出しの並びのまま。移した過去の版にだけある。
+    misplaced_columns: list[Attribute] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class AdditionalFile(BaseModel):
+    """IDF の Comment[AdditionalFile:type] が挙げる、SDRF の外のファイル。"""
+
+    type: str | None = Field(None, examples=["txt"])
+    name: str | None = Field(None, examples=["barcode-sample-mapping.txt"])
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1039,14 +1051,19 @@ class Cibex(BaseModel):
 
 
 class InvestigationLegacy(BaseModel):
-    """移した experiment にだけあるもの。IDF の Comment[CIBEX *] と CIBEX の元の登録、公開用の写しの更新日。"""
+    """移した experiment にだけあるもの。IDF の Comment[CIBEX *] と CIBEX の元の登録、archive の更新日、
+    表として読めない過去の版の SDRF。
+    """
 
-    # 公開用の写しが IDF の Comment[Last Update Date] に書いた、archive の更新日。新しい登録には無い。
+    # IDF の Comment[Last Update Date]。D-way の archive の更新日で、新しい登録には無い。
     last_update_date: str | None = None
     cibex_accept_date: str | None = None
     cibex_public_release_date: str | None = None
     cibex_submitter: str | None = None
     cibex: Cibex | None = None
+    # SDRF として保存されていたが、Source Name で始まるタブ区切りの表ではないもの (CSV や、
+    # SDRF の代わりに保存された IDF)。保存されたまま。どれも次の版で表に直されている。
+    sdrf_as_stored: str | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1066,6 +1083,7 @@ class Investigation(BaseModel):
     publications: list[Publication] | None = None
     sdrf_file: str | None = None
     sdrf: list[SdrfRow] | None = None
+    additional_files: list[AdditionalFile] | None = None
     # 以下は GEA が IDF の Comment[...] に書くもの。
     experiment_type: str | None = Field(None, examples=["transcription profiling by array"])
     channel_type: str | None = Field(None, examples=["single-channel"])

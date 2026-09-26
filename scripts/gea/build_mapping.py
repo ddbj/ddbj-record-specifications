@@ -4,7 +4,7 @@
 # ///
 """Write docs/v3-gea-mapping.yml: where in v3 each item of GEA's metadata goes.
 
-The second of the two steps (see scripts/gea/README.md).
+The last of the steps (see scripts/gea/README.md).
 
 Usage:
     uv run scripts/gea/build_mapping.py CENSUS.json docs/v3-gea-mapping.yml
@@ -54,6 +54,7 @@ IDF = {
     "PubMed ID": "investigation.publications[].pubmed_id",
     "Publication DOI": "investigation.publications[].doi",
     "Public Release Date": "submission.hold_date",
+    "Comment[Public Release Date]": "submission.hold_date (古い版の書き方)",
     "SDRF File": "investigation.sdrf_file",
     "Comment[GEAAccession]": "investigation.accession",
     "Comment[SecondaryAccession]": "investigation.identifiers[secondary].value",
@@ -91,6 +92,9 @@ NODE_ATTRIBUTES = {
 }
 
 BRACKETED = " (角括弧の中が name)"
+
+# An SDRF census_gea.py does not read as a table.
+SDRF_UNREAD = "(unread)"
 
 # --- ADF header: one tag per line. The table after it goes into the file as it is.
 
@@ -157,10 +161,17 @@ def snake(key: str) -> str:
 
 
 def idf_rule(tag: str) -> str | None:
+    if re.fullmatch(r"Comment\[AdditionalFile:.+\]", tag):
+        return "investigation.additional_files[].name (角括弧の中の : の後が type)"
     return IDF.get(tag)
 
 
+DATA_FILES = {node for node, field in NODES.items() if field == "data_files[]"}
+
+
 def sdrf_rule(item: str) -> str | None:
+    if item == SDRF_UNREAD:
+        return "investigation.legacy.sdrf_as_stored (SDRF を保存されたまま)"
     if item in NODES:
         return f"{SDRF}.{NODES[item]}.name" + (" (type は列の名前)" if NODES[item] == "data_files[]" else "")
     if m := re.fullmatch(r"Protocol REF > (.+)", item):
@@ -175,6 +186,9 @@ def sdrf_rule(item: str) -> str | None:
     column, owner = m.group(1), NODES.get(m.group(2))
     if owner is None:
         return None
+    # A data file carries only comments. Anything else written after one is MAGE-TAB's nowhere.
+    if m.group(2) in DATA_FILES and column != "Comment[*]":
+        return f"{SDRF}.misplaced_columns[].value (name は列の見出し)"
     node = owner
     if column == "Characteristics[*]" and node == "source":
         return f"{SDRF}.source.characteristics[].value" + BRACKETED
@@ -223,8 +237,11 @@ def items(census: dict[str, Any]) -> dict[str, dict[str, dict[str, Any]]]:
     return {
         "idf": census["idf"],
         "sdrf": {
-            item: {**entry, "most_in_a_row": census["sdrf"]["most_in_a_row"].get(item, 1)}
-            for item, entry in census["sdrf"]["items"].items()
+            **{
+                item: {**entry, "most_in_a_row": census["sdrf"]["most_in_a_row"].get(item, 1)}
+                for item, entry in census["sdrf"]["items"].items()
+            },
+            **({SDRF_UNREAD: {"files": census["sdrf"]["unread"]}} if census["sdrf"]["unread"] else {}),
         },
         "adf": {**census["adf"]["header"], ADF_TABLE: {"files": sum(census["adf"]["forms"].values())}},
         "cibex": cibex,
@@ -265,11 +282,12 @@ HEADER = """\
 # 考え方は docs/v3-gea.md、作り方は scripts/gea/README.md。このファイルは
 # scripts/gea/build_mapping.py が書くので、手で直さない。
 #
-# 対象は a012:/usr/local/resources/gea（公開用の写し）にある全てのファイルに現れる項目。
+# 対象は D-way の dordb にある IDF / SDRF / ADF の全ての版と、a012:/usr/local/resources/gea/cibex の
+# CIBEX のファイルに現れる項目。
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
-#           Protocol REF は、直後のノードを > の後に書く
+#           Protocol REF は、直後のノードを > の後に書く。(unread) は表として読まない SDRF
 #   adf     ADF の見出しの行。(table) は見出しの後の表
 #   cibex   CIBEX の「節 / キー」
 #
@@ -278,7 +296,7 @@ HEADER = """\
 #   a.b[]                b は list。[] の中の語は注記で、要素の type と、relation なら target.db
 #   ... (注記)           読み手のための補足
 #
-# 数はその項目を含むファイルの数。
+# 数はその項目を含むファイルの数。IDF / SDRF / ADF は版を 1 つのファイルと数える。
 """
 
 

@@ -1,0 +1,14 @@
+{
+  "schema_version": "v3.0",
+  "provenance": {
+    "source_format": "MAGE-TAB"
+  },
+  "investigation": {
+    "accession": "E-GEAD-1",
+    "title": "Transcriptome of leaves",
+    "sdrf_file": "E-GEAD-1.sdrf.txt",
+    "legacy": {
+      "sdrf_as_stored": "\"Source Name\",\"Characteristics[organism]\",\"Assay Name\",\"Array Data File\"\n\"leaf_r1\",\"Arabidopsis thaliana\",\"leaf_r1\",\"DRR000001\"\n"
+    }
+  }
+}

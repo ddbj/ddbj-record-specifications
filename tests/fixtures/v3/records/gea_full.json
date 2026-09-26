@@ -355,7 +355,23 @@
             "unit": "micromolar",
             "unit_type": "concentration unit"
           }
+        ],
+        "misplaced_columns": [
+          {
+            "name": "Parameter Value[day growth temperature]",
+            "value": "28"
+          },
+          {
+            "name": "Unit[temperature unit]",
+            "value": "degree Celsius"
+          }
         ]
+      }
+    ],
+    "additional_files": [
+      {
+        "type": "txt",
+        "name": "barcode-sample-mapping.txt"
       }
     ],
     "legacy": {

@@ -7,7 +7,7 @@
 - 対応表が指す v3 の場所が、どれもモデルに実在し、ADF の表を除いて値の場所である
 - raw fixture の GEA のファイルに出てくる項目が、どれも対応表にある
 - ファイルの読み方の規則 (scripts/gea/census_gea.py) が、それぞれの癖を持つ raw fixture で働く
-- 対応表の全ての場所に、gea_full.json か gea_array_design_full.json の中で値がある
+- 対応表の全ての場所に、gea_*.json のどれかの中で値がある
 """
 
 from pathlib import Path
@@ -19,7 +19,8 @@ from .mapping_helpers import ROOT, SCALARS, load_mapping, load_record, load_scri
 
 RAW_GEA = ROOT.joinpath("tests/fixtures/v3/raw/gea")
 MAPPING = load_mapping("v3-gea-mapping.yml")
-RECORDS = [load_record("gea_full.json"), load_record("gea_array_design_full.json")]
+# 表として読めない SDRF は、表の行と同じ record には現れないので、別の record にした。
+RECORDS = [load_record(name) for name in ("gea_full.json", "gea_array_design_full.json", "gea_unread_sdrf.json")]
 
 census_gea = load_script("scripts/gea/census_gea.py")
 build_mapping = load_script("scripts/gea/build_mapping.py")
@@ -211,3 +212,84 @@ def test_a_block_that_could_be_rows_or_an_entry_is_unrepresentable(tmp_path: Pat
     assert _unrepresentable(_census(cibex)) == {
         "unrepresentable: CIBEX blocks that could be a table's rows or an entry": 1
     }
+
+
+def test_a_space_before_a_bracket_is_not_counted(tmp_path: Path) -> None:
+    # E-GEAD-637 などの古い版の形: Comment [x]、Factor Value [x]、Unit [x]。
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tComment [BioSample]\tAssay Name\tFactor Value [age]\tUnit [time unit]\ns1\tSAMD1\ta1\t5\tday\n",
+    )
+
+    assert set(_census(sdrf)["sdrf"]["items"]) == {
+        "Source Name",
+        "Comment[*] @ Source Name",
+        "Assay Name",
+        "Factor Value[*]",
+        "Unit[*] @ Factor Value[*]",
+    }
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # CSV で保存された版 (E-GEAD-670、856)。
+        '"Source Name","Assay Name"\n"s1","a1"\n',
+        # SDRF の代わりに IDF が保存された版 (E-GEAD-324、342)。
+        "Comment[GEAAccession]\tE-GEAD-1\nMAGE-TAB Version\t1.1\n",
+    ],
+)
+def test_an_sdrf_that_is_not_a_table_is_left_unread(tmp_path: Path, text: str) -> None:
+    census = _census(_write(tmp_path, "x.sdrf.txt", text))
+
+    assert census["sdrf"]["unread"] == 1
+    assert census["sdrf"]["items"] == {}
+    assert set(build_mapping.items(census)["sdrf"]) <= set(MAPPING["sdrf"])
+
+
+def test_an_empty_column_without_a_heading_is_left_out(tmp_path: Path) -> None:
+    # E-GEAD-1066 の古い版の形: 見出しも値も無い列が、途中と末尾にある。
+    sdrf = _write(tmp_path, "x.sdrf.txt", "Source Name\t\tAssay Name\t\ns1\t\ta1\t\t\n")
+
+    census = _census(sdrf)
+
+    assert set(census["sdrf"]["items"]) == {"Source Name", "Assay Name"}
+    assert census["sdrf"]["items"]["Assay Name"]["kinds"] == {"str": ["a1"]}
+    assert _unrepresentable(census) == {}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # 見出しの無い列に値がある。
+        "Source Name\t\tAssay Name\ns1\tlost\ta1\n",
+        # 見出しより後に値がある。
+        "Source Name\tAssay Name\ns1\ta1\tlost\n",
+    ],
+)
+def test_a_value_without_a_heading_is_unrepresentable(tmp_path: Path, text: str) -> None:
+    sdrf = _write(tmp_path, "x.sdrf.txt", text)
+
+    assert _unrepresentable(_census(sdrf)) == {"unrepresentable: SDRF values in a column without a heading": 1}
+
+
+def test_columns_after_a_data_file_other_than_comments_are_misplaced(tmp_path: Path) -> None:
+    # E-GEAD-889 などの古い版の形。MAGE-TAB のデータファイルは Comment しか持たない。
+    sdrf = _write(
+        tmp_path,
+        "x.sdrf.txt",
+        "Source Name\tAssay Name\tDerived Array Data File\tComment[md5]\tFactor Value[t]\t"
+        "Parameter Value[temperature]\tUnit[temperature unit]\tReplicate\n"
+        "s1\ta1\tf.txt\t0123\t5\t28\tdegree Celsius\tbiological replicate-1\n",
+    )
+
+    locations = {item: build_mapping.sdrf_rule(item) for item in _census(sdrf)["sdrf"]["items"]}
+
+    assert locations["Comment[*] @ Derived Array Data File"].startswith("investigation.sdrf[].data_files[].comments[]")
+    for item in (
+        "Parameter Value[*] @ Derived Array Data File",
+        "Unit[*] @ Parameter Value[*] @ Derived Array Data File",
+        "Replicate @ Derived Array Data File",
+    ):
+        assert locations[item].startswith("investigation.sdrf[].misplaced_columns[].value"), item

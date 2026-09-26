@@ -4,17 +4,15 @@
 # ///
 """Tally every item in every GEA metadata file: IDF, SDRF, ADF and CIBEX.
 
-The first of the two steps that produce docs/v3-gea-mapping.yml (see scripts/gea/README.md).
+The second of the steps that produce docs/v3-gea-mapping.yml (see scripts/gea/README.md).
 
 Usage:
-    uv run scripts/gea/census_gea.py GEA_DIR OUT.json
+    uv run scripts/gea/census_gea.py DORDB_DIR CIBEX_DIR OUT.json
 
-GEA_DIR is a copy of the published GEA tree (experiment/, array/, cibex/), for instance from
-a012:/usr/local/resources/gea with only the metadata files:
+DORDB_DIR is what export_dordb.rb wrote: every version of every IDF, SDRF and ADF D-way holds.
+CIBEX_DIR holds the CIBEX files, which D-way does not: the cibex/ of the published GEA tree,
 
-    rsync -a -m --include='*/' --include='livelist.txt' --include='*.idf.txt' --include='*.sdrf.txt' \\
-      --include='*.filelist.txt' --include='*.adf' --include='*.metadata' --exclude='*' \\
-      a012:/usr/local/resources/gea/ GEA_DIR/
+    rsync -a a012:/usr/local/resources/gea/cibex/ CIBEX_DIR/
 
 For each item the output records how many files have it, how often it repeats in one file, and
 which kinds of value it holds (int / float / bool / empty / str), with a few examples.
@@ -184,6 +182,14 @@ class Tally:
         return dict(sorted(self.items.items()))
 
 
+def tag(cell: str) -> str:
+    """A MAGE-TAB tag or column heading, without the spaces MAGE-TAB does not count.
+
+    Some SDRFs write `Comment [x]` or `Factor Value [x]` for `Comment[x]` and `Factor Value[x]`.
+    """
+    return re.sub(r"\s+\[", "[", cell.strip())
+
+
 def census_idf(path: Path, tally: Tally, encodings: Counter[str]) -> None:
     occurrences: dict[str, list[str]] = defaultdict(list)
     for row in rows_of(read(path, encodings), backslash_quotes=True):
@@ -192,7 +198,7 @@ def census_idf(path: Path, tally: Tally, encodings: Counter[str]) -> None:
         values = [cell.strip() for cell in row[1:]]
         while values and values[-1] == "":
             values.pop()
-        occurrences[row[0].strip()] += values
+        occurrences[tag(row[0])] += values
     tally.file(occurrences, path.name)
 
 
@@ -211,11 +217,28 @@ def census_sdrf(  # noqa: PLR0913, PLR0917
     per_row: Counter[str],
     anomalies: Counter[str],
     encodings: Counter[str],
-) -> int:
-    """Tally one SDRF; return its number of rows."""
+) -> int | None:
+    """Tally one SDRF; return its number of rows.
+
+    A file that is not a tab-separated table starting with Source Name (a CSV, or an IDF saved in
+    place of the SDRF) is not read, and None is returned: v3 keeps it as it is stored.
+    """
     rows = [row for row in rows_of(read(path, encodings), backslash_quotes=True) if any(cell.strip() for cell in row)]
-    header = [cell.strip() for cell in rows[0]]
-    body = rows[1:]
+    if not rows or tag(rows[0][0]) != "Source Name":
+        return None
+
+    # A column without a heading (an empty one, or cells past the last) is nothing MAGE-TAB can
+    # name. The stored ones hold no values, and are left out.
+    width = len(rows[0])
+    headed = [index for index, cell in enumerate(rows[0]) if cell.strip()]
+    for row in rows[1:]:
+        if any(cell.strip() for index, cell in enumerate(row) if index >= width or not rows[0][index].strip()):
+            anomalies["unrepresentable: SDRF values in a column without a heading"] += 1
+    if len(headed) < width:
+        anomalies["SDRFs with an empty column without a heading"] += 1
+
+    header = [tag(rows[0][index]) for index in headed]
+    body = [[row[index] for index in headed if index < len(row)] for row in rows[1:]]
 
     node: str | None = None
     items: list[str] = []
@@ -409,7 +432,7 @@ def census(idfs: list[Path], sdrfs: list[Path], adfs: list[Path], cibexes: list[
 
     for path in idfs:
         census_idf(path, idf, encodings["idf"])
-    sdrf_rows = sum(census_sdrf(path, sdrf, sdrf_names, sdrf_per_row, anomalies, encodings["sdrf"]) for path in sdrfs)
+    read_rows = [census_sdrf(path, sdrf, sdrf_names, sdrf_per_row, anomalies, encodings["sdrf"]) for path in sdrfs]
     for path in adfs:
         census_adf(path, adf_header, adf_table, adf_forms, encodings["adf"])
     for path in cibexes:
@@ -422,7 +445,8 @@ def census(idfs: list[Path], sdrfs: list[Path], adfs: list[Path], cibexes: list[
         "idf": idf.as_json(),
         "sdrf": {
             "items": sdrf.as_json(),
-            "rows": sdrf_rows,
+            "rows": sum(n for n in read_rows if n is not None),
+            "unread": read_rows.count(None),
             "most_in_a_row": dict(sorted(sdrf_per_row.items())),
             "bracketed_names": {kind: dict(counter.most_common()) for kind, counter in sdrf_names.items()},
         },
@@ -436,15 +460,16 @@ def census(idfs: list[Path], sdrfs: list[Path], adfs: list[Path], cibexes: list[
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("gea_dir", type=Path)
+    parser.add_argument("dordb_dir", type=Path)
+    parser.add_argument("cibex_dir", type=Path)
     parser.add_argument("out", type=Path)
     args = parser.parse_args()
 
     out = census(
-        sorted(args.gea_dir.glob("experiment/*/*/*.idf.txt")),
-        sorted(args.gea_dir.glob("experiment/*/*/*.sdrf.txt")),
-        sorted(args.gea_dir.glob("array/*/*/*.adf")),
-        sorted(args.gea_dir.glob("cibex/*/*.metadata")),
+        sorted(args.dordb_dir.glob("idf/*/*.idf.txt")),
+        sorted(args.dordb_dir.glob("sdrf/*/*.sdrf.txt")),
+        sorted(args.dordb_dir.glob("adf/*/*.adf")),
+        sorted(args.cibex_dir.glob("*/*.metadata")),
     )
 
     args.out.write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")

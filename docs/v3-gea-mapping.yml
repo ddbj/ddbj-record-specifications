@@ -2,11 +2,12 @@
 # 考え方は docs/v3-gea.md、作り方は scripts/gea/README.md。このファイルは
 # scripts/gea/build_mapping.py が書くので、手で直さない。
 #
-# 対象は a012:/usr/local/resources/gea（公開用の写し）にある全てのファイルに現れる項目。
+# 対象は D-way の dordb にある IDF / SDRF / ADF の全ての版と、a012:/usr/local/resources/gea/cibex の
+# CIBEX のファイルに現れる項目。
 #
 #   idf     IDF の行の見出し
 #   sdrf    SDRF の列。角括弧の中は [*] にまとめ、属性の列は直前のノードを @ の後に書く。
-#           Protocol REF は、直後のノードを > の後に書く
+#           Protocol REF は、直後のノードを > の後に書く。(unread) は表として読まない SDRF
 #   adf     ADF の見出しの行。(table) は見出しの後の表
 #   cibex   CIBEX の「節 / キー」
 #
@@ -15,88 +16,99 @@
 #   a.b[]                b は list。[] の中の語は注記で、要素の type と、relation なら target.db
 #   ... (注記)           読み手のための補足
 #
-# 数はその項目を含むファイルの数。
+# 数はその項目を含むファイルの数。IDF / SDRF / ADF は版を 1 つのファイルと数える。
 
 idf:
-  Comment[AEExperimentType]:          investigation.experiment_type  # 768 ファイル
-  Comment[Array Design REF]:          investigation.array_design_ref  # 367 ファイル
-  Comment[BioProject]:                relations[part_of bioproject].target.id  # 768 ファイル
-  Comment[CIBEX Accept Date]:         investigation.legacy.cibex_accept_date  # 254 ファイル
-  Comment[CIBEX Public Release Date]: investigation.legacy.cibex_public_release_date  # 209 ファイル
-  Comment[CIBEX Submitter]:           investigation.legacy.cibex_submitter  # 14 ファイル
-  Comment[DBCLS]:                     investigation.dbcls_approval  # 25 ファイル
-  Comment[GEAAccession]:              investigation.accession  # 768 ファイル
-  Comment[Last Update Date]:          investigation.legacy.last_update_date  # 768 ファイル
-  Comment[NBDC]:                      investigation.nbdc_approval  # 13 ファイル
-  Comment[Number of channel]:         investigation.channel_type  # 369 ファイル
-  Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 26 ファイル
-  Comment[SecondaryAccession]:        investigation.identifiers[secondary].value  # 254 ファイル
-  Experiment Description:             investigation.description  # 768 ファイル
-  Experimental Design:                investigation.experimental_designs[]  # 768 ファイル
-  Experimental Factor Name:           investigation.experimental_factors[].name  # 768 ファイル
-  Experimental Factor Type:           investigation.experimental_factors[].type  # 768 ファイル
-  Investigation Title:                investigation.title  # 768 ファイル
-  MAGE-TAB Version:                   investigation.magetab_version  # 768 ファイル
-  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 768 ファイル
-  Person First Name:                  submission.submitters[].first_name  # 768 ファイル
-  Person Last Name:                   submission.submitters[].last_name  # 768 ファイル
-  Person Roles:                       submission.submitters[].role  # 768 ファイル
-  Protocol Description:               investigation.protocols[].description  # 768 ファイル
-  Protocol Name:                      investigation.protocols[].name  # 768 ファイル
-  Protocol Type:                      investigation.protocols[].type  # 768 ファイル
-  PubMed ID:                          investigation.publications[].pubmed_id  # 185 ファイル
-  Public Release Date:                submission.hold_date  # 768 ファイル
-  Publication DOI:                    investigation.publications[].doi  # 22 ファイル
-  SDRF File:                          investigation.sdrf_file  # 768 ファイル
+  Comment[AEExperimentType]:          investigation.experiment_type  # 4,702 ファイル
+  Comment[AdditionalFile:txt]:        'investigation.additional_files[].name (角括弧の中の : の後が type)'  # 4 ファイル
+  Comment[AdditionalFile:visium]:     'investigation.additional_files[].name (角括弧の中の : の後が type)'  # 1 ファイル
+  Comment[Array Design REF]:          investigation.array_design_ref  # 2,306 ファイル
+  Comment[BioProject]:                relations[part_of bioproject].target.id  # 4,702 ファイル
+  Comment[CIBEX Accept Date]:         investigation.legacy.cibex_accept_date  # 690 ファイル
+  Comment[CIBEX Public Release Date]: investigation.legacy.cibex_public_release_date  # 553 ファイル
+  Comment[CIBEX Submitter]:           investigation.legacy.cibex_submitter  # 47 ファイル
+  Comment[DBCLS]:                     investigation.dbcls_approval  # 109 ファイル
+  Comment[GEAAccession]:              investigation.accession  # 4,702 ファイル
+  Comment[Last Update Date]:          investigation.legacy.last_update_date  # 1,117 ファイル
+  Comment[NBDC]:                      investigation.nbdc_approval  # 47 ファイル
+  Comment[Number of channel]:         investigation.channel_type  # 2,314 ファイル
+  Comment[Public Release Date]:       submission.hold_date (古い版の書き方)  # 37 ファイル
+  Comment[Related study]:             relations[related_to].target.id (値の "DB:" は target.db に)  # 108 ファイル
+  Comment[SecondaryAccession]:        investigation.identifiers[secondary].value  # 690 ファイル
+  Experiment Description:             investigation.description  # 4,702 ファイル
+  Experimental Design:                investigation.experimental_designs[]  # 4,702 ファイル
+  Experimental Factor Name:           investigation.experimental_factors[].name  # 4,702 ファイル
+  Experimental Factor Type:           investigation.experimental_factors[].type  # 4,702 ファイル
+  Investigation Title:                investigation.title  # 4,702 ファイル
+  MAGE-TAB Version:                   investigation.magetab_version  # 4,702 ファイル
+  Person Affiliation:                 submission.submitters[].organizations[].name (その人の 1 つ目の organization)  # 4,702 ファイル
+  Person First Name:                  submission.submitters[].first_name  # 4,702 ファイル
+  Person Last Name:                   submission.submitters[].last_name  # 4,702 ファイル
+  Person Roles:                       submission.submitters[].role  # 4,702 ファイル
+  Protocol Description:               investigation.protocols[].description  # 4,702 ファイル
+  Protocol Name:                      investigation.protocols[].name  # 4,702 ファイル
+  Protocol Type:                      investigation.protocols[].type  # 4,702 ファイル
+  PubMed ID:                          investigation.publications[].pubmed_id  # 560 ファイル
+  Public Release Date:                submission.hold_date  # 1,080 ファイル
+  Publication DOI:                    investigation.publications[].doi  # 92 ファイル
+  SDRF File:                          investigation.sdrf_file  # 4,702 ファイル
 
 sdrf:
-  Array Data File:                               investigation.sdrf[].data_files[].name (type は列の名前)  # 729 ファイル
-  Array Data Matrix File:                        investigation.sdrf[].data_files[].name (type は列の名前)  # 36 ファイル
-  Array Design REF @ Assay Name:                 investigation.sdrf[].assay.array_design_ref  # 368 ファイル
-  Assay Name:                                    investigation.sdrf[].assay.name  # 768 ファイル
-  Characteristics[*] @ Source Name:              investigation.sdrf[].source.characteristics[].value (角括弧の中が name)  # 768 ファイル
-  Comment[*] @ Array Data File:                  investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Assay Name:                       investigation.sdrf[].assay.comments[].value (角括弧の中が name)  # 400 ファイル
-  Comment[*] @ Derived Array Data File:          investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 3 ファイル
-  Comment[*] @ Derived Array Data Matrix File:   investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 2 ファイル
-  Comment[*] @ Extract Name:                     investigation.sdrf[].extract.comments[].value (角括弧の中が name)  # 399 ファイル
-  Comment[*] @ Source Name:                      investigation.sdrf[].source.comments[].value (角括弧の中が name)  # 768 ファイル
-  Derived Array Data File:                       investigation.sdrf[].data_files[].name (type は列の名前)  # 474 ファイル
-  Derived Array Data Matrix File:                investigation.sdrf[].data_files[].name (type は列の名前)  # 222 ファイル
-  Extract Name:                                  investigation.sdrf[].extract.name  # 768 ファイル
-  Factor Value[*]:                               investigation.sdrf[].factor_values[].value (角括弧の中が name)  # 767 ファイル
-  Label @ Labeled Extract Name:                  investigation.sdrf[].labeled_extract.label  # 368 ファイル
-  Labeled Extract Name:                          investigation.sdrf[].labeled_extract.name  # 368 ファイル
-  Material Type @ Extract Name:                  investigation.sdrf[].extract.material_type  # 768 ファイル
-  Protocol REF > Array Data File:                investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 330 ファイル
-  Protocol REF > Array Data Matrix File:         investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 36 ファイル
-  Protocol REF > Assay Name:                     investigation.sdrf[].assay.protocol_refs[] (直後のノードの protocol)  # 767 ファイル
-  Protocol REF > Derived Array Data File:        investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 474 ファイル
-  Protocol REF > Derived Array Data Matrix File: investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 222 ファイル
-  Protocol REF > Extract Name:                   investigation.sdrf[].extract.protocol_refs[] (直後のノードの protocol)  # 767 ファイル
-  Protocol REF > Labeled Extract Name:           investigation.sdrf[].labeled_extract.protocol_refs[] (直後のノードの protocol)  # 368 ファイル
-  Source Name:                                   investigation.sdrf[].source.name  # 768 ファイル
-  Technology Type @ Assay Name:                  investigation.sdrf[].assay.technology_type  # 768 ファイル
-  Unit[*] @ Factor Value[*]:                     investigation.sdrf[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 23 ファイル
+  (unread):                                                      investigation.legacy.sdrf_as_stored (SDRF を保存されたまま)  # 5 ファイル
+  Array Data File:                                               investigation.sdrf[].data_files[].name (type は列の名前)  # 3,139 ファイル
+  Array Data Matrix File:                                        investigation.sdrf[].data_files[].name (type は列の名前)  # 169 ファイル
+  Array Design REF @ Assay Name:                                 investigation.sdrf[].assay.array_design_ref  # 1,443 ファイル
+  Assay Name:                                                    investigation.sdrf[].assay.name  # 3,308 ファイル
+  Characteristics[*] @ Derived Array Data File:                  investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 1 ファイル
+  Characteristics[*] @ Derived Array Data Matrix File:           investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 1 ファイル
+  Characteristics[*] @ Source Name:                              investigation.sdrf[].source.characteristics[].value (角括弧の中が name)  # 3,308 ファイル
+  Comment[*] @ Array Data File:                                  investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 823 ファイル
+  Comment[*] @ Array Data Matrix File:                           investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 113 ファイル
+  Comment[*] @ Assay Name:                                       investigation.sdrf[].assay.comments[].value (角括弧の中が name)  # 1,871 ファイル
+  Comment[*] @ Derived Array Data File:                          investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 1,359 ファイル
+  Comment[*] @ Derived Array Data Matrix File:                   investigation.sdrf[].data_files[].comments[].value (角括弧の中が name)  # 656 ファイル
+  Comment[*] @ Extract Name:                                     investigation.sdrf[].extract.comments[].value (角括弧の中が name)  # 1,863 ファイル
+  Comment[*] @ Source Name:                                      investigation.sdrf[].source.comments[].value (角括弧の中が name)  # 3,307 ファイル
+  Derived Array Data File:                                       investigation.sdrf[].data_files[].name (type は列の名前)  # 2,093 ファイル
+  Derived Array Data Matrix File:                                investigation.sdrf[].data_files[].name (type は列の名前)  # 1,033 ファイル
+  Extract Name:                                                  investigation.sdrf[].extract.name  # 3,308 ファイル
+  Factor Value[*]:                                               investigation.sdrf[].factor_values[].value (角括弧の中が name)  # 3,306 ファイル
+  Label @ Labeled Extract Name:                                  investigation.sdrf[].labeled_extract.label  # 1,443 ファイル
+  Labeled Extract Name:                                          investigation.sdrf[].labeled_extract.name  # 1,443 ファイル
+  Material Type @ Extract Name:                                  investigation.sdrf[].extract.material_type  # 3,308 ファイル
+  Parameter Value[*] @ Derived Array Data Matrix File:           investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 2 ファイル
+  Protocol REF > Array Data File:                                investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 1,276 ファイル
+  Protocol REF > Array Data Matrix File:                         investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 169 ファイル
+  Protocol REF > Assay Name:                                     investigation.sdrf[].assay.protocol_refs[] (直後のノードの protocol)  # 3,306 ファイル
+  Protocol REF > Derived Array Data File:                        investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 2,093 ファイル
+  Protocol REF > Derived Array Data Matrix File:                 investigation.sdrf[].data_files[].protocol_refs[] (直後のノードの protocol)  # 1,033 ファイル
+  Protocol REF > Extract Name:                                   investigation.sdrf[].extract.protocol_refs[] (直後のノードの protocol)  # 3,306 ファイル
+  Protocol REF > Labeled Extract Name:                           investigation.sdrf[].labeled_extract.protocol_refs[] (直後のノードの protocol)  # 1,443 ファイル
+  Replicate @ Derived Array Data File:                           investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 2 ファイル
+  Replicate @ Derived Array Data Matrix File:                    investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 4 ファイル
+  Source Name:                                                   investigation.sdrf[].source.name  # 3,308 ファイル
+  Technology Type @ Assay Name:                                  investigation.sdrf[].assay.technology_type  # 3,308 ファイル
+  Unit[*] @ Factor Value[*]:                                     investigation.sdrf[].factor_values[].unit (直前の Factor Value の unit。角括弧の中が unit_type)  # 80 ファイル
+  Unit[*] @ Parameter Value[*] @ Derived Array Data Matrix File: investigation.sdrf[].misplaced_columns[].value (name は列の見出し)  # 2 ファイル
 
 adf:
-  (table):                            array_design.file (ADF をファイルのまま)  # 242 ファイル
-  Array Design Name:                  array_design.name  # 18 ファイル
-  Comment[CIBEX Public Release Date]: array_design.legacy.cibex_public_release_date  # 4 ファイル
-  Comment[Description]:               array_design.description  # 17 ファイル
-  Comment[GEAAccession]:              array_design.accession  # 242 ファイル
-  Comment[Organism]:                  array_design.organism.name  # 18 ファイル
-  Comment[Public Release Date]:       submission.hold_date  # 13 ファイル
-  Comment[SubmittedName]:             array_design.submitted_name  # 5 ファイル
-  Printing Protocol:                  array_design.printing_protocol  # 18 ファイル
-  Provider:                           array_design.provider  # 18 ファイル
-  Sequence Polymer Type:              array_design.sequence_polymer_type  # 13 ファイル
-  Substrate Type:                     array_design.substrate_type  # 18 ファイル
-  Surface Type:                       array_design.surface_type  # 18 ファイル
-  Technology Type:                    array_design.technology_type  # 18 ファイル
-  Term Source File:                   array_design.term_sources[].file  # 12 ファイル
-  Term Source Name:                   array_design.term_sources[].name  # 12 ファイル
-  Version:                            array_design.version  # 13 ファイル
+  (table):                            array_design.file (ADF をファイルのまま)  # 862 ファイル
+  Array Design Name:                  array_design.name  # 87 ファイル
+  Comment[CIBEX Public Release Date]: array_design.legacy.cibex_public_release_date  # 24 ファイル
+  Comment[Description]:               array_design.description  # 80 ファイル
+  Comment[GEAAccession]:              array_design.accession  # 613 ファイル
+  Comment[Organism]:                  array_design.organism.name  # 87 ファイル
+  Comment[Public Release Date]:       submission.hold_date  # 70 ファイル
+  Comment[SubmittedName]:             array_design.submitted_name  # 27 ファイル
+  Printing Protocol:                  array_design.printing_protocol  # 87 ファイル
+  Provider:                           array_design.provider  # 87 ファイル
+  Sequence Polymer Type:              array_design.sequence_polymer_type  # 60 ファイル
+  Substrate Type:                     array_design.substrate_type  # 87 ファイル
+  Surface Type:                       array_design.surface_type  # 87 ファイル
+  Technology Type:                    array_design.technology_type  # 87 ファイル
+  Term Source File:                   array_design.term_sources[].file  # 56 ファイル
+  Term Source Name:                   array_design.term_sources[].name  # 56 ファイル
+  Version:                            array_design.version  # 60 ファイル
 
 cibex:
   (top) / CIBEX accession:                     investigation.legacy.cibex.accession  # 216 ファイル
