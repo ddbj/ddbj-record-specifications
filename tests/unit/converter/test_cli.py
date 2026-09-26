@@ -82,6 +82,13 @@ def test_convert_json_data_unsupported_pair_raises(v1_valid_minimal: dict[str, A
 # === post-conversion validation ===
 
 
+@pytest.mark.parametrize(("from_", "to"), [("v4", "v4"), ("v3", "v4"), ("v4", "v3")])
+def test_convert_json_data_refuses_v4(from_: str, to: str) -> None:
+    # v4 の record は zip のパッケージで、ddbj_record_package が扱う。
+    with pytest.raises(ValueError, match="ddbj_record_package"):
+        convert_json_data({"schema_version": "v4"}, from_, to)
+
+
 def test_converter_cli_runs_post_conversion_validation(
     tmp_path: Path,
     v1_to_v2_input: dict[str, Any],

@@ -17,7 +17,7 @@ genome.ddbj.zip
 └── features.jsonl        1 行に 1 feature
 ```
 
-v4 の型は、変わる `Entry` と、それを含む `Sequences`、`DdbjRecord` だけを定義し、ほかは v3 のものを使う。v3 のクラスを継承しないのは、v4 の record を v3 の record として受け付けさせないため。v3 の型が変われば、v4 の型も同じに変わる。
+v4 の型は、変わる `Entry` と、それを含む `Sequences`、`DdbjRecord` だけを定義し、ほかは v3 のものを使う。v3 のクラスを継承しないのは、v4 の record を v3 の record として受け付けさせないため。v4 が使う v3 のモデル（`Sample` など）は、v3 で変われば v4 でも同じに変わる。v4 で定義し直した 3 つのモデルは v3 の欄を写しているので、v3 に欄が増えたり型が変わったりしたら、写しも直す（テストが食い違いを見つける）。
 
 ## なぜ v3 と分けるか
 
@@ -34,11 +34,11 @@ v3 の record は 1 つの JSON で、ddbj-repository は BioProject と BioSamp
 record は、2 通りの理由で大きくなる。
 
 - **配列が大きい。** ゲノムの登録（Trad）では、record の大半が配列になる。染色体レベルのゲノムは数 Gbp あり、植物には数十 Gbp のものもある。entry の数は少なく、1 本が大きい
-- **オブジェクトが多い。** JPO から受け取った ST.26 の配列表（2026-09-26 に a012 の `ddbjjpo/from_JPO` で数えた 20,729 件、計 20.9 GB）では、配列は全体の 21% で、最大のもの（1.66 GB、141 万 entry）では 1.8% しかない。大きさは entry と feature の数から来ている。BioSample には 1 件に 10 万 sample のものがある
+- **オブジェクトが多い。** JPO から受け取った ST.26 の配列表（2 万件あまり、計 20 GB ほど）では、配列は全体の 21% で、最大のもの（1.66 GB、141 万 entry）では 1.8% しかない。大きさは entry と feature の数から来ている。BioSample には 1 件に 10 万 sample のものがある
 
 どちらでも、record を 1 つの JSON にすると次のことが難しくなる。ゲノムはまだ扱ったことが無いが、ST.26 と BioSample では既に起きている。
 
-- **丸ごと読まないと何も分からない。** 何の登録か、entry がいくつあるかを知るだけで、全体を読むことになる。普通の JSON パーサーは全体をメモリに載せる。ddbj-repository の `StreamingParser` は、この大きさを流して読むための工夫
+- **丸ごと読まないと何も分からない。** 何の登録か、entry がいくつあるかを知るだけで、全体を読むことになる。普通の JSON パーサーは全体をメモリに載せ、流して読むには特別な工夫が要る
 - **少し直すだけで、全体を書き直すことになる。** 差分も履歴（JSON Patch の連鎖）も、全体の大きさで扱うことになる
 
 配列を FASTA に、オブジェクトを 1 行ずつ JSON Lines に出せば、どちらの理由で大きくても、1 度に読むのは 1 行か FASTA の決まった大きさの塊で済む。
@@ -88,14 +88,14 @@ DdbjRecord の次の list は、list ごとの JSON Lines（1 行に 1 つのオ
 - 対象は、数に上限の無いオブジェクトの list。`projects` を除く DdbjRecord のトップレベルの list と、`sequences.entries`。大きくなったときだけ外に出す形にすると、読む側が 2 通りになるので、常に外に出す
 - `projects` は `record.json` に残す。1 つの登録の project は、SRA の submission の study でも数十まで（DRA の全ての submission で最大 59）で、submission と並んで最初に読みたいもの
 - list が空なら、ファイルを入れない（空のファイルも入れない）。ファイルが無いことと、list が空であることは同じ
-- 行の順は list の順で、`n` 行目が list の `n - 1` 番目。relation の `index`（その種類の list の中の位置）は、そのファイルの行を指す。空の行を許さないのはこのため
-- JSON は I-JSON（RFC 7493）のもの。UTF-8 で書き、BOM を付けない。`NaN`、`Infinity`、範囲を超える数（`1e400`）、対になっていないサロゲート（`\ud800`）、同じ key の繰り返しは使わない。改行は LF か CRLF。1 行は 1 MiB まで（配列を FASTA に出すので、1 つのオブジェクトはこれに収まる）
+- 行の順は list の順で、`n` 行目が list の `n - 1` 番目。relation の `index`（その種類の list の中の位置）は、JSON Lines に置く list ならそのファイルの行を、`projects` なら `record.json` の `projects` の中の位置を指す。空の行を許さないのはこのため
+- JSON は I-JSON（RFC 7493）のもの。UTF-8 で書き、BOM を付けない。`NaN`、`Infinity`、倍精度で表せない数（`1e400`、±(2^53 − 1) を超える整数、倍精度で丸めると値の変わる桁を持つ `1.00000000000000000001`）、対になっていないサロゲート（`\ud800`）、同じ key の繰り返しは使わない。倍精度の最も短い表記で書いた数（`0.1`）は使ってよい。改行は LF か CRLF。1 行は 1 MiB まで（配列を FASTA に出すので、1 つのオブジェクトはこれに収まる）
 - 型は読み替えない。整数の欄に `"4"` や `4.0` や `true` を書かない（同じ record が同じ JSON で書かれるように）。`record.json` も同じ
 - `record.json` に置くオブジェクトの中の list（`submission.submitters` など）は、`record.json` に残す
 
 ### entry と配列
 
-配列を持つ entry は、`entries.jsonl` の行に長さと digest（下）を書き、配列は FASTA に alias を見出しにして置く。alias はパッケージの中で一意で、空白の無い印字可能な ASCII、4,096 文字まで。配列を持たない entry は digest を書かない（長さだけを書いてもよい）。長さと digest はパッケージを書く側（ツール）が計り、受け取る側は `check` で計り直して確かめる。
+配列を持つ entry は、`entries.jsonl` の行に長さと digest（下）を書き、配列は FASTA に alias を見出しにして置く。alias はパッケージの中で一意で、空白の無い印字可能な ASCII、4,096 文字まで。配列を持たない entry は digest を書かない（長さだけを書いてもよいが、v3 の entry には長さの欄が無いので、そのパッケージは `unpack` で v3 に戻せない）。長さと digest はパッケージを書く側（ツール）が計り、受け取る側は `check` で計り直して確かめる。
 
 ### FASTA
 
@@ -122,16 +122,11 @@ GA4GH refget（v2）の `sha512t24u` に `SQ.` を付けたもの。配列を大
 - `record.json` があり、v4 のモデルに合い、JSON Lines に置く list を持たない
 - メンバーが上のものだけ。名前とパス、圧縮、暗号化が上のとおり。使えない圧縮や暗号化のメンバーは、中を読まない
 - `record.json` の `schema_version` が `v4`
-- JSON Lines の各行が、その list の要素のモデルに型を読み替えずに合う。空のファイル、空の行、行の途中の CR、I-JSON でないもの（BOM、`NaN`、範囲を超える数、対になっていないサロゲート、同じ key の繰り返し）は問題
+- JSON Lines の各行が、その list の要素のモデルに型を読み替えずに合う。空のファイル、空の行、行の途中の CR、I-JSON でないもの（BOM、`NaN`、倍精度で表せない数、対になっていないサロゲート、同じ key の繰り返し）は問題
 - FASTA の見出しが alias だけで、配列の行が英字だけ
 - entry と配列が 1 対 1 で、長さと digest が合う。alias は一意
 
-使うメモリには上限があり、配列の大きさにも JSON Lines の行の数にもよらない。ただし、配列を持つ entry の数には比例する。
-
-- FASTA は 1 MiB の塊ずつ読む。1 本が 1 行に書かれていても、見出しが長くても（4,096 バイトより先は読まない）、塊の大きさで済む
-- JSON Lines は 1 行ずつ（1 MiB まで）、`record.json` は 4 MiB まで読む。モデルに合わせるのに、1 MiB の行で最悪 300 MB 近く、4 MiB の `record.json` で最悪 1 GB 近くを使う（空のオブジェクトを並べた、わざと作った入力で。普通の record ではずっと小さい）。外から受け取ったパッケージを確かめるなら、メモリを限った別のプロセスで行う
-- 覚えておくのは、配列を持つ entry の alias と長さと digest。ST.26 の最大のもの（141 万 entry）で 400 MB ほど
-- 挙げる問題は 1 つのファイルについて 100 件までで、残りは数だけを書く。1 行の問題は 1 度だけ挙げ、1 行の誤りが多ければ数だけを書く（誤りの一覧はそれだけでメモリを食う）。名前や場所は 80 文字で切り、制御文字は `\x..` にする。読めなくなったこと（CRC など）は、上限に掛けず最後に必ず挙げる
+使うメモリは、配列の大きさにも JSON Lines の行の数にもよらない。FASTA は決まった大きさの塊ずつ、JSON Lines は 1 行ずつ読み、1 行と `record.json` には上限がある。増えるのは、配列を持つ entry の数に比例して覚えておく alias と長さと digest だけ。挙げる問題の数にも上限があり、壊れたファイルが問題の一覧でメモリを使い切ることは無い。外から受け取ったパッケージを確かめるなら、メモリを限った別のプロセスで行う（わざと作った入力では、上限の中の 1 行でもモデルに合わせるのに大きなメモリを使う）。
 
 `check` が確かめるのはパッケージの形と、entry と配列の対応まで。feature の `sequence_id` が entry の alias を指しているか、relation の `index` が list の中にあるか、といった record の中の参照は、ddbj-validator のルールが確かめる。型が保証する範囲の考え方は v3 と同じ（[v3-schema.md](./v3-schema.md#型が保証する範囲)）。
 
@@ -148,12 +143,7 @@ GA4GH refget（v2）の `sha512t24u` に `SQ.` を付けたもの。配列を大
 - FASTA の分け方は record に入らないので、分け方を変えても record の SHA は変わらない
 - `sequence_digest` を通じて、record の SHA は配列も含む。配列が変われば digest が変わり、record の差分にはその 1 行が出る。配列を差分や JSON Patch に載せなくてよい
 
-## リポジトリの中での持ち方
-
-仕様の外。受け取ったパッケージを `record.json`、JSON Lines、FASTA に分けて持ち、渡すときに組み直してよい。組み直すとき、FASTA は圧縮済みのバイトをそのまま写せる。
-
-- 履歴（ある時点の record）を組み立てられるよう、差し替えた配列も digest で引ける形で残す
-- 受け取ったパッケージの `check` は、目次から読むのでファイルを手元に置いて行う。アップロードの検証（`VerifyMultipartUploadJob` が全体を読んで MD5 を計っている）と 1 度の読み取りにまとめるなら、その読み取りの中で流して確かめるものを別に作る
+## パッケージに入れないもの
 
 DRA のリードや GEA のデータファイルは、これまでどおりパッケージに入れず、別にアップロードして `File`（名前とチェックサム）で指す。それらは record とは別に持ち運ばれるデータファイルで、record は名前で指すだけでよい。配列は entry そのものを成すもので、record と一緒に動かないと record が意味を成さないので、パッケージに入れる。
 
@@ -162,13 +152,8 @@ DRA のリードや GEA のデータファイルは、これまでどおりパ�
 - record は、配列を持たなくてもパッケージで渡す。`schema_version` は `v4`
 - entry は配列を持たず、長さと digest を持つ
 - v3 の record は `pack` で v4 に、v4 のパッケージは `unpack` で v3 に移せる。どちらも record 全体と配列をメモリに載せる（`pack` は配列の数倍）ので、小さい record と移し替え用。ゲノムのパッケージは、配列を流して書くツールで作る
-- `pack` は、v3 のモデルに合わない record と、`schema_version` が `v3` でない record を断る。空の入れ物（`{"submission": {}}` など）は、空は無いのと同じとして残さない
-
-v4 を読み書きすることになるもの:
-
-- ddbj-repository: `DDBJRecord::StreamingParser`（JSON Lines を 1 行ずつ読むだけになる）、`Flatfile::StreamingRenderer`、`ApplySubmissionRequestJob`、canonical JSON（行ごとの canonical な形と record の SHA、版上げ）、保存してある record の移し替え、Web クライアントのアップロード
-- submission-bulk-st26: DDBJ Record の書き出し
-- ddbj-validator: record の入力
+- `pack` は、v3 のモデルに合わない record と、`schema_version` が `v3` でない record を断る。型は読み替えない（v3 の型は `"12"` を整数の欄に受け付けるが、`pack` はその record を断る）。パッケージは型を読み替えずに読む約束なので（[JSON Lines](#json-lines)）、読み替えて書くと、同じ record が書く道具によって違う JSON になる。空の入れ物（`{"submission": {}}` など）は、空は無いのと同じとして残さない
+- `unpack` は、配列を持たずに長さだけを書いた entry のあるパッケージを断る。v3 の entry には長さを置く場所が無く、黙って落とすと戻した record が元と違う
 
 ## 選ばなかった案
 

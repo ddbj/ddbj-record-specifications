@@ -22,11 +22,13 @@ record = DdbjRecord.model_validate_json(Path("record.json").read_text())
 
 v1 / v2 の record は `ddbj_record.schema.v1` / `ddbj_record.schema.v2` の `DdbjRecord` で読む。1 つの環境で複数の major を同時に import できる。
 
+v4 の record は 1 つの JSON ではなく zip のパッケージなので、`DdbjRecord` で直に読まず、`ddbj_record.package` の `read_record` / `iter_objects` / `load_record` で読む ([下](#v4-のパッケージ))。
+
 型が保証するのは、JSON として読めて型に合うことまでである。登録データとして正しいかは [ddbj/ddbj-validator](https://github.com/ddbj/ddbj-validator) で確かめる。
 
 ## major の間の変換
 
-今あるのは v1 <-> v2 の converter である。
+今あるのは v1 <-> v2 の converter と、v3 <-> v4 の `pack` / `unpack` である。v4 はパッケージなので、v3 <-> v4 は `ddbj_record_converter` ではなく `ddbj_record_package` で行う ([下](#v4-のパッケージ))。
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input v1.json --output v2.json
@@ -76,3 +78,5 @@ dump_json_schema --version v3 > ddbj_record.schema.json
 ```
 
 pydantic が出す形のままで、共通の型は `$defs` にまとめ、`$ref` で指す。
+
+v4 の JSON Schema (`--version v4`) が表すのは、`load_record` が組み立てる record (JSON Lines に置く list も含むもの) の形で、パッケージの `record.json` の形ではない。`record.json` は、そこから JSON Lines に置く list を除いたもの。

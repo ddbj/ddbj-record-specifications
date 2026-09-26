@@ -2,11 +2,13 @@
 
 import json
 import os
+import typing
 import zipfile
 from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import BaseModel
 
 from ddbj_record import package as package_module
 from ddbj_record.package import (
@@ -135,7 +137,7 @@ def test_the_record_is_read_without_the_lists_or_the_sequences(tmp_path: Path) -
 def test_a_list_is_read_one_line_at_a_time(tmp_path: Path) -> None:
     path = _fixture(tmp_path)
 
-    assert [entry.alias for entry in iter_objects(path, "entries.jsonl")] == ["chromosome", "pPLH-1"]  # type: ignore[attr-defined]
+    assert [entry.alias for entry in iter_objects(path, "entries.jsonl")] == ["chromosome", "pPLH-1"]
     assert list(iter_objects(path, "samples.jsonl")) == []
     with pytest.raises(PackageError, match="not a list"):
         list(iter_objects(path, "notes.jsonl"))
@@ -667,7 +669,7 @@ def test_samples_go_one_per_line(tmp_path: Path) -> None:
 
     assert check(out) == []
     assert read_record(out).samples is None
-    assert [sample.alias for sample in iter_objects(out, "samples.jsonl")] == ["s0", "s1", "s2"]  # type: ignore[attr-defined]
+    assert [sample.alias for sample in iter_objects(out, "samples.jsonl")] == ["s0", "s1", "s2"]
 
 
 @pytest.mark.parametrize(
@@ -733,7 +735,7 @@ def test_pack_drops_ascii_whitespace_in_a_sequence(tmp_path: Path) -> None:
     pack({"schema_version": "v3", "sequences": {"entries": [{"alias": "a", "sequence": "ac\ng t"}]}}, out)
 
     entry = next(iter_objects(out, "entries.jsonl"))
-    assert (entry.length, entry.sequence_digest) == (4, sequence_digest(["acgt"]))  # type: ignore[attr-defined]
+    assert (entry.length, entry.sequence_digest) == (4, sequence_digest(["acgt"]))
 
 
 def test_a_packed_file_has_the_usual_permissions(tmp_path: Path) -> None:
@@ -778,12 +780,42 @@ def test_the_cli_reports_a_record_it_cannot_read(tmp_path: Path, content: bytes 
 # --- 読み直しで足したもの
 
 
+def _model_of(annotation: Any) -> type[BaseModel]:
+    """`list[X] | None` や `X | None` の X。"""
+    for arg in typing.get_args(annotation) or (annotation,):
+        if arg is type(None):
+            continue
+        inner = typing.get_args(arg)
+        found = inner[0] if inner else arg
+        assert isinstance(found, type)
+        assert issubclass(found, BaseModel)
+        return found
+    raise AssertionError(annotation)
+
+
 def test_v4_covers_every_part_of_a_v3_record() -> None:
     # v4 の DdbjRecord は v3 のものを継承しない(v4 の record を v3 として受けさせない)ので、欄を写している。
     # v3 に欄が増えたら、v4 にも足す。数に上限の無い list なら JSON Lines にも。
     assert list(v4.DdbjRecord.model_fields) == list(v3.DdbjRecord.model_fields)
     assert list(v4.Sequences.model_fields) == list(v3.Sequences.model_fields)
     assert set(v4.Entry.model_fields) == (set(v3.Entry.model_fields) - {"sequence"}) | {"length", "sequence_digest"}
+
+    # 名前だけでなく型も。v4 で変わるのは、Entry を含む sequences と entries だけ。
+    for v4_model, v3_model, changed in (
+        (v4.DdbjRecord, v3.DdbjRecord, {"sequences"}),
+        (v4.Sequences, v3.Sequences, {"entries"}),
+        (v4.Entry, v3.Entry, {"sequence", "length", "sequence_digest"}),
+    ):
+        for name in set(v3_model.model_fields) & set(v4_model.model_fields) - changed:
+            v4_field, v3_field = v4_model.model_fields[name], v3_model.model_fields[name]
+            assert (v4_field.annotation, v4_field.metadata) == (v3_field.annotation, v3_field.metadata), name
+
+    # JSON Lines の各行のモデルは、その list の要素の型。
+    for name, (location, model) in package_module.COLLECTIONS.items():
+        owner: type[BaseModel] = v4.DdbjRecord
+        for part in location[:-1]:
+            owner = _model_of(owner.model_fields[part].annotation)
+        assert _model_of(owner.model_fields[location[-1]].annotation) is model, name
 
     top_level_lists = {
         name for name, field in v3.DdbjRecord.model_fields.items() if str(field.annotation).startswith("list[")
@@ -801,8 +833,11 @@ def test_v4_covers_every_part_of_a_v3_record() -> None:
         ('{"alias":"s1","attributes":[{"name":"n","value":"v"}],"x":1e400}', "out of range"),
         ('{"alias":"\\ud800"}', "not JSON"),
         ('{"alias":"a","alias":"b"}', "appears twice"),
+        ('{"alias":"s1","x":9007199254740992}', "out of range"),
+        ('{"alias":"s1","x":-9007199254740992}', "out of range"),
+        ('{"alias":"s1","x":1.00000000000000000001}', "more precision than a double holds"),
     ],
-    ids=["infinity", "lone surrogate", "duplicate key"],
+    ids=["infinity", "lone surrogate", "duplicate key", "integer too large", "integer too small", "too precise"],
 )
 def test_a_line_is_i_json(tmp_path: Path, line: str, problem: str) -> None:
     problems = check(_with(tmp_path, "samples.jsonl", line + "\n"))
@@ -846,7 +881,7 @@ def test_iter_objects_stops_at_a_bad_line(tmp_path: Path) -> None:
     path = _with(tmp_path, "samples.jsonl", '{"alias":"s1"}\n{"colour":"red"}\n{"alias":"s3"}\n')
     objects = iter_objects(path, "samples.jsonl")
 
-    assert next(objects).alias == "s1"  # type: ignore[attr-defined]
+    assert next(objects).alias == "s1"
     with pytest.raises(PackageError):
         next(objects)
 
@@ -906,3 +941,33 @@ def test_trad_fixtures_with_real_sequences_go_there_and_back(tmp_path: Path) -> 
 
         assert check(out) == [], path.stem
         assert unpack(out) == record, path.stem
+
+
+@pytest.mark.parametrize("number", ["9007199254740991", "-9007199254740991", "0.1", "1e2", "2.5E-3"])
+def test_numbers_a_double_holds_are_read(tmp_path: Path, number: str) -> None:
+    # I-JSON の範囲の端と、倍精度の最も短い表記で書いた数。
+    field = "nominal_sdev" if "." in number or "e" in number.lower() else "nominal_length"
+    line = f'{{"alias":"e1","library":{{"{field}":{number}}}}}'
+    path = _with(tmp_path, "experiments.jsonl", line + "\n")
+
+    assert check(path) == []
+    assert len(list(iter_objects(path, "experiments.jsonl"))) == 1
+
+
+def test_a_too_large_integer_is_not_read(tmp_path: Path) -> None:
+    path = _with(tmp_path, "experiments.jsonl", '{"alias":"e1","library":{"nominal_length":18446744073709551616}}\n')
+
+    assert any("out of range" in p for p in check(path))
+    with pytest.raises(PackageError, match="out of range"):
+        list(iter_objects(path, "experiments.jsonl"))
+
+
+def test_unpack_refuses_a_length_without_a_sequence(tmp_path: Path) -> None:
+    # 配列の無い entry は長さだけを書いてよいが、v3 の Entry には置く場所が無いので、黙って落とさない。
+    entries = _entries()
+    entries.append({"alias": "gap", "length": 100})
+    path = _fixture(tmp_path, entries=entries)
+
+    assert check(path) == []
+    with pytest.raises(PackageError, match="v3 cannot hold it"):
+        unpack(path)

@@ -73,6 +73,10 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
     # もう少しかっこよく出来る気もしているが、増えてきてから考える
     # schema の class に変換系の method を持たせるのは可読性が落ちそうなため、やめておく
 
+    # v4 の record は 1 つの JSON ではなく zip のパッケージなので、ここでは扱わない。
+    if "v4" in (from_, to):
+        raise ValueError("a v4 record is a package, not a JSON file; use ddbj_record_package (pack / unpack / check)")
+
     from_obj = resolve_record_model(from_).model_validate(json_data)
 
     if from_ == to:

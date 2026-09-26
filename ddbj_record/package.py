@@ -32,8 +32,9 @@ import zipfile
 import zlib
 from collections import Counter
 from collections.abc import Iterable, Iterator
+from decimal import Decimal
 from pathlib import Path, PurePosixPath
-from typing import IO, Any
+from typing import IO, Any, Literal, TypeVar, overload
 
 from pydantic import BaseModel, ValidationError
 
@@ -106,6 +107,12 @@ READ_ERRORS = (
 )
 
 
+# I-JSON (RFC 7493 §2.2) の整数の範囲。IEEE 754 の倍精度で正しく表せる整数。
+MAX_SAFE_INTEGER = 2**53 - 1
+
+Model = TypeVar("Model", bound=BaseModel)
+
+
 class PackageError(Exception):
     """パッケージとして読めない(zip でない、record.json が無い、約束に合わない)か、作れない。"""
 
@@ -127,10 +134,30 @@ def read_record(path: Path) -> v4.DdbjRecord:
     record.json が約束に合わなければ(v4 でない、JSON Lines に置く list を持つ) PackageError を上げる。
     """
     with _open(path) as package:
-        record: v4.DdbjRecord = _strict(RECORD_NAME, _read_record_json(package), v4.DdbjRecord)  # type: ignore[assignment]
+        record = _strict(RECORD_NAME, _read_record_json(package), v4.DdbjRecord)
     if problems := _record_problems(record):
         raise PackageError(problems[0])
     return record
+
+
+@overload
+def iter_objects(path: Path, name: Literal["samples.jsonl"]) -> Iterator[v3.Sample]: ...
+@overload
+def iter_objects(path: Path, name: Literal["experiments.jsonl"]) -> Iterator[v3.Experiment]: ...
+@overload
+def iter_objects(path: Path, name: Literal["runs.jsonl"]) -> Iterator[v3.Run]: ...
+@overload
+def iter_objects(path: Path, name: Literal["analyses.jsonl"]) -> Iterator[v3.Analysis]: ...
+@overload
+def iter_objects(path: Path, name: Literal["datasets.jsonl"]) -> Iterator[v3.Dataset]: ...
+@overload
+def iter_objects(path: Path, name: Literal["entries.jsonl"]) -> Iterator[v4.Entry]: ...
+@overload
+def iter_objects(path: Path, name: Literal["features.jsonl"]) -> Iterator[v3.Feature]: ...
+@overload
+def iter_objects(path: Path, name: Literal["relations.jsonl"]) -> Iterator[v3.Relation]: ...
+@overload
+def iter_objects(path: Path, name: str) -> Iterator[BaseModel]: ...
 
 
 def iter_objects(path: Path, name: str) -> Iterator[BaseModel]:
@@ -142,7 +169,7 @@ def iter_objects(path: Path, name: str) -> Iterator[BaseModel]:
         raise PackageError(f"{name}: not a list of the record")
     _, model = COLLECTIONS[name]
     with _open(path) as package:
-        if name not in package.NameToInfo:
+        if not _has(package, name):
             return
         problems = _Problems(name)
         lines = 0
@@ -182,7 +209,7 @@ def unpack(path: Path) -> dict[str, Any]:
     record = load_record(path).model_dump(exclude_none=True)
     sequences: dict[str, str] = {}
     with _open(path) as package:
-        for name in sorted(n for n in package.NameToInfo if FASTA_NAME.fullmatch(n)):
+        for name in sorted(n for n in package.namelist() if FASTA_NAME.fullmatch(n)):
             with package.open(name) as fasta:
                 alias: str | None = None
                 parts: list[str] = []
@@ -200,7 +227,12 @@ def unpack(path: Path) -> dict[str, Any]:
     for entry in (record.get("sequences") or {}).get("entries") or []:
         if entry.pop("sequence_digest", None) is not None:
             entry["sequence"] = sequences[entry["alias"]]
-        entry.pop("length", None)
+            entry.pop("length")
+        elif "length" in entry:
+            # 配列の無い entry の長さは、v3 の Entry に置く場所が無い。黙って落とさない。
+            raise PackageError(
+                f"entry {_quote(str(entry.get('alias')))} has a length but no sequence; v3 cannot hold it"
+            )
     record["schema_version"] = V3_SCHEMA_VERSION
     return record
 
@@ -368,7 +400,7 @@ def _open(path: Path) -> zipfile.ZipFile:
         package = zipfile.ZipFile(path)
     except READ_ERRORS as e:
         raise PackageError(f"{path}: not a zip: {e}") from e
-    if RECORD_NAME not in package.NameToInfo:
+    if not _has(package, RECORD_NAME):
         package.close()
         raise PackageError(f"{path}: no {RECORD_NAME}")
     return package
@@ -388,7 +420,15 @@ def _read_record_json(package: zipfile.ZipFile) -> bytes:
 # --- JSON を読む
 
 
-def _parse(where: str, data: bytes, model: type[BaseModel], problems: _Problems) -> BaseModel | None:
+def _has(package: zipfile.ZipFile, name: str) -> bool:
+    try:
+        package.getinfo(name)
+    except KeyError:
+        return False
+    return True
+
+
+def _parse(where: str, data: bytes, model: type[Model], problems: _Problems) -> Model | None:
     """UTF-8 の JSON のオブジェクト 1 つを、モデルに合わせて読む。合わなければ問題を 1 つ挙げて None。"""
     try:
         text = data.decode("utf-8")
@@ -400,7 +440,11 @@ def _parse(where: str, data: bytes, model: type[BaseModel], problems: _Problems)
         return None
     try:
         obj = json.loads(
-            text, parse_constant=_reject_constant, parse_float=_finite_float, object_pairs_hook=_unique_keys
+            text,
+            parse_constant=_reject_constant,
+            parse_float=_interoperable_float,
+            parse_int=_interoperable_int,
+            object_pairs_hook=_unique_keys,
         )
         # \ud800 のように書いた、対になっていないサロゲートは UTF-8 にできない(I-JSON で断るもの)。
         json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -418,7 +462,7 @@ def _parse(where: str, data: bytes, model: type[BaseModel], problems: _Problems)
         return None
 
 
-def _strict(where: str, data: bytes, model: type[BaseModel]) -> BaseModel:
+def _strict(where: str, data: bytes, model: type[Model]) -> Model:
     problems = _Problems(where)
     parsed = _parse(where, data, model, problems)
     if parsed is None:
@@ -430,9 +474,24 @@ def _reject_constant(name: str) -> None:
     raise ValueError(f"{name} is not JSON")
 
 
-def _finite_float(text: str) -> float:
+def _interoperable_float(text: str) -> float:
+    """I-JSON の数: 倍精度で表せない数は、読む側によって値が変わるので受けない。
+
+    範囲を超えるもの (1e400) と、倍精度で丸めると値の変わる桁を持つもの (1.00000000000000000001) を断る。
+    0.1 のように、倍精度の最も短い表記で書いたものは受ける。
+    """
     value = float(text)
     if value in (float("inf"), float("-inf")):
+        raise ValueError(f"{_quote(text)} is out of range")
+    if Decimal(repr(value)) != Decimal(text):
+        raise ValueError(f"{_quote(text)} has more precision than a double holds")
+    return value
+
+
+def _interoperable_int(text: str) -> int:
+    """I-JSON の整数: ±(2**53 - 1) を超えるものは、倍精度で読む側が正しく読めないので受けない。"""
+    value = int(text)
+    if abs(value) > MAX_SAFE_INTEGER:
         raise ValueError(f"{_quote(text)} is out of range")
     return value
 
@@ -524,8 +583,10 @@ def check(path: Path) -> list[str]:
         member_problems, unreadable = _check_members(package, check_mimetype=not problems)
         problems += member_problems
 
+        names = set(package.namelist())
+
         def readable(name: str) -> bool:
-            return name in package.NameToInfo and name not in unreadable
+            return name in names and name not in unreadable
 
         if readable(RECORD_NAME):
             problems += _check_record(package)
@@ -535,7 +596,7 @@ def check(path: Path) -> list[str]:
             if readable(name):
                 problems += _check_collection(package, name, expected)
 
-        fasta_files = sorted(name for name in package.NameToInfo if FASTA_NAME.fullmatch(name) and readable(name))
+        fasta_files = sorted(name for name in names if FASTA_NAME.fullmatch(name) and readable(name))
         problems += _check_sequences(package, expected, fasta_files)
         return problems
 
@@ -571,11 +632,11 @@ def _check_members(package: zipfile.ZipFile, *, check_mimetype: bool) -> tuple[l
     """メンバーの名前、種類、圧縮、暗号化を確かめる。読めないメンバーの名前も返す(中を読まないために)。"""
     infos = package.infolist()
     problems = _Problems("the package")
-    if RECORD_NAME not in package.NameToInfo:
+    if not _has(package, RECORD_NAME):
         problems.add(f"no {RECORD_NAME}")
     unreadable = set()
 
-    mimetype = package.NameToInfo.get(MIMETYPE_NAME)
+    mimetype = package.getinfo(MIMETYPE_NAME) if _has(package, MIMETYPE_NAME) else None
     if check_mimetype and (mimetype is None or mimetype.header_offset != 0):
         problems.add(f"{MIMETYPE_NAME} is not the first member in the zip's directory")
 
@@ -617,7 +678,7 @@ def _check_record(package: zipfile.ZipFile) -> list[str]:
         return problems.all()
 
     record = _parse(RECORD_NAME, data, v4.DdbjRecord, problems)
-    if isinstance(record, v4.DdbjRecord):
+    if record is not None:
         for problem in _record_problems(record):
             problems.add(problem)
     return problems.all()
