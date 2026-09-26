@@ -25,6 +25,8 @@ Raw formats:        Submit formats:
 
 v3 モデルと各形式のフィールド対応。converter / validation rule 実装時に参照する。
 
+ここに挙げるのは主なものだけ。SRA XML については、全ての要素と属性の置き場所を [v3-sra-mapping.yml](./v3-sra-mapping.yml) に書いた（考え方は [v3-sra.md](./v3-sra.md)）。
+
 ### Project
 
 | v3 | BP | SRA Study | JGA Study |
@@ -34,7 +36,7 @@ v3 モデルと各形式のフィールド対応。converter / validation rule �
 | project_type | TopSingle="primary", TopAdmin="umbrella" | - | - |
 | study_types | - | STUDY_TYPE (1 値) | STUDY_TYPES (複数値) |
 | organism | Organism | - (Sample 側) | - (Sample 側) |
-| publications | Publication (StructuredCitation) | STUDY_LINKS (PubMed xref) | PUBLICATIONS |
+| publications | Publication (StructuredCitation) | -（STUDY_LINKS の PubMed は relations の xref） | PUBLICATIONS |
 | grants | Grant | - | GRANTS |
 | keywords | Keyword | - | - |
 | relevance | Relevance (6+1 categories) | - | - |
@@ -64,13 +66,13 @@ v3 モデルと各形式のフィールド対応。converter / validation rule �
 | library.source | LIBRARY_SOURCE | 同左 |
 | library.selection | LIBRARY_SELECTION | 同左 |
 | library.layout | LIBRARY_LAYOUT (SINGLE/PAIRED) | 同左 |
-| library.nominal_length | PAIRED@nominal_length | 同左 |
+| library.nominal_length | PAIRED@NOMINAL_LENGTH | 同左 |
 | library.construction_protocol | LIBRARY_CONSTRUCTION_PROTOCOL | 同左 |
 | platform.type | PLATFORM (family) | SEQUENCING_PLATFORM |
 | platform.instrument_model | INSTRUMENT_MODEL | 同左 |
 | platform.array_name | - | ARRAY_PLATFORM.array_name |
 | platform.array_provider | - | ARRAY_PLATFORM.array_provider |
-| targeted_loci | TARGETED_LOCI | 同左 |
+| targeted_loci[].name | TARGETED_LOCI/LOCUS@locus_name | 同左 |
 
 ### Organism
 
@@ -83,7 +85,7 @@ v3 モデルと各形式のフィールド対応。converter / validation rule �
 
 | v3 フィールド | 対応する各形式の名称 |
 |-------------|-------------------|
-| submission.hold_date | BP: Hold/@release_date、SRA: HOLD/@HoldUntilDate、Trad: hold_date |
+| submission.hold_date | BP: Hold/@release_date、SRA: 未決（[v3-sra.md](./v3-sra.md) の論点 3）、Trad: hold_date |
 | runs[].run_date | SRA: Run/@run_date���JGA: Data/@data_acquisition_date |
 | analyses[].analysis_date | SRA: Analysis/@analysis_date、JGA: Analysis/@analysis_date |
 | project.publications[].date | BP: Publication/@date |
@@ -168,7 +170,7 @@ XSD 定義（[ddbj/pub](https://github.com/ddbj/pub)）とスパコン上の実�
 | EAV | BioSample | attribute_name/value による柔軟な属性 |
 | Controlled-access chain | JGA 固有 | Dataset → Policy → DAC |
 | FILE | SRA Run, JGA Data/Analysis | filename/filetype/checksum_method/checksum |
-| LINKS | 全形式 | URL_LINK と XREF_LINK の 2 種類 |
+| LINKS | 全形式 | URL_LINK と XREF_LINK の 2 種類（SRA XSD 1.5 より前は ENTREZ_LINK と DDBJ_LINK も） |
 
 #### BioProject (XSD: Core.xsd, Submission.xsd)
 

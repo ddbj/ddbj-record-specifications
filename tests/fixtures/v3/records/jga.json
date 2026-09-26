@@ -138,12 +138,16 @@
       "alias": "case-run-1",
       "title": "Genotyping data for case subject 001",
       "data_type": "array",
-      "files": [
+      "data_blocks": [
         {
-          "filename": "case_001.idat",
-          "filetype": "idat",
-          "checksum_method": "MD5",
-          "checksum": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+          "files": [
+            {
+              "filename": "case_001.idat",
+              "filetype": "idat",
+              "checksum_method": "MD5",
+              "checksum": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+            }
+          ]
         }
       ]
     },
@@ -151,12 +155,16 @@
       "alias": "control-run-1",
       "title": "Genotyping data for control subject 001",
       "data_type": "array",
-      "files": [
+      "data_blocks": [
         {
-          "filename": "control_001.idat",
-          "filetype": "idat",
-          "checksum_method": "MD5",
-          "checksum": "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3"
+          "files": [
+            {
+              "filename": "control_001.idat",
+              "filetype": "idat",
+              "checksum_method": "MD5",
+              "checksum": "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3"
+            }
+          ]
         }
       ]
     }
@@ -167,12 +175,16 @@
       "title": "GWAS analysis for type 2 diabetes",
       "analysis_type": "microarray",
       "analysis_date": "2025-06-15",
-      "files": [
+      "data_blocks": [
         {
-          "filename": "gwas_results.vcf.gz",
-          "filetype": "vcf",
-          "checksum_method": "MD5",
-          "checksum": "1234567890abcdef1234567890abcdef"
+          "files": [
+            {
+              "filename": "gwas_results.vcf.gz",
+              "filetype": "vcf",
+              "checksum_method": "MD5",
+              "checksum": "1234567890abcdef1234567890abcdef"
+            }
+          ]
         }
       ]
     }
