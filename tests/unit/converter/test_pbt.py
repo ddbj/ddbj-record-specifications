@@ -19,6 +19,7 @@ st_topology = st.sampled_from(["circular", "linear"])
 st_abbr_name = st.from_regex(r"[A-Z][a-z]{1,10},[A-Z]\.", fullmatch=True)
 st_keywords = st.one_of(st.none(), st.lists(st.text(min_size=1, max_size=20), min_size=1, max_size=5))
 st_datatype = st.one_of(st.none(), st.text(min_size=1, max_size=20))
+st_hold_date = st.one_of(st.none(), st.dates())
 
 
 @st.composite
@@ -29,6 +30,7 @@ def st_v1_record(draw: st.DrawFn) -> dict[str, Any]:
     ab_name = draw(st_abbr_name)
     keywords = draw(st_keywords)
     datatype = draw(st_datatype)
+    hold_date = draw(st_hold_date)
 
     common: dict[str, Any] = {
         "SUBMITTER": {
@@ -52,6 +54,8 @@ def st_v1_record(draw: st.DrawFn) -> dict[str, Any]:
         common["KEYWORD"] = {"keyword": keywords}
     if datatype is not None:
         common["DATATYPE"] = {"type": datatype}
+    if hold_date is not None:
+        common["DATE"] = {"hold_date": f"{hold_date.year:04d}{hold_date.month:02d}{hold_date.day:02d}"}
 
     return {
         "schema_version": "v1.0",
@@ -73,6 +77,7 @@ def st_v2_record(draw: st.DrawFn) -> dict[str, Any]:
     ab_name = draw(st_abbr_name)
     keywords = draw(st_keywords)
     datatype = draw(st_datatype)
+    hold_date = draw(st_hold_date)
 
     submission: dict[str, Any] = {
         "submitters": [
@@ -104,6 +109,8 @@ def st_v2_record(draw: st.DrawFn) -> dict[str, Any]:
         submission["keywords"] = keywords
     if datatype is not None:
         submission["datatype"] = datatype
+    if hold_date is not None:
+        submission["hold_date"] = hold_date.isoformat()
 
     return {
         "schema_version": "v2.0",
@@ -325,3 +332,33 @@ def test_pbt_v1_roundtrip_preserves_datatype(record_data: dict[str, Any]) -> Non
         assert v1_back.COMMON.DATATYPE.type == v1_obj.COMMON.DATATYPE.type
     else:
         assert v1_back.COMMON.DATATYPE is None
+
+
+# === PBT: hold_date format preservation ===
+
+
+@given(record_data=st_v1_record())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_preserves_hold_date(record_data: dict[str, Any]) -> None:
+    """The v1 side carries the MSS DATE format, so a detour through v2 must return the same digits."""
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v2_obj = v1_to_v2(v1_obj)
+        v1_back = v2_to_v1(v2_obj)
+    if v1_obj.COMMON.DATE:
+        assert v1_back.COMMON.DATE is not None
+        assert v1_back.COMMON.DATE.hold_date == v1_obj.COMMON.DATE.hold_date
+    else:
+        assert v1_back.COMMON.DATE is None
+
+
+@given(record_data=st_v2_record())
+@settings(max_examples=100)
+def test_pbt_v2_roundtrip_preserves_hold_date(record_data: dict[str, Any]) -> None:
+    v2_obj = DdbjRecordV2.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v1_obj = v2_to_v1(v2_obj)
+        v2_back = v1_to_v2(v1_obj)
+    assert v2_back.submission.hold_date == v2_obj.submission.hold_date
