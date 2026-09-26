@@ -589,6 +589,8 @@ class Sample(BaseModel):
     individual_name: str | None = None
     # MAGE-TAB の Source の Comment[x] の列 (name が x)。Submission.comments のような自由記述ではない。
     comments: list[Attribute] | None = None
+    # この Source が現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    sdrf_rows: list[SdrfRowNumber] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -862,7 +864,7 @@ class PoolMember(BaseModel):
     # 見出し、value はその行の値で、見出しの並びのまま。Unit[y] の列も見出しごと 1 つの要素にし、
     # unit は使わない (前の列の unit にすると y を失う)。移した過去の版にだけある。
     misplaced_columns: list[Attribute] | None = None
-    # この member が現れる SDRF の行の番号。行は、その番号を持つ member と run / analysis から作り直す
+    # この member が現れる SDRF の行の番号。行は、その番号を持つ sample、member、run / analysis から作り直す
     # (tests/fixtures/v3/mapping/gea.yml の冒頭)。
     sdrf_rows: list[SdrfRowNumber] | None = None
 
@@ -994,8 +996,10 @@ class Run(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
-    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ) と、SDRF のファイルの列の中での
+    # 位置 (0 始まり。左端のファイルの列が 0)。
     sdrf_rows: list[SdrfRowNumber] | None = None
+    sdrf_column: int | None = Field(None, ge=0)
     legacy: RunLegacy | None = None
 
     model_config = ConfigDict(extra="forbid")
@@ -1076,8 +1080,10 @@ class Analysis(BaseModel):
     # MAGE-TAB でこのファイルの前に並ぶ Protocol REF と、ファイルの Comment[x] の列。
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
-    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
+    # このファイルが現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ) と、SDRF のファイルの列の中での
+    # 位置 (0 始まり。左端のファイルの列が 0)。
     sdrf_rows: list[SdrfRowNumber] | None = None
+    sdrf_column: int | None = Field(None, ge=0)
 
     model_config = ConfigDict(extra="forbid")
 

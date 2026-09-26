@@ -45,19 +45,29 @@
 #   処理済みデータのファイル (Derived Array Data File / Derived Array Data Matrix File)
 #                    analyses[]。relations[derived_from] で、左隣のファイル (無ければ Assay) と、その行の Assay を指す
 #
-# どのノードも、列の位置、名前、そのノードに置く値 (属性、Comment、Protocol REF、member なら Factor Value と
-# misplaced_columns も) が全て同じものだけを 1 つのオブジェクトにまとめ、どれかが違えば同じ名前の別のオブジェクト
-# にする。同じファイルの名前でも、Comment の md5 が行ごとに違うもの (表計算の連番で書き換わったもの) や、別の列に
-# 書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、list の中の位置 (index) も書く。
+# どのノードも、列の位置、名前、そのノードに置く値 (属性、Comment、Protocol REF、member なら元の sample と extract、
+# Factor Value、misplaced_columns も) が全て同じものだけを 1 つのオブジェクトにまとめ、どれかが違えば同じ名前の別の
+# オブジェクトにする。同じファイルの名前でも、Comment の md5 が行ごとに違うもの (表計算の連番で書き換わったもの) や、
+# 別の列に書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、list の中の位置 (index) も
+# 書く。
 #
 # run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
 # (dual-channel で channel ごとに別のファイルがあるものなど)。
 #
-# 行の番号 (0 始まり。見出しの次の行が 0) を、member と run / analysis の sdrf_rows に書く。行 n は、n を持つ
-# member (と、その sample と experiment) と、n を持つ run / analysis からなり、その中のファイルは derived_from を
-# 左からたどる順に並ぶ。行は番号の順に作る。全く同じ行の繰り返し (22 版に計 363 行。公開中の E-GEAD-414、415、416
-# の最新版にもある) も、番号が違うので別の行として戻る。番号で行を決めるので、オブジェクトの組み合わせから元に
-# 無い行が増えることも無い。sdrf_rows は番号の集まりで、並びに意味は無い。
+# 行は、relations や index をたどらずに、次の 2 つだけから作る。relations、members[].sample、
+# data_blocks[].member_name はオブジェクトの間の関係を表すもので、行を作るのには使わない (index は、list の並びが
+# 変わると別のものを指す)。
+#
+#   sdrf_rows    元の行の番号 (0 始まり。見出しの次の行が 0)。samples[]、members[]、runs[]、analyses[] に持つ
+#   sdrf_column  run / analysis の、SDRF のファイルの列の中での位置 (0 始まり。左端のファイルの列が 0)
+#
+# 行 n は、n を持つ sample と member (と、member を含む experiment)、n を持つ run / analysis からなり、ファイルは
+# sdrf_column の順に並ぶ。行は番号の順に作る。全く同じ行の繰り返し (22 版に計 363 行。公開中の E-GEAD-414、415、
+# 416 の最新版にもある) も、番号が違うので別の行として戻る。番号で行を決めるので、オブジェクトの組み合わせから
+# 元に無い行が増えることも無い。sdrf_rows は番号の集まりで、並びに意味は無い。
+#
+# record は次を満たす: 0 から行の数 - 1 までの番号が、それぞれちょうど 1 つの sample と 1 つの member にある。
+# 1 つの番号を持つ run / analysis の sdrf_column は重ならない。
 #
 # 保たないのは、種類の違う列の並び (ノードの中で Comment が Technology Type の前か後か、misplaced_columns の列が
 # Factor Value の前か後か、など)。同じ種類の列の並びは保つ。

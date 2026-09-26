@@ -259,6 +259,11 @@
           "name": "Library",
           "value": "lib-1"
         }
+      ],
+      "sdrf_rows": [
+        0,
+        2,
+        3
       ]
     },
     {
@@ -278,6 +283,9 @@
           "name": "taxonomy_id",
           "value": "9606"
         }
+      ],
+      "sdrf_rows": [
+        1
       ]
     }
   ],
@@ -435,7 +443,8 @@
               }
             ],
             "sdrf_rows": [
-              2
+              2,
+              3
             ]
           }
         ]
@@ -467,7 +476,8 @@
       ],
       "sdrf_rows": [
         0
-      ]
+      ],
+      "sdrf_column": 0
     },
     {
       "alias": "hyb1_Cy3.txt",
@@ -487,7 +497,8 @@
       ],
       "sdrf_rows": [
         1
-      ]
+      ],
+      "sdrf_column": 0
     },
     {
       "accession": "DRR000001",
@@ -503,8 +514,10 @@
         }
       ],
       "sdrf_rows": [
-        2
-      ]
+        2,
+        3
+      ],
+      "sdrf_column": 0
     }
   ],
   "analyses": [
@@ -532,7 +545,8 @@
       "sdrf_rows": [
         0,
         1
-      ]
+      ],
+      "sdrf_column": 1
     },
     {
       "alias": "normalized_matrix.txt",
@@ -558,7 +572,8 @@
       "sdrf_rows": [
         0,
         1
-      ]
+      ],
+      "sdrf_column": 2
     }
   ],
   "relations": [
