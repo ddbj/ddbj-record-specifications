@@ -61,7 +61,7 @@ major の中でも、フィールドの削除・名前の変更・型の変更�
 main はまだ v1 / v2 を持っている。次の順に移す。
 
 1. v3 の minor を `v3.1` とし、tag `v3.1` を打つ
-2. 今の main から `v2` branch を作り、tag `v2.3` を打つ
+2. 今の main から `v2` branch を作り、そこから v3 の型を消す。tag `v2.3` は CI が打つ (系統の major は `SCHEMA_VERSIONS` の最後の値で決まるので、v3 を残すと `v2` に `v3.1` を打つ)
 3. dr_tools の依存を main から `v2` の系統 (tag `v2.3` か commit) に移してもらう
 4. main から v1 / v2 の型と converter を消す
 
