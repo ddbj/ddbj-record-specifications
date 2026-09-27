@@ -6,6 +6,9 @@ on:
     branches: [main, "v[0-9]", "v[0-9][0-9]"]
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Only a pull request's runs are cancelled: a run on a branch decides whether its minor is tagged.

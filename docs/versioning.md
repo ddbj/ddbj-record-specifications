@@ -25,8 +25,8 @@ minor は、型の形が変わるたびに上げる。破壊的な変更かど�
 
 - 形とは、型が受け付ける record の範囲と、型の名前 (Python から import する名前) である。説明 (`description` / `examples` / `title`) だけの変更は形を変えない
 - 上げるのは `ddbj_record/schema/__init__.py` の `LATEST_MINOR_VERSIONS` で、形を変える PR の中で上げる
-- 上げ忘れは CI の `minor` job が止める。今の minor の tag がすでにあり、その tag から形が変わっていれば落ちる。見るのは JSON Schema に出る形なので、JSON Schema に出ない validator を足すときは、PR を出す側が minor を上げる
-- PR は向き先の branch に追いついてから merge する。同じ minor に上げた PR が 2 つ続けて入ると、後の方は merge した後の branch の CI で初めて落ちる
+- 上げ忘れは CI の `minor` job が止める。今の minor の tag がすでにあり、その tag から形が変わっていれば落ちる。見るのは JSON Schema に出る形なので、JSON Schema に出ない validator を足すときは、PR を出す側が minor を上げ、下のラベルも付ける
+- major の branch への変更は PR で入れ、CI と `label` workflow が通り、向き先に追いついてから merge する。ruleset でこれを merge の条件にする。同じ minor に上げた PR が 2 つ続けて入ると、後の方は merge した後の branch の CI で初めて落ちる。PR を通らない変更は release note にも載らない
 - 系統の branch に入ると、CI の `tag` workflow がその minor の tag を打つ。打つのは系統の major の tag だけで、系統が持つ古い major の型の minor は `LATEST_MINOR_VERSIONS` にだけ書く
 - 形の変わらない変更には tag を打たない。パッケージの version は tag から付き、tag の後の commit は `3.1.post1.devN+g…` のようになる
 
@@ -46,7 +46,7 @@ record を書く側は、使った型の `LATEST_MINOR_VERSIONS` の値を `sche
 
 major の中でも、フィールドの削除・名前の変更・型の変更をしてよい。その代わり minor を上げ、利用側が直す必要があるかを知らせる。
 
-- 形を変える PR には、`breaking` (利用側が直す必要がある) か `compatible` (今の利用側はそのまま動く) のラベルを 1 つ付ける。付け忘れは CI の `label` workflow が止める (PR の向き先と JSON Schema を比べ、形が変わっていてラベルが無ければ落ちる)。破壊的かどうかは、利用側にとっての意味で PR を出す側が決める
+- 形を変える PR には、`breaking` (利用側が直す必要がある) か `compatible` (今の利用側はそのまま動く) のラベルを 1 つ付ける。`label` workflow が PR の向き先と JSON Schema を比べ、形が変わっているのにラベルが 1 つでなければ落ちる。破壊的かどうかは、利用側にとっての意味で PR を出す側が決める。ラベルを付けられない人 (fork からの PR) の PR は、受け入れる側が付ける
 - `tag` workflow は tag を打つと、その minor の GitHub Release を作る。release note は同じ major の前の minor からの PR を、「破壊的変更」「互換な変更」「その他」に分けて並べる (`.github/release.yml`)
 - 変更の中身は PR の本文に書く。手で書く CHANGELOG は持たない
 
@@ -70,7 +70,7 @@ major の中でも、フィールドの削除・名前の変更・型の変更�
 1. v3 の minor を `v3.1` とし、tag `v3.1` を打つ。v3 の record を書く利用側 (ddbj-repository など) は `schema_version` を `"v3.1"` にする
 2. `main` から `v3` branch を作り、v1 / v2 の型と converter、v1 / v2 のためだけにある `normalize_schema_version` などと、その docs を消す
 3. `main` から `v2` branch を作り、v3 の型とその docs を消す。tag `v2.3` は CI が打つ (系統の major は `SCHEMA_VERSIONS` の最後の値で決まるので、v3 を残すと `v2` に `v3.1` を打つ)
-4. default branch を `v3` にし、開いている PR の向き先を `v3` に変える
+4. default branch を `v3` にし、開いている PR の向き先を `v3` に変える。`v2` / `v3` に ruleset を置き、PR を通すこと、CI と `label` workflow が通ること、向き先に追いついていることを merge の条件にする
 5. `main` の README に `v2` / `v3` を追うよう書いてから、`main` に変更を受け付けない ruleset を置いて止める
 6. 利用側を移す。dr_tools は `v2` (v1 / v2 は不具合を直すだけの系統なので、tag でなく branch を追うのが合う)、`main` を追っている他の利用側は `v3`
 7. `main` を参照する利用側が無くなったら、`main` を消す

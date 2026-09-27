@@ -78,6 +78,7 @@ def _shape(schema: Any) -> Any:
 
 
 def _schema_at(ref: str, tmp_path: Path) -> Any:
+    """The JSON Schema of MAJOR at `ref`, or None when `ref` has no such major."""
     archive = _git("archive", "--format=tar", ref, "ddbj_record")
     assert archive.returncode == 0, archive.stderr.decode()
     with tarfile.open(fileobj=BytesIO(archive.stdout)) as tar:
@@ -90,6 +91,10 @@ import sys
 sys.path.insert(0, sys.argv[2])
 import ddbj_record
 assert ddbj_record.__file__.startswith(sys.argv[2]), ddbj_record.__file__
+from ddbj_record.schema import SCHEMA_VERSIONS
+if sys.argv[1] not in SCHEMA_VERSIONS:
+    print("null")
+    sys.exit()
 from ddbj_record.schema.cli import dump_schema
 print(dump_schema(sys.argv[1]))
 """
@@ -135,7 +140,10 @@ def test_a_change_to_the_shape_says_whether_it_breaks(tmp_path: Path) -> None:
     if not base:
         pytest.skip("not run for a pull request")
 
-    if _shape(json.loads(dump_schema(MAJOR))) == _shape(_schema_at(base, tmp_path)):
+    before = _schema_at(base, tmp_path)
+    if before is None:
+        pytest.skip(f"{MAJOR} is new in this pull request: a new major has no users to break yet")
+    if _shape(json.loads(dump_schema(MAJOR))) == _shape(before):
         return
 
     labels = _CHANGE_LABELS & set(json.loads(os.environ.get("PR_LABELS") or "[]"))

@@ -5,6 +5,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -22,5 +25,6 @@ jobs:
       - run: uv sync --locked
       - run: uv run pytest tests/unit/schema/test_versioning.py -k says_whether_it_breaks
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          # The checkout is the merge of the pull request into its base, whose first parent is that base.
+          PR_BASE: HEAD^1
           PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
