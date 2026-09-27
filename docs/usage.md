@@ -6,7 +6,7 @@
 pip install "ddbj-record @ git+https://github.com/ddbj/ddbj-record-specifications.git@v3.1"
 ```
 
-使う major の系統の tag (minor) か commit で固定する。v3 は main、v1 / v2 は `v2` branch の系統である ([versioning.md](./versioning.md))。
+使う major の branch (`v3`、v1 / v2 なら `v2`) を追うか、その tag (minor) か commit で固定する ([versioning.md](./versioning.md))。
 
 GitHub の archive (`archive/<commit>.tar.gz`) で入れることもできる。version は archive の中の `.git_archival.txt` から付く。そのため、tag が打たれる前と後で、同じ commit の archive の中身が変わる。archive をハッシュで固定するなら、tag が打たれた後に取る。
 

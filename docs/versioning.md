@@ -4,11 +4,13 @@ DDBJ Record の version は `vMAJOR.MINOR` (`v3.1` など) で表す。record �
 
 ## major と系統
 
-major ごとに系統を分ける。最新の major は main で作り、古い major はその名前の branch (`v2` など) で直す。一般的なライブラリが major ごとに branch を持つのと同じ形である。
+major ごとに系統を分け、それぞれ major の名前の branch (`v2`、`v3`) に置く。今の major も同じで、`main` は系統に使わない。GitHub の default branch は、最新の major の branch にする。
 
-- 利用側は、使う major の系統の tag か commit で型を固定する。形の変わらない不具合の直しには tag を打たないので、それも追うなら系統の branch を参照する
-- 新しい major を始めるときは、main から今の major の branch を切り、main で新しい major を作る
+- 利用側は、使う major の branch を追うか、その tag か commit で型を固定する。branch の名前が「この major の中の変更だけが来る」ことを約束する。形の変わらない不具合の直しには tag を打たないので、それも追うなら branch を参照する
+- 新しい major は、今の major の branch から切った branch (`v4` など) で作る。出来上がったら default branch をそこに切り替える。その間も、それより後も、今の major の branch を追う利用側には何も起きない
 - 古い major の branch は消さない。不具合はそこで直す
+
+`main` を最新の major にすると、次の major に取り掛かった時点で、`main` を今の major のつもりで追っていた利用側が壊れる。次の major に取り掛かるときに初めて今の major の branch を切っても、それまで `main` を追っていた利用側は同じように壊れる。
 
 1 つの系統に入る型は 1 つの major のものである。例外は major の間の converter で、新しい方の系統に置き、古い major の型をそこに持つ。依存は新しい系統から古い系統への一方向で、古い系統は新しい系統を知らない (pydantic 2 が `pydantic.v1` を同梱しているのと同じ)。
 
@@ -21,11 +23,11 @@ major ごとに系統を分ける。最新の major は main で作り、古い 
 
 minor は、型の形が変わるたびに上げる。破壊的な変更かどうかは問わない。
 
-- 形とは、型が受け付ける record の範囲と、型の名前 (Python から import する名前) である。説明 (`description` / `examples`) だけの変更は形を変えない
+- 形とは、型が受け付ける record の範囲と、型の名前 (Python から import する名前) である。説明 (`description` / `examples` / `title`) だけの変更は形を変えない
 - 上げるのは `ddbj_record/schema/__init__.py` の `LATEST_MINOR_VERSIONS` で、形を変える PR の中で上げる
 - 上げ忘れは CI の `minor` job が止める。今の minor の tag がすでにあり、その tag から形が変わっていれば落ちる。見るのは JSON Schema に出る形なので、JSON Schema に出ない validator を足すときは、PR を出す側が minor を上げる
-- PR は main に追いついてから merge する。同じ minor に上げた PR が 2 つ続けて入ると、後の方は merge した後の main の CI で初めて落ちる
-- main (古い major ならその branch) に入ると、CI の `tag` workflow がその minor の tag を打つ。打つのは系統の major の tag だけで、系統が持つ古い major の型の minor は `LATEST_MINOR_VERSIONS` にだけ書く
+- PR は向き先の branch に追いついてから merge する。同じ minor に上げた PR が 2 つ続けて入ると、後の方は merge した後の branch の CI で初めて落ちる
+- 系統の branch に入ると、CI の `tag` workflow がその minor の tag を打つ。打つのは系統の major の tag だけで、系統が持つ古い major の型の minor は `LATEST_MINOR_VERSIONS` にだけ書く
 - 形の変わらない変更には tag を打たない。パッケージの version は tag から付き、tag の後の commit は `3.1.post1.devN+g…` のようになる
 
 v3 の形はまだ動いているので、破壊的な変更も minor で出す (semver の `0.x` と同じ扱い)。v3 が落ち着いたと判断したら本書にそう書き、以降の破壊的な変更は次の major にする。
@@ -59,11 +61,12 @@ major の中でも、フィールドの削除・名前の変更・型の変更�
 
 ## この方針に移る手順
 
-main はまだ v1 / v2 を持っている。次の順に移す。
+今は `main` が v1 / v2 / v3 を全部持ち、利用側の一部が `main` を参照している。`main` は消さずに今の形で止め、利用側が移るのを待つ。止めるので、`main` を参照している利用側は壊れない (その代わり、止めた後の変更は届かない)。
 
 1. v3 の minor を `v3.1` とし、tag `v3.1` を打つ。v3 の record を書く利用側 (ddbj-repository など) は `schema_version` を `"v3.1"` にする
-2. 今の main から `v2` branch を作り、そこから v3 の型を消す。tag `v2.3` は CI が打つ (系統の major は `SCHEMA_VERSIONS` の最後の値で決まるので、v3 を残すと `v2` に `v3.1` を打つ)
-3. dr_tools の依存を main から `v2` branch に移してもらう。v1 / v2 は不具合を直すだけの系統なので、tag でなく branch を追うのが合う
-4. main から v1 / v2 の型と converter、v1 / v2 のためだけにある `normalize_schema_version` などと、その docs を消す
-
-3 より前に 4 をすると、main を参照している dr_tools と、それを入れる DFAST が壊れる。
+2. `main` から `v3` branch を作り、v1 / v2 の型と converter、v1 / v2 のためだけにある `normalize_schema_version` などと、その docs を消す
+3. `main` から `v2` branch を作り、v3 の型とその docs を消す。tag `v2.3` は CI が打つ (系統の major は `SCHEMA_VERSIONS` の最後の値で決まるので、v3 を残すと `v2` に `v3.1` を打つ)
+4. default branch を `v3` にし、開いている PR の向き先を `v3` に変える
+5. `main` の README に `v2` / `v3` を追うよう書いてから、`main` に変更を受け付けない ruleset を置いて止める
+6. 利用側を移す。dr_tools は `v2` (v1 / v2 は不具合を直すだけの系統なので、tag でなく branch を追うのが合う)、`main` を追っている他の利用側は `v3`
+7. `main` を参照する利用側が無くなったら、`main` を消す

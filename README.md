@@ -4,7 +4,7 @@ DDBJ の登録データを表す JSON (DDBJ Record) の型を、Pydantic で定�
 
 この repo が持つもの:
 
-- major ごとの型 (`ddbj_record/schema/v*.py`)。JSON Schema もここから作る。最新の major は main に、古い major はその名前の branch にある
+- major ごとの型 (`ddbj_record/schema/v*.py`)。JSON Schema もここから作る。major ごとに、その名前の branch (`v2`、`v3`) にある
 - major の間の converter (`ddbj_record/converter/`)
 
 持たないもの:

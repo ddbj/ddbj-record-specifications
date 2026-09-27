@@ -18,7 +18,7 @@ docker compose exec app uv run mypy
 
 ## CI
 
-系統の branch (main と `v2` など) への push と pull request で、GitHub Actions が次を実行する。
+major の branch (`v2`、`v3` など) への push と pull request で、GitHub Actions が次を実行する。
 
 - ruff check、ruff format --check、mypy
 - Python 3.10 - 3.14 で pytest
