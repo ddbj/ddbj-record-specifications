@@ -1264,7 +1264,8 @@ class RelationSource(BaseModel):
     record 内のオブジェクトを accession で指し、accession が無ければ alias で指す。
     SRA の alias は record の中でも一意とは限らないので、accession が無く alias も
     一意でないときは、その種類の list で同じ alias を持つものの中での位置 (書かれた順、
-    0 始まり) を index に書く。list 全体の中の位置ではない。
+    0 始まり) を index に書く。list 全体の中の位置ではない。alias は前後の空白を除き、
+    続く空白を 1 つとみなして比べ、alias の無いものどうしも同じ alias を持つものとして数える。
     """
 
     type: str | None = Field(None, examples=["sample"])
