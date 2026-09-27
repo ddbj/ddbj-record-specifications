@@ -145,7 +145,8 @@ class ApplicationIdentification(BaseModel):
 class St26Submission(BaseModel):
     """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。
 
-    配列 (SequenceData) より前の全てと、JPO が末尾に足す Bibliography を持つ。
+    配列 (SequenceData) より前の全てと、JPO が末尾に足す Bibliography、欠番にした配列の番号を持つ。
+    配列そのものは sequences.entries[] (配列ごとの ST.26 の値は entries[].st26)。
     """
 
     dtd_version: str | None = Field(None, examples=["V1_3"])
@@ -173,15 +174,16 @@ class St26Submission(BaseModel):
     # 4 と書いて 8 つ持つものがある)、配列から数え直せるとは限らない。int にするのは、DTD は #PCDATA だが
     # ST.26 が配列の数と定めていて、保存された全ての値 (21,452 件) が ASCII の整数として読めるから。
     sequence_total_quantity: int | None = None
+    # 配列が "000" の SequenceData の番号。"000" は、その番号の配列を欠番にしたことを表すので、entry に
+    # しない。entry の alias (配列番号) と同じく書かれたままの文字列で持つ。ST.26 は配列番号を 1 から
+    # 始まる連続した整数とするので、entry と欠番の番号から SequenceData の並びが戻る (崩れたものは検証で止める)。
+    skipped_sequence_id_numbers: list[str] | None = None
     # 以下は JPO が公報の書誌から足したもの (Bibliography。WIPO の DTD には無い)。
     # 公報の日付。DDBJ が公開した日 (record に入れない、登録システムの日付) とは別。
     published_date: str | None = Field(None, examples=["2024-12-03"])
     # 公報の書誌の優先権。earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは
     # 7 割ほどで、別の出願を指すものもあるので、1 つにまとめない。
     bibliography_priority: ApplicationIdentification | None = None
-    # 配列が "000" の SequenceData の番号。"000" は、その番号の配列を欠番にしたことを表す
-    # ので、entry にしない。SequenceData の番号は、どのファイルでも 1 から順に振られている。
-    skipped_sequence_id_numbers: list[int] | None = None
 
     model_config = ConfigDict(extra="forbid")
 

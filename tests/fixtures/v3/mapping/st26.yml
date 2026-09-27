@@ -16,6 +16,9 @@
 # 値の読み方:
 #   (container)          値を持たない入れ物。子が値を持つ
 #   a.b[]                b は list
+#   a.b{*}               b は dict で、その全ての値（名前ごとの qualifier の list）
+#   a.b{}                b は dict で、その key（qualifier の名前）
+#   a.b{*}[]             括弧は続けて書く（dict の値である list の要素）
 #   ... (注記)           読み手のための補足
 #
 # 日付は ISO 8601 にする。Bibliography の日付は YYYYMMDD（20241203）と書かれているので書き直し、
@@ -62,19 +65,24 @@ header:
   ST26SequenceListing/Bibliography/PriorityDate:                                       submission.st26.bibliography_priority.filing_date (YYYYMMDD を ISO 8601 に)  # 18,075 ファイル
 
 # SequenceData の中。数は要素の数（2026-09-27 に同じファイルを集計。SequenceData は 13,154,350、うち
-# 配列が "000" のものが 1,186,347）。
+# 配列が "000" のものが 1,186,347）。qualifier の行の数は、source の qualifier も含めた全ての数。
 #
 # SequenceData 1 つが sequences.entries[] の 1 つ。ただし配列が "000"（欠番）のものは entry にせず、
 # 番号だけを submission.st26.skipped_sequence_id_numbers に持つ。"000" の SequenceData は、空の
-# length / moltype / division と "000" のほかに何も持たないので、戻すときはそれを書く。番号はどの
-# ファイルでも 1 から順に振られているので、entry と欠番の番号から SequenceData の並びが戻る。
+# length / moltype / division と "000" のほかに何も持たない（other-seqids も持たない）ので、戻すときは
+# それを書く。番号は、ST.26 のとおりどのファイルでも 1 から順に振られていて（先頭に 0 を付けたものも
+# 無い）、entry と欠番の番号から SequenceData の並びが戻る。
 #
 # feature は key が source のものを sequences.entries[].source_features[] に、それ以外を features[] に
 # 置き、features[].sequence_id でその配列の entry の alias を指す。source の qualifier は、organism と
 # mol_type も含めて全てを書かれたまま source.qualifiers に持ち、最初の organism と mol_type の値を
 # source.organism.name と source.mol_type にも書く（型付きの場所を読む利用側のため。両方が合うことは
-# ddbj-validator のルールが確かめる）。key が SOURCE などと大文字のもの（418）は source ではないので
-# features[] に置く。
+# ddbj-validator のルールが確かめる）。英語の値（INSDQualifier_value）を持たない qualifier は数えず、
+# 英語の値を持つものが 1 つも無ければ型付きの場所は書かない。key が SOURCE と大文字のもの（418）は
+# source ではないので features[] に置く。
+#
+# 値を持たない qualifier（名前だけのもの。4 つ）は、value の無い {}（id があれば {"alias": ...}）で持つ。
+# v2 のように "true" と書かない。"true" と書かれた qualifier と区別できなくなるため。
 #
 # 行の [000] は配列が "000" の SequenceData、[source] は key が source の feature、[organism] /
 # [mol_type] はその中の organism / mol_type の qualifier。
@@ -86,11 +94,12 @@ header:
 #     が 3,622,314 配列あるが、INSDC の feature の並びに意味は無く、戻すときは source を先頭に置く
 #   - 1 つの feature の中で、名前の違う qualifier の前後（qualifier は名前ごとにまとめて持つので、
 #     note, organism, note のように名前が入り混じった並びは戻らない。218 feature）
-#   - 配列の前後の空白（4,879 配列）と、中身の無い INSDQualifier_value（860）
+#   - 配列の前後の空白（4,879 配列。中の空白は無い）と、中身の無い INSDQualifier_value（860）と
+#     NonEnglishQualifier_value
 
 sequences:
   ST26SequenceListing/SequenceData/@sequenceIDNumber:                                                                                               sequences.entries[].alias (書かれたままの文字列)  # 11,968,003
-  ST26SequenceListing/SequenceData[000]/@sequenceIDNumber:                                                                                          submission.st26.skipped_sequence_id_numbers[] (配列が "000" の SequenceData)  # 1,186,347
+  ST26SequenceListing/SequenceData[000]/@sequenceIDNumber:                                                                                          submission.st26.skipped_sequence_id_numbers[] (配列が "000" の SequenceData。書かれたままの文字列)  # 1,186,347
   ST26SequenceListing/SequenceData/INSDSeq:                                                                                                         (container)  # 13,154,350
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_length:                                                                                          sequences.entries[].sequence (の長さ。書かれた値は持たない)  # 11,968,003
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_moltype:                                                                                         sequences.entries[].st26.moltype  # 11,968,003
@@ -113,6 +122,6 @@ sequences:
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/INSDQualifier_name:            sequences.entries[].source_features[].source.qualifiers{}
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/INSDQualifier_value:           sequences.entries[].source_features[].source.qualifiers{*}[].value
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/NonEnglishQualifier_value:     sequences.entries[].source_features[].source.qualifiers{*}[].non_english_value
-  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[organism]/INSDQualifier_value: sequences.entries[].source_features[].source.organism.name (最初の organism。qualifiers にも持つ)
-  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[mol_type]/INSDQualifier_value: sequences.entries[].source_features[].source.mol_type (最初の mol_type。qualifiers にも持つ)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[organism]/INSDQualifier_value: sequences.entries[].source_features[].source.organism.name (英語の値を持つ最初の organism。qualifiers にも持つ)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[mol_type]/INSDQualifier_value: sequences.entries[].source_features[].source.mol_type (英語の値を持つ最初の mol_type。qualifiers にも持つ)
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_sequence:                                                                                        sequences.entries[].sequence (書かれたまま。前後の空白は落とす)  # 11,968,003

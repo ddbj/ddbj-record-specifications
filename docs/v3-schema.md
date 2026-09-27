@@ -31,7 +31,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 - 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA では、ACTIONS は書かれた順に行うので、`@target` の無い HOLD と RELEASE のうち最後のものが効く。それが `@HoldUntilDate` を持つ HOLD なら、その日付を `hold_date` にも写す。RELEASE や、日付の無い HOLD (期間だけのものなど) なら `hold_date` を置かない。ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。`hold_date` がこの規則で決まるものと同じかは ddbj-validator のルールで確かめる
 - GEA の SDRF の Extract と Labeled Extract は、Assay に入る材料として `experiments[].pool.members[]` に置く。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つで、dual-channel の Assay は member を 2 つ持つ。channel ごとに Source や Factor Value が違うことがあるので、Factor Value も member に置く
 
-record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs`、ST.26 の配列の `sequences.entries[].st26` など)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
+record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。そのうち v3 に同じ意味の場所が無く、元の形式に戻すためだけに持つ値は、そのモデルの形式ごとのフィールドにまとめる (ST.26 の配列の `moltype` と other-seqid を持つ `sequences.entries[].st26`)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
 
 SRA XSD 1.5 より前の要素のように、形式の古い version にしか無い要素は、そのモデルの `legacy` に置く。GEA の前身の CIBEX の登録は `submission.gea.legacy` に置く。新しい登録が `legacy` を使っていないかは、ddbj-validator のルールで確かめる。
 

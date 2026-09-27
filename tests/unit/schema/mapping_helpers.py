@@ -2,7 +2,7 @@
 
 対応表の場所は DdbjRecord の中の点区切りの道筋 (`experiments[].pool.members[].sample.id`)。
 `[...]` は list の要素、`{key}` は dict の key の値、`{*}` は dict の全ての値、`{}` は dict の key
-そのもの (qualifier の名前など) で、`[...]` の中と末尾の ` (...)` は読み手のための注記。括弧は続けて
+そのもの (qualifier の名前など)。`[...]` の中は要素の絞り込み (`_matches`)、末尾の ` (...)` は読み手のための注記。括弧は続けて
 書ける (`qualifiers{*}[]` は、dict の値である list の要素)。
 `(container)` は、自分では値を持たない入れ物の要素を表す。
 """

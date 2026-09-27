@@ -34,7 +34,7 @@ VALUE_ROWS = {row: location for row, location in ROWS.items() if row != "header:
 
 
 @pytest.mark.parametrize("location", VALUE_ROWS.values(), ids=VALUE_ROWS.keys())
-def test_every_item_but_the_sequences_lands_on_a_value(location: str) -> None:
+def test_every_item_but_the_sequence_data_row_lands_on_a_value(location: str) -> None:
     assert resolve(location) in SCALARS
 
 
@@ -117,6 +117,17 @@ RAW_FILES = sorted(RAW_ST26.glob("*.xml"))
 @pytest.mark.parametrize("path", RAW_FILES, ids=lambda path: path.name)
 def test_every_item_in_the_raw_files_is_mapped(path: Path, part: str) -> None:
     assert _raw_items(path)[part] - set(MAPPING[part]) == set()
+
+
+# 対応表の key の `[000]` / `[source]` / `[organism]` などは、同じ要素の中を分けるための注記。
+ANNOTATION = re.compile(r"\[[^\]]*\]")
+
+
+@pytest.mark.parametrize("part", ["header", "sequences"])
+def test_every_mapped_item_exists_in_the_dtd_or_the_raw_files(part: str) -> None:
+    # 逆向きの確かめ。これが無いと、綴りを誤った key の行があっても上の確かめは通る。
+    known = DTD_ITEMS[part].union(*(_raw_items(path)[part] for path in RAW_FILES))
+    assert {ANNOTATION.sub("", item) for item in MAPPING[part]} - known == set()
 
 
 def test_the_raw_files_include_the_jpo_bibliography() -> None:
