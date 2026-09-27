@@ -31,7 +31,7 @@ main への push と pull request で、GitHub Actions が次を実行する。
 - 実行時の依存は pydantic だけにする。テストと lint の道具は `[dependency-groups] dev` に置き、利用側には見せない
 - 依存と `requires-python` には下限だけを書き、上限は書かない。下限は CI の lowest-direct のテストで確かめる
 - `requires-python` は 3.10 以上。型の注釈に `X | None` を使い、pydantic がそれを実行時に評価するため
-- パッケージの version は `0.0.0` のまま変えない ([versioning.md](./versioning.md))
+- パッケージの version は tag から付く ([versioning.md](./versioning.md))
 
 ## lint と型検査
 

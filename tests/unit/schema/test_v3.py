@@ -35,7 +35,7 @@ def _record_paths() -> list[Path]:
 def test_v3_record_fixture_parses(path: Path) -> None:
     with path.open("r", encoding="utf-8") as f:
         record = DdbjRecord.model_validate(json.load(f))
-    assert record.schema_version == "v3"
+    assert record.schema_version == "v3.1"
 
 
 # === Attribute.name ===
@@ -68,7 +68,7 @@ def test_a_name_with_surrounding_spaces_is_still_a_name() -> None:
 
 def test_a_nameless_attribute_fails_the_whole_record() -> None:
     record = {
-        "schema_version": "v3",
+        "schema_version": "v3.1",
         "samples": [{"alias": "s1", "attributes": [{"value": "10 m"}]}],
     }
 
@@ -190,7 +190,7 @@ def test_pool_member_sample_with_index_points_among_samples_sharing_an_alias() -
     # GEA の SDRF には、名前が同じで値の違う Source がある。別の sample にし、位置で指す。
     record = DdbjRecord.model_validate(
         {
-            "schema_version": "v3",
+            "schema_version": "v3.1",
             "samples": [
                 {"alias": "PDAC3", "attributes": [{"name": "sample_name", "value": "PDAC3_Scr"}]},
                 {"alias": "PDAC3", "attributes": [{"name": "sample_name", "value": "PDAC3_MNX1KD"}]},
@@ -211,7 +211,7 @@ def test_pool_member_sample_with_index_points_among_samples_sharing_an_alias() -
 
 def test_pool_member_sample_with_negative_index_fails_the_whole_record() -> None:
     record = {
-        "schema_version": "v3",
+        "schema_version": "v3.1",
         "experiments": [{"pool": {"members": [{"sample": {"db": "sample", "id": "PDAC3", "index": -1}}]}}],
     }
 
@@ -232,7 +232,7 @@ def test_pool_member_sample_with_negative_index_fails_the_whole_record() -> None
 def test_projects_keep_every_study_of_a_submission_in_order() -> None:
     record = DdbjRecord.model_validate(
         {
-            "schema_version": "v3",
+            "schema_version": "v3.1",
             "submission": {"accession": "SRA002148"},
             "projects": [{"accession": "SRP000285"}, {"accession": "SRP019355"}],
         }
@@ -244,7 +244,7 @@ def test_projects_keep_every_study_of_a_submission_in_order() -> None:
 
 def test_projects_given_as_a_single_object_is_rejected() -> None:
     with pytest.raises(ValidationError):
-        DdbjRecord.model_validate({"schema_version": "v3", "projects": {"accession": "PRJDB1"}})
+        DdbjRecord.model_validate({"schema_version": "v3.1", "projects": {"accession": "PRJDB1"}})
 
 
 # === extra="forbid" ===

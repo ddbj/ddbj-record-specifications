@@ -8,12 +8,17 @@ SCHEMA_VERSIONS = [
     "v3",
 ]
 
-# Latest minor version for v1 and v2, whose records carry a minor in schema_version.
-# Used by converters to set schema_version in output data. v3 has no minor: its schema_version is "v3".
+# The minor each major's types are at, which is what a record written with them states in
+# schema_version. It is raised whenever the major's shape changes (docs/versioning.md).
 LATEST_MINOR_VERSIONS: dict[str, str] = {
     "v1": "v1.0",
     "v2": "v2.3",
+    "v3": "v3.1",
 }
+
+# Majors whose types read every minor as the latest one. From v3 on, a minor may change the
+# shape, so a record keeps the minor it was written in.
+_FOLDED_MAJORS = ("v1", "v2")
 
 # Mapping from legacy schema_version values to their major version.
 _LEGACY_TO_MAJOR: dict[str, str] = {
@@ -25,19 +30,19 @@ _LEGACY_TO_MAJOR: dict[str, str] = {
 
 
 def normalize_schema_version(raw: str) -> str | None:
-    """Normalize a schema_version value to the latest minor version.
+    """Normalize a v1 / v2 schema_version value to the latest minor version.
 
     Accepts legacy values ("0.1", "v1", "0.2", "v2") and canonical values
     ("v1.0", "v2.0", "v2.1") and returns the latest minor version for that
-    major version (e.g., "v2.1"). Returns None if the input is unrecognized.
+    major version (e.g., "v2.3"). Returns None if the input is unrecognized,
+    which includes every v3 value: a v3 record keeps the minor it was written in.
     """
     if raw in _LEGACY_TO_MAJOR:
         major = _LEGACY_TO_MAJOR[raw]
         return LATEST_MINOR_VERSIONS.get(major)
     match = re.fullmatch(r"(v\d+)\.\d+", raw)
-    if match:
-        major = match.group(1)
-        return LATEST_MINOR_VERSIONS.get(major)
+    if match and match.group(1) in _FOLDED_MAJORS:
+        return LATEST_MINOR_VERSIONS[match.group(1)]
     return None
 
 

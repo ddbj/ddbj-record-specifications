@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "v[0-9]*"]
   pull_request:
 
 concurrency:
@@ -48,3 +48,18 @@ jobs:
           python-version: "3.10"
       - run: uv sync --resolution lowest-direct
       - run: uv run --no-sync pytest
+
+  # A change to the shape raises the minor (docs/versioning.md). Needs the tags to compare with.
+  minor:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest tests/unit/schema/test_minor.py
+        env:
+          REQUIRE_TAGS: "1"
