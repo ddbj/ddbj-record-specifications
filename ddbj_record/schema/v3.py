@@ -1263,7 +1263,8 @@ class RelationSource(BaseModel):
 
     record 内のオブジェクトを accession で指し、accession が無ければ alias で指す。
     SRA の alias は record の中でも一意とは限らないので、accession が無く alias も
-    一意でないときは、その種類の list の中の位置 (0 始まり) を index に書く。
+    一意でないときは、その種類の list で同じ alias を持つものの中での位置 (書かれた順、
+    0 始まり) を index に書く。list 全体の中の位置ではない。
     """
 
     type: str | None = Field(None, examples=["sample"])
@@ -1282,7 +1283,7 @@ class RelationTarget(BaseModel):
     オブジェクトで、id は alias、accession は accession。相手がこの record の中に
     あるかどうかは表さず、読む側が accession か (center_name, alias) で探す。
     ただし、相手がこの record の中にあり、accession が無く alias も一意でないときは、
-    その種類の list の中の位置 (0 始まり) を index に書く。
+    その種類の list で同じ alias を持つものの中での位置 (書かれた順、0 始まり) を index に書く。
     SRA の参照は refname と accession を同時に書けるので、片方に寄せると戻せない。
     center_name は alias の名前空間(SRA の refcenter)。
     """
