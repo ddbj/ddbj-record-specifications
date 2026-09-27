@@ -1163,8 +1163,8 @@ class SourceFeature(BaseModel):
 class St26Sequence(BaseModel):
     """ST.26 の配列 (SequenceData) の 1 つについて、v3 の Entry に置き場の無い値。書かれたまま持つ。"""
 
-    # INSDSeq_moltype。DNA / RNA / AA。source の mol_type からおおむね決まるが、mol_type の無い配列
-    # (source を SOURCE と大文字で書いたものなど) では、AA であることを示すのはこれだけである。
+    # INSDSeq_moltype。DNA / RNA / AA。source の mol_type からおおむね決まるが、値の無い mol_type を
+    # 書いた配列もあり、そこでは mol_type から決められないので、書かれたまま持つ。
     moltype: str | None = Field(None, examples=["AA"])
     # INSDSeq_other-seqids/INSDSeqid。公報と配列番号を指す。JPO から届くファイルでは全ての配列が持ち、
     # 最後の配列番号の前 ("pat|JP|2024048697|A5") はファイルの中で同じ。

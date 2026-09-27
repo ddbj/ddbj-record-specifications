@@ -78,16 +78,21 @@ header:
 # mol_type も含めて全てを書かれたまま source.qualifiers に持ち、最初の organism と mol_type の値を
 # source.organism.name と source.mol_type にも書く（型付きの場所を読む利用側のため。両方が合うことは
 # ddbj-validator のルールが確かめる）。英語の値（INSDQualifier_value）を持たない qualifier は数えず、
-# 英語の値を持つものが 1 つも無ければ型付きの場所は書かない。key が SOURCE と大文字のもの（418）は
-# source ではないので features[] に置く。
+# 英語の値を持つものが 1 つも無ければ型付きの場所は書かない。
+#
+# source / organism / mol_type は、大文字小文字を区別せずに見分ける。key を SOURCE、qualifier の名前を
+# MOL_TYPE / ORGANISM と大文字で書いたものが 418 配列（15 ファイル、全て AA で MOL_TYPE は protein）
+# あり、これまでの取り込み（submission-bulk-st26）も同じように読んで公開している。qualifier の名前は
+# 書かれたまま持ち、source の key の綴りだけを持たない（戻すときは source と書く）。
 #
 # 値を持たない qualifier（名前だけのもの。4 つ）は、value の無い {}（id があれば {"alias": ...}）で持つ。
 # v2 のように "true" と書かない。"true" と書かれた qualifier と区別できなくなるため。
 #
 # 行の [000] は配列が "000" の SequenceData、[source] は key が source の feature、[organism] /
-# [mol_type] はその中の organism / mol_type の qualifier。
+# [mol_type] はその中の organism / mol_type の qualifier（いずれも大文字小文字を区別しない）。
 #
 # 保たないもの:
+#   - source の key の大文字小文字（SOURCE と書いたもの 418。INSDC の key は source）
 #   - INSDSeq_length。配列の長さなので持たず、戻すときは配列から数える。書かれた値が配列の長さと
 #     合わないものが 7 配列あり、それは ST.26 として誤りなので検証で止める
 #   - feature の並びのうち、source とそれ以外の前後。source を先頭の feature でない位置に書いたもの
@@ -108,7 +113,7 @@ sequences:
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_other-seqids/INSDSeqid:                                                                          sequences.entries[].st26.other_seqid  # 11,917,861
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table:                                                                                   (container)  # 11,968,001
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature:                                                                       (container)  # 20,623,127
-  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_key:                                                       features[].type (書かれたまま)  # 8,655,544
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_key:                                                       features[].type (書かれたまま)  # 8,655,126
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_location:                                                  features[].location
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals:                                                     (container)
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier:                                       (container)  # 38,766,748
@@ -116,7 +121,7 @@ sequences:
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/INSDQualifier_name:                    features[].qualifiers{} (書かれたまま)
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/INSDQualifier_value:                   features[].qualifiers{*}[].value  # 38,766,014
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/NonEnglishQualifier_value:             features[].qualifiers{*}[].non_english_value  # 4,248
-  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]:                                                               (container)  # 11,967,583
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]:                                                               (container)  # 11,968,001
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_location:                                          sequences.entries[].source_features[].location
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/@id:                           sequences.entries[].source_features[].source.qualifiers{*}[].alias
   ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/INSDQualifier_name:            sequences.entries[].source_features[].source.qualifiers{}
