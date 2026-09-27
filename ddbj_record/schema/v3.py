@@ -179,6 +179,9 @@ class St26Submission(BaseModel):
     # 公報の書誌の優先権。earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは
     # 7 割ほどで、別の出願を指すものもあるので、1 つにまとめない。
     bibliography_priority: ApplicationIdentification | None = None
+    # 配列が "000" の SequenceData の番号。"000" は、その番号の配列を欠番にしたことを表す
+    # ので、entry にしない。SequenceData の番号は、どのファイルでも 1 から順に振られている。
+    skipped_sequence_id_numbers: list[int] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1126,6 +1129,9 @@ class Qualifier(BaseModel):
 
     alias: str | None = None
     value: str | None = None
+    # ST.26 の NonEnglishQualifier_value。英語でない言語で書かれた値で、value (英語) と一緒にも、
+    # 単独でも書かれる。言語は submission.st26.non_english_language。
+    non_english_value: str | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1152,6 +1158,19 @@ class SourceFeature(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class St26Sequence(BaseModel):
+    """ST.26 の配列 (SequenceData) の 1 つについて、v3 の Entry に置き場の無い値。書かれたまま持つ。"""
+
+    # INSDSeq_moltype。DNA / RNA / AA。source の mol_type からおおむね決まるが、mol_type の無い配列
+    # (source を SOURCE と大文字で書いたものなど) では、AA であることを示すのはこれだけである。
+    moltype: str | None = Field(None, examples=["AA"])
+    # INSDSeq_other-seqids/INSDSeqid。公報と配列番号を指す。JPO から届くファイルでは全ての配列が持ち、
+    # 最後の配列番号の前 ("pat|JP|2024048697|A5") はファイルの中で同じ。
+    other_seqid: str | None = Field(None, examples=["pat|JP|2024048697|A5|1"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class Entry(BaseModel):
     # version を含む ("AB123456.1")。alias は登録者が付けた名前。
     accession: str | None = Field(None, examples=["AB123456.1"])
@@ -1164,6 +1183,7 @@ class Entry(BaseModel):
     sequence: str | None = None
     comments: list[str] | None = None
     source_features: list[SourceFeature] | None = None
+    st26: St26Sequence | None = None
 
     model_config = ConfigDict(extra="forbid")
 

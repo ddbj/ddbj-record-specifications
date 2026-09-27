@@ -1,7 +1,9 @@
 """tests/fixtures/v3/mapping/*.yml を読んで確かめるテストの共通部品。
 
 対応表の場所は DdbjRecord の中の点区切りの道筋 (`experiments[].pool.members[].sample.id`)。
-`[...]` は list の要素、`{...}` は dict の値で、括弧の中と末尾の ` (...)` は読み手のための注記。
+`[...]` は list の要素、`{key}` は dict の key の値、`{*}` は dict の全ての値、`{}` は dict の key
+そのもの (qualifier の名前など) で、`[...]` の中と末尾の ` (...)` は読み手のための注記。括弧は続けて
+書ける (`qualifiers{*}[]` は、dict の値である list の要素)。
 `(container)` は、自分では値を持たない入れ物の要素を表す。
 """
 
@@ -20,7 +22,8 @@ ROOT = Path(__file__).resolve().parents[3]
 FIXTURES_V3 = ROOT.joinpath("tests/fixtures/v3")
 
 CONTAINER = "(container)"
-SEGMENT = re.compile(r"(\w+)(\[[^\]]*\]|\{[^}]*\})?")
+SEGMENT = re.compile(r"(\w+)((?:\[[^\]]*\]|\{[^}]*\})*)")
+BRACKET = re.compile(r"\[[^\]]*\]|\{[^}]*\}")
 SCALARS = (str, int, float, bool)
 
 
@@ -45,7 +48,7 @@ def resolve(location: str) -> Any:
         m = SEGMENT.fullmatch(segment)
         if not m:
             raise LookupError(f"{location}: cannot read {segment!r}")
-        name, bracket = m.groups()
+        name, brackets = m.groups()
 
         if not (isinstance(tp, type) and issubclass(tp, BaseModel)):
             raise LookupError(f"{location}: {name} is below a non-model")  # noqa: TRY004 -- the location is wrong, not a type
@@ -54,19 +57,19 @@ def resolve(location: str) -> Any:
 
         # 後で定義されるモデル (RelationTarget, File など) の注釈は文字列のままなので、get_type_hints で解決する。
         tp = _unwrap_optional(get_type_hints(tp)[name])
-        container = get_origin(tp)
 
-        if bracket is None:
-            if container in (list, dict):
-                raise LookupError(f"{location}: {name} is a {container.__name__}")
-        elif bracket.startswith("["):
-            if container is not list:
-                raise LookupError(f"{location}: {name} is not a list")
-            tp = get_args(tp)[0]
-        else:
-            if container is not dict:
-                raise LookupError(f"{location}: {name} is not a dict")
-            tp = get_args(tp)[1]
+        if not brackets and get_origin(tp) in (list, dict):
+            raise LookupError(f"{location}: {name} is a {get_origin(tp).__name__}")
+        for bracket in BRACKET.findall(brackets):
+            container = get_origin(tp)
+            if bracket.startswith("["):
+                if container is not list:
+                    raise LookupError(f"{location}: {name}{brackets} is not a list at {bracket}")
+                tp = get_args(tp)[0]
+            else:
+                if container is not dict:
+                    raise LookupError(f"{location}: {name}{brackets} is not a dict at {bracket}")
+                tp = get_args(tp)[0 if bracket == "{}" else 1]
 
     return tp
 
@@ -129,15 +132,20 @@ def values_at(data: Any, location: str) -> list[Any]:
     for segment in strip_note(location).split("."):
         m = SEGMENT.fullmatch(segment)
         assert m, segment
-        name, bracket = m.groups()
+        name, brackets = m.groups()
 
         found = [item[name] for item in found if isinstance(item, dict) and item.get(name) not in (None, "")]
 
-        if bracket is not None and bracket.startswith("["):
-            annotation = bracket[1:-1]
-            found = [element for items in found for element in items if _matches(element, annotation)]
-        elif bracket is not None:
-            key = bracket[1:-1]
-            found = [items[key] for items in found if key in items]
+        for bracket in BRACKET.findall(brackets):
+            if bracket.startswith("["):
+                annotation = bracket[1:-1]
+                found = [element for items in found for element in items if _matches(element, annotation)]
+            elif bracket == "{}":
+                found = [key for items in found for key in items]
+            elif bracket == "{*}":
+                found = [value for items in found for value in items.values()]
+            else:
+                key = bracket[1:-1]
+                found = [items[key] for items in found if key in items]
 
     return found
