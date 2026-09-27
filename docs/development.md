@@ -18,11 +18,14 @@ docker compose exec app uv run mypy
 
 ## CI
 
-main への push と pull request で、GitHub Actions が次を実行する。
+major の branch (`v2`、`v3` など) への push と pull request で、GitHub Actions が次を実行する。
 
 - ruff check、ruff format --check、mypy
 - Python 3.10 - 3.14 で pytest
 - 依存の下限 (`uv sync --resolution lowest-direct`) で pytest
+- tag を取ってきて、形が変わったのに minor を上げていないかを確かめる (`minor` job)
+
+pull request では、形を変えているのに `breaking` / `compatible` のラベルが 1 つでないと `label` workflow が落ちる。系統の branch で CI が通ると、`tag` workflow がその minor の tag を打ち、GitHub Release を作る ([versioning.md](./versioning.md))。`tag` workflow は `workflow_run` で動くので、使われるのは default branch にある `tag.yml` だけである。直すときは default branch で直す。
 
 ## 依存と Python の範囲
 
@@ -31,7 +34,7 @@ main への push と pull request で、GitHub Actions が次を実行する。
 - 実行時の依存は pydantic だけにする。テストと lint の道具は `[dependency-groups] dev` に置き、利用側には見せない
 - 依存と `requires-python` には下限だけを書き、上限は書かない。下限は CI の lowest-direct のテストで確かめる
 - `requires-python` は 3.10 以上。型の注釈に `X | None` を使い、pydantic がそれを実行時に評価するため
-- パッケージの version は `0.0.0` のまま変えない ([versioning.md](./versioning.md))
+- パッケージの version は tag から付く ([versioning.md](./versioning.md))
 
 ## lint と型検査
 

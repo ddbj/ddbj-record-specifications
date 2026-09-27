@@ -4,13 +4,20 @@
 docker compose exec app uv run pytest
 ```
 
-この repo のテストが確かめるのは、型が record を読めること、型と対応表が食い違っていないこと、converter の出力の 3 つである。登録データとしての正しさは確かめない (ddbj-validator のルールが判定する)。
+この repo のテストが確かめるのは、型が record を読めること、型と対応表が食い違っていないこと、converter の出力、形を変えたら minor を上げて破壊的かどうかを言っていること、の 4 つである。登録データとしての正しさは確かめない (ddbj-validator のルールが判定する)。
 
 ## 型のテスト
 
 - 各 major の fixture (`tests/fixtures/v1/`、`v2/`、`v3/records/`) が、その major の型で読めることを確かめる。`invalid_*.json` は読めないことを確かめる
 - v3 の `*_full.json` は、なるべく多くのフィールドに値を入れた record である。v3 のモデルは `extra="forbid"` なので、型からフィールドを消すと `*_full.json` が読めなくなり、テストが落ちる。フィールドを消すときは、`*_full.json` も直す
 - v2 の型が受け付ける値の範囲は、PBT (hypothesis) でも確かめる
+
+## version のテスト
+
+`test_versioning.py` は、系統の major の JSON Schema を比べる ([versioning.md](../docs/versioning.md))。
+
+- 今の minor の tag のものと比べ、形が変わっているのに `LATEST_MINOR_VERSIONS` を上げていなければ落ちる。tag を比べるので、履歴の浅い checkout では skip する。CI の `minor` job は履歴を全部取り、skip せずに落とす
+- pull request では向き先のものと比べ、形が変わっているのに `breaking` / `compatible` のラベルが 1 つでなければ落ちる。CI の `label` workflow が、向き先とラベルを `PR_BASE` / `PR_LABELS` で渡す
 
 ## 対応表のテスト
 

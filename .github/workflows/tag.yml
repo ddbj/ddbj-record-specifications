@@ -1,0 +1,62 @@
+name: Tag
+
+# Tags the minor of the line's major once it has passed CI on its branch, and publishes its release
+# note, which sorts the pull requests by whether they break the current users (docs/versioning.md).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    # The lines only: "v[0-9]*" would also match a branch such as v3-release.
+    branches: [main, "v[0-9]", "v[0-9][0-9]"]
+
+# One at a time: two runs tagging or publishing the same minor would race.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - name: Tag the minor unless it is tagged already
+        id: minor
+        run: |
+          tag=$(PYTHONPATH=. python3 -c 'from ddbj_record.schema import LATEST_MINOR_VERSIONS, SCHEMA_VERSIONS; print(LATEST_MINOR_VERSIONS[SCHEMA_VERSIONS[-1]])')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git rev-parse --quiet --verify "refs/tags/$tag" > /dev/null; then
+            echo "$tag is tagged already"
+          else
+            git tag "$tag" "${{ github.event.workflow_run.head_sha }}"
+            git push origin "refs/tags/$tag"
+          fi
+      # Every tag of the major that has no release gets one, so a release that failed is made by a
+      # later run even after the minor has moved on.
+      - name: Publish the releases of the major's tags that have none
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.minor.outputs.tag }}
+          # The repository's latest release is the default branch's, which is the newest finished major.
+          ON_DEFAULT_BRANCH: ${{ github.event.workflow_run.head_branch == github.event.repository.default_branch }}
+        run: |
+          major=${TAG%%.*}
+          tags=$(git tag --list "$major.*" | grep -E "^$major\.[0-9]+$" | sort -t. -k2,2n || true)
+          highest=$(echo "$tags" | tail -n 1)
+          previous=
+          for tag in $tags; do
+            if ! gh release view "$tag" > /dev/null 2>&1; then
+              latest=$([ "$ON_DEFAULT_BRANCH" = true ] && [ "$tag" = "$highest" ] && echo true || echo false)
+              if [ -n "$previous" ]; then
+                gh release create "$tag" --verify-tag --latest="$latest" --generate-notes --notes-start-tag "$previous"
+              else
+                gh release create "$tag" --verify-tag --latest="$latest" --notes "$major の最初の tag。これより前の変更は pull request の履歴を見る。"
+              fi
+            fi
+            previous=$tag
+          done

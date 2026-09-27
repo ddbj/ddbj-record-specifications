@@ -20,10 +20,6 @@ def test_schema_versions_contains_v3() -> None:
     assert "v3" in SCHEMA_VERSIONS
 
 
-def test_latest_minor_versions_has_no_v3() -> None:
-    assert "v3" not in LATEST_MINOR_VERSIONS
-
-
 # === LATEST_MINOR_VERSIONS ===
 
 
@@ -33,6 +29,10 @@ def test_latest_minor_versions_v1() -> None:
 
 def test_latest_minor_versions_v2() -> None:
     assert LATEST_MINOR_VERSIONS["v2"] == "v2.3"
+
+
+def test_latest_minor_versions_v3() -> None:
+    assert LATEST_MINOR_VERSIONS["v3"] == "v3.1"
 
 
 # === normalize_schema_version ===
@@ -60,8 +60,10 @@ def test_normalize_schema_version_valid(raw: str, expected: str) -> None:
     "raw",
     [
         "v999.0",
+        # A v3 record keeps the minor it was written in, so no v3 value is folded.
         "v3",
         "v3.0",
+        "v3.1",
         "invalid",
         "",
         "v",

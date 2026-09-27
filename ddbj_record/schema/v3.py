@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddbj_record.schema import LATEST_MINOR_VERSIONS
+
 # === Common types ===
 
 
@@ -1318,7 +1320,7 @@ class Relation(BaseModel):
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str | None = Field(None, examples=["v3"])
+    schema_version: str | None = Field(None, examples=[LATEST_MINOR_VERSIONS["v3"]])
     provenance: Provenance | None = None
     submission: Submission | None = None
     projects: list[Project] | None = None

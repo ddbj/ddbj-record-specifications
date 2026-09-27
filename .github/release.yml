@@ -1,0 +1,9 @@
+# The release note of a minor's tag, generated from its pull requests (docs/versioning.md).
+changelog:
+  categories:
+    - title: 破壊的変更
+      labels: [breaking]
+    - title: 互換な変更
+      labels: [compatible]
+    - title: その他
+      labels: ["*"]

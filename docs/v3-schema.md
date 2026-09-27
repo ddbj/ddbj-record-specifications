@@ -49,7 +49,7 @@ v3 の型が保証するのは、JSON として読めて型に合うこと (well
 
 ```json
 {
-  "schema_version": "v3",
+  "schema_version": "v3.1",
   "provenance": {"source_format": "ST.26 XML"},
   "submission": {"submitters": [{"name": "Taro Yamada"}]}
 }

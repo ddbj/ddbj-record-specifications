@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ddbj-record"
-version = "0.0.0"
+dynamic = ["version"]
 description = "Pydantic models of the DDBJ Record JSON format, with converters between its major versions."
 readme = "README.md"
 authors = [{ name = "Bioinformatics and DDBJ Center" }]
@@ -24,8 +24,22 @@ ddbj_record_converter = "ddbj_record.converter.cli:main"
 [dependency-groups]
 dev = ["hypothesis>=6.160", "mypy>=2", "pytest>=9", "pyyaml>=6", "ruff>=0.16", "types-PyYAML"]
 
+# The version is the minor's tag (docs/versioning.md); a commit after it is 3.1.post1.devN+g….
+# An archive from GitHub carries the tag in .git_archival.txt, so a tarball install gets it too.
+# A tree with neither (the dev image, which leaves .git out) builds as 0.0.0.
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+
 [tool.hatch.build.targets.wheel]
 packages = ["ddbj_record"]
+
+# Rebuild the installed package when the commit or the tags move, so its version follows them.
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { git = { commit = true, tags = true } }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
