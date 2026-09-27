@@ -3,10 +3,12 @@
 ## インストール
 
 ```bash
-pip install git+https://github.com/ddbj/ddbj-record-specifications.git@main
+pip install "ddbj-record @ git+https://github.com/ddbj/ddbj-record-specifications.git@v3.1"
 ```
 
-main の最新を使うか、commit を指定して固定する。どちらを選ぶかの考え方は [versioning.md](./versioning.md) にある。
+使う major の系統の tag (minor) か commit で固定する。v3 は main、v1 / v2 は `v2` branch の系統である ([versioning.md](./versioning.md))。
+
+GitHub の archive (`archive/<commit>.tar.gz`) で入れることもできる。version は archive の中の `.git_archival.txt` から付く。そのため、tag が打たれる前と後で、同じ commit の archive の中身が変わる。archive をハッシュで固定するなら、tag が打たれた後に取る。
 
 ## record を読む
 
@@ -20,13 +22,13 @@ from ddbj_record.schema.v3 import DdbjRecord
 record = DdbjRecord.model_validate_json(Path("record.json").read_text())
 ```
 
-v1 / v2 の record は `ddbj_record.schema.v1` / `ddbj_record.schema.v2` の `DdbjRecord` で読む。1 つの環境で複数の major を同時に import できる。
+v1 / v2 の record は、`v2` の系統の `ddbj_record.schema.v1` / `ddbj_record.schema.v2` の `DdbjRecord` で読む。
 
 型が保証するのは、JSON として読めて型に合うことまでである。登録データとして正しいかは [ddbj/ddbj-validator](https://github.com/ddbj/ddbj-validator) で確かめる。
 
 ## major の間の変換
 
-今あるのは v1 <-> v2 の converter である。
+今あるのは v1 <-> v2 の converter で、`v2` の系統にある。
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input v1.json --output v2.json

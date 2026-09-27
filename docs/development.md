@@ -18,11 +18,14 @@ docker compose exec app uv run mypy
 
 ## CI
 
-main への push と pull request で、GitHub Actions が次を実行する。
+系統の branch (main と `v2` など) への push と pull request で、GitHub Actions が次を実行する。
 
 - ruff check、ruff format --check、mypy
 - Python 3.10 - 3.14 で pytest
 - 依存の下限 (`uv sync --resolution lowest-direct`) で pytest
+- tag を取ってきて、形が変わったのに minor を上げていないかを確かめる (`minor` job)
+
+系統の branch で CI が通ると、`tag` workflow がその minor の tag を打つ ([versioning.md](./versioning.md))。
 
 ## 依存と Python の範囲
 

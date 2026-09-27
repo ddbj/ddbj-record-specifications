@@ -2,12 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, "v[0-9]*"]
+    branches: [main, "v[0-9]", "v[0-9][0-9]"]
   pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Only a pull request's runs are cancelled: a run on a branch decides whether its minor is tagged.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint:

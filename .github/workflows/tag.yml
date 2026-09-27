@@ -5,7 +5,8 @@ on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: [main, "v[0-9]*"]
+    # The lines only: "v[0-9]*" would also match a branch such as v3-release.
+    branches: [main, "v[0-9]", "v[0-9][0-9]"]
 
 jobs:
   tag:
