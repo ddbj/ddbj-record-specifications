@@ -44,7 +44,11 @@ record を書く側は、使った型の `LATEST_MINOR_VERSIONS` の値を `sche
 
 ## major の中の変更
 
-major の中でも、フィールドの削除・名前の変更・型の変更をしてよい。その代わり minor を上げ、変更は PR の本文で知らせる。tag の間の差分は GitHub の比較 (`compare/v3.1...v3.2`) で見られるので、release note・CHANGELOG は書かない。
+major の中でも、フィールドの削除・名前の変更・型の変更をしてよい。その代わり minor を上げ、利用側が直す必要があるかを知らせる。
+
+- 形を変える PR には、`breaking` (利用側が直す必要がある) か `compatible` (今の利用側はそのまま動く) のラベルを 1 つ付ける。付け忘れは CI の `label` workflow が止める (PR の向き先と JSON Schema を比べ、形が変わっていてラベルが無ければ落ちる)。破壊的かどうかは、利用側にとっての意味で PR を出す側が決める
+- `tag` workflow は tag を打つと、その minor の GitHub Release を作る。release note は同じ major の前の minor からの PR を、「破壊的変更」「互換な変更」「その他」に分けて並べる (`.github/release.yml`)
+- 変更の中身は PR の本文に書く。手で書く CHANGELOG は持たない
 
 変更が利用側に及ばないよう、破壊的変更になりにくい定義を選ぶ。
 

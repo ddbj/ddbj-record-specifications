@@ -25,7 +25,7 @@ major の branch (`v2`、`v3` など) への push と pull request で、GitHub 
 - 依存の下限 (`uv sync --resolution lowest-direct`) で pytest
 - tag を取ってきて、形が変わったのに minor を上げていないかを確かめる (`minor` job)
 
-系統の branch で CI が通ると、`tag` workflow がその minor の tag を打つ ([versioning.md](./versioning.md))。
+pull request では、形を変えているのに `breaking` / `compatible` のラベルが無いと `label` workflow が落ちる。系統の branch で CI が通ると、`tag` workflow がその minor の tag を打ち、GitHub Release を作る ([versioning.md](./versioning.md))。
 
 ## 依存と Python の範囲
 

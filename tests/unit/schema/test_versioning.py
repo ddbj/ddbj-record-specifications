@@ -1,10 +1,15 @@
-"""A change to the shape of the line's major raises its minor (docs/versioning.md).
+"""A change to the shape of the line's major raises its minor, and says whether it breaks the
+current users (docs/versioning.md).
 
 The JSON Schema of the types is compared with the one at the tag of the current minor. The tag is
 made once the minor reaches the branch, so a minor that is not tagged yet has nothing to compare with.
 
 The comparison needs the history and its tags. CI's `minor` job fetches them and sets REQUIRE_TAGS,
 so that a checkout without them fails there instead of skipping.
+
+A pull request that changes the shape carries one of the labels `breaking` / `compatible`, which the
+release note of the minor's tag sorts it by (.github/release.yml). CI's `label` workflow passes the
+pull request's base and labels in PR_BASE / PR_LABELS.
 
 Only what shows in the JSON Schema is compared. A validator added to a model narrows what it accepts
 without showing there, and raising the minor for it is left to the PR that adds it.
@@ -35,6 +40,9 @@ _ANNOTATIONS = frozenset({"description", "examples", "title"})
 
 # Keywords whose value maps names to schemas. A field may itself be called `description`.
 _SCHEMA_MAPS = frozenset({"properties", "$defs", "patternProperties"})
+
+# What a pull request that changes the shape says about it: exactly one of these.
+_CHANGE_LABELS = frozenset({"breaking", "compatible"})
 
 
 def _git(*args: str) -> subprocess.CompletedProcess[bytes]:
@@ -69,13 +77,13 @@ def _shape(schema: Any) -> Any:
     }
 
 
-def _schema_at(tag: str, tmp_path: Path) -> Any:
-    archive = _git("archive", "--format=tar", tag, "ddbj_record")
+def _schema_at(ref: str, tmp_path: Path) -> Any:
+    archive = _git("archive", "--format=tar", ref, "ddbj_record")
     assert archive.returncode == 0, archive.stderr.decode()
     with tarfile.open(fileobj=BytesIO(archive.stdout)) as tar:
         tar.extractall(tmp_path, filter="data")
 
-    # The tag's types go first on sys.path, and the check that they are what got imported keeps an
+    # The ref's types go first on sys.path, and the check that they are what got imported keeps an
     # installed package (or PYTHONSAFEPATH) from turning this into a comparison of the types with themselves.
     script = """
 import sys
@@ -119,4 +127,19 @@ def test_shape_is_that_of_the_minors_tag(tmp_path: Path) -> None:
 
     assert _shape(json.loads(dump_schema(MAJOR))) == _shape(_schema_at(tag, tmp_path)), (
         f'the shape of {MAJOR} has changed since {tag}; raise LATEST_MINOR_VERSIONS["{MAJOR}"]'
+    )
+
+
+def test_a_change_to_the_shape_says_whether_it_breaks(tmp_path: Path) -> None:
+    base = os.environ.get("PR_BASE")
+    if not base:
+        pytest.skip("not run for a pull request")
+
+    if _shape(json.loads(dump_schema(MAJOR))) == _shape(_schema_at(base, tmp_path)):
+        return
+
+    labels = _CHANGE_LABELS & set(json.loads(os.environ.get("PR_LABELS") or "[]"))
+    assert len(labels) == 1, (
+        f"this pull request changes the shape of {MAJOR}; label it with one of {sorted(_CHANGE_LABELS)} "
+        f"(it has {sorted(labels) or 'neither'})"
     )
