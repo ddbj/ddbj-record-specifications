@@ -164,7 +164,7 @@ def test_organism_taxonomy_id_as_a_number_is_rejected(value: int) -> None:
 
 # === relations の index ===
 #
-# accession が無く alias も重なるオブジェクトは、その種類の list の中の位置 (0 始まり) で指す。
+# accession が無く alias も重なるオブジェクトは、その種類の list で同じ alias を持つものの中での位置 (0 始まり) で指す。
 # 起点 (RelationSource) と相手 (RelationTarget、pool.members[].sample) で同じ規則にする。
 
 

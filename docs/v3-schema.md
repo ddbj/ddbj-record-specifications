@@ -63,7 +63,7 @@ SRA XML、GEA のメタデータ、ST.26 の配列表から変換した record �
 - 保たないのは、値を持たない要素、数の書き方、XML の書式 (属性の並び、空白、コメント)。例えば `NOMINAL_SDEV="0.0E0"` は `nominal_sdev: 0.0` になり、`0.0E0` には戻らない
 - 日付は ISO 8601 に書き直し、戻すときは元の形式の書き方にする (ST.26 の Bibliography の `20241203` など)。決まった書き方でない日付は、書かれたまま持って書かれたまま戻す
 - 大きな表 (アレイ設計のプローブの表など) とリードファイルは record に入れず、`File` で指す
-- GEA の SDRF の行は record に持たず、オブジェクトと relations から作り直す。行の番号を sample、member、run / analysis の `sdrf_rows` に、ファイルの列の位置を run / analysis の `sdrf_column` に持ち、行はこの 2 つだけから作るので、行の順序と全く同じ行の繰り返しも戻り、list の並びが変わっても崩れない。保たないのは、種類の違う列の並び (ノードの中で Comment が属性の前か後か、など)。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
+- GEA の SDRF の行は record に持たず、オブジェクトから作り直す。行の番号を sample、member、run / analysis の `sdrf_rows` に、ファイルの列の位置を run / analysis の `sdrf_column` に持ち、行はこの 2 つだけから作る (relations は使わない)。そのため、行の順序と全く同じ行の繰り返しも戻り、list の並びが変わっても崩れない。保たないのは、種類の違う列の並び (ノードの中で Comment が属性の前か後か、など)。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
 - ST.26 の feature は、source とそれ以外の前後と、1 つの feature の中で名前の違う qualifier の前後を保たない。source は entry の `source_features` に、それ以外は `features` に分けて持ち、qualifier は名前ごとにまとめて持つためである。配列の長さ (`INSDSeq_length`) は配列から数える。詳しくは ST.26 の対応表 (`st26.yml`) の sequences の節にある
 
 形式の要素を v3 のどこに置くかは、[`tests/fixtures/v3/mapping/`](../tests/fixtures/v3/mapping/) の対応表に 1 行ずつ書いてある。変換そのものは利用側が行う。対応表をどう確かめているかは [tests/README.md](../tests/README.md) にある。

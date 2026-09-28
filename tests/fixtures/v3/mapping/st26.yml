@@ -6,9 +6,8 @@
 # header はヘッダー（配列（SequenceData）より前の全てと、JPO が末尾に足す Bibliography）、sequences は
 # SequenceData の中（配列と feature table）。
 #
-# 対象は JPO との受け渡しの場所（a012:ddbjjpo/from_JPO）にある配列表の全てのファイル（2026-09-26
-# に集計、JPO から受け取った 20,731 件と MOIP の 723 件のうち、XML として読めた 21,452 件）に
-# 現れる項目。
+# 対象は JPO との受け渡しの場所にある配列表の全てのファイル（2026-09-26 に集計、JPO から受け取った
+# 20,731 件と MOIP の 723 件のうち、XML として読めた 21,452 件）に現れる項目。
 #
 #   A/B          A の中の B
 #   A/@name      A の属性

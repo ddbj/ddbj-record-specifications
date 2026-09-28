@@ -3,8 +3,8 @@
 # gea_full.json / gea_array_design_full.json / gea_unread_sdrf.json に全ての行の実例があることを確かめる。
 # モデルを変えたら、ここも手で直す。
 #
-# 対象は、D-way の GEA の DB (dordb の mass.metadata) にある IDF / SDRF / ADF の全ての版と、CIBEX の
-# ファイル (dordb に無いので、公開用の写しの cibex/ から) に現れる項目。accession が振られていない登録 (151 件) は
+# 対象は、D-way の GEA の DB にある IDF / SDRF / ADF の全ての版と、CIBEX の
+# ファイル (その DB に無いので、公開用の写しから) に現れる項目。accession が振られていない登録 (151 件) は
 # 作っている途中のものなので含めない (accession を振った登録の、振る前の版は含める)。公開用の写しは、
 # 公開した experiment の、公開したときの版しか持たない。
 #
@@ -48,16 +48,15 @@
 # どのノードも、列の位置、名前、そのノードに置く値 (属性、Comment、Protocol REF、member なら元の sample と extract、
 # Factor Value、misplaced_columns も) が全て同じものだけを 1 つのオブジェクトにまとめ、どれかが違えば同じ名前の別の
 # オブジェクトにする。同じファイルの名前でも、Comment の md5 が行ごとに違うもの (表計算の連番で書き換わったもの) や、
-# 別の列に書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、list の中の位置 (index) も
-# 書く。
+# 別の列に書かれたものは別のオブジェクトになる。名前の重なるオブジェクトを指すときは、同じ名前のものの中での位置
+# (index) も書く。
 #
 # run / analysis が、Assay の一部の member の行にしか無いときは、data_blocks[].member_name でその member を指す
 # (dual-channel で channel ごとに別のファイルがあるものなど)。1 つの Assay の中で member を名前で指せないもの
 # (member_name の重なるもの、Labeled Extract が無く Extract が複数あるもの) は書かない。
 #
 # 行は、relations や index をたどらずに、次の 2 つだけから作る。relations、members[].sample、
-# data_blocks[].member_name はオブジェクトの間の関係を表すもので、行を作るのには使わない (index は、list の並びが
-# 変わると別のものを指す)。
+# data_blocks[].member_name はオブジェクトの間の関係を表すもので、行を作るのには使わない。
 #
 #   sdrf_rows    元の行の番号 (0 始まり。見出しの次の行が 0)。samples[]、members[]、runs[]、analyses[] に持つ
 #   sdrf_column  run / analysis の、SDRF のファイルの列の中での位置 (0 始まり。左端のファイルの列が 0)
