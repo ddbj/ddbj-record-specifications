@@ -105,10 +105,10 @@ record の中で accession と alias を持つもの (`projects[]`、`samples[]`
 | `governed_by` | 起点が相手の規約に従う | JGA の dataset -> policy |
 | `managed_by` | 起点を相手が管理する | JGA の policy -> DAC |
 
-- 起点 (`source`) は record の中のオブジェクトで、`type` にその種類 (`run` など) を書く。`accession` で指し、無ければ `alias` で指す。alias も一意でなければ、list の中の位置 (`index`、0 始まり) で指す。SRA や GEA から変換した record には、accession の無いオブジェクトも、alias が重なるものもある
+- 起点 (`source`) は record の中のオブジェクトで、`type` にその種類 (`run` など) を書く。`accession` で指し、無ければ `alias` で指す。alias も一意でなければ、その種類の list で同じ alias を持つものの中での、書かれた順の位置 (`index`、0 始まり) で指す。alias は前後の空白を除き、続く空白を 1 つとみなして比べ、alias の無いものどうしも同じ alias を持つものとして数える。SRA や GEA から変換した record には、accession の無いオブジェクトも、alias が重なるものもある。list 全体の中の位置にしないのは、list を alias で並べ直しても (ddbj-repository は保存するときにそうする)、同じ alias の中の順を保てば指す先が変わらないため
 - `source` を省くと、record 全体が起点になる
 - オブジェクトの種類は、record のキーの単数形で書く (`samples` の要素なら `sample`、`analyses` なら `analysis`、`access_control.policy` なら `policy`)。起点の `type` も相手の `db` も同じ名前を使う
-- 相手 (`target`) は、`url` か、`db` と `id` で指す。`db` がオブジェクトの種類 (`sample` など) のときは、`id` に alias、`accession` に accession を書く。相手がこの record の中にあり、accession が無く alias も一意でないときは、`index` も書く。それ以外では、相手がこの record の中にあるかどうかは表さない
+- 相手 (`target`) は、`url` か、`db` と `id` で指す。`db` がオブジェクトの種類 (`sample` など) のときは、`id` に alias、`accession` に accession を書く。相手がこの record の中にあり、accession が無く alias も一意でないときは、`index` (起点と同じく、同じ alias を持つものの中での位置) も書く。それ以外では、相手がこの record の中にあるかどうかは表さない
 
 ```json
 {
