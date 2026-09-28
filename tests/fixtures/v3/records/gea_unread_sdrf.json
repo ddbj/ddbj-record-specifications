@@ -1,0 +1,25 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "MAGE-TAB"
+  },
+  "submission": {
+    "gea": {
+      "magetab_version": "1.1",
+      "sdrf_file": "E-GEAD-1.sdrf.txt",
+      "legacy": {
+        "unread_sdrf": {
+          "filename": "E-GEAD-1.sdrf.txt",
+          "checksum_method": "MD5",
+          "checksum": "0f343b0931126a20f133d67c2b018a3b"
+        }
+      }
+    }
+  },
+  "projects": [
+    {
+      "alias": "ESUB000001_Experiment_1",
+      "title": "Transcriptome of leaves"
+    }
+  ]
+}
