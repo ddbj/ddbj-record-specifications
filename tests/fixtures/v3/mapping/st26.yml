@@ -1,0 +1,132 @@
+# ST.26 の配列表（WIPO の DTD V1_3 と、JPO が足す Bibliography）の項目を、v3 のどこに置くか。
+# tests/unit/schema/test_v3_st26_mapping.py が、全ての行の場所がモデルに実在すること、WIPO の DTD が
+# 宣言する要素と属性と raw fixture の ST.26 のファイルの項目が全てここにあること、st26_full.json に
+# 全ての行の実例があることを確かめる。モデルを変えたら、ここも手で直す。
+#
+# header はヘッダー（配列（SequenceData）より前の全てと、JPO が末尾に足す Bibliography）、sequences は
+# SequenceData の中（配列と feature table）。
+#
+# 対象は JPO との受け渡しの場所（a012:ddbjjpo/from_JPO）にある配列表の全てのファイル（2026-09-26
+# に集計、JPO から受け取った 20,731 件と MOIP の 723 件のうち、XML として読めた 21,452 件）に
+# 現れる項目。
+#
+#   A/B          A の中の B
+#   A/@name      A の属性
+#
+# 値の読み方:
+#   (container)          値を持たない入れ物。子が値を持つ
+#   a.b[]                b は list
+#   a.b{*}               b は dict で、その全ての値（名前ごとの qualifier の list）
+#   a.b{}                b は dict で、その key（qualifier の名前）
+#   a.b{*}[]             括弧は続けて書く（dict の値である list の要素）
+#   ... (注記)           読み手のための補足
+#
+# 日付は ISO 8601 にする。Bibliography の日付は YYYYMMDD（20241203）と書かれているので書き直し、
+# XML に戻すときは YYYYMMDD に戻す。決まった書かれ方でない日付（EarliestPriorityApplicationIdentification/
+# FilingDate の 4/28/2023 が 1 件）は、書き直すには書かれ方を推し量ることになるので、書かれたまま持ち、
+# 戻すときもそのまま書く。そのような日付は検証で止める（submission-bulk-st26 の PAT_R0008 /
+# PAT_R0028、ddbj-validator のルール）。
+# 空の要素と空の languageCode は、値が無いものとして持たない。ただし、中身が空で languageCode のある
+# InventionTitle（1 件）は、発明の名称の数を保つために {"language_code": "ja"} として持つ。
+#
+# 数はその項目を含むファイルの数。
+
+header:
+  ST26SequenceListing/@dtdVersion:                                                     submission.st26.dtd_version  # 21,452 ファイル
+  ST26SequenceListing/@fileName:                                                       submission.st26.file_name  # 21,442 ファイル
+  ST26SequenceListing/@softwareName:                                                   submission.st26.software_name  # 21,446 ファイル
+  ST26SequenceListing/@softwareVersion:                                                submission.st26.software_version  # 21,446 ファイル
+  ST26SequenceListing/@productionDate:                                                 submission.st26.production_date  # 21,447 ファイル
+  ST26SequenceListing/@originalFreeTextLanguageCode:                                   submission.st26.original_language  # 3,796 ファイル
+  ST26SequenceListing/@nonEnglishFreeTextLanguageCode:                                 submission.st26.non_english_language  # 208 ファイル
+  ST26SequenceListing/ApplicationIdentification:                                       (container)  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/IPOfficeCode:                          submission.st26.application.ip_office_code  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/ApplicationNumberText:                 submission.st26.application.application_number_text  # 20,919 ファイル
+  ST26SequenceListing/ApplicationIdentification/FilingDate:                            submission.st26.application.filing_date  # 20,919 ファイル
+  ST26SequenceListing/ApplicantFileReference:                                          submission.st26.applicant_file_reference  # 20,873 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification:                       (container)  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/IPOfficeCode:          submission.st26.earliest_priority.ip_office_code  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/ApplicationNumberText: submission.st26.earliest_priority.application_number_text  # 18,552 ファイル
+  ST26SequenceListing/EarliestPriorityApplicationIdentification/FilingDate:            submission.st26.earliest_priority.filing_date  # 18,552 ファイル
+  ST26SequenceListing/ApplicantName:                                                   submission.st26.applicant_name  # 21,452 ファイル
+  ST26SequenceListing/ApplicantName/@languageCode:                                     submission.st26.applicant_name_language_code  # 21,452 ファイル
+  ST26SequenceListing/ApplicantNameLatin:                                              submission.st26.applicant_name_latin  # 5,207 ファイル
+  ST26SequenceListing/InventorName:                                                    submission.st26.inventor_name  # 3,259 ファイル
+  ST26SequenceListing/InventorName/@languageCode:                                      submission.st26.inventor_name_language_code  # 3,259 ファイル
+  ST26SequenceListing/InventorNameLatin:                                               submission.st26.inventor_name_latin  # 942 ファイル
+  ST26SequenceListing/InventionTitle:                                                  submission.st26.invention_titles[].title  # 21,452 ファイル
+  ST26SequenceListing/InventionTitle/@languageCode:                                    submission.st26.invention_titles[].language_code  # 21,452 ファイル
+  ST26SequenceListing/SequenceTotalQuantity:                                           submission.st26.sequence_total_quantity  # 21,452 ファイル
+  ST26SequenceListing/SequenceData:                                                    sequences.entries[] (中身は sequences の節)  # 21,452 ファイル
+  ST26SequenceListing/Bibliography:                                                    (container)  # 20,729 ファイル
+  ST26SequenceListing/Bibliography/PublishedDate:                                      submission.st26.published_date (YYYYMMDD を ISO 8601 に)  # 20,729 ファイル
+  ST26SequenceListing/Bibliography/PriorityCountry:                                    submission.st26.bibliography_priority.ip_office_code  # 18,075 ファイル
+  ST26SequenceListing/Bibliography/PriorityNumber:                                     submission.st26.bibliography_priority.application_number_text  # 18,075 ファイル
+  ST26SequenceListing/Bibliography/PriorityDate:                                       submission.st26.bibliography_priority.filing_date (YYYYMMDD を ISO 8601 に)  # 18,075 ファイル
+
+# SequenceData の中。数は要素の数（2026-09-27 に同じファイルを集計。SequenceData は 13,154,350、うち
+# 配列が "000" のものが 1,186,347）。qualifier の行の数は、source の qualifier も含めた全ての数。
+#
+# SequenceData 1 つが sequences.entries[] の 1 つ。ただし配列が "000"（欠番）のものは entry にせず、
+# 番号だけを submission.st26.skipped_sequence_id_numbers に持つ。"000" の SequenceData は、空の
+# length / moltype / division と "000" のほかに何も持たない（other-seqids も持たない）ので、戻すときは
+# それを書く。番号は、ST.26 のとおりどのファイルでも 1 から順に振られていて（先頭に 0 を付けたものも
+# 無い）、entry と欠番の番号から SequenceData の並びが戻る。
+#
+# feature は key が source のものを sequences.entries[].source_features[] に、それ以外を features[] に
+# 置き、features[].sequence_id でその配列の entry の alias を指す。source の qualifier は、organism と
+# mol_type も含めて全てを書かれたまま source.qualifiers に持ち、最初の organism と mol_type の値を
+# source.organism.name と source.mol_type にも書く（型付きの場所を読む利用側のため。両方が合うことは
+# ddbj-validator のルールが確かめる）。英語の値（INSDQualifier_value）を持たない qualifier は数えず、
+# 英語の値を持つものが 1 つも無ければ型付きの場所は書かない。
+#
+# source / organism / mol_type は、大文字小文字を区別せずに見分ける。key を SOURCE、qualifier の名前を
+# MOL_TYPE / ORGANISM と大文字で書いたものが 418 配列（15 ファイル、全て AA で MOL_TYPE は protein）
+# あり、これまでの取り込み（submission-bulk-st26）も同じように読んで公開している。qualifier の名前は
+# 書かれたまま持ち、source の key の綴りだけを持たない（戻すときは source と書く）。
+#
+# 値を持たない qualifier（名前だけのもの。4 つ）は、value の無い {}（id があれば {"alias": ...}）で持つ。
+# v2 のように "true" と書かない。"true" と書かれた qualifier と区別できなくなるため。
+#
+# 行の [000] は配列が "000" の SequenceData、[source] は key が source の feature、[organism] /
+# [mol_type] はその中の organism / mol_type の qualifier（いずれも大文字小文字を区別しない）。
+#
+# 保たないもの:
+#   - source の key の大文字小文字（SOURCE と書いたもの 418。INSDC の key は source）
+#   - INSDSeq_length。配列の長さなので持たず、戻すときは配列から数える。書かれた値が配列の長さと
+#     合わないものが 7 配列あり、それは ST.26 として誤りなので検証で止める
+#   - feature の並びのうち、source とそれ以外の前後。source を先頭の feature でない位置に書いたもの
+#     が 3,622,314 配列あるが、INSDC の feature の並びに意味は無く、戻すときは source を先頭に置く
+#   - 1 つの feature の中で、名前の違う qualifier の前後（qualifier は名前ごとにまとめて持つので、
+#     note, organism, note のように名前が入り混じった並びは戻らない。218 feature）
+#   - 配列の前後の空白（4,879 配列。中の空白は無い）と、中身の無い INSDQualifier_value（860）と
+#     NonEnglishQualifier_value
+
+sequences:
+  ST26SequenceListing/SequenceData/@sequenceIDNumber:                                                                                               sequences.entries[].alias (書かれたままの文字列)  # 11,968,003
+  ST26SequenceListing/SequenceData[000]/@sequenceIDNumber:                                                                                          submission.st26.skipped_sequence_id_numbers[] (配列が "000" の SequenceData。書かれたままの文字列)  # 1,186,347
+  ST26SequenceListing/SequenceData/INSDSeq:                                                                                                         (container)  # 13,154,350
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_length:                                                                                          sequences.entries[].sequence (の長さ。書かれた値は持たない)  # 11,968,003
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_moltype:                                                                                         sequences.entries[].st26.moltype  # 11,968,003
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_division:                                                                                        sequences.entries[].division  # 11,968,003
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_other-seqids:                                                                                    (container)  # 11,917,861
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_other-seqids/INSDSeqid:                                                                          sequences.entries[].st26.other_seqid  # 11,917,861
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table:                                                                                   (container)  # 11,968,001
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature:                                                                       (container)  # 20,623,127
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_key:                                                       features[].type (書かれたまま)  # 8,655,126
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_location:                                                  features[].location
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals:                                                     (container)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier:                                       (container)  # 38,766,748
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/@id:                                   features[].qualifiers{*}[].alias  # 22,839,002
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/INSDQualifier_name:                    features[].qualifiers{} (書かれたまま)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/INSDQualifier_value:                   features[].qualifiers{*}[].value  # 38,766,014
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature/INSDFeature_quals/INSDQualifier/NonEnglishQualifier_value:             features[].qualifiers{*}[].non_english_value  # 4,248
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]:                                                               (container)  # 11,968,001
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_location:                                          sequences.entries[].source_features[].location
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/@id:                           sequences.entries[].source_features[].source.qualifiers{*}[].alias
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/INSDQualifier_name:            sequences.entries[].source_features[].source.qualifiers{}
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/INSDQualifier_value:           sequences.entries[].source_features[].source.qualifiers{*}[].value
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier/NonEnglishQualifier_value:     sequences.entries[].source_features[].source.qualifiers{*}[].non_english_value
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[organism]/INSDQualifier_value: sequences.entries[].source_features[].source.organism.name (英語の値を持つ最初の organism。qualifiers にも持つ)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_feature-table/INSDFeature[source]/INSDFeature_quals/INSDQualifier[mol_type]/INSDQualifier_value: sequences.entries[].source_features[].source.mol_type (英語の値を持つ最初の mol_type。qualifiers にも持つ)
+  ST26SequenceListing/SequenceData/INSDSeq/INSDSeq_sequence:                                                                                        sequences.entries[].sequence (書かれたまま。前後の空白は落とす)  # 11,968,003

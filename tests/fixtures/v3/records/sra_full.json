@@ -1076,7 +1076,7 @@
       "source": {
         "type": "sample",
         "alias": "soil-a",
-        "index": 2
+        "index": 1
       },
       "target": {
         "url": "https://example.org/plots/1/cores/2"

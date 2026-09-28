@@ -148,9 +148,15 @@ class ApplicationIdentification(BaseModel):
 
 
 class St26Submission(BaseModel):
-    """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。"""
+    """ST.26 (WIPO) の特許配列リストの出願情報。来歴ではなく、登録の内容そのもの。
+
+    配列 (SequenceData) より前の全てと、JPO が末尾に足す Bibliography、欠番にした配列の番号を持つ。
+    配列そのものは sequences.entries[] (配列ごとの ST.26 の値は entries[].st26)。
+    """
 
     dtd_version: str | None = Field(None, examples=["V1_3"])
+    # ルート要素の fileName。出願人が付けた名前で、JPO から届くファイルの名前 (公報番号) とは別。
+    file_name: str | None = None
     software_name: str | None = None
     software_version: str | None = None
     production_date: str | None = None
@@ -159,13 +165,30 @@ class St26Submission(BaseModel):
     applicant_file_reference: str | None = None
     application: ApplicationIdentification | None = None
     earliest_priority: ApplicationIdentification | None = None
+    # ST.26 が書く出願人と発明者は、筆頭の 1 人ずつ。language_code は ApplicantName / InventorName の属性。
     applicant_name: str | None = None
+    applicant_name_language_code: str | None = Field(None, examples=["ja"])
     # applicant_name / inventor_name のラテン文字の翻字。
     applicant_name_latin: str | None = None
     inventor_name: str | None = None
+    inventor_name_language_code: str | None = Field(None, examples=["ja"])
     inventor_name_latin: str | None = None
-    # 言語ごとの発明の名称。
+    # 言語ごとの発明の名称。同じ言語のものが 2 つあることもあるので、書かれた順に持つ。
     invention_titles: list[InventionTitle] | None = None
+    # SequenceData の数 ("000" の欠番も数える)。entry の数とは合わないことがあり (手で直されたファイルには、
+    # 4 と書いて 8 つ持つものがある)、配列から数え直せるとは限らない。int にするのは、DTD は #PCDATA だが
+    # ST.26 が配列の数と定めていて、保存された全ての値 (21,452 件) が ASCII の整数として読めるから。
+    sequence_total_quantity: int | None = None
+    # 配列が "000" の SequenceData の番号。"000" は、その番号の配列を欠番にしたことを表すので、entry に
+    # しない。entry の alias (配列番号) と同じく書かれたままの文字列で持つ。ST.26 は配列番号を 1 から
+    # 始まる連続した整数とするので、entry と欠番の番号から SequenceData の並びが戻る (崩れたものは検証で止める)。
+    skipped_sequence_id_numbers: list[str] | None = None
+    # 以下は JPO が公報の書誌から足したもの (Bibliography。WIPO の DTD には無い)。
+    # 公報の日付。DDBJ が公開した日 (record に入れない、登録システムの日付) とは別。
+    published_date: str | None = Field(None, examples=["2024-12-03"])
+    # 公報の書誌の優先権。earliest_priority (配列表に書かれた優先権) と庁・番号・日付が全て一致するのは
+    # 7 割ほどで、別の出願を指すものもあるので、1 つにまとめない。
+    bibliography_priority: ApplicationIdentification | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1140,6 +1163,9 @@ class Qualifier(BaseModel):
 
     alias: str | None = None
     value: str | None = None
+    # ST.26 の NonEnglishQualifier_value。英語でない言語で書かれた値で、value (英語) と一緒にも、
+    # 単独でも書かれる。言語は submission.st26.non_english_language。
+    non_english_value: str | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1166,6 +1192,19 @@ class SourceFeature(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class St26Sequence(BaseModel):
+    """ST.26 の配列 (SequenceData) の 1 つについて、v3 の Entry に置き場の無い値。書かれたまま持つ。"""
+
+    # INSDSeq_moltype。DNA / RNA / AA。source の mol_type からおおむね決まるが、値の無い mol_type を
+    # 書いた配列もあり、そこでは mol_type から決められないので、書かれたまま持つ。
+    moltype: str | None = Field(None, examples=["AA"])
+    # INSDSeq_other-seqids/INSDSeqid。公報と配列番号を指す。JPO から届くファイルでは全ての配列が持ち、
+    # 最後の配列番号の前 ("pat|JP|2024048697|A5") はファイルの中で同じ。
+    other_seqid: str | None = Field(None, examples=["pat|JP|2024048697|A5|1"])
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class Entry(BaseModel):
     # version を含む ("AB123456.1")。alias は登録者が付けた名前。
     accession: str | None = Field(None, examples=["AB123456.1"])
@@ -1178,6 +1217,7 @@ class Entry(BaseModel):
     sequence: str | None = None
     comments: list[str] | None = None
     source_features: list[SourceFeature] | None = None
+    st26: St26Sequence | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -1295,7 +1335,9 @@ class RelationSource(BaseModel):
 
     record 内のオブジェクトを accession で指し、accession が無ければ alias で指す。
     SRA の alias は record の中でも一意とは限らないので、accession が無く alias も
-    一意でないときは、その種類の list の中の位置 (0 始まり) を index に書く。
+    一意でないときは、その種類の list で同じ alias を持つものの中での位置 (書かれた順、
+    0 始まり) を index に書く。list 全体の中の位置ではない。alias は前後の空白を除き、
+    続く空白を 1 つとみなして比べ、alias の無いものどうしも同じ alias を持つものとして数える。
     """
 
     type: str | None = Field(None, examples=["sample"])
@@ -1314,7 +1356,7 @@ class RelationTarget(BaseModel):
     オブジェクトで、id は alias、accession は accession。相手がこの record の中に
     あるかどうかは表さず、読む側が accession か (center_name, alias) で探す。
     ただし、相手がこの record の中にあり、accession が無く alias も一意でないときは、
-    その種類の list の中の位置 (0 始まり) を index に書く。
+    その種類の list で同じ alias を持つものの中での位置 (書かれた順、0 始まり) を index に書く。
     SRA の参照は refname と accession を同時に書けるので、片方に寄せると戻せない。
     center_name は alias の名前空間(SRA の refcenter)。
     """

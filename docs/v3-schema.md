@@ -28,10 +28,10 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 - GFF は record の要素にせず、入力の形式として扱う。GFF の feature は `features` に入れる
 - 染色体やプラスミドを表すモデルは作らない。`sequences.entries[]` の `name` / `type` / `topology` で表す (例: `{"name": "pPLH-1", "type": "plasmid", "topology": "circular"}`)
 - `array_design` は accession を持つ独立した登録で、多くの experiment から参照されるので、`assembly` と同じくトップレベルに置く
-- 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA の `@target` の無い HOLD の日付も `hold_date` に写し、ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。2 つが食い違っていないかは ddbj-validator のルールで確かめる
+- 公開予定日は、どの DB から変換した record でも `submission.hold_date` に置く。SRA では、ACTIONS は書かれた順に行うので、`@target` の無い HOLD と RELEASE のうち最後のものが効く。それが `@HoldUntilDate` を持つ HOLD なら、その日付を `hold_date` にも写す。RELEASE や、日付の無い HOLD (期間だけのものなど) なら `hold_date` を置かない。ACTION 自体は往復のために `submission.sra.actions[]` にそのまま残す。`hold_date` がこの規則で決まるものと同じかは ddbj-validator のルールで確かめる
 - GEA の SDRF の Extract と Labeled Extract は、Assay に入る材料として `experiments[].pool.members[]` に置く。Assay に入る Labeled Extract (無ければ Extract) 1 つが member 1 つで、dual-channel の Assay は member を 2 つ持つ。channel ごとに Source や Factor Value が違うことがあるので、Factor Value も member に置く
 
-record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
+record 全体にかかる形式固有の情報は、形式ごとのフィールドにまとめる (`submission.st26`、`submission.sra`、`submission.gea`、`provenance.gff`)。1 つのオブジェクトにかかる値は、そのモデルのフィールドに置く (GFF の `score`、SRA の `center_name`、MAGE-TAB の `protocol_refs` など)。そのうち v3 に同じ意味の場所が無く、元の形式に戻すためだけに持つ値は、そのモデルの形式ごとのフィールドにまとめる (ST.26 の配列の `moltype` と other-seqid を持つ `sequences.entries[].st26`)。MAGE-TAB の `Comment[x]` は、v3 に同じ意味のフィールドがあるもの (`Comment[BioSample]` など) を除き、そのノードの `comments` に名前と値で置く。
 
 SRA XSD 1.5 より前の要素のように、形式の古い version にしか無い要素は、そのモデルの `legacy` に置く。GEA の前身の CIBEX の登録と、GEA の過去の版にある表として読めない SDRF は `submission.gea.legacy` に置く。新しい登録が `legacy` を使っていないかは、ddbj-validator のルールで確かめる。
 
@@ -57,12 +57,14 @@ v3 の型が保証するのは、JSON として読めて型に合うこと (well
 
 ## 元の形式との往復
 
-SRA XML や GEA のメタデータから変換した record は、元の形式に戻せる。ddbj-repository は record の形で保存し、公開用の XML などをそこから作るためである。
+SRA XML、GEA のメタデータ、ST.26 の配列表から変換した record は、元の形式に戻せる。ddbj-repository は record の形で保存し、公開用の XML などをそこから作るためである。
 
 - 戻せるのは、値、入れ子、繰り返しの数、繰り返しの順序
 - 保たないのは、値を持たない要素、数の書き方、XML の書式 (属性の並び、空白、コメント)。例えば `NOMINAL_SDEV="0.0E0"` は `nominal_sdev: 0.0` になり、`0.0E0` には戻らない
+- 日付は ISO 8601 に書き直し、戻すときは元の形式の書き方にする (ST.26 の Bibliography の `20241203` など)。決まった書き方でない日付は、書かれたまま持って書かれたまま戻す
 - 大きな表 (アレイ設計のプローブの表など) とリードファイルは record に入れず、`File` で指す
 - GEA の SDRF の行は record に持たず、オブジェクトと relations から作り直す。行の番号を sample、member、run / analysis の `sdrf_rows` に、ファイルの列の位置を run / analysis の `sdrf_column` に持ち、行はこの 2 つだけから作るので、行の順序と全く同じ行の繰り返しも戻り、list の並びが変わっても崩れない。保たないのは、種類の違う列の並び (ノードの中で Comment が属性の前か後か、など)。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
+- ST.26 の feature は、source とそれ以外の前後と、1 つの feature の中で名前の違う qualifier の前後を保たない。source は entry の `source_features` に、それ以外は `features` に分けて持ち、qualifier は名前ごとにまとめて持つためである。配列の長さ (`INSDSeq_length`) は配列から数える。詳しくは ST.26 の対応表 (`st26.yml`) の sequences の節にある
 
 形式の要素を v3 のどこに置くかは、[`tests/fixtures/v3/mapping/`](../tests/fixtures/v3/mapping/) の対応表に 1 行ずつ書いてある。変換そのものは利用側が行う。対応表をどう確かめているかは [tests/README.md](../tests/README.md) にある。
 
@@ -105,10 +107,10 @@ record の中で accession と alias を持つもの (`projects[]`、`samples[]`
 | `governed_by` | 起点が相手の規約に従う | JGA の dataset -> policy |
 | `managed_by` | 起点を相手が管理する | JGA の policy -> DAC |
 
-- 起点 (`source`) は record の中のオブジェクトで、`type` にその種類 (`run` など) を書く。`accession` で指し、無ければ `alias` で指す。alias も一意でなければ、list の中の位置 (`index`、0 始まり) で指す。SRA や GEA から変換した record には、accession の無いオブジェクトも、alias が重なるものもある
+- 起点 (`source`) は record の中のオブジェクトで、`type` にその種類 (`run` など) を書く。`accession` で指し、無ければ `alias` で指す。alias も一意でなければ、その種類の list で同じ alias を持つものの中での、書かれた順の位置 (`index`、0 始まり) で指す。alias は前後の空白を除き、続く空白を 1 つとみなして比べ、alias の無いものどうしも同じ alias を持つものとして数える。SRA や GEA から変換した record には、accession の無いオブジェクトも、alias が重なるものもある。list 全体の中の位置にしないのは、list を alias で並べ直しても (ddbj-repository は保存するときにそうする)、同じ alias の中の順を保てば指す先が変わらないため
 - `source` を省くと、record 全体が起点になる
 - オブジェクトの種類は、record のキーの単数形で書く (`samples` の要素なら `sample`、`analyses` なら `analysis`、`access_control.policy` なら `policy`)。起点の `type` も相手の `db` も同じ名前を使う
-- 相手 (`target`) は、`url` か、`db` と `id` で指す。`db` がオブジェクトの種類 (`sample` など) のときは、`id` に alias、`accession` に accession を書く。相手がこの record の中にあり、accession が無く alias も一意でないときは、`index` も書く。それ以外では、相手がこの record の中にあるかどうかは表さない
+- 相手 (`target`) は、`url` か、`db` と `id` で指す。`db` がオブジェクトの種類 (`sample` など) のときは、`id` に alias、`accession` に accession を書く。相手がこの record の中にあり、accession が無く alias も一意でないときは、`index` (起点と同じく、同じ alias を持つものの中での位置) も書く。それ以外では、相手がこの record の中にあるかどうかは表さない
 
 ```json
 {
