@@ -13,7 +13,7 @@
 #   a.b[]                b は list。[] の中の語は注記で、要素の type と、relation なら
 #                        target.db（relations[part_of sample] は type が part_of で
 #                        target.db が sample の relation）
-#   a.properties{key}    dict の key
+#   a.properties{key}    dict の key の値
 #   ... (要素名が値)     子要素の名前がその値になる（PLATFORM/ILLUMINA → "ILLUMINA"）
 #   ... (要素名を小文字にした値)
 #                        同じく、小文字にして値にする（LIBRARY_LAYOUT/PAIRED → "paired"）

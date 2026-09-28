@@ -39,13 +39,115 @@
           "language_code": "en"
         }
       ],
-      "sequence_total_quantity": 2,
+      "sequence_total_quantity": 3,
       "published_date": "2024-12-03",
       "bibliography_priority": {
         "ip_office_code": "US",
         "application_number_text": "62/000,001",
         "filing_date": "2019-06-26"
+      },
+      "skipped_sequence_id_numbers": [
+        "2"
+      ]
+    }
+  },
+  "sequences": {
+    "entries": [
+      {
+        "alias": "1",
+        "division": "PAT",
+        "sequence": "atgcatgcatgcatgcatgc",
+        "source_features": [
+          {
+            "location": "1..20",
+            "source": {
+              "organism": {
+                "name": "synthetic construct"
+              },
+              "mol_type": "other DNA",
+              "qualifiers": {
+                "mol_type": [
+                  {
+                    "value": "other DNA"
+                  }
+                ],
+                "organism": [
+                  {
+                    "alias": "q1",
+                    "value": "synthetic construct",
+                    "non_english_value": "人工配列"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "st26": {
+          "moltype": "DNA",
+          "other_seqid": "pat|JP|2024000001|A|1"
+        }
+      },
+      {
+        "alias": "3",
+        "division": "PAT",
+        "sequence": "MKTAYIAKQR",
+        "source_features": [
+          {
+            "location": "1..10",
+            "source": {
+              "organism": {
+                "name": "Homo sapiens"
+              },
+              "mol_type": "protein",
+              "qualifiers": {
+                "mol_type": [
+                  {
+                    "value": "protein"
+                  }
+                ],
+                "organism": [
+                  {
+                    "value": "Homo sapiens"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "st26": {
+          "moltype": "AA",
+          "other_seqid": "pat|JP|2024000001|A|3"
+        }
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "misc_feature",
+      "location": "5..12",
+      "sequence_id": "1",
+      "qualifiers": {
+        "note": [
+          {
+            "alias": "q2",
+            "value": "linker",
+            "non_english_value": "リンカー"
+          }
+        ]
+      }
+    },
+    {
+      "type": "REGION",
+      "location": "1..10",
+      "sequence_id": "3",
+      "qualifiers": {
+        "note": [
+          {
+            "alias": "q3",
+            "value": "binding region"
+          }
+        ]
       }
     }
-  }
+  ]
 }

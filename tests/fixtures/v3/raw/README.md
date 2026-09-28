@@ -181,7 +181,7 @@ WIPO 公式サイトから取得したものと、JPO から届く形を真似�
 | `Error_The_Applicant_File_Reference_number_is_missing..xml` | Error: ApplicantFileReference 欠落 (3.5 KB) |
 | `README.txt` | WIPO 提供のバリデーション結果説明 (1.7 KB) |
 | `ST26SequenceListing_V1_3.dtd` | WIPO の DTD V1_3 (13 KB) |
-| `JPO-bibliography.xml` | JPO から届く形を真似て作ったもの: JPO が末尾に足す `Bibliography`、"000" の配列 (2.6 KB) |
+| `JPO-bibliography.xml` | JPO から届く形を真似て作ったもの: JPO が末尾に足す `Bibliography`、"000" の配列、`INSDSeq_other-seqids` (2.6 KB) |
 
 ソース:
 - Annex III: https://www.wipo.int/standards/en/xml_material/st26/

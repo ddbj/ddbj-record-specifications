@@ -20,7 +20,7 @@ docker compose exec app uv run pytest
 - 値を持つ要素と属性は、値 (str / int / float / bool) のフィールドを指す
 - 対応表の全ての場所に、`sra_full.json`・`gea_full.json`・`gea_array_design_full.json`・`st26_full.json` のどれかで値がある
 - SRA は、[`tests/fixtures/v3/raw/dra/`](./fixtures/v3/raw/dra/) の XML に出てくる全ての要素と属性が、対応表にある
-- ST.26 は、WIPO の DTD が宣言するヘッダーの要素と属性と、[`tests/fixtures/v3/raw/st26/`](./fixtures/v3/raw/st26/) の XML のヘッダーに出てくる全ての要素と属性が、対応表にある
+- ST.26 は、WIPO の DTD が宣言する要素と属性と、[`tests/fixtures/v3/raw/st26/`](./fixtures/v3/raw/st26/) の XML に出てくる全ての要素と属性が、対応表の該当する節 (ヘッダーは header、SequenceData の中は sequences) にある
 
 対応表の行が正しい場所を指しているか (TAG を value に置いていないか、など) は確かめない。それは対応表を読む人が決める。
 型を変えたら、対応表も手で直す。
