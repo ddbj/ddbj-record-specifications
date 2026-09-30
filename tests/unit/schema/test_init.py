@@ -20,8 +20,16 @@ def test_schema_versions_contains_v3() -> None:
     assert "v3" in SCHEMA_VERSIONS
 
 
+def test_schema_versions_contains_v4() -> None:
+    assert "v4" in SCHEMA_VERSIONS
+
+
 def test_latest_minor_versions_has_no_v3() -> None:
     assert "v3" not in LATEST_MINOR_VERSIONS
+
+
+def test_latest_minor_versions_has_no_v4() -> None:
+    assert "v4" not in LATEST_MINOR_VERSIONS
 
 
 # === LATEST_MINOR_VERSIONS ===

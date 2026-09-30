@@ -7,7 +7,7 @@ from ddbj_record.schema.cli import dump_schema, main, parse_args
 # === parse_args ===
 
 
-@pytest.mark.parametrize(("raw", "expected"), [("v1", "v1"), ("v2", "v2"), ("v3", "v3"), ("v2.3", "v2")])
+@pytest.mark.parametrize(("raw", "expected"), [("v1", "v1"), ("v2", "v2"), ("v3", "v3"), ("v4", "v4"), ("v2.3", "v2")])
 def test_parse_args_accepts_known_versions(raw: str, expected: str) -> None:
     assert parse_args(["--version", raw]).version == expected
 
@@ -27,6 +27,7 @@ def test_parse_args_unknown_version_exits(raw: str) -> None:
         ("v1", ("COMMON", "COMMON_SOURCE", "ENTRIES")),
         ("v2", ("schema_version", "provenance", "submission", "sequences", "features")),
         ("v3", ("schema_version", "submission", "projects", "samples", "relations")),
+        ("v4", ("schema_version", "submission", "projects", "samples", "relations")),
     ],
 )
 def test_dump_schema_has_the_top_level_properties(version: str, keys: tuple[str, ...]) -> None:

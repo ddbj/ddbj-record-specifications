@@ -1,10 +1,10 @@
 # version の方針
 
-DDBJ Record の version は major (v1 / v2 / v3) だけで表す。
+DDBJ Record の version は major (v1 / v2 / v3 / v4) だけで表す。
 
 ## major の分け方
 
-major ごとに `ddbj_record/schema/v1.py` / `v2.py` / `v3.py` を持つ。REST API が `/v1` と `/v2` を並べて提供するのと同じ考え方である。
+major ごとに `ddbj_record/schema/v1.py` / `v2.py` / `v3.py` / `v4.py` を持つ。REST API が `/v1` と `/v2` を並べて提供するのと同じ考え方である。
 
 - 次の major は、main の上に新しいファイルとして作る。branch では作らない
 - 新しい major を出した後も、古い major は main の上で直す
@@ -27,7 +27,7 @@ from ddbj_record.schema.v3 import DdbjRecord as V3Record
 
 minor と git tag は使わない。
 
-- v3 の record の `schema_version` は `"v3"` と書く。minor は付けない
+- v3 と v4 の record の `schema_version` は `"v3"` / `"v4"` と書く。minor は付けない
 - パッケージの version (hatch-vcs が git から付ける値) には意味を持たせない。新しい tag は打たず、GitHub Release も作らない
 - 利用側は main の最新を追うか、commit を指定して固定する
 

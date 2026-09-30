@@ -1,0 +1,2 @@
+{"alias":"chromosome","type":"chromosome","topology":"circular","length":184,"sequence_digest":"SQ.Ga9qeRqboqFQa8EOeyuft0wcoEshuLIM","source_features":[{"location":"1..184","source":{"organism":{"name":"Escherichia coli"},"mol_type":"genomic DNA"}}]}
+{"alias":"pPLH-1","type":"plasmid","topology":"circular","length":45,"sequence_digest":"SQ.XvDTR23_Cbjon2mh-3yLheP_TgSXT7uP","source_features":[{"location":"1..45","source":{"organism":{"name":"Escherichia coli"},"mol_type":"genomic DNA"}}]}
