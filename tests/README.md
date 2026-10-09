@@ -9,7 +9,7 @@ docker compose exec app uv run pytest
 ## 型のテスト
 
 - 各 major の fixture (`tests/fixtures/v1/`、`v2/`、`v3/records/`) が、その major の型で読めることを確かめる。`invalid_*.json` は読めないことを確かめる
-- v3 の `*_full.json` は、なるべく多くのフィールドに値を入れた record である。v3 のモデルは `extra="forbid"` なので、型からフィールドを消すと `*_full.json` が読めなくなり、テストが落ちる。フィールドを消すときは、`*_full.json` も直す
+- v3 の `*_full.json` は、なるべく多くのフィールドに値を入れた record である。v3 のモデルは型に無いキーも受け取る (`extra="allow"`) ので、読めるだけでは型と fixture のずれに気づけない。fixture を読んだ結果に型に無いキーが残っていないことも確かめ、型からフィールドを消して `*_full.json` を直し忘れるとテストが落ちるようにしている
 - v2 の型が受け付ける値の範囲は、PBT (hypothesis) でも確かめる
 
 ## 対応表のテスト

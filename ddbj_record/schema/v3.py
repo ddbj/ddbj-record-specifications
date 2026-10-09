@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+# 全てのモデルは、型に無いキーも受け取り、書き出すときもそのまま保つ (extra="allow")。利用側はそれぞれ別の commit に
+# 固定しているので、新しいフィールドを足した record を古い commit の型で読んでも失敗せず、往復で失わない。
+# 綴り違いや置き場違いのキーの指摘は、ddbj-validator のルールが行う。
 
 # 元の SDRF の行の番号 (0 始まり、見出しの次の行が 0)。
 SdrfRowNumber = Annotated[int, Field(ge=0)]
@@ -19,7 +23,7 @@ class Organism(BaseModel):
     # taxonomy の番号として正しいかはルールで確かめる。
     taxonomy_id: str | None = Field(None, examples=["9606"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Address(BaseModel):
@@ -29,7 +33,7 @@ class Address(BaseModel):
     street: str | None = Field(None, examples=["Yata 1111"])
     postal_code: str | None = Field(None, examples=["411-8540"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Organization(BaseModel):
@@ -42,7 +46,7 @@ class Organization(BaseModel):
     address: Address | None = None
     ror_id: str | None = Field(None, examples=["https://ror.org/01xq5f0"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Person(BaseModel):
@@ -58,7 +62,7 @@ class Person(BaseModel):
     role: str | None = Field(None, examples=["submitter"])
     organizations: list[Organization] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Attribute(BaseModel):
@@ -68,7 +72,7 @@ class Attribute(BaseModel):
     value: str | None = None
     unit: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Identifier(BaseModel):
@@ -83,7 +87,7 @@ class Identifier(BaseModel):
     label: str | None = None
     namespace: str | None = Field(None, examples=["BioSample"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ExternalRef(BaseModel):
@@ -99,7 +103,7 @@ class ExternalRef(BaseModel):
     id: str | None = Field(None, examples=["NC_000001.11"])
     label: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Provenance ===
@@ -112,13 +116,13 @@ class GffMeta(BaseModel):
     pragmas: list[str] | None = None
     source_tool: str | None = Field(None, examples=["DFAST"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Provenance(BaseModel):
     """record の来歴。変換元の形式と分類、GFF の record 全体の情報。
 
-    変換元ごとに持つ情報が違うので、知らないキーも受け取る (extra="allow")。分かっている情報は型付きのフィールドに置く。
+    変換元ごとに持つ情報が違う。分かっている情報は型付きのフィールドに置き、それ以外は書かれたキーのまま持つ。
     """
 
     source_format: str | None = Field(None, examples=["GFF"])
@@ -136,7 +140,7 @@ class InventionTitle(BaseModel):
     title: str | None = None
     language_code: str | None = Field(None, examples=["ja"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ApplicationIdentification(BaseModel):
@@ -144,7 +148,7 @@ class ApplicationIdentification(BaseModel):
     application_number_text: str | None = None
     filing_date: str | None = Field(None, examples=["2024-01-15"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class St26Submission(BaseModel):
@@ -190,7 +194,7 @@ class St26Submission(BaseModel):
     # 別の出願を指すものもあるので、1 つにまとめない。
     bibliography_priority: ApplicationIdentification | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Submission ===
@@ -203,7 +207,7 @@ class SraContact(BaseModel):
     inform_on_status: str | None = Field(None, examples=["mishima@ddbj.nig.ac.jp"])
     inform_on_error: str | None = Field(None, examples=["mishima@ddbj.nig.ac.jp"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SraActionLegacy(BaseModel):
@@ -212,7 +216,7 @@ class SraActionLegacy(BaseModel):
     hold_for_period: str | None = None
     notes: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SraAction(BaseModel):
@@ -229,7 +233,7 @@ class SraAction(BaseModel):
     hold_until_date: str | None = Field(None, examples=["2025-01-01"])
     legacy: SraActionLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SraSubmissionLegacy(BaseModel):
@@ -238,7 +242,7 @@ class SraSubmissionLegacy(BaseModel):
     submission_id: str | None = None
     files: list[File] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SraSubmission(BaseModel):
@@ -251,7 +255,7 @@ class SraSubmission(BaseModel):
     actions: list[SraAction] | None = None
     legacy: SraSubmissionLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexExperiment(BaseModel):
@@ -263,7 +267,7 @@ class CibexExperiment(BaseModel):
     number_of_hybridizations: int | None = None
     description: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexSubmitter(BaseModel):
@@ -277,7 +281,7 @@ class CibexSubmitter(BaseModel):
     laboratory: str | None = None
     address: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexReference(BaseModel):
@@ -292,7 +296,7 @@ class CibexReference(BaseModel):
     page: str | None = None
     pubmed_id: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexDataField(BaseModel):
@@ -301,7 +305,7 @@ class CibexDataField(BaseModel):
     field: str | None = Field(None, examples=["F532 Median"])
     description: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexArrayDesign(BaseModel):
@@ -320,7 +324,7 @@ class CibexArrayDesign(BaseModel):
     file: str | None = None
     data_fields: list[CibexDataField] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexSample(BaseModel):
@@ -342,7 +346,7 @@ class CibexSample(BaseModel):
     biosource_provider: str | None = None
     description: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexLabeledExtract(BaseModel):
@@ -352,7 +356,7 @@ class CibexLabeledExtract(BaseModel):
     labeling_protocol: str | None = None
     pooling_protocol: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexHybridization(BaseModel):
@@ -364,7 +368,7 @@ class CibexHybridization(BaseModel):
     file: str | None = None
     data_fields: list[CibexDataField] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CibexSummary(BaseModel):
@@ -375,7 +379,7 @@ class CibexSummary(BaseModel):
     file: str | None = None
     data_fields: list[CibexDataField] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Cibex(BaseModel):
@@ -393,7 +397,7 @@ class Cibex(BaseModel):
     hybridizations: list[CibexHybridization] | None = None
     summaries: list[CibexSummary] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class GeaSubmissionLegacy(BaseModel):
@@ -411,7 +415,7 @@ class GeaSubmissionLegacy(BaseModel):
     # バイト列のもの。その版の record は SDRF から作るオブジェクトを持たない。
     unread_sdrf: File | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class GeaSubmission(BaseModel):
@@ -431,7 +435,7 @@ class GeaSubmission(BaseModel):
     additional_files: list[File] | None = None
     legacy: GeaSubmissionLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Submission(BaseModel):
@@ -450,7 +454,7 @@ class Submission(BaseModel):
     center_name: str | None = Field(None, examples=["NIG"])
     broker_name: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Project ===
@@ -472,7 +476,7 @@ class Publication(BaseModel):
     authors: list[Person] | None = None
     consortiums: list[str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Grant(BaseModel):
@@ -480,7 +484,7 @@ class Grant(BaseModel):
     agency: str | None = None
     id: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ProjectTarget(BaseModel):
@@ -497,7 +501,7 @@ class ProjectTarget(BaseModel):
     # data_type ごとの説明。data_types と対にするため relevance と同じ dict[str, str]。
     data_type_descriptions: dict[str, str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class LocusTagPrefix(BaseModel):
@@ -511,7 +515,7 @@ class LocusTagPrefix(BaseModel):
     prefix: str | None = Field(None, examples=["ECK12"])
     biosample_id: str | None = Field(None, examples=["SAMD00123456"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ProjectLegacy(BaseModel):
@@ -520,7 +524,7 @@ class ProjectLegacy(BaseModel):
     # DESCRIPTOR/PROJECT_ID(NCBI Genome Project の番号)
     project_id: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ExperimentalFactor(BaseModel):
@@ -532,7 +536,7 @@ class ExperimentalFactor(BaseModel):
     name: str | None = Field(None, examples=["treatment"])
     type: str | None = Field(None, examples=["compound"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Protocol(BaseModel):
@@ -545,7 +549,7 @@ class Protocol(BaseModel):
     type: str | None = Field(None, examples=["nucleic acid extraction protocol"])
     description: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Project(BaseModel):
@@ -587,7 +591,7 @@ class Project(BaseModel):
     new_study_type: str | None = None
     legacy: ProjectLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Sample ===
@@ -617,7 +621,7 @@ class Sample(BaseModel):
     # この Source が現れる SDRF の行の番号 (PoolMember.sdrf_rows と同じ)。
     sdrf_rows: list[SdrfRowNumber] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Experiment ===
@@ -629,7 +633,7 @@ class LibraryLegacy(BaseModel):
     # LIBRARY_LAYOUT/PAIRED@ORIENTATION
     orientation: str | None = Field(None, examples=["5'-3'-3'-5'"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class LibraryDescriptor(BaseModel):
@@ -646,7 +650,7 @@ class LibraryDescriptor(BaseModel):
     pooling_strategy: str | None = None
     legacy: LibraryLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class TargetedLocus(BaseModel):
@@ -654,7 +658,7 @@ class TargetedLocus(BaseModel):
     description: str | None = None
     probe_set: ExternalRef | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ColorMatrixEntry(BaseModel):
@@ -663,7 +667,7 @@ class ColorMatrixEntry(BaseModel):
     dibase: str | None = Field(None, examples=["AC"])
     color: str | None = Field(None, examples=["1"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class PlatformLegacy(BaseModel):
@@ -678,7 +682,7 @@ class PlatformLegacy(BaseModel):
     color_matrix: list[ColorMatrixEntry] | None = None
     color_matrix_code: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Platform(BaseModel):
@@ -692,14 +696,14 @@ class Platform(BaseModel):
     array_design: RelationTarget | None = None
     legacy: PlatformLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class RelativeOrder(BaseModel):
     follows_read_index: int | None = None
     precedes_read_index: int | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Basecall(BaseModel):
@@ -711,7 +715,7 @@ class Basecall(BaseModel):
     max_mismatch: int | None = None
     match_edge: str | None = Field(None, examples=["start"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class BasecallTable(BaseModel):
@@ -719,7 +723,7 @@ class BasecallTable(BaseModel):
     default_length: int | None = None
     basecalls: list[Basecall] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ExpectedBasecall(BaseModel):
@@ -729,7 +733,7 @@ class ExpectedBasecall(BaseModel):
     base_coord: int | None = None
     default_length: int | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ReadSpecLegacy(BaseModel):
@@ -738,7 +742,7 @@ class ReadSpecLegacy(BaseModel):
     cycle_coord: int | None = None
     expected_basecall: ExpectedBasecall | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ReadSpec(BaseModel):
@@ -752,7 +756,7 @@ class ReadSpec(BaseModel):
     expected_basecall_table: BasecallTable | None = None
     legacy: ReadSpecLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SpotDescriptorLegacy(BaseModel):
@@ -761,7 +765,7 @@ class SpotDescriptorLegacy(BaseModel):
     number_of_reads_per_spot: int | None = None
     adapter_spec: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SpotDescriptor(BaseModel):
@@ -769,7 +773,7 @@ class SpotDescriptor(BaseModel):
     reads: list[ReadSpec] | None = None
     legacy: SpotDescriptorLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class PipelineStep(BaseModel):
@@ -781,7 +785,7 @@ class PipelineStep(BaseModel):
     section_name: str | None = None
     notes: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Gap(BaseModel):
@@ -799,7 +803,7 @@ class Gap(BaseModel):
     mean: float | None = None
     stdev: float | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class BaseCalling(BaseModel):
@@ -808,7 +812,7 @@ class BaseCalling(BaseModel):
     base_caller: str | None = None
     sequence_space: str | None = Field(None, examples=["Base Space"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class QualityScoring(BaseModel):
@@ -819,7 +823,7 @@ class QualityScoring(BaseModel):
     number_of_levels: int | None = None
     multiplier: float | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ExperimentLegacy(BaseModel):
@@ -830,14 +834,14 @@ class ExperimentLegacy(BaseModel):
     base_calling: BaseCalling | None = None
     quality_scoring: list[QualityScoring] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ReadLabel(BaseModel):
     value: str | None = None
     read_group_tag: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Extract(BaseModel):
@@ -852,7 +856,7 @@ class Extract(BaseModel):
     protocol_refs: list[str] | None = None
     comments: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class FactorValue(BaseModel):
@@ -863,7 +867,7 @@ class FactorValue(BaseModel):
     unit: str | None = Field(None, examples=["hour"])
     unit_type: str | None = Field(None, examples=["time unit"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class PoolMember(BaseModel):
@@ -893,14 +897,14 @@ class PoolMember(BaseModel):
     # (tests/fixtures/v3/mapping/gea.yml の冒頭)。
     sdrf_rows: list[SdrfRowNumber] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Pool(BaseModel):
     default_member: PoolMember | None = None
     members: list[PoolMember] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Experiment(BaseModel):
@@ -926,7 +930,7 @@ class Experiment(BaseModel):
     comments: list[Attribute] | None = None
     legacy: ExperimentLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Run ===
@@ -937,7 +941,7 @@ class FileLegacy(BaseModel):
 
     data_series_labels: list[str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class File(BaseModel):
@@ -955,7 +959,7 @@ class File(BaseModel):
     read_labels: list[str] | None = None
     legacy: FileLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class DataBlockLegacy(BaseModel):
@@ -968,7 +972,7 @@ class DataBlockLegacy(BaseModel):
     total_spots: int | None = None
     total_reads: int | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class DataBlock(BaseModel):
@@ -983,7 +987,7 @@ class DataBlock(BaseModel):
     files: list[File] | None = None
     legacy: DataBlockLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class RunLegacy(BaseModel):
@@ -997,7 +1001,7 @@ class RunLegacy(BaseModel):
     run_file: str | None = None
     total_data_blocks: int | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Run(BaseModel):
@@ -1027,7 +1031,7 @@ class Run(BaseModel):
     sdrf_column: int | None = Field(None, ge=0)
     legacy: RunLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Analysis ===
@@ -1037,14 +1041,14 @@ class StandardAssembly(BaseModel):
     short_name: str | None = Field(None, examples=["GRCh38"])
     names: list[ExternalRef] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class CustomAssembly(BaseModel):
     description: str | None = None
     sources: list[ExternalRef] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class RunLabel(BaseModel):
@@ -1054,7 +1058,7 @@ class RunLabel(BaseModel):
     data_block_name: str | None = None
     read_group_label: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SeqLabel(BaseModel):
@@ -1065,7 +1069,7 @@ class SeqLabel(BaseModel):
     data_block_name: str | None = None
     seq_label: str | None = Field(None, examples=["chr1"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ReferenceAlignment(BaseModel):
@@ -1083,7 +1087,7 @@ class ReferenceAlignment(BaseModel):
     marks_duplicate_reads: bool | None = None
     includes_failed_reads: bool | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Analysis(BaseModel):
@@ -1110,7 +1114,7 @@ class Analysis(BaseModel):
     sdrf_rows: list[SdrfRowNumber] | None = None
     sdrf_column: int | None = Field(None, ge=0)
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Array Design (GEA: A-GEAD) ===
@@ -1121,13 +1125,13 @@ class TermSource(BaseModel):
     file: str | None = None
     version: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ArrayDesignLegacy(BaseModel):
     cibex_public_release_date: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class ArrayDesign(BaseModel):
@@ -1154,7 +1158,7 @@ class ArrayDesign(BaseModel):
     file: File | None = None
     legacy: ArrayDesignLegacy | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Sequences & Entries ===
@@ -1174,7 +1178,7 @@ class Qualifier(BaseModel):
     # 単独でも書かれる。言語は submission.st26.non_english_language。
     non_english_value: str | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Source(BaseModel):
@@ -1182,7 +1186,7 @@ class Source(BaseModel):
     mol_type: str | None = Field(None, examples=["genomic DNA"])
     qualifiers: dict[str, list[Qualifier]] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class SourceFeature(BaseModel):
@@ -1201,7 +1205,7 @@ class SourceFeature(BaseModel):
     source: Source | None = None
     definition: list[str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class St26Sequence(BaseModel):
@@ -1214,7 +1218,7 @@ class St26Sequence(BaseModel):
     # 最後の配列番号の前 ("pat|JP|2024048697|A5") はファイルの中で同じ。
     other_seqid: str | None = Field(None, examples=["pat|JP|2024048697|A5|1"])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Entry(BaseModel):
@@ -1234,7 +1238,7 @@ class Entry(BaseModel):
     source_features: list[SourceFeature] | None = None
     st26: St26Sequence | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class StructuredComment(BaseModel):
@@ -1243,7 +1247,7 @@ class StructuredComment(BaseModel):
     tagset_id: str | None = Field(None, examples=["Genome-Assembly-Data"])
     fields: dict[str, str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Sequences(BaseModel):
@@ -1257,7 +1261,7 @@ class Sequences(BaseModel):
     keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
     attributes: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Features ===
@@ -1278,7 +1282,7 @@ class Feature(BaseModel):
     # GFF の Parent 属性。親の Feature の alias。
     parent_ids: list[str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Assembly ===
@@ -1294,7 +1298,7 @@ class Assembly(BaseModel):
     genome_representation: str | None = Field(None, examples=["full"])
     attributes: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Dataset ===
@@ -1310,7 +1314,7 @@ class Dataset(BaseModel):
     dataset_types: list[str] | None = None
     attributes: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Access Control ===
@@ -1324,7 +1328,7 @@ class Policy(BaseModel):
     policy_url: str | None = None
     attributes: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Dac(BaseModel):
@@ -1333,7 +1337,7 @@ class Dac(BaseModel):
     contacts: list[Person] | None = None
     attributes: list[Attribute] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class AccessControl(BaseModel):
@@ -1342,7 +1346,7 @@ class AccessControl(BaseModel):
     policy: Policy | None = None
     dac: Dac | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === Relations ===
@@ -1363,7 +1367,7 @@ class RelationSource(BaseModel):
     accession: str | None = None
     index: int | None = Field(None, ge=0)
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class RelationTarget(BaseModel):
@@ -1387,7 +1391,7 @@ class RelationTarget(BaseModel):
     identifiers: list[Identifier] | None = None
     index: int | None = Field(None, ge=0)
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 class Relation(BaseModel):
@@ -1403,14 +1407,16 @@ class Relation(BaseModel):
     label: str | None = None
     properties: dict[str, str] | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
 
 # === DdbjRecord ===
 
 
 class DdbjRecord(BaseModel):
-    schema_version: str | None = Field(None, examples=["v3"])
+    # この型が読むのは v3 の record だけ。型に無いキーを受け取るので、別の major の record を v3 として
+    # 読んでしまわないように、schema_version の値で止める。
+    schema_version: Literal["v3"] | None = Field(None, examples=["v3"])
     provenance: Provenance | None = None
     submission: Submission | None = None
     projects: list[Project] | None = None
@@ -1426,4 +1432,4 @@ class DdbjRecord(BaseModel):
     access_control: AccessControl | None = None
     array_design: ArrayDesign | None = None
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
