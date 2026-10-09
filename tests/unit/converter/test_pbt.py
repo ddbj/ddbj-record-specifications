@@ -6,8 +6,10 @@ from hypothesis import strategies as st
 
 from ddbj_record.converter.v1_to_v2 import _normalize_abbr, _qualifier_value_to_str, v1_to_v2
 from ddbj_record.converter.v2_to_v1 import _qualifier_value_to_union, v2_to_v1
+from ddbj_record.converter.v2_to_v3 import v2_to_v3
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
+from ddbj_record.schema.v3 import DdbjRecord as DdbjRecordV3
 
 # === strategies ===
 
@@ -138,6 +140,50 @@ def st_v2_record(draw: st.DrawFn) -> dict[str, Any]:
     }
 
 
+st_entry_id = st.from_regex(r"[a-zA-Z0-9_.\-]{1,32}", fullmatch=True)
+st_qualifier_name = st.sampled_from(["plasmid", "submitter_seqid", "note", "isolate", "environmental_sample"])
+st_qualifier_values = st.lists(
+    st.one_of(st.booleans(), st.text(min_size=1, max_size=20).filter(lambda s: s not in ("true", "false"))),
+    min_size=1,
+    max_size=3,
+)
+
+
+@st.composite
+def st_v1_source_qualifiers(draw: st.DrawFn) -> dict[str, list[str | bool]]:
+    """entry の source feature の qualifiers。organism / mol_type / ff_definition はそれぞれ有ったり無かったりする。"""
+    qualifiers: dict[str, list[str | bool]] = {}
+    for name in draw(st.lists(st_qualifier_name, unique=True, max_size=3)):
+        qualifiers[name] = draw(st_qualifier_values)
+    if draw(st.booleans()):
+        qualifiers["organism"] = [draw(st_organism)]
+    if draw(st.booleans()):
+        qualifiers["mol_type"] = [draw(st_mol_type)]
+    if draw(st.booleans()):
+        qualifiers["ff_definition"] = ["@@[organism]@@ DNA"]
+    return qualifiers
+
+
+@st.composite
+def st_v1_record_with_entries(draw: st.DrawFn) -> dict[str, Any]:
+    record = draw(st_v1_record())
+    entry_ids = draw(st.lists(st_entry_id, unique=True, min_size=1, max_size=3))
+    record["ENTRIES"] = [
+        {
+            "id": entry_id,
+            "name": entry_id,
+            "type": draw(st_entry_type),
+            "topology": draw(st_topology),
+            "sequence": "atgc",
+            "features": [
+                {"id": f"sf_{i}", "type": "source", "location": "1..4", "qualifiers": draw(st_v1_source_qualifiers())}
+            ],
+        }
+        for i, entry_id in enumerate(entry_ids)
+    ]
+    return record
+
+
 # === PBT tests ===
 
 
@@ -213,6 +259,222 @@ def test_pbt_v2_to_v1_output_schema_version_fixed(record_data: dict[str, Any]) -
     v2_obj = DdbjRecordV2.model_validate(record_data)
     v1_obj = v2_to_v1(v2_obj)
     assert v1_obj.schema_version == "v1.0"
+
+
+# === PBT: entry の source feature の qualifier が v1 -> v2 で残る ===
+
+
+@given(record_data=st_v1_record_with_entries())
+@settings(max_examples=100)
+def test_pbt_v1_to_v2_keeps_every_entry_source_qualifier(record_data: dict[str, Any]) -> None:
+    """ff_definition 以外の qualifier が 1 つでもあれば Source ができ、全ての qualifier が同じ値で残る。
+
+    organism / mol_type は Source のフィールドに、無ければ COMMON_SOURCE の値が入る。
+    """
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    v2_obj = v1_to_v2(v1_obj)
+    for v1_entry, v2_entry in zip(v1_obj.ENTRIES, v2_obj.sequences.entries, strict=True):
+        v1_sf = v1_entry.features[0]
+        v2_source = v2_entry.source_features[0].source
+        if all(key == "ff_definition" for key in v1_sf.qualifiers):
+            assert v2_source is None
+            continue
+        assert v2_source is not None
+        expected_organism = v1_sf.qualifiers.get("organism", [v1_obj.COMMON_SOURCE.organism])[0]
+        expected_mol_type = v1_sf.qualifiers.get("mol_type", [v1_obj.COMMON_SOURCE.mol_type])[0]
+        assert v2_source.organism == expected_organism
+        assert v2_source.mol_type == expected_mol_type
+        for key, values in v1_sf.qualifiers.items():
+            if key in ("organism", "mol_type", "ff_definition"):
+                assert key not in v2_source.qualifiers
+                continue
+            assert [q.value for q in v2_source.qualifiers[key]] == [_qualifier_value_to_str(v) for v in values]
+
+
+@given(record_data=st_v1_record_with_entries())
+@settings(max_examples=100)
+def test_pbt_v1_roundtrip_restores_entry_source_qualifiers(record_data: dict[str, Any]) -> None:
+    """v1 -> v2 -> v1 で、entry の source feature の qualifier が元に戻る。
+
+    例外は、COMMON_SOURCE と同じ organism / mol_type を entry に重ねて書いていたもので、これは v2 -> v1 で
+    書かないので消える。
+    """
+    v1_obj = DdbjRecordV1.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v1_back = v2_to_v1(v1_to_v2(v1_obj))
+    common = {"organism": [v1_obj.COMMON_SOURCE.organism], "mol_type": [v1_obj.COMMON_SOURCE.mol_type]}
+    for v1_entry, rt_entry in zip(v1_obj.ENTRIES, v1_back.ENTRIES, strict=True):
+        orig = v1_entry.features[0].qualifiers
+        expected = {key: values for key, values in orig.items() if common.get(key) != values}
+        assert rt_entry.features[0].qualifiers == expected
+
+
+# === PBT: v2 -> v3 ===
+
+st_v2_qualifier_value = st.one_of(st.just("true"), st.text(min_size=1, max_size=20).filter(lambda s: s != "true"))
+st_v2_qualifiers = st.dictionaries(
+    keys=st.sampled_from(["product", "note", "pseudo", "gene", "plasmid"]),
+    values=st.lists(st.builds(dict, value=st_v2_qualifier_value), min_size=1, max_size=2),
+    max_size=3,
+)
+st_comment_lines = st.lists(st.lists(st.text(max_size=10), max_size=2), max_size=2)
+st_year = st.sampled_from(["", "2023", "2024"])
+
+
+@st.composite
+def st_v2_reference(draw: st.DrawFn) -> dict[str, Any]:
+    reference: dict[str, Any] = {
+        "title": draw(st.text(min_size=1, max_size=20)),
+        "authors": [{"abbreviation": draw(st_abbr_name)}],
+        "status": draw(st.sampled_from(["unpublished", "in-press", "published"])),
+        "year": draw(st_year),
+    }
+    if draw(st.booleans()):
+        reference["date_published"] = draw(st.dates()).isoformat()
+    return reference
+
+
+@st.composite
+def st_v2_record_rich(draw: st.DrawFn) -> dict[str, Any]:
+    """entries / features / qualifiers / comments / references を持つ v2 の record。"""
+    record = draw(st_v2_record())
+    record["submission"]["references"] = draw(st.lists(st_v2_reference(), max_size=2))
+    record["submission"]["comments"] = draw(st_comment_lines)
+    record["submission"]["division"] = draw(st.one_of(st.none(), st.sampled_from(["BCT", "UNK"])))
+    record["sequences"]["common_source"]["qualifiers"] = draw(st_v2_qualifiers)
+
+    entries: list[dict[str, Any]] = []
+    features: list[dict[str, Any]] = []
+    for i, entry_id in enumerate(draw(st.lists(st_entry_id, unique=True, max_size=3))):
+        source_feature: dict[str, Any] = {"id": f"sf_{i}", "location": "1..4"}
+        if draw(st.booleans()):
+            source_feature["source"] = {
+                "organism": draw(st_organism),
+                "mol_type": draw(st_mol_type),
+                "qualifiers": draw(st_v2_qualifiers),
+            }
+        entry: dict[str, Any] = {
+            "id": entry_id,
+            "name": entry_id,
+            "type": draw(st_entry_type),
+            "topology": draw(st_topology),
+            "source_features": [source_feature],
+        }
+        if draw(st.booleans()):
+            entry["comments"] = draw(st_comment_lines)
+        entries.append(entry)
+        features.extend(
+            {
+                "id": f"f_{i}_{j}",
+                "type": "CDS",
+                "location": "1..4",
+                "sequence_id": entry_id,
+                "qualifiers": draw(st_v2_qualifiers),
+            }
+            for j in range(draw(st.integers(min_value=0, max_value=2)))
+        )
+    record["sequences"]["entries"] = entries
+    record["features"] = features
+    return record
+
+
+def _v3_qualifier_values(qualifiers: dict[str, list[Any]] | None) -> dict[str, list[tuple[str | None, str | None]]]:
+    return {name: [(q.alias, q.value) for q in values] for name, values in (qualifiers or {}).items()}
+
+
+def _expected_v3_qualifier_values(qualifiers: dict[str, list[Any]]) -> dict[str, list[tuple[str | None, str | None]]]:
+    return {
+        name: [(q.id, None if q.value == "true" else q.value) for q in values] for name, values in qualifiers.items()
+    }
+
+
+@given(record_data=st_v2_record_rich())
+@settings(max_examples=100)
+def test_pbt_v2_to_v3_produces_valid_v3_that_reads_back_unchanged(record_data: dict[str, Any]) -> None:
+    v3_obj = v2_to_v3(DdbjRecordV2.model_validate(record_data))
+    dumped = v3_obj.model_dump(exclude_none=True, by_alias=True)
+    assert dumped["schema_version"] == "v3"
+    assert DdbjRecordV3.model_validate(dumped).model_dump(exclude_none=True, by_alias=True) == dumped
+
+
+@given(record_data=st_v2_record_rich())
+@settings(max_examples=100)
+def test_pbt_v2_to_v3_keeps_entries_and_features(record_data: dict[str, Any]) -> None:
+    v2_obj = DdbjRecordV2.model_validate(record_data)
+    v3_obj = v2_to_v3(v2_obj)
+    assert v3_obj.sequences is not None
+    v3_entries = v3_obj.sequences.entries or []
+    assert [e.alias for e in v3_entries] == [e.id for e in v2_obj.sequences.entries]
+    assert [(f.alias, f.sequence_id) for f in v3_obj.features or []] == [(f.id, f.sequence_id) for f in v2_obj.features]
+    for v2_entry, v3_entry in zip(v2_obj.sequences.entries, v3_entries, strict=True):
+        assert v3_entry.division == v2_obj.submission.division
+        expected_comments = ["\n".join(lines) for lines in v2_entry.comments or [] if lines] or None
+        assert v3_entry.comments == expected_comments
+
+
+@given(record_data=st_v2_record_rich())
+@settings(max_examples=100)
+def test_pbt_v2_to_v3_keeps_every_qualifier_and_drops_only_true(record_data: dict[str, Any]) -> None:
+    """全ての qualifier が同じ名前・同じ順序で残り、"true" だけが value の無い qualifier になる。"""
+    v2_obj = DdbjRecordV2.model_validate(record_data)
+    v3_obj = v2_to_v3(v2_obj)
+    assert v3_obj.sequences is not None
+    assert v3_obj.sequences.common_source is not None
+    assert _v3_qualifier_values(v3_obj.sequences.common_source.qualifiers) == _expected_v3_qualifier_values(
+        v2_obj.sequences.common_source.qualifiers
+    )
+    for v2_feature, v3_feature in zip(v2_obj.features, v3_obj.features or [], strict=True):
+        assert _v3_qualifier_values(v3_feature.qualifiers) == _expected_v3_qualifier_values(v2_feature.qualifiers)
+    for v2_entry, v3_entry in zip(v2_obj.sequences.entries, v3_obj.sequences.entries or [], strict=True):
+        v2_source = v2_entry.source_features[0].source
+        assert v3_entry.source_features is not None
+        v3_source = v3_entry.source_features[0].source
+        if v2_source is None:
+            assert v3_source is None
+            continue
+        assert v3_source is not None
+        assert v3_source.organism is not None
+        assert v3_source.organism.name == v2_source.organism
+        assert _v3_qualifier_values(v3_source.qualifiers) == _expected_v3_qualifier_values(v2_source.qualifiers)
+
+
+@given(record_data=st_v2_record_rich())
+@settings(max_examples=100)
+def test_pbt_v2_to_v3_keeps_submission_values(record_data: dict[str, Any]) -> None:
+    v2_obj = DdbjRecordV2.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v3_obj = v2_to_v3(v2_obj)
+    assert v3_obj.sequences is not None
+    assert v3_obj.sequences.keywords == (v2_obj.submission.keywords or None)
+    assert v3_obj.sequences.common_source is not None
+    assert v3_obj.sequences.common_source.organism is not None
+    assert v3_obj.sequences.common_source.organism.name == v2_obj.sequences.common_source.organism
+    assert v3_obj.sequences.common_source.mol_type == v2_obj.sequences.common_source.mol_type
+    expected_comments = ["\n".join(lines) for lines in v2_obj.submission.comments if lines] or None
+    assert v3_obj.submission is not None
+    assert v3_obj.submission.comments == expected_comments
+    assert v3_obj.submission.hold_date == v2_obj.submission.hold_date
+
+
+@given(record_data=st_v2_record_rich())
+@settings(max_examples=100)
+def test_pbt_v2_to_v3_publications_take_date_published_or_year(record_data: dict[str, Any]) -> None:
+    v2_obj = DdbjRecordV2.model_validate(record_data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        v3_obj = v2_to_v3(v2_obj)
+    if not v2_obj.submission.references:
+        assert v3_obj.projects is None
+        return
+    assert v3_obj.projects is not None
+    publications = v3_obj.projects[0].publications or []
+    assert len(publications) == len(v2_obj.submission.references)
+    for reference, publication in zip(v2_obj.submission.references, publications, strict=True):
+        assert publication.title == reference.title
+        assert publication.status == reference.status
+        assert publication.date == (reference.date_published or reference.year or None)
 
 
 # === PBT: reference status roundtrip idempotency ===

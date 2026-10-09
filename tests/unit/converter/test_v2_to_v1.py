@@ -423,8 +423,55 @@ def test_convert_entries_source_feature_rebuilt() -> None:
     assert len(entries) == 1
     source_features = [f for f in entries[0].features if f.type == "source"]
     assert len(source_features) == 1
-    assert source_features[0].qualifiers["organism"] == ["Test"]
-    assert source_features[0].qualifiers["ff_definition"] == ["test def"]
+    # organism と mol_type は common_source と同じなので、entry の source feature には書かない。
+    assert source_features[0].qualifiers == {"strain": ["S1"], "ff_definition": ["test def"]}
+
+
+def _make_v2_with_entry_source(source: dict[str, Any]) -> DdbjRecordV2:
+    return _make_v2_minimal(
+        {
+            "sequences": {
+                "entries": [
+                    {
+                        "id": "pPLH-1",
+                        "name": "pPLH-1",
+                        "type": "plasmid",
+                        "topology": "circular",
+                        "source_features": [{"id": "sf1", "location": "1..100", "source": source}],
+                    }
+                ],
+            }
+        }
+    )
+
+
+def _entry_source_qualifiers(v2_obj: DdbjRecordV2) -> dict[str, list[str | bool]]:
+    entries = _convert_entries(v2_obj)
+    return next(f for f in entries[0].features if f.type == "source").qualifiers
+
+
+def test_convert_entries_organism_same_as_common_is_not_written() -> None:
+    v2_obj = _make_v2_with_entry_source(
+        {"organism": "Test organism", "mol_type": "genomic DNA", "qualifiers": {"plasmid": [{"value": "pPLH-1"}]}}
+    )
+    assert _entry_source_qualifiers(v2_obj) == {"plasmid": ["pPLH-1"]}
+
+
+def test_convert_entries_organism_different_from_common_is_written() -> None:
+    v2_obj = _make_v2_with_entry_source(
+        {"organism": "Escherichia phage T4", "mol_type": "genomic DNA", "qualifiers": {}}
+    )
+    assert _entry_source_qualifiers(v2_obj) == {"organism": ["Escherichia phage T4"]}
+
+
+def test_convert_entries_mol_type_different_from_common_is_written() -> None:
+    v2_obj = _make_v2_with_entry_source({"organism": "Test organism", "mol_type": "genomic RNA", "qualifiers": {}})
+    assert _entry_source_qualifiers(v2_obj) == {"mol_type": ["genomic RNA"]}
+
+
+def test_convert_entries_source_equal_to_common_without_qualifiers_gives_empty_qualifiers() -> None:
+    v2_obj = _make_v2_with_entry_source({"organism": "Test organism", "mol_type": "genomic DNA", "qualifiers": {}})
+    assert _entry_source_qualifiers(v2_obj) == {}
 
 
 def test_convert_entries_features_mapped_by_sequence_id() -> None:

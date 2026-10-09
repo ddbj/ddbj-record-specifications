@@ -15,6 +15,7 @@ from ddbj_record.converter.v1_to_v2 import (
 )
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
+from ddbj_record.schema.v2 import Qualifier
 
 # === fixture-based integration test ===
 
@@ -632,31 +633,118 @@ def test_convert_submission_same_surname_candidates() -> None:
     assert contact.abbreviation == "Tanaka,A."
 
 
-def test_convert_sequences_source_without_mol_type_produces_none_source() -> None:
-    v1_obj = _make_v1_minimal(
+# === entry だけの source の qualifier ===
+#
+# dr_tools の ann2json は organism と mol_type を COMMON_SOURCE に移すので、entry の source feature には
+# entry 固有の qualifier (/plasmid など) だけが残る。v2 の Source は organism と mol_type が必須なので、
+# 無いものは COMMON_SOURCE から写して Source を作り、entry 固有の qualifier を落とさない。
+
+
+def _make_v1_with_source_qualifiers(qualifiers: dict[str, Any]) -> DdbjRecordV1:
+    return _make_v1_minimal(
         {
             "ENTRIES": [
                 {
-                    "id": "chr1",
-                    "name": "chr1",
-                    "type": "chromosome",
-                    "topology": "linear",
+                    "id": "pPLH-1",
+                    "name": "pPLH-1",
+                    "type": "plasmid",
+                    "topology": "circular",
                     "sequence": None,
-                    "features": [
-                        {
-                            "id": "sf1",
-                            "type": "source",
-                            "location": "1..100",
-                            "qualifiers": {"organism": ["Test organism"]},
-                        }
-                    ],
+                    "features": [{"id": "sf1", "type": "source", "location": "1..100", "qualifiers": qualifiers}],
                 }
             ]
         }
     )
+
+
+def test_convert_sequences_entry_only_qualifier_is_kept() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"plasmid": ["pPLH-1"], "ff_definition": ["@@[plasmid]@@ DNA"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.qualifiers == {"plasmid": [Qualifier(value="pPLH-1")]}
+
+
+def test_convert_sequences_entry_only_qualifier_copies_common_organism_and_mol_type() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"plasmid": ["pPLH-1"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.organism == "Test organism"
+    assert source.mol_type == "genomic DNA"
+
+
+def test_convert_sequences_entry_only_boolean_qualifier_is_kept_as_true() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"environmental_sample": [True]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.qualifiers == {"environmental_sample": [Qualifier(value="true")]}
+
+
+def test_convert_sequences_entry_only_multi_value_qualifier_keeps_every_value() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"note": ["first", "second"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert [q.value for q in source.qualifiers["note"]] == ["first", "second"]
+
+
+def test_convert_sequences_source_with_organism_only_copies_common_mol_type() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"organism": ["Escherichia phage T4"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.organism == "Escherichia phage T4"
+    assert source.mol_type == "genomic DNA"
+    assert source.qualifiers == {}
+
+
+def test_convert_sequences_source_with_mol_type_only_copies_common_organism() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"mol_type": ["genomic RNA"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.organism == "Test organism"
+    assert source.mol_type == "genomic RNA"
+
+
+def test_convert_sequences_source_with_own_organism_and_mol_type_keeps_them() -> None:
+    v1_obj = _make_v1_with_source_qualifiers(
+        {"organism": ["Escherichia phage T4"], "mol_type": ["genomic RNA"], "strain": ["T4"]}
+    )
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert source.organism == "Escherichia phage T4"
+    assert source.mol_type == "genomic RNA"
+    assert source.qualifiers == {"strain": [Qualifier(value="T4")]}
+
+
+def test_convert_sequences_organism_and_mol_type_are_not_copied_into_qualifiers() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"organism": ["X"], "mol_type": ["genomic DNA"], "plasmid": ["p1"]})
+    source = _convert_sequences(v1_obj).entries[0].source_features[0].source
+    assert source is not None
+    assert set(source.qualifiers) == {"plasmid"}
+
+
+def test_convert_sequences_ff_definition_is_not_copied_into_qualifiers() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"plasmid": ["p1"], "ff_definition": ["@@[plasmid]@@ DNA"]})
+    source_feature = _convert_sequences(v1_obj).entries[0].source_features[0]
+    assert source_feature.source is not None
+    assert "ff_definition" not in source_feature.source.qualifiers
+    assert source_feature.definition == ["@@[plasmid]@@ DNA"]
+
+
+def test_convert_sequences_source_with_only_ff_definition_has_no_source() -> None:
+    # 上書きするものが無い source feature に、COMMON_SOURCE の写しを作らない。
+    v1_obj = _make_v1_with_source_qualifiers({"ff_definition": ["@@[organism]@@ DNA, complete genome"]})
+    assert _convert_sequences(v1_obj).entries[0].source_features[0].source is None
+
+
+def test_convert_sequences_source_with_no_qualifiers_has_no_source() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({})
+    assert _convert_sequences(v1_obj).entries[0].source_features[0].source is None
+
+
+def test_convert_sequences_common_source_is_not_changed_by_entry_qualifiers() -> None:
+    v1_obj = _make_v1_with_source_qualifiers({"plasmid": ["pPLH-1"], "organism": ["Escherichia phage T4"]})
     sequences = _convert_sequences(v1_obj)
-    # organism without mol_type -> source=None
-    assert sequences.entries[0].source_features[0].source is None
+    assert sequences.common_source.organism == "Test organism"
+    assert sequences.common_source.qualifiers == {}
 
 
 # === negative tests ===

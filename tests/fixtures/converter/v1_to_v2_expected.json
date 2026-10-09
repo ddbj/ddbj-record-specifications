@@ -155,6 +155,17 @@
           {
             "id": "feature_2270",
             "location": "1..81630",
+            "source": {
+              "organism": "Paucilactobacillus hokkaidonensis",
+              "mol_type": "genomic DNA",
+              "qualifiers": {
+                "plasmid": [
+                  {
+                    "value": "pPLH-1"
+                  }
+                ]
+              }
+            },
             "definition": [
               "@@[organism]@@ @@[strain]@@ plasmid @@[plasmid]@@ DNA, complete sequence"
             ]
@@ -171,6 +182,17 @@
           {
             "id": "feature_2374",
             "location": "1..40971",
+            "source": {
+              "organism": "Paucilactobacillus hokkaidonensis",
+              "mol_type": "genomic DNA",
+              "qualifiers": {
+                "plasmid": [
+                  {
+                    "value": "pPLH-2"
+                  }
+                ]
+              }
+            },
             "definition": [
               "@@[organism]@@ @@[strain]@@ plasmid @@[plasmid]@@ DNA, complete sequence"
             ]

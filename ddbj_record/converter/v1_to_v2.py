@@ -244,6 +244,14 @@ def _convert_experiments(v1_obj: DdbjRecordV1) -> list[Experiment]:
     return [experiment]
 
 
+def _source_scalar(v1_sf: FeatureV1, key: str, common_value: str) -> str:
+    """Return the entry's own organism / mol_type, or the COMMON_SOURCE value if the source feature does not have it."""
+    values = v1_sf.qualifiers.get(key)
+    if values:
+        return _qualifier_value_to_str(values[0])
+    return common_value
+
+
 def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
     common_source = Source(
         organism=v1_obj.COMMON_SOURCE.organism, mol_type=v1_obj.COMMON_SOURCE.mol_type, qualifiers={}
@@ -272,10 +280,15 @@ def _convert_sequences(v1_obj: DdbjRecordV1) -> Sequences:
 
         v2_source_features: list[SourceFeature] = []
         for v1_sf in v1_source_features:
+            # v2 の Source は organism と mol_type が必須なので、entry の source feature に無いものは COMMON_SOURCE
+            # から写す。entry 固有の qualifier (/plasmid など) だけを持つ source feature を落とさないため。
+            # ff_definition しか持たない source feature は、上書きするものが無いので Source を作らない。
             v2_sf_source = None  # source for each source feature
-            if "organism" in v1_sf.qualifiers and "mol_type" in v1_sf.qualifiers:
+            if any(key != "ff_definition" for key in v1_sf.qualifiers):
                 v2_sf_source = Source(
-                    organism=v1_sf.qualifiers["organism"][0], mol_type=v1_sf.qualifiers["mol_type"][0], qualifiers={}
+                    organism=_source_scalar(v1_sf, "organism", v1_obj.COMMON_SOURCE.organism),
+                    mol_type=_source_scalar(v1_sf, "mol_type", v1_obj.COMMON_SOURCE.mol_type),
+                    qualifiers={},
                 )
                 for key, value in v1_sf.qualifiers.items():
                     if key in ("organism", "mol_type", "ff_definition"):

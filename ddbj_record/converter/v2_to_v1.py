@@ -356,8 +356,13 @@ def _convert_entries(v2_obj: DdbjRecordV2) -> list[Entry]:
         for v2_sf in v2_entry.source_features:
             source_qualifiers: dict[str, list[str | bool]] = {}
             if v2_sf.source:
-                source_qualifiers["organism"] = [v2_sf.source.organism]
-                source_qualifiers["mol_type"] = [v2_sf.source.mol_type]
+                # v1 の entry の source feature には、COMMON_SOURCE に無い entry 固有の情報だけを書く。v2 の Source は
+                # organism と mol_type が必須なので、common_source と同じ値は COMMON_SOURCE にあるものとして書かない。
+                common_source = v2_obj.sequences.common_source
+                if v2_sf.source.organism != common_source.organism:
+                    source_qualifiers["organism"] = [v2_sf.source.organism]
+                if v2_sf.source.mol_type != common_source.mol_type:
+                    source_qualifiers["mol_type"] = [v2_sf.source.mol_type]
                 for key, q_objs in v2_sf.source.qualifiers.items():
                     if key in ("organism", "mol_type"):
                         continue

@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from ddbj_record.converter.v1_to_v2 import v1_to_v2
 from ddbj_record.converter.v2_to_v1 import v2_to_v1
+from ddbj_record.converter.v2_to_v3 import v2_to_v3
 from ddbj_record.schema import SCHEMA_VERSIONS, normalize_cli_version
 from ddbj_record.schema.v1 import DdbjRecord as DdbjRecordV1
 from ddbj_record.schema.v2 import DdbjRecord as DdbjRecordV2
@@ -43,7 +44,9 @@ def parse_args(args: list[str] | None = None) -> Args:
         help="Schema version to convert from. If not specified, the version will be inferred from the input file.",
         dest="from_",
     )
-    parser.add_argument("--to", type=str, required=True, help="Schema version to convert to (e.g., 'v1' or 'v2')")
+    parser.add_argument(
+        "--to", type=str, required=True, help="Schema version to convert to ('v1', 'v2' or 'v3'; v3 only as target)"
+    )
     parser.add_argument("-i", "--input", type=Path, required=True, help="Path to the input JSON file to convert")
     parser.add_argument("-o", "--output", type=Path, required=True, help="Path to save the converted JSON file")
 
@@ -82,6 +85,11 @@ def convert_json_data(json_data: dict[str, Any], from_: str, to: str) -> dict[st
         result = v1_to_v2(cast("DdbjRecordV1", from_obj)).model_dump(exclude_none=True, by_alias=True)
     elif from_ == "v2" and to == "v1":
         result = v2_to_v1(cast("DdbjRecordV2", from_obj)).model_dump(exclude_none=True, by_alias=True)
+    elif from_ == "v2" and to == "v3":
+        result = v2_to_v3(cast("DdbjRecordV2", from_obj)).model_dump(exclude_none=True, by_alias=True)
+    elif from_ == "v1" and to == "v3":
+        # v1 -> v2 -> v3 とつなぐ。v1 の record を v3 で読む利用側のため。
+        result = v2_to_v3(v1_to_v2(cast("DdbjRecordV1", from_obj))).model_dump(exclude_none=True, by_alias=True)
     else:
         raise ValueError(f"Unsupported conversion from {from_} to {to}")
 

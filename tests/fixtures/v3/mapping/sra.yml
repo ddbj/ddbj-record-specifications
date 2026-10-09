@@ -18,7 +18,7 @@
 #   ... (要素名を小文字にした値)
 #                        同じく、小文字にして値にする（LIBRARY_LAYOUT/PAIRED → "paired"）
 #   ... (種類の名前にした値)
-#                        SRA のオブジェクトの型名を、record の種類の名前（record のキーの
+#                        SRA のオブジェクトの型名を、オブジェクトの種類（record のキーの
 #                        単数形）にする（STUDY → "project"、SAMPLE → "sample"）
 #   relations[...]       ルートの relations。source は文書の根の要素
 #

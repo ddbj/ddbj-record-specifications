@@ -471,6 +471,8 @@ class Publication(BaseModel):
     issue: str | None = None
     pages_from: str | None = None
     pages_to: str | None = None
+    # 論文の所在の URL。DOI も PubMed ID も無い論文 (preprint、投稿中のもの) を指すために持つ。
+    url: str | None = Field(None, examples=["https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1"])
     authors: list[Person] | None = None
     consortiums: list[str] | None = None
 
@@ -1163,7 +1165,12 @@ class ArrayDesign(BaseModel):
 
 
 class Qualifier(BaseModel):
-    """INSDC の qualifier の値。alias は record の中での識別子。"""
+    """INSDC の qualifier の値。alias は record の中での識別子。
+
+    値の無い qualifier (`/pseudo`、`/ribosomal_slippage`、`/circular_RNA` など、名前だけで書くもの) は value を
+    省き、`{}` (alias があれば `{"alias": ...}`) で書く。v2 のように `"true"` と書かない。`"true"` と書かれた
+    qualifier と区別できなくなるため。
+    """
 
     alias: str | None = None
     value: str | None = None
@@ -1184,6 +1191,11 @@ class Source(BaseModel):
 
 class SourceFeature(BaseModel):
     """INSDC の source feature。
+
+    source は、この entry に限って sequences.common_source を上書きする値である。上書きの単位は organism、
+    mol_type、qualifier の名前ごとで、source に無いものは common_source の値を使う。同じ名前の qualifier は
+    source の値で置き換え、common_source の値に追記しない。entry 固有の qualifier (`/plasmid`、`/submitter_seqid`
+    など) だけを書くときは、organism と mol_type を省いてよい。
 
     definition は DEFINITION 行 (ff_definition) をそのまま持つ。`@@[organism]@@` のような template は展開しない。展開は record を読む側が行う。
     """
@@ -1218,6 +1230,9 @@ class Entry(BaseModel):
     topology: str | None = Field(None, examples=["circular"])
     # GenBank の division。
     division: str | None = Field(None, examples=["BCT"])
+    # 配列の完成度 ("complete" / "nearly complete" / "partial")。DEFINITION 行の文言を決めるのに使う。
+    # 名前は DDBJ の DEFINITION 行の構築指標の completeness code から取った。公開状態 (status) とは別。
+    completeness: str | None = Field(None, examples=["complete"])
     sequence: str | None = None
     comments: list[str] | None = None
     source_features: list[SourceFeature] | None = None
@@ -1241,6 +1256,9 @@ class Sequences(BaseModel):
     common_source: Source | None = None
     entries: list[Entry] | None = None
     structured_comments: list[StructuredComment] | None = None
+    # Trad の KEYWORD。flat file では全ての entry の KEYWORDS 欄になる ("WGS"、"STANDARD_DRAFT" など)。
+    # BioProject の keyword (projects[].keywords) とは別。
+    keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
     attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="allow")
