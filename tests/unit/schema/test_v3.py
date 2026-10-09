@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from ddbj_record.schema.v3 import (
     Attribute,
@@ -14,6 +14,7 @@ from ddbj_record.schema.v3 import (
     Organism,
     Project,
     ProjectTarget,
+    Provenance,
     RelationSource,
     RelationTarget,
     Sample,
@@ -36,6 +37,29 @@ def test_v3_record_fixture_parses(path: Path) -> None:
     with path.open("r", encoding="utf-8") as f:
         record = DdbjRecord.model_validate(json.load(f))
     assert record.schema_version == "v3"
+
+
+def _unknown_keys(value: Any, path: str) -> list[str]:
+    """モデルの中で、型に無いキーに入った値の場所を集める。Provenance は型に無いキーを持つのが前提なので見ない。"""
+    if isinstance(value, BaseModel):
+        found = [] if isinstance(value, Provenance) else [f"{path}.{key}" for key in value.model_extra or {}]
+        for name in type(value).model_fields:
+            found.extend(_unknown_keys(getattr(value, name), f"{path}.{name}"))
+        return found
+    if isinstance(value, list):
+        return [found for i, item in enumerate(value) for found in _unknown_keys(item, f"{path}[{i}]")]
+    if isinstance(value, dict):
+        return [found for key, item in value.items() for found in _unknown_keys(item, f"{path}.{key}")]
+    return []
+
+
+@pytest.mark.parametrize("path", _record_paths(), ids=lambda p: p.stem)
+def test_v3_record_fixture_has_no_unknown_keys(path: Path) -> None:
+    # 型に無いキーも読めるので、読めるだけでは型と fixture のずれに気づけない。型からフィールドを消して
+    # fixture を直し忘れると、その値が型に無いキーとして残り、ここで落ちる。
+    with path.open("r", encoding="utf-8") as f:
+        record = DdbjRecord.model_validate(json.load(f))
+    assert _unknown_keys(record, "record") == []
 
 
 # === Attribute.name ===
@@ -247,12 +271,65 @@ def test_projects_given_as_a_single_object_is_rejected() -> None:
         DdbjRecord.model_validate({"schema_version": "v3", "projects": {"accession": "PRJDB1"}})
 
 
-# === extra="forbid" ===
+# === 型に無いキー (extra="allow") ===
+#
+# 利用側が固定している commit より新しいフィールドを持つ record も読め、読んだものを書き出しても失わない。
+# 綴り違いや置き場違いのキーの指摘は ddbj-validator のルールが行う。
 
 
-def test_project_rejects_unknown_fields() -> None:
+def test_unknown_keys_are_kept() -> None:
+    project = Project.model_validate({"title": "x", "bogus": 1})
+    assert project.title == "x"
+    assert project.model_extra == {"bogus": 1}
+
+
+def test_unknown_keys_survive_dump_and_validate() -> None:
+    record = {
+        "schema_version": "v3",
+        "samples": [{"alias": "s1", "new_field": {"nested": [1, 2]}}],
+        "new_top_level": "x",
+    }
+    dumped = DdbjRecord.model_validate(record).model_dump(exclude_none=True)
+    assert dumped == record
+
+
+def test_unknown_keys_do_not_relax_known_fields() -> None:
     with pytest.raises(ValidationError):
-        Project.model_validate({"title": "x", "bogus": 1})
+        Project.model_validate({"title": ["not", "a", "string"], "bogus": 1})
+
+
+def test_unknown_keys_are_not_mistaken_for_known_fields() -> None:
+    # 綴り違いのキーは、知っているフィールドには入らない。指摘はルールの仕事。
+    sample = Sample.model_validate({"alias": "s1", "titel": "typo"})
+    assert sample.title is None
+    assert sample.model_extra == {"titel": "typo"}
+
+
+# === schema_version ===
+#
+# 型に無いキーを受け取るので、別の major の record も形の上では読めてしまう。schema_version の値で止める。
+
+
+def test_schema_version_v3_is_accepted() -> None:
+    assert DdbjRecord.model_validate({"schema_version": "v3"}).schema_version == "v3"
+
+
+def test_schema_version_may_be_omitted() -> None:
+    assert DdbjRecord.model_validate({}).schema_version is None
+
+
+@pytest.mark.parametrize("value", ["v2.3", "v2", "v1.0", "0.2", "3", "V3", "v3.0", ""])
+def test_schema_version_of_another_major_is_rejected(value: str) -> None:
+    with pytest.raises(ValidationError):
+        DdbjRecord.model_validate({"schema_version": value})
+
+
+def test_v2_record_is_not_read_as_v3(v2_valid_minimal: dict[str, Any]) -> None:
+    # v2 の record は型の違い (common_source.organism が文字列) でも落ちるが、中身が v3 と同じ形の record でも
+    # schema_version で止まることを確かめる。
+    with pytest.raises(ValidationError) as excinfo:
+        DdbjRecord.model_validate(v2_valid_minimal)
+    assert ("schema_version",) in [error["loc"] for error in excinfo.value.errors()]
 
 
 def test_bioproject_other_fixture_is_fully_populated(v3_bioproject_other: dict[str, Any]) -> None:
