@@ -1,0 +1,289 @@
+{
+  "schema_version": "v2.3",
+  "provenance": {
+    "source_format": "TradAnnotation",
+    "dfast_version": "1.3.4"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Hanako Mishima",
+        "abbreviation": "Mishima,H.",
+        "email": "mishima@ddbj.nig.ac.jp",
+        "orcid": "0000-0000-0000-0001",
+        "organization": [
+          {
+            "name": "National Institute of Genetics",
+            "abbreviation": "NIG",
+            "url": "https://ddbj.nig.ac.jp",
+            "type": "institution",
+            "department": "DNA Data Bank of Japan",
+            "address": {
+              "country": "Japan",
+              "state": "Shizuoka",
+              "city": "Mishima",
+              "street": "Yata 1111",
+              "postal_code": "411-8540"
+            },
+            "ror_id": "https://ror.org/01xq5f0"
+          },
+          {
+            "name": "Example Genome Consortium",
+            "type": "consortium"
+          }
+        ]
+      },
+      {
+        "abbreviation": "Tanizawa,Y."
+      },
+      {
+        "abbreviation": "Nakamura,Y."
+      }
+    ],
+    "db_xrefs": [
+      {
+        "db": "bioproject",
+        "id": "PRJDB99999"
+      },
+      {
+        "db": "biosample",
+        "id": "SAMD999999"
+      },
+      {
+        "db": "insdc.sra",
+        "id": "DRR999990"
+      }
+    ],
+    "references": [
+      {
+        "title": "Draft genome sequencing of Paucilactobacillus hokkaidonensis",
+        "authors": [
+          {
+            "abbreviation": "Mishima,H."
+          },
+          {
+            "abbreviation": "Tanizawa,Y."
+          }
+        ],
+        "status": "unpublished",
+        "year": "2023",
+        "url": "https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1"
+      },
+      {
+        "title": "Genomic basis of cold adaptation in Paucilactobacillus hokkaidonensis",
+        "authors": [
+          {
+            "name": "Yasukazu Nakamura",
+            "abbreviation": "Nakamura,Y."
+          }
+        ],
+        "consortiums": [
+          {
+            "name": "Example Genome Consortium"
+          }
+        ],
+        "status": "published",
+        "year": "2024",
+        "journal": "Journal of Example Genomics",
+        "volume": "12",
+        "issue": "3",
+        "start_page": "100",
+        "end_page": "110",
+        "date_published": "2024-03-15",
+        "doi": "10.1000/example.2024.001",
+        "pubmed_id": "99999999"
+      }
+    ],
+    "comments": [
+      [
+        "Comment line1",
+        "line2"
+      ],
+      [
+        "Annotated by DFAST 1.3.4 https://dfast.ddbj.nig.ac.jp/"
+      ]
+    ],
+    "trad_submission_category": "WGS",
+    "division": "BCT",
+    "locus_tag_prefix": "PLH",
+    "seq_prefix": "contig",
+    "hold_date": "2025-03-31",
+    "keywords": [
+      "WGS",
+      "STANDARD_DRAFT"
+    ],
+    "datatype": "WGS"
+  },
+  "experiments": [
+    {
+      "id": "st_comment_experiment",
+      "platform": {
+        "platform_type": "Illumina MiSeq; PacBio RSII"
+      },
+      "experiment_attributes": {
+        "tagset_id": "Genome-Assembly-Data",
+        "assembly_method": "SPAdes v. 3.15.5",
+        "coverage": "60x",
+        "genome_coverage": "60x"
+      }
+    },
+    {
+      "id": "exp-1",
+      "title": "Whole genome shotgun sequencing",
+      "design": {
+        "design_description": "Paired-end library of LOOC260",
+        "library_name": "lib1",
+        "library_strategy": "WGS",
+        "library_source": "GENOMIC",
+        "library_selection": "RANDOM",
+        "library_layout": {
+          "layout_type": "PAIRED",
+          "nominal_length": 300,
+          "nominal_sdev": 50.0
+        },
+        "targeted_loci": [
+          {
+            "locus_name": "16S rRNA",
+            "description": "V3-V4 region"
+          }
+        ],
+        "pooling_strategy": "none",
+        "library_construction_protocol": "Nextera XT"
+      },
+      "platform": {
+        "platform_type": "ILLUMINA",
+        "instrument_model": "Illumina MiSeq"
+      },
+      "experiment_attributes": {
+        "run_id": "RUN001"
+      }
+    }
+  ],
+  "sequences": {
+    "common_source": {
+      "organism": "Paucilactobacillus hokkaidonensis",
+      "mol_type": "genomic DNA",
+      "qualifiers": {
+        "strain": [
+          {
+            "value": "LOOC260"
+          }
+        ],
+        "collection_date": [
+          {
+            "value": "2012-04-01"
+          }
+        ],
+        "note": [
+          {
+            "value": "first note"
+          },
+          {
+            "value": "second note"
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "id": "contig_001",
+        "name": "contig_001",
+        "type": "unplaced",
+        "topology": "linear",
+        "sequence": "atgcatgcatgc",
+        "comments": [
+          [
+            "Entry comment line1",
+            "line2"
+          ]
+        ],
+        "source_features": [
+          {
+            "id": "source_1",
+            "location": "1..12",
+            "source": {
+              "organism": "Paucilactobacillus hokkaidonensis",
+              "mol_type": "genomic DNA",
+              "qualifiers": {
+                "submitter_seqid": [
+                  {
+                    "value": "contig_001"
+                  }
+                ]
+              }
+            },
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "contig_002",
+        "name": "contig_002",
+        "type": "unplaced",
+        "topology": "linear",
+        "sequence": "ttagcttagc",
+        "source_features": [
+          {
+            "id": "source_2",
+            "location": "1..10",
+            "definition": [
+              "@@[organism]@@ @@[strain]@@ DNA, @@[submitter_seqid]@@"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "feature_1",
+      "type": "CDS",
+      "location": "1..12",
+      "sequence_id": "contig_001",
+      "qualifiers": {
+        "product": [
+          {
+            "value": "hypothetical protein"
+          }
+        ],
+        "transl_table": [
+          {
+            "value": "11"
+          }
+        ],
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "pseudo": [
+          {
+            "value": "true"
+          }
+        ],
+        "inference": [
+          {
+            "id": "qualifier_1",
+            "value": "COORDINATES:ab initio prediction:MetaGeneAnnotator"
+          }
+        ]
+      },
+      "locus_tag_id": "00010"
+    },
+    {
+      "id": "feature_2",
+      "type": "repeat_region",
+      "location": "1..10",
+      "sequence_id": "contig_002",
+      "qualifiers": {
+        "rpt_type": [
+          {
+            "value": "direct"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -173,3 +173,15 @@ def v2_to_v1_input() -> dict[str, Any]:
 def v2_to_v1_expected() -> dict[str, Any]:
 
     return _load_json("converter/v2_to_v1_expected.json")
+
+
+@pytest.fixture
+def v2_to_v3_input() -> dict[str, Any]:
+
+    return _load_json("converter/v2_to_v3_input.json")
+
+
+@pytest.fixture
+def v2_to_v3_expected() -> dict[str, Any]:
+
+    return _load_json("converter/v2_to_v3_expected.json")

@@ -59,6 +59,7 @@
           "title": "Complete genome sequencing of Paucilactobacillus hokkaidonensis",
           "status": "unpublished",
           "date": "2023",
+          "url": "https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1",
           "authors": [
             {
               "abbreviation": "Mishima,H."
@@ -204,6 +205,7 @@
         "name": "chromosome",
         "type": "chromosome",
         "topology": "circular",
+        "completeness": "complete",
         "sequence": "ttatccacaattaaac...(2277985 bp)...gaa",
         "source_features": [
           {
@@ -220,6 +222,7 @@
         "name": "pPLH-1",
         "type": "plasmid",
         "topology": "circular",
+        "completeness": "complete",
         "sequence": "atgtatgattttaag...(81630 bp)...gac",
         "source_features": [
           {
@@ -236,6 +239,7 @@
         "name": "pPLH-2",
         "type": "plasmid",
         "topology": "linear",
+        "completeness": "complete",
         "sequence": "atgacaaaatcaaca...(40971 bp)...aca",
         "source_features": [
           {
@@ -257,6 +261,10 @@
           "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
         }
       }
+    ],
+    "keywords": [
+      "WGS",
+      "STANDARD_DRAFT"
     ]
   },
   "features": [

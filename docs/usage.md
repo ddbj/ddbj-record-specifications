@@ -26,10 +26,11 @@ v1 / v2 の record は `ddbj_record.schema.v1` / `ddbj_record.schema.v2` の `Dd
 
 ## major の間の変換
 
-今あるのは v1 <-> v2 の converter である。
+今あるのは v1 <-> v2 と v2 -> v3 の converter である。CLI の v1 -> v3 は、v1 -> v2 -> v3 とつなぐ。v3 から古い major への変換は無い。
 
 ```bash
 ddbj_record_converter --from v1 --to v2 --input v1.json --output v2.json
+ddbj_record_converter --from v2 --to v3 --input v2.json --output v3.json
 ```
 
 Python からは、変換元の major の型で読んだものを渡す。
@@ -38,10 +39,14 @@ Python からは、変換元の major の型で読んだものを渡す。
 from pathlib import Path
 
 from ddbj_record.converter.v1_to_v2 import v1_to_v2
+from ddbj_record.converter.v2_to_v3 import v2_to_v3
 from ddbj_record.schema.v1 import DdbjRecord as V1Record
 
 v2_record = v1_to_v2(V1Record.model_validate_json(Path("v1.json").read_text()))
+v3_record = v2_to_v3(v2_record)
 ```
+
+変換で情報を失うときは `UserWarning` を出し、変換は止めない。何を失うかは [v1-v2.md](./v1-v2.md) にある。
 
 ## JSON Schema
 

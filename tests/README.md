@@ -29,6 +29,7 @@ docker compose exec app uv run pytest
 
 - 入力と期待する出力の組 ([`tests/fixtures/converter/`](./fixtures/converter/)) を持つ。converter の出力を `model_dump(exclude_none=True, by_alias=True)` した結果が、期待する出力と一致することを確かめる
 - v1 -> v2 -> v1 と v2 -> v1 -> v2 の往復で、値が保たれることを確かめる
+- v2 -> v3 は戻す converter が無いので、往復は確かめない。代わりに、全ての v2 の fixture が v3 に変換でき、変換結果が v3 の型で読めて、読み直しても変わらないことを確かめる
 - PBT で、生成した record を変換した結果が、変換先の型で読めることを確かめる
 
 ## テストデータ

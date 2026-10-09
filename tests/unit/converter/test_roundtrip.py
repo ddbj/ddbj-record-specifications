@@ -53,6 +53,25 @@ def test_v1_to_v2_to_v1_preserves_entry_ids(v1_to_v2_input: dict[str, Any]) -> N
         assert rt_entry.topology == orig_entry.topology
 
 
+def test_v1_to_v2_to_v1_restores_entry_source_qualifiers(v1_to_v2_input: dict[str, Any]) -> None:
+    """plasmid の entry の /plasmid のように、entry の source feature だけにある qualifier が往復で元に戻る。
+
+    v1 -> v2 で COMMON_SOURCE から写した organism と mol_type は、v2 -> v1 で書かないので、
+    entry の source feature の qualifier は元と同じになる。
+    """
+    v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
+    v2_obj = v1_to_v2(v1_obj)
+    v1_back = v2_to_v1(v2_obj)
+    checked = 0
+    for orig_entry, rt_entry in zip(v1_obj.ENTRIES, v1_back.ENTRIES, strict=True):
+        orig_sources = [f for f in orig_entry.features if f.type == "source"]
+        rt_sources = [f for f in rt_entry.features if f.type == "source"]
+        for orig_sf, rt_sf in zip(orig_sources, rt_sources, strict=True):
+            assert rt_sf.qualifiers == orig_sf.qualifiers, orig_entry.id
+            checked += 1
+    assert checked > 0
+
+
 def test_v1_to_v2_to_v1_preserves_hold_date(v1_to_v2_input: dict[str, Any]) -> None:
     """v1 holds the MSS DATE format (YYYYMMDD), so the roundtrip must not leave the ISO form behind."""
     v1_obj = DdbjRecordV1.model_validate(v1_to_v2_input)
