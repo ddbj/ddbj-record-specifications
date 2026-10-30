@@ -12,6 +12,9 @@ docker compose exec app uv run ruff format --check
 docker compose exec app uv run mypy
 ```
 
+- image は開発環境だけに使い、dev の依存と uv を含む。パッケージは全部 uv が入れるので、system Python の pip は image から消す
+- base image は uv の公式 image の `python<Python の minor version>-<Debian の codename>-slim` の tag を使う。この tag の image は uv の release のたびに作り直されるので、uv の version と digest では固定せず、compose は build のたびに base image を pull する
+- Python の version は base image の tag と `.python-version` で揃える。2 つが食い違うと `uv sync` が失敗する (uv は別の Python をダウンロードしない)
 - 依存は image を作るときに `/opt/venv` に入れる。venv を repo の外に置くので、host に `.venv` はできない
 - 依存を変えたら `docker compose exec app uv lock` で `uv.lock` を直し、`docker compose up -d --build` で image を作り直す
 - compose は container を host のユーザー (既定は `1000:1000`) で動かす。container が repo に書いたファイルは host のユーザーのものになる

@@ -2,6 +2,8 @@ services:
   app:
     build:
       context: .
+      # The base image tag is rebuilt upstream, so every build pulls the latest one.
+      pull: true
     image: ddbj-record-specifications
     container_name: ddbj-record-specifications
     # Files the container writes into the bind mount are owned by the host user.
