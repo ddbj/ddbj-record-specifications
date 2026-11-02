@@ -1192,12 +1192,22 @@ class Source(BaseModel):
 class SourceFeature(BaseModel):
     """INSDC の source feature。
 
-    source は、この entry に限って sequences.common_source を上書きする値である。上書きの単位は organism、
-    mol_type、qualifier の名前ごとで、source に無いものは common_source の値を使う。同じ名前の qualifier は
+    entry の main source は、`/focus` か `/transgenic` を持つ source feature である。どちらも無ければ、
+    entry の先頭の source feature を main source とする。source feature が 2 つ以上ある entry は、main source に
+    `/focus` か `/transgenic` を書く。2 つ目以降の source feature は、配列の一部が別の由来であることを表す
+    (`/focus` は別の生物の配列が入り込んだとき、`/transgenic` は別の配列を埋め込んだとき)。
+
+    main source の source は、この entry に限って sequences.common_source を上書きする値である。上書きの単位は
+    organism、mol_type、qualifier の名前ごとで、source に無いものは common_source の値を使う。同じ名前の qualifier は
     source の値で置き換え、common_source の値に追記しない。entry 固有の qualifier (`/plasmid`、`/submitter_seqid`
     など) だけを書くときは、organism と mol_type を省いてよい。
 
+    main source でない source feature の source には common_source を重ねない。その source feature の値を全て
+    (organism と mol_type を含めて) source に書く。common_source の `/strain` や `/isolate` は、別の由来の領域には
+    当てはまらないことがあるためである。
+
     definition は DEFINITION 行 (ff_definition) をそのまま持つ。`@@[organism]@@` のような template は展開しない。展開は record を読む側が行う。
+    definition は main source にだけ書く。
     """
 
     alias: str | None = None
@@ -1252,7 +1262,8 @@ class StructuredComment(BaseModel):
 
 class Sequences(BaseModel):
     seq_prefix: str | None = Field(None, examples=["contig"])
-    # 全ての entry の source feature に共通する値。Sample.organism とは別に持つ。
+    # 全ての entry の main source に共通する値。main source でない source feature には重ねない (SourceFeature)。
+    # Sample.organism とは別に持つ。
     common_source: Source | None = None
     entries: list[Entry] | None = None
     structured_comments: list[StructuredComment] | None = None
