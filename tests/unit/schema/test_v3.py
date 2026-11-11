@@ -298,6 +298,13 @@ def test_publications_of_the_sequences_and_of_an_entry_are_kept_apart() -> None:
     ]
 
 
+def test_publication_keeps_its_type() -> None:
+    sequences = Sequences.model_validate({"publications": [{"type": "thesis", "title": "t"}]})
+
+    assert sequences.publications is not None
+    assert sequences.publications[0].type == "thesis"
+
+
 def test_entry_keeps_its_secondary_accessions_in_order() -> None:
     entry = Entry.model_validate(
         {

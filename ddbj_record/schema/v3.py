@@ -462,6 +462,9 @@ class Submission(BaseModel):
 
 class Publication(BaseModel):
     title: str | None = None
+    # 出版物の種類 ("journal" / "thesis" / "proceedings" / "book" / "patent")。flat file の JOURNAL 行の書き方が
+    # 種類で違うので持つ ("Thesis (2020) ..." など)。省いたときは journal とみなす。
+    type: str | None = Field(None, examples=["journal"])
     pubmed_id: str | None = Field(None, examples=["12345678"])
     doi: str | None = Field(None, examples=["10.1038/nature12345"])
     status: str | None = Field(None, examples=["published"])
@@ -1286,6 +1289,7 @@ class Entry(BaseModel):
     keywords: list[str] | None = Field(None, examples=[["HTG", "HTGS_PHASE1"]])
     # この entry にだけ付く論文。flat file の REFERENCE は、1 つ目 (Direct Submission) の後に
     # sequences.publications、その後にこれを続けたもの。keywords と同じく足すだけで、取り消すことはできない。
+    # feature の `/citation` の番号 ("[2]") は、この順に 1 から数えた REFERENCE の番号である。
     publications: list[Publication] | None = None
     source_features: list[SourceFeature] | None = None
     st26: St26Sequence | None = None
