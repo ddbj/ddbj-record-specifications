@@ -69,6 +69,28 @@
   },
   "relations": [
     {
+      "type": "part_of",
+      "source": {
+        "type": "entry",
+        "accession": "DF999001"
+      },
+      "target": {
+        "db": "insdc",
+        "id": "BAAA01000000"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "entry",
+        "accession": "DF999002"
+      },
+      "target": {
+        "db": "insdc",
+        "id": "BAAA01000000"
+      }
+    },
+    {
       "type": "xref",
       "target": {
         "db": "bioproject",

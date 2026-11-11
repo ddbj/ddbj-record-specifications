@@ -1261,8 +1261,11 @@ class Entry(BaseModel):
     # 公開状態や日付と同じく record に入れない。alias は登録者が付けた名前。
     accession: str | None = Field(None, examples=["AB123456"])
     # accession 以外の識別子。この entry にまとめられて使われなくなった accession (flat file の ACCESSION 行の
-    # 2 つ目以降) を type "secondary" で、flat file に書く順に置く。WGS などの master ("BBYQ01000000") は
-    # accession から決まるので置かない。
+    # 2 つ目以降) を type "secondary" で、flat file に書く順に置く。WGS などの entry の master
+    # ("BBYQ01000000") は accession から決まるので置かない。
+    # CON の entry が属する WGS のセット (ACCESSION 行に master が書かれる) は、accession からも contig からも
+    # 決まらない。識別子ではなく別のものとの関係なので、relations に part_of で置く
+    # (source は entry、target は {"db": "insdc", "id": "BFBW01000000"})。
     identifiers: list[Identifier] | None = None
     alias: str | None = Field(None, examples=["contig_001"])
     name: str | None = None

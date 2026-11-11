@@ -103,7 +103,7 @@ record の中で accession と alias を持つもの (`projects[]`、`samples[]`
 |---|---|---|
 | `reference` | URL への参照 | project のホームページ |
 | `xref` | 外部 DB の項目への参照 | PubMed の論文 |
-| `part_of` | 起点が相手の一部である | experiment -> sample、run -> experiment、sample -> BioProject |
+| `part_of` | 起点が相手の一部である | experiment -> sample、run -> experiment、sample -> BioProject、CON の entry -> WGS のセット |
 | `child_of` | 起点が相手の子である | umbrella の子 project -> 親 project |
 | `derived_from` | 起点が相手から派生した | BioSample の派生、SRA の analysis の TARGETS、GEA の処理済みデータ -> 元のデータと Assay |
 | `related_to` | 起点が相手に関係する | SRA の RELATED_STUDIES |
