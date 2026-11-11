@@ -363,6 +363,23 @@ def test_tpa_primary_complement_written_as_the_flat_file_letter_is_rejected() ->
         Entry.model_validate({"tpa_primary": [{"span": "1-244", "complement": "c"}]})
 
 
+def test_structured_comments_of_an_entry_are_separate_from_those_of_the_sequences() -> None:
+    sequences = Sequences.model_validate(
+        {
+            "structured_comments": [{"tagset_id": "Assembly-Data", "fields": {"Sequencing Technology": "Illumina"}}],
+            "entries": [{"structured_comments": [{"tagset_id": "Assembly-Data", "fields": {"Coverage": "1523x"}}]}, {}],
+        }
+    )
+
+    assert sequences.structured_comments is not None
+    assert sequences.structured_comments[0].fields == {"Sequencing Technology": "Illumina"}
+    assert sequences.entries is not None
+    assert [[c.fields for c in entry.structured_comments or []] for entry in sequences.entries] == [
+        [{"Coverage": "1523x"}],
+        [],
+    ]
+
+
 def test_entry_keywords_are_separate_from_the_keywords_of_the_sequences() -> None:
     sequences = Sequences.model_validate({"keywords": ["WGS"], "entries": [{"keywords": ["HTG"]}]})
 

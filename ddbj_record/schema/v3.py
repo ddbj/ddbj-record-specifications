@@ -1239,6 +1239,15 @@ class St26Sequence(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class StructuredComment(BaseModel):
+    """Trad の ST_COMMENT の 1 つ。tagset_id がブロックの種類で、fields はその中の項目と値。"""
+
+    tagset_id: str | None = Field(None, examples=["Genome-Assembly-Data"])
+    fields: dict[str, str] | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
 class TpaPrimary(BaseModel):
     """TPA の entry を組み立てた元の配列の 1 区間。flat file の PRIMARY 欄の 1 行。"""
 
@@ -1286,6 +1295,9 @@ class Entry(BaseModel):
     # TPA の entry を組み立てた元の配列。flat file の PRIMARY 欄に書かれた順。
     tpa_primary: list[TpaPrimary] | None = None
     comments: list[str] | None = None
+    # この entry にだけ付く ST_COMMENT。entry ごとに値が違うもの (ウイルスの配列をまとめて登録したときの
+    # Coverage など) を置く。flat file の COMMENT には、sequences.structured_comments の後に続く。
+    structured_comments: list[StructuredComment] | None = None
     # この entry にだけ付く KEYWORD。flat file の KEYWORDS 欄は、sequences.keywords の後にこれを続けたもの。
     # common_source と違って足すだけで、sequences.keywords の値を entry で取り消すことはできない。
     # 両方にある値は 1 度だけ書く。
@@ -1300,21 +1312,13 @@ class Entry(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class StructuredComment(BaseModel):
-    """Trad の ST_COMMENT の 1 つ。tagset_id がブロックの種類で、fields はその中の項目と値。"""
-
-    tagset_id: str | None = Field(None, examples=["Genome-Assembly-Data"])
-    fields: dict[str, str] | None = None
-
-    model_config = ConfigDict(extra="allow")
-
-
 class Sequences(BaseModel):
     seq_prefix: str | None = Field(None, examples=["contig"])
     # 全ての entry の main source に共通する値。main source でない source feature には重ねない (SourceFeature)。
     # Sample.organism とは別に持つ。
     common_source: Source | None = None
     entries: list[Entry] | None = None
+    # 全ての entry に共通の ST_COMMENT。entry ごとに違うものは entries[].structured_comments に置く。
     structured_comments: list[StructuredComment] | None = None
     # Trad の KEYWORD。flat file では全ての entry の KEYWORDS 欄になる ("WGS"、"STANDARD_DRAFT" など)。
     # BioProject の keyword (projects[].keywords) とは別。entry ごとに違うものは entries[].keywords に置く。

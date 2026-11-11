@@ -235,6 +235,15 @@
         "topology": "circular",
         "completeness": "complete",
         "sequence": "atgtatgattttaag...(81630 bp)...gac",
+        "structured_comments": [
+          {
+            "tagset_id": "Assembly-Data",
+            "fields": {
+              "Assembly Method": "HGAP v. x.x",
+              "Coverage": "120x"
+            }
+          }
+        ],
         "keywords": [
           "HTG",
           "HTGS_PHASE3"
