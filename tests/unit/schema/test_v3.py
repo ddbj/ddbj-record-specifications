@@ -10,6 +10,7 @@ from pydantic import BaseModel, ValidationError
 from ddbj_record.schema.v3 import (
     Attribute,
     DdbjRecord,
+    Entry,
     LocusTagPrefix,
     Organism,
     Project,
@@ -18,6 +19,7 @@ from ddbj_record.schema.v3 import (
     RelationSource,
     RelationTarget,
     Sample,
+    Sequences,
 )
 
 RECORDS_DIR = Path(__file__).resolve().parents[2].joinpath("fixtures", "v3", "records")
@@ -269,6 +271,97 @@ def test_projects_keep_every_study_of_a_submission_in_order() -> None:
 def test_projects_given_as_a_single_object_is_rejected() -> None:
     with pytest.raises(ValidationError):
         DdbjRecord.model_validate({"schema_version": "v3", "projects": {"accession": "PRJDB1"}})
+
+
+# === 配列の論文・secondary accession・CONTIG・PRIMARY ===
+#
+# flat file の REFERENCE、ACCESSION 行の 2 つ目以降、CONTIG、PRIMARY の置き場。
+
+
+def test_publications_of_the_sequences_and_of_an_entry_are_kept_apart() -> None:
+    sequences = Sequences.model_validate(
+        {
+            "publications": [{"title": "common", "location": "sites"}],
+            "entries": [
+                {"alias": "e1", "publications": [{"title": "only e1", "location": "bases 1 to 660"}]},
+                {"alias": "e2"},
+            ],
+        }
+    )
+
+    assert sequences.publications is not None
+    assert [(p.title, p.location) for p in sequences.publications] == [("common", "sites")]
+    assert sequences.entries is not None
+    assert [[(p.title, p.location) for p in entry.publications or []] for entry in sequences.entries] == [
+        [("only e1", "bases 1 to 660")],
+        [],
+    ]
+
+
+def test_entry_keeps_its_secondary_accessions_in_order() -> None:
+    entry = Entry.model_validate(
+        {
+            "accession": "AB000001",
+            "identifiers": [{"type": "secondary", "value": "D00001"}, {"type": "secondary", "value": "D00002"}],
+        }
+    )
+
+    assert entry.identifiers is not None
+    assert [(i.type, i.value) for i in entry.identifiers] == [("secondary", "D00001"), ("secondary", "D00002")]
+
+
+def test_entry_built_from_other_entries_has_a_contig_and_no_sequence() -> None:
+    entry = Entry.model_validate({"contig": "join(BAAA01000001:1..5000,gap(100))"})
+
+    assert entry.contig == "join(BAAA01000001:1..5000,gap(100))"
+    assert entry.sequence is None
+
+
+def test_entry_contig_given_as_a_list_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        Entry.model_validate({"contig": ["BAAA01000001:1..5000", "gap(100)"]})
+
+
+def test_tpa_primary_rows_are_kept_in_order() -> None:
+    entry = Entry.model_validate(
+        {
+            "tpa_primary": [
+                {
+                    "span": "1-244",
+                    "primary_identifier": "AABS01000685.1",
+                    "primary_span": "29113-29356",
+                    "complement": True,
+                },
+                {"span": "245-377", "primary_identifier": "TI123456789", "primary_span": "1-133"},
+            ]
+        }
+    )
+
+    assert entry.tpa_primary is not None
+    assert [(row.span, row.primary_identifier, row.complement) for row in entry.tpa_primary] == [
+        ("1-244", "AABS01000685.1", True),
+        ("245-377", "TI123456789", None),
+    ]
+
+
+def test_tpa_primary_complement_omitted_and_false_are_both_read() -> None:
+    entry = Entry.model_validate({"tpa_primary": [{"span": "1-10"}, {"span": "11-20", "complement": False}]})
+
+    assert entry.tpa_primary is not None
+    assert [row.complement for row in entry.tpa_primary] == [None, False]
+
+
+def test_tpa_primary_complement_written_as_the_flat_file_letter_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        Entry.model_validate({"tpa_primary": [{"span": "1-244", "complement": "c"}]})
+
+
+def test_entry_keywords_are_separate_from_the_keywords_of_the_sequences() -> None:
+    sequences = Sequences.model_validate({"keywords": ["WGS"], "entries": [{"keywords": ["HTG"]}]})
+
+    assert sequences.keywords == ["WGS"]
+    assert sequences.entries is not None
+    assert sequences.entries[0].keywords == ["HTG"]
 
 
 # === 型に無いキー (extra="allow") ===

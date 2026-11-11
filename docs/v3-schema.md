@@ -25,6 +25,7 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 | `datasets` / `access_control` | JGA の dataset、policy、DAC |
 | `submission` | 登録の手続きについての情報 (登録者、公開予定日 (`hold_date`)、SRA の submission、GEA の IDF の Comment など、ST.26 の出願情報) |
 
+- Trad の論文 (flat file の REFERENCE) は `sequences.publications` に、entry ごとに違うものは `sequences.entries[].publications` に置く。`projects[].publications` は BioProject の論文で、project と配列を 1 つの record に入れたとき、project の論文が配列の REFERENCE になるとは限らないので分ける。REFERENCE の 1 つ目 (Direct Submission) は論文ではないので record に置かず、登録システムが `submission.submitters` と登録日から作る
 - GFF は record の要素にせず、入力の形式として扱う。GFF の feature は `features` に入れる
 - 染色体やプラスミドを表すモデルは作らない。`sequences.entries[]` の `name` / `type` / `topology` で表す (例: `{"name": "pPLH-1", "type": "plasmid", "topology": "circular"}`)
 - `array_design` は accession を持つ独立した登録で、多くの experiment から参照されるので、`assembly` と同じくトップレベルに置く
@@ -73,6 +74,7 @@ SRA XML、GEA のメタデータ、ST.26 の配列表から変換した record �
 ## record に入れないもの
 
 - 公開状態 (status) と、登録システムが管理する日付 (作成日・更新日・公開日) は record に入れず、登録システムの側で持つ
+- 配列の版 (`AB123456.1` の `.1`) と `/protein_id` も入れない。どちらも、公開のたびに登録システムが前に公開したものと比べて決める値で、登録者が書くものではないためである。`sequences.entries[].accession` には版を付けない。`contig` が指す配列にも付けず、flat file にするときに登録システムが付ける。TPA の元の配列 (`tpa_primary[].primary_identifier`) だけは、登録者が使った配列を版まで決めて指す値なので、版を付けて書く
 - ただし、元の形式に書かれている日付は、往復のためにそのまま持つ (GEA の IDF の `Comment[Last Update Date]` など)
 - 日付は ISO 8601 で書き、精度の違いを許す (`"2024-01-15"`、`"2024-01"`、`"2024"`)
 

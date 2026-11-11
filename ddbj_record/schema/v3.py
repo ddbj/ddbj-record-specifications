@@ -76,7 +76,7 @@ class Attribute(BaseModel):
 
 
 class Identifier(BaseModel):
-    """accession 以外の識別子(SRA IDENTIFIERS)。
+    """accession 以外の識別子 (SRA の IDENTIFIERS、Trad の secondary accession)。
 
     type は "primary" / "secondary" / "external" / "submitter" / "uuid"。
     namespace は external / submitter が持つ(例: "BioSample", "NGDC")。
@@ -475,6 +475,11 @@ class Publication(BaseModel):
     url: str | None = Field(None, examples=["https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1"])
     authors: list[Person] | None = None
     consortiums: list[str] | None = None
+    # 論文が配列のどの範囲についてのものか。flat file の REFERENCE 行の括弧の中 ("bases 1 to 660"、
+    # "bases 1 to 300; 500 to 660"、"sites" など) を書かれたまま持つ。範囲を言わない論文では省く。
+    # 塩基の範囲は entry ごとのものなので、sequences.entries[].publications の論文に書く。sequences.publications の
+    # 論文には、全ての entry に当てはまるもの ("sites") だけを書く。project の論文には書かない。
+    location: str | None = Field(None, examples=["bases 1 to 660"])
 
     model_config = ConfigDict(extra="allow")
 
@@ -1231,9 +1236,31 @@ class St26Sequence(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class TpaPrimary(BaseModel):
+    """TPA の entry を組み立てた元の配列の 1 区間。flat file の PRIMARY 欄の 1 行。"""
+
+    # この entry の中での範囲 (TPA_SPAN)。
+    span: str | None = Field(None, examples=["1-244"])
+    # 元の配列 (PRIMARY_IDENTIFIER)。登録者が使った配列を版まで決めて指すので、版を付けて書く。
+    # INSDC の配列でないもの (Trace Archive の "TI123456789" など) も書かれる。
+    primary_identifier: str | None = Field(None, examples=["AABS01000685.1"])
+    # 元の配列の中での範囲 (PRIMARY_SPAN)。
+    primary_span: str | None = Field(None, examples=["29113-29356"])
+    # 元の配列の相補鎖を使ったとき true (COMP 列の "c")。省いたときと false は、どちらも相補鎖でないこと
+    # (COMP 列が空) を表す。COMP 列は "c" か空のどちらかなので、文字でなく真偽値で持つ。
+    complement: bool | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
 class Entry(BaseModel):
-    # version を含む ("AB123456.1")。alias は登録者が付けた名前。
-    accession: str | None = Field(None, examples=["AB123456.1"])
+    # 版 (".1") を含まない。配列の版は、公開のたびに登録システムが前に公開した配列と比べて決めるので、
+    # 公開状態や日付と同じく record に入れない。alias は登録者が付けた名前。
+    accession: str | None = Field(None, examples=["AB123456"])
+    # accession 以外の識別子。この entry にまとめられて使われなくなった accession (flat file の ACCESSION 行の
+    # 2 つ目以降) を type "secondary" で、flat file に書く順に置く。WGS などの master ("BBYQ01000000") は
+    # accession から決まるので置かない。
+    identifiers: list[Identifier] | None = None
     alias: str | None = Field(None, examples=["contig_001"])
     name: str | None = None
     type: str | None = Field(None, examples=["chromosome"])
@@ -1244,7 +1271,22 @@ class Entry(BaseModel):
     # 名前は DDBJ の DEFINITION 行の構築指標の completeness code から取った。公開状態 (status) とは別。
     completeness: str | None = Field(None, examples=["complete"])
     sequence: str | None = None
+    # ほかの entry を並べて組み立てた entry (CON) の、並べ方。flat file の CONTIG 欄の join(...) を、改行と
+    # 字下げを除いて持つ。こういう entry は sequence を持たない。
+    # 相手の配列は accession で指し、accession が付く前は alias で指す。版は付けない: flat file にするときに、
+    # 登録システムがそのとき公開している版を付ける。相手が直されても、この値は古くならない。
+    # 元になった AGP は record に入れない (ファイルとして別に持つ)。
+    contig: str | None = Field(None, examples=["join(BAAA01000001:1..5000,gap(100),complement(BAAA01000002:1..3200))"])
+    # TPA の entry を組み立てた元の配列。flat file の PRIMARY 欄に書かれた順。
+    tpa_primary: list[TpaPrimary] | None = None
     comments: list[str] | None = None
+    # この entry にだけ付く KEYWORD。flat file の KEYWORDS 欄は、sequences.keywords の後にこれを続けたもの。
+    # common_source と違って足すだけで、sequences.keywords の値を entry で取り消すことはできない。
+    # 両方にある値は 1 度だけ書く。
+    keywords: list[str] | None = Field(None, examples=[["HTG", "HTGS_PHASE1"]])
+    # この entry にだけ付く論文。flat file の REFERENCE は、1 つ目 (Direct Submission) の後に
+    # sequences.publications、その後にこれを続けたもの。keywords と同じく足すだけで、取り消すことはできない。
+    publications: list[Publication] | None = None
     source_features: list[SourceFeature] | None = None
     st26: St26Sequence | None = None
 
@@ -1268,8 +1310,14 @@ class Sequences(BaseModel):
     entries: list[Entry] | None = None
     structured_comments: list[StructuredComment] | None = None
     # Trad の KEYWORD。flat file では全ての entry の KEYWORDS 欄になる ("WGS"、"STANDARD_DRAFT" など)。
-    # BioProject の keyword (projects[].keywords) とは別。
+    # BioProject の keyword (projects[].keywords) とは別。entry ごとに違うものは entries[].keywords に置く。
     keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
+    # 配列についての論文。flat file では全ての entry の REFERENCE になる。ただし REFERENCE の 1 つ目
+    # ("Direct Submission") は論文でないのでここに置かない。登録システムが、submission.submitters のうち role が
+    # "submitter" の人を AUTHORS に、先頭の人 (連絡先) を Contact に、登録日を日付に、配列の全長を範囲にして作る。
+    # BioProject の論文 (projects[].publications) とは別で、project の論文が配列の REFERENCE になるとは
+    # 限らない。entry ごとに違うものは entries[].publications に置く。
+    publications: list[Publication] | None = None
     attributes: list[Attribute] | None = None
 
     model_config = ConfigDict(extra="allow")

@@ -465,11 +465,8 @@ def test_pbt_v2_to_v3_publications_take_date_published_or_year(record_data: dict
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         v3_obj = v2_to_v3(v2_obj)
-    if not v2_obj.submission.references:
-        assert v3_obj.projects is None
-        return
-    assert v3_obj.projects is not None
-    publications = v3_obj.projects[0].publications or []
+    assert v3_obj.sequences is not None
+    publications = v3_obj.sequences.publications or []
     assert len(publications) == len(v2_obj.submission.references)
     for reference, publication in zip(v2_obj.submission.references, publications, strict=True):
         assert publication.title == reference.title

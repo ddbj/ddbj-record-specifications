@@ -209,17 +209,10 @@ def _convert_publication(reference: ReferenceV2) -> Publication:
 
 
 def _convert_projects(submission: SubmissionV2) -> list[Project] | None:
-    """references と locus_tag_prefix を、accession を持たない 1 つの project に置く。どちらも無ければ省く。"""
-    locus_tag_prefix: list[LocusTagPrefix] | None = None
-    if submission.locus_tag_prefix is not None:
-        locus_tag_prefix = [LocusTagPrefix(prefix=submission.locus_tag_prefix)]
-    project = _or_none(
-        Project(
-            publications=_list_or_none([_convert_publication(reference) for reference in submission.references]),
-            locus_tag_prefix=locus_tag_prefix,
-        )
-    )
-    return [project] if project is not None else None
+    """locus_tag_prefix を、accession を持たない 1 つの project に置く。無ければ省く。"""
+    if submission.locus_tag_prefix is None:
+        return None
+    return [Project(locus_tag_prefix=[LocusTagPrefix(prefix=submission.locus_tag_prefix)])]
 
 
 # === relations ===
@@ -384,6 +377,7 @@ def _convert_sequences(v2_obj: DdbjRecordV2, structured_comments: list[Structure
         entries=_list_or_none([_convert_entry(entry, submission.division) for entry in v2_obj.sequences.entries]),
         structured_comments=structured_comments,
         keywords=submission.keywords or None,
+        publications=_list_or_none([_convert_publication(reference) for reference in submission.references]),
     )
 
 

@@ -52,43 +52,6 @@
   },
   "projects": [
     {
-      "publications": [
-        {
-          "title": "Draft genome sequencing of Paucilactobacillus hokkaidonensis",
-          "status": "unpublished",
-          "date": "2023",
-          "url": "https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1",
-          "authors": [
-            {
-              "abbreviation": "Mishima,H."
-            },
-            {
-              "abbreviation": "Tanizawa,Y."
-            }
-          ]
-        },
-        {
-          "title": "Genomic basis of cold adaptation in Paucilactobacillus hokkaidonensis",
-          "pubmed_id": "99999999",
-          "doi": "10.1000/example.2024.001",
-          "status": "published",
-          "date": "2024-03-15",
-          "journal": "Journal of Example Genomics",
-          "volume": "12",
-          "issue": "3",
-          "pages_from": "100",
-          "pages_to": "110",
-          "authors": [
-            {
-              "name": "Yasukazu Nakamura",
-              "abbreviation": "Nakamura,Y."
-            }
-          ],
-          "consortiums": [
-            "Example Genome Consortium"
-          ]
-        }
-      ],
       "locus_tag_prefix": [
         {
           "prefix": "PLH"
@@ -224,6 +187,43 @@
     "keywords": [
       "WGS",
       "STANDARD_DRAFT"
+    ],
+    "publications": [
+      {
+        "title": "Draft genome sequencing of Paucilactobacillus hokkaidonensis",
+        "status": "unpublished",
+        "date": "2023",
+        "url": "https://www.biorxiv.org/content/10.1101/2023.01.01.000001v1",
+        "authors": [
+          {
+            "abbreviation": "Mishima,H."
+          },
+          {
+            "abbreviation": "Tanizawa,Y."
+          }
+        ]
+      },
+      {
+        "title": "Genomic basis of cold adaptation in Paucilactobacillus hokkaidonensis",
+        "pubmed_id": "99999999",
+        "doi": "10.1000/example.2024.001",
+        "status": "published",
+        "date": "2024-03-15",
+        "journal": "Journal of Example Genomics",
+        "volume": "12",
+        "issue": "3",
+        "pages_from": "100",
+        "pages_to": "110",
+        "authors": [
+          {
+            "name": "Yasukazu Nakamura",
+            "abbreviation": "Nakamura,Y."
+          }
+        ],
+        "consortiums": [
+          "Example Genome Consortium"
+        ]
+      }
     ]
   },
   "features": [
