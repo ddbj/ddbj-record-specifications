@@ -463,7 +463,8 @@ class Submission(BaseModel):
 class Publication(BaseModel):
     title: str | None = None
     # 出版物の種類 ("journal" / "thesis" / "proceedings" / "book" / "patent")。flat file の JOURNAL 行の書き方が
-    # 種類で違うので持つ ("Thesis (2020) ..." など)。省いたときは journal とみなす。
+    # 種類で違うので持つ。省いたときは、種類が書かれていないことだけを表す (journal とはみなさない)。
+    # 種類ごとに要る項目 (学位論文の大学、書籍の編者や出版社、特許の番号) の置き場は、まだ決めていない。
     type: str | None = Field(None, examples=["journal"])
     pubmed_id: str | None = Field(None, examples=["12345678"])
     doi: str | None = Field(None, examples=["10.1038/nature12345"])
@@ -1270,11 +1271,14 @@ class Entry(BaseModel):
     # 公開状態や日付と同じく record に入れない。alias は登録者が付けた名前。
     accession: str | None = Field(None, examples=["AB123456"])
     # accession 以外の識別子。この entry にまとめられて使われなくなった accession (flat file の ACCESSION 行の
-    # 2 つ目以降) を type "secondary" で、flat file に書く順に置く。WGS などの entry の master
-    # ("BBYQ01000000") は accession から決まるので置かない。
-    # CON の entry が属する WGS のセット (ACCESSION 行に master が書かれる) は、accession からも contig からも
-    # 決まらない。識別子ではなく別のものとの関係なので、relations に part_of で置く
-    # (source は entry、target は {"db": "insdc", "id": "BFBW01000000"})。
+    # 2 つ目以降) を type "secondary" で、flat file に書く順に置く。
+    # ACCESSION 行にはセットの master も書かれるが、ここには置かない。
+    # - WGS / TSA / TLS の entry ("BBYQ01000001"): master ("BBYQ01000000") は自分の accession から決まる。
+    # - CON の entry ("DG000121"): 属する WGS のセットの master ("BFBW01000000") は自分の accession から
+    #   決まらない。識別子ではなく別のものとの関係なので、relations に part_of で置く (target は
+    #   {"db": "insdc", "id": "BFBW01000000"})。entry から insdc への part_of は、この用途にだけ使う。
+    #   source は entry。record の CON の entry が全て同じセットに属するときは、source を省いて
+    #   (record 全体を起点にして) 1 つだけ書いてよい。
     identifiers: list[Identifier] | None = None
     alias: str | None = Field(None, examples=["contig_001"])
     name: str | None = None
@@ -1296,7 +1300,10 @@ class Entry(BaseModel):
     tpa_primary: list[TpaPrimary] | None = None
     comments: list[str] | None = None
     # この entry にだけ付く ST_COMMENT。entry ごとに値が違うもの (ウイルスの配列をまとめて登録したときの
-    # Coverage など) を置く。flat file の COMMENT には、sequences.structured_comments の後に続く。
+    # Coverage など) を置く。ブロックは分けない: 項目が 1 つでも entry ごとに違うブロックは、共通の項目も含めて
+    # 丸ごとここに置き、sequences.structured_comments には置かない。同じ tagset_id を両方に置いても合わせて
+    # 1 つにはせず、flat file には 2 つのブロックとして出る。
+    # flat file の COMMENT は、comments (submission、entry の順)、sequences.structured_comments、これ、の順。
     structured_comments: list[StructuredComment] | None = None
     # この entry にだけ付く KEYWORD。flat file の KEYWORDS 欄は、sequences.keywords の後にこれを続けたもの。
     # common_source と違って足すだけで、sequences.keywords の値を entry で取り消すことはできない。
@@ -1304,7 +1311,9 @@ class Entry(BaseModel):
     keywords: list[str] | None = Field(None, examples=[["HTG", "HTGS_PHASE1"]])
     # この entry にだけ付く論文。flat file の REFERENCE は、1 つ目 (Direct Submission) の後に
     # sequences.publications、その後にこれを続けたもの。keywords と同じく足すだけで、取り消すことはできない。
-    # feature の `/citation` の番号 ("[2]") は、この順に 1 から数えた REFERENCE の番号である。
+    # feature の `/citation` の番号 ("[2]") は、この順に 1 から数えた REFERENCE の番号である。同じ論文が
+    # 両方にあっても除かずに数える。したがって sequences.publications に論文を足すと、entry の論文の番号が
+    # 全て 1 つずれる。`/citation` を持つ record では、番号も合わせて直す。
     publications: list[Publication] | None = None
     source_features: list[SourceFeature] | None = None
     st26: St26Sequence | None = None
@@ -1323,7 +1332,8 @@ class Sequences(BaseModel):
     # Trad の KEYWORD。flat file では全ての entry の KEYWORDS 欄になる ("WGS"、"STANDARD_DRAFT" など)。
     # BioProject の keyword (projects[].keywords) とは別。entry ごとに違うものは entries[].keywords に置く。
     keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
-    # 配列についての論文。flat file では全ての entry の REFERENCE になる。ただし REFERENCE の 1 つ目
+    # 配列についての論文。flat file では全ての entry の REFERENCE になる。順序は保つ (feature の `/citation` が
+    # REFERENCE を番号で指す。数え方は Entry.publications)。ただし REFERENCE の 1 つ目
     # ("Direct Submission") は論文でないのでここに置かない。登録システムが、submission.submitters のうち role が
     # "submitter" の人を AUTHORS に、先頭の人 (連絡先) を Contact に、登録日を日付に、配列の全長を範囲にして作る。
     # BioProject の論文 (projects[].publications) とは別で、project の論文が配列の REFERENCE になるとは

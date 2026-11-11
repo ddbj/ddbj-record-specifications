@@ -16,6 +16,7 @@ from ddbj_record.schema.v3 import (
     Project,
     ProjectTarget,
     Provenance,
+    Publication,
     RelationSource,
     RelationTarget,
     Sample,
@@ -298,11 +299,33 @@ def test_publications_of_the_sequences_and_of_an_entry_are_kept_apart() -> None:
     ]
 
 
-def test_publication_keeps_its_type() -> None:
-    sequences = Sequences.model_validate({"publications": [{"type": "thesis", "title": "t"}]})
+def test_publication_type_is_a_value_not_a_list() -> None:
+    assert Publication.model_validate({"type": "thesis"}).type == "thesis"
+    assert Publication.model_validate({}).type is None
 
-    assert sequences.publications is not None
-    assert sequences.publications[0].type == "thesis"
+    with pytest.raises(ValidationError):
+        Publication.model_validate({"type": ["thesis", "book"]})
+
+
+def test_the_wgs_set_of_a_con_entry_is_a_relation() -> None:
+    record = DdbjRecord.model_validate(
+        {
+            "schema_version": "v3",
+            "sequences": {"entries": [{"accession": "DG000121", "contig": "join(LD726224:1..293438)"}]},
+            "relations": [
+                {
+                    "type": "part_of",
+                    "source": {"type": "entry", "accession": "DG000121"},
+                    "target": {"db": "insdc", "id": "BFBW01000000"},
+                }
+            ],
+        }
+    )
+
+    assert record.sequences is not None and record.sequences.entries is not None
+    assert record.sequences.entries[0].identifiers is None
+    assert record.relations is not None
+    assert (record.relations[0].target.db, record.relations[0].target.id) == ("insdc", "BFBW01000000")
 
 
 def test_entry_keeps_its_secondary_accessions_in_order() -> None:
@@ -366,16 +389,28 @@ def test_tpa_primary_complement_written_as_the_flat_file_letter_is_rejected() ->
 def test_structured_comments_of_an_entry_are_separate_from_those_of_the_sequences() -> None:
     sequences = Sequences.model_validate(
         {
-            "structured_comments": [{"tagset_id": "Assembly-Data", "fields": {"Sequencing Technology": "Illumina"}}],
-            "entries": [{"structured_comments": [{"tagset_id": "Assembly-Data", "fields": {"Coverage": "1523x"}}]}, {}],
+            "structured_comments": [
+                {"tagset_id": "Genome-Annotation-Data", "fields": {"Annotation Pipeline": "DFAST"}}
+            ],
+            "entries": [
+                {
+                    "structured_comments": [
+                        {
+                            "tagset_id": "Assembly-Data",
+                            "fields": {"Coverage": "1523x", "Sequencing Technology": "Illumina"},
+                        }
+                    ]
+                },
+                {},
+            ],
         }
     )
 
     assert sequences.structured_comments is not None
-    assert sequences.structured_comments[0].fields == {"Sequencing Technology": "Illumina"}
+    assert sequences.structured_comments[0].tagset_id == "Genome-Annotation-Data"
     assert sequences.entries is not None
     assert [[c.fields for c in entry.structured_comments or []] for entry in sequences.entries] == [
-        [{"Coverage": "1523x"}],
+        [{"Coverage": "1523x", "Sequencing Technology": "Illumina"}],
         [],
     ]
 

@@ -237,10 +237,10 @@
         "sequence": "atgtatgattttaag...(81630 bp)...gac",
         "structured_comments": [
           {
-            "tagset_id": "Assembly-Data",
+            "tagset_id": "Plasmid-Data",
             "fields": {
-              "Assembly Method": "HGAP v. x.x",
-              "Coverage": "120x"
+              "Copy Number": "3",
+              "Replicon Type": "theta"
             }
           }
         ],
@@ -358,6 +358,11 @@
           },
           {
             "value": "similar to AA sequence:RefSeq:WP_003641628.1"
+          }
+        ],
+        "citation": [
+          {
+            "value": "[2]"
           }
         ]
       },
