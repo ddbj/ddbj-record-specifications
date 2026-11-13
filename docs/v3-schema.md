@@ -65,6 +65,7 @@ SRA XML、GEA のメタデータ、ST.26 の配列表から変換した record �
 - 戻せるのは、値、入れ子、繰り返しの数、繰り返しの順序
 - 保たないのは、値を持たない要素、数の書き方、XML の書式 (属性の並び、空白、コメント)。例えば `NOMINAL_SDEV="0.0E0"` は `nominal_sdev: 0.0` になり、`0.0E0` には戻らない
 - 日付は ISO 8601 に書き直し、戻すときは元の形式の書き方にする (ST.26 の Bibliography の `20241203` など)。決まった書き方でない日付は、書かれたまま持って書かれたまま戻す
+- 配列の版 (`AB123456.1` の `.1`) も入れない。公開のたびに登録システムが前に公開した配列と比べて決める値で、登録者が書くものではないためである。`sequences.entries[].accession` には版を付けない
 - 大きな表 (アレイ設計のプローブの表など) とリードファイルは record に入れず、`File` で指す
 - GEA の SDRF の行は record に持たず、オブジェクトから作り直す。行の番号を sample、member、run / analysis の `sdrf_rows` に、ファイルの列の位置を run / analysis の `sdrf_column` に持ち、行はこの 2 つだけから作る (relations は使わない)。そのため、行の順序と全く同じ行の繰り返しも戻り、list の並びが変わっても崩れない。保たないのは、種類の違う列の並び (ノードの中で Comment が属性の前か後か、など)。作り直し方は GEA の対応表 (`gea.yml`) の冒頭にある
 - ST.26 の feature は、source とそれ以外の前後と、1 つの feature の中で名前の違う qualifier の前後を保たない。source は entry の `source_features` に、それ以外は `features` に分けて持ち、qualifier は名前ごとにまとめて持つためである。配列の長さ (`INSDSeq_length`) は配列から数える。詳しくは ST.26 の対応表 (`st26.yml`) の sequences の節にある
@@ -74,7 +75,6 @@ SRA XML、GEA のメタデータ、ST.26 の配列表から変換した record �
 ## record に入れないもの
 
 - 公開状態 (status) と、登録システムが管理する日付 (作成日・更新日・公開日) は record に入れず、登録システムの側で持つ
-- 配列の版 (`AB123456.1` の `.1`) と `/protein_id` も入れない。どちらも、公開のたびに登録システムが前に公開したものと比べて決める値で、登録者が書くものではないためである。`sequences.entries[].accession` には版を付けない。`contig` が指す配列にも付けず、flat file にするときに登録システムが付ける。TPA の元の配列 (`tpa_primary[].primary_identifier`) だけは、登録者が使った配列を版まで決めて指す値なので、版を付けて書く
 - ただし、元の形式に書かれている日付は、往復のためにそのまま持つ (GEA の IDF の `Comment[Last Update Date]` など)
 - 日付は ISO 8601 で書き、精度の違いを許す (`"2024-01-15"`、`"2024-01"`、`"2024"`)
 

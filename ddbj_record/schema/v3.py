@@ -464,7 +464,6 @@ class Publication(BaseModel):
     title: str | None = None
     # 出版物の種類 ("journal" / "thesis" / "proceedings" / "book" / "patent")。flat file の JOURNAL 行の書き方が
     # 種類で違うので持つ。省いたときは、種類が書かれていないことだけを表す (journal とはみなさない)。
-    # 種類ごとに要る項目 (学位論文の大学、書籍の編者や出版社、特許の番号) の置き場は、まだ決めていない。
     type: str | None = Field(None, examples=["journal"])
     pubmed_id: str | None = Field(None, examples=["12345678"])
     doi: str | None = Field(None, examples=["10.1038/nature12345"])
@@ -1334,8 +1333,7 @@ class Sequences(BaseModel):
     keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
     # 配列についての論文。flat file では全ての entry の REFERENCE になる。順序は保つ (feature の `/citation` が
     # REFERENCE を番号で指す。数え方は Entry.publications)。ただし REFERENCE の 1 つ目
-    # ("Direct Submission") は論文でないのでここに置かない。登録システムが、submission.submitters のうち role が
-    # "submitter" の人を AUTHORS に、先頭の人 (連絡先) を Contact に、登録日を日付に、配列の全長を範囲にして作る。
+    # ("Direct Submission") は論文でないのでここに置かない。登録システムが submission.submitters と登録日から作る。
     # BioProject の論文 (projects[].publications) とは別で、project の論文が配列の REFERENCE になるとは
     # 限らない。entry ごとに違うものは entries[].publications に置く。
     publications: list[Publication] | None = None
