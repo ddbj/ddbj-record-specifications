@@ -201,7 +201,18 @@
     },
     "entries": [
       {
+        "accession": "AP099997",
         "alias": "chromosome",
+        "identifiers": [
+          {
+            "type": "secondary",
+            "value": "AP099998"
+          },
+          {
+            "type": "secondary",
+            "value": "AP099999"
+          }
+        ],
         "name": "chromosome",
         "type": "chromosome",
         "topology": "circular",
@@ -224,6 +235,33 @@
         "topology": "circular",
         "completeness": "complete",
         "sequence": "atgtatgattttaag...(81630 bp)...gac",
+        "structured_comments": [
+          {
+            "tagset_id": "Plasmid-Data",
+            "fields": {
+              "Copy Number": "3",
+              "Replicon Type": "theta"
+            }
+          }
+        ],
+        "keywords": [
+          "HTG",
+          "HTGS_PHASE3"
+        ],
+        "publications": [
+          {
+            "title": "A cold-inducible plasmid of Paucilactobacillus hokkaidonensis",
+            "status": "in-press",
+            "date": "2025",
+            "journal": "Microbiol Resour Announc",
+            "authors": [
+              {
+                "abbreviation": "Mishima,H."
+              }
+            ],
+            "location": "bases 1 to 81630"
+          }
+        ],
         "source_features": [
           {
             "location": "1..81630",
@@ -265,6 +303,27 @@
     "keywords": [
       "WGS",
       "STANDARD_DRAFT"
+    ],
+    "publications": [
+      {
+        "title": "Complete genome sequence of Paucilactobacillus hokkaidonensis LOOC260",
+        "type": "journal",
+        "pubmed_id": "25879859",
+        "doi": "10.1186/s12864-015-1435-2",
+        "status": "published",
+        "date": "2015",
+        "journal": "BMC Genomics",
+        "volume": "16",
+        "pages_from": "240",
+        "authors": [
+          {
+            "abbreviation": "Tanizawa,Y."
+          },
+          {
+            "abbreviation": "Nakamura,Y."
+          }
+        ]
+      }
     ]
   },
   "features": [
@@ -299,6 +358,11 @@
           },
           {
             "value": "similar to AA sequence:RefSeq:WP_003641628.1"
+          }
+        ],
+        "citation": [
+          {
+            "value": "[2]"
           }
         ]
       },

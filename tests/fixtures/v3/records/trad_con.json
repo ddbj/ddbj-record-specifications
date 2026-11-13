@@ -1,0 +1,101 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "TradAnnotation",
+    "submission_category": "CON"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Hanako Mishima",
+        "abbreviation": "Mishima,H.",
+        "email": "mishima@ddbj.nig.ac.jp",
+        "role": "contact",
+        "organizations": [
+          {
+            "name": "National Institute of Genetics",
+            "department": "DNA Data Bank of Japan"
+          }
+        ]
+      }
+    ]
+  },
+  "sequences": {
+    "common_source": {
+      "organism": {
+        "name": "Oryza sativa Japonica Group"
+      },
+      "mol_type": "genomic DNA",
+      "qualifiers": {
+        "cultivar": [
+          {
+            "value": "Nipponbare"
+          }
+        ]
+      }
+    },
+    "entries": [
+      {
+        "accession": "DF999001",
+        "alias": "scaffold_1",
+        "topology": "linear",
+        "division": "CON",
+        "contig": "join(BAAA01000001:1..5000,gap(100),complement(BAAA01000002:1..3200))",
+        "source_features": [
+          {
+            "location": "1..8300",
+            "definition": [
+              "@@[organism]@@ DNA, scaffold: scaffold_1, cultivar: @@[cultivar]@@"
+            ]
+          }
+        ]
+      },
+      {
+        "accession": "DF999002",
+        "alias": "scaffold_2",
+        "topology": "linear",
+        "division": "CON",
+        "contig": "join(BAAA01000003:1..12000,gap(unk100),BAAA01000004:1..700)",
+        "source_features": [
+          {
+            "location": "1..12800",
+            "definition": [
+              "@@[organism]@@ DNA, scaffold: scaffold_2, cultivar: @@[cultivar]@@"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "relations": [
+    {
+      "type": "part_of",
+      "source": {
+        "type": "entry",
+        "accession": "DF999001"
+      },
+      "target": {
+        "db": "insdc",
+        "id": "BZZZ01000000"
+      }
+    },
+    {
+      "type": "part_of",
+      "source": {
+        "type": "entry",
+        "accession": "DF999002"
+      },
+      "target": {
+        "db": "insdc",
+        "id": "BZZZ01000000"
+      }
+    },
+    {
+      "type": "xref",
+      "target": {
+        "db": "bioproject",
+        "id": "PRJDB99999"
+      }
+    }
+  ]
+}

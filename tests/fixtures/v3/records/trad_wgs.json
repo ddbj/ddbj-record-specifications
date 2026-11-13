@@ -37,17 +37,6 @@
         {
           "prefix": "ECK12"
         }
-      ],
-      "publications": [
-        {
-          "title": "Draft genome sequence of Escherichia coli K-12",
-          "status": "unpublished",
-          "authors": [
-            {
-              "abbreviation": "Yamada,T."
-            }
-          ]
-        }
       ]
     }
   ],
@@ -134,6 +123,17 @@
           "Genome Coverage": "120x",
           "Sequencing Technology": "Illumina NovaSeq 6000"
         }
+      }
+    ],
+    "publications": [
+      {
+        "title": "Draft genome sequence of Escherichia coli K-12",
+        "status": "unpublished",
+        "authors": [
+          {
+            "abbreviation": "Yamada,T."
+          }
+        ]
       }
     ]
   },

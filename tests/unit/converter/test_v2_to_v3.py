@@ -279,8 +279,8 @@ def test_submission_is_omitted_when_empty() -> None:
 # --- projects ---
 
 
-def test_projects_omitted_without_references_and_locus_tag_prefix() -> None:
-    assert _convert_projects(_make_v2().submission) is None
+def test_projects_omitted_without_locus_tag_prefix() -> None:
+    assert _convert_projects(_make_v2({"submission.references": [_reference(year="2023")]}).submission) is None
 
 
 def test_projects_is_one_project_without_accession() -> None:
@@ -291,37 +291,37 @@ def test_projects_is_one_project_without_accession() -> None:
     assert projects[0].locus_tag_prefix is not None
     assert [p.prefix for p in projects[0].locus_tag_prefix] == ["PLH"]
     assert projects[0].locus_tag_prefix[0].biosample_id is None
+    assert projects[0].publications is None
+
+
+# --- publications ---
 
 
 def test_publication_date_comes_from_year_without_date_published() -> None:
-    projects = _convert_projects(_make_v2({"submission.references": [_reference(year="2023")]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    assert projects[0].publications[0].date == "2023"
+    publications = _convert_sequences(_make_v2({"submission.references": [_reference(year="2023")]}), None).publications
+    assert publications is not None
+    assert publications[0].date == "2023"
 
 
 def test_publication_date_prefers_date_published() -> None:
     reference = _reference(year="2024", date_published="2024-03-15")
-    projects = _convert_projects(_make_v2({"submission.references": [reference]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    assert projects[0].publications[0].date == "2024-03-15"
+    publications = _convert_sequences(_make_v2({"submission.references": [reference]}), None).publications
+    assert publications is not None
+    assert publications[0].date == "2024-03-15"
 
 
 def test_publication_date_is_none_for_empty_year() -> None:
-    projects = _convert_projects(_make_v2({"submission.references": [_reference(year="")]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    assert projects[0].publications[0].date is None
+    publications = _convert_sequences(_make_v2({"submission.references": [_reference(year="")]}), None).publications
+    assert publications is not None
+    assert publications[0].date is None
 
 
 def test_publication_year_differing_from_date_published_warns() -> None:
     reference = _reference(year="2023", date_published="2024-03-15")
     with pytest.warns(UserWarning, match="year '2023' differs from date_published"):
-        projects = _convert_projects(_make_v2({"submission.references": [reference]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    assert projects[0].publications[0].date == "2024-03-15"
+        publications = _convert_sequences(_make_v2({"submission.references": [reference]}), None).publications
+    assert publications is not None
+    assert publications[0].date == "2024-03-15"
 
 
 def test_publication_pages_and_identifiers_are_renamed() -> None:
@@ -336,10 +336,9 @@ def test_publication_pages_and_identifiers_are_renamed() -> None:
         pubmed_id="123",
         url="https://example.org/x",
     )
-    projects = _convert_projects(_make_v2({"submission.references": [reference]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    publication = projects[0].publications[0]
+    publications = _convert_sequences(_make_v2({"submission.references": [reference]}), None).publications
+    assert publications is not None
+    publication = publications[0]
     assert (publication.status, publication.journal, publication.volume, publication.issue) == (
         "published",
         "J",
@@ -352,33 +351,39 @@ def test_publication_pages_and_identifiers_are_renamed() -> None:
 
 def test_publication_authors_keep_name_and_abbreviation_without_role() -> None:
     reference = _reference(authors=[{"name": "Taro Yamada", "abbreviation": "Yamada,T."}])
-    projects = _convert_projects(_make_v2({"submission.references": [reference]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    authors = projects[0].publications[0].authors
+    publications = _convert_sequences(_make_v2({"submission.references": [reference]}), None).publications
+    assert publications is not None
+    authors = publications[0].authors
     assert authors is not None
     assert (authors[0].name, authors[0].abbreviation, authors[0].role) == ("Taro Yamada", "Yamada,T.", None)
 
 
 def test_publication_consortiums_become_names() -> None:
     reference = _reference(consortiums=[{"name": "Consortium X"}, {"name": "Consortium Y"}])
-    projects = _convert_projects(_make_v2({"submission.references": [reference]}).submission)
-    assert projects is not None
-    assert projects[0].publications is not None
-    assert projects[0].publications[0].consortiums == ["Consortium X", "Consortium Y"]
+    publications = _convert_sequences(_make_v2({"submission.references": [reference]}), None).publications
+    assert publications is not None
+    assert publications[0].consortiums == ["Consortium X", "Consortium Y"]
 
 
 def test_publication_consortium_with_more_than_a_name_warns() -> None:
     reference = _reference(consortiums=[{"name": "Consortium X", "url": "https://example.org"}])
     with pytest.warns(UserWarning, match="consortium 'Consortium X'"):
-        _convert_projects(_make_v2({"submission.references": [reference]}).submission)
+        _convert_sequences(_make_v2({"submission.references": [reference]}), None)
 
 
 def test_publication_consortium_with_only_a_name_does_not_warn() -> None:
     reference = _reference(consortiums=[{"name": "Consortium X"}])
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        _convert_projects(_make_v2({"submission.references": [reference]}).submission)
+        _convert_sequences(_make_v2({"submission.references": [reference]}), None)
+
+
+def test_references_alone_make_no_project() -> None:
+    v3_obj = v2_to_v3(_make_v2({"submission.references": [_reference(year="2023")]}))
+    assert v3_obj.projects is None
+    assert v3_obj.sequences is not None
+    assert v3_obj.sequences.publications is not None
+    assert [publication.date for publication in v3_obj.sequences.publications] == ["2023"]
 
 
 # --- relations ---

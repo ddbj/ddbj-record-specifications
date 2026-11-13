@@ -1,0 +1,116 @@
+{
+  "schema_version": "v3",
+  "provenance": {
+    "source_format": "TradAnnotation",
+    "submission_category": "TPA"
+  },
+  "submission": {
+    "submitters": [
+      {
+        "name": "Hanako Mishima",
+        "abbreviation": "Mishima,H.",
+        "email": "mishima@ddbj.nig.ac.jp",
+        "role": "contact",
+        "organizations": [
+          {
+            "name": "National Institute of Genetics",
+            "department": "DNA Data Bank of Japan"
+          }
+        ]
+      }
+    ]
+  },
+  "sequences": {
+    "common_source": {
+      "organism": {
+        "name": "Ciona intestinalis"
+      },
+      "mol_type": "mRNA"
+    },
+    "entries": [
+      {
+        "accession": "BR999001",
+        "alias": "zf-6",
+        "topology": "linear",
+        "division": "INV",
+        "sequence": "acgt...(1954 bp)...acgt",
+        "tpa_primary": [
+          {
+            "span": "1-244",
+            "primary_identifier": "BAAA01000685.1",
+            "primary_span": "29113-29356",
+            "complement": true
+          },
+          {
+            "span": "245-377",
+            "primary_identifier": "BAAA01000685.1",
+            "primary_span": "28222-28354",
+            "complement": true
+          },
+          {
+            "span": "378-1954",
+            "primary_identifier": "TI123456789",
+            "primary_span": "1-1577"
+          }
+        ],
+        "comments": [
+          "Example cDNA Project (URL:https://example.org/cdna)"
+        ],
+        "source_features": [
+          {
+            "location": "1..1954",
+            "definition": [
+              "TPA_exp: @@[organism]@@ zf-6 mRNA for zinc finger protein, complete cds"
+            ]
+          }
+        ]
+      }
+    ],
+    "keywords": [
+      "Third Party Data",
+      "TPA",
+      "TPA:experimental"
+    ],
+    "publications": [
+      {
+        "title": "Expression profiles of zinc finger genes in an ascidian embryo",
+        "status": "published",
+        "date": "2006",
+        "journal": "Dev. Biol.",
+        "volume": "292",
+        "issue": "2",
+        "pages_from": "546",
+        "pages_to": "554",
+        "authors": [
+          {
+            "abbreviation": "Mishima,H."
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "CDS",
+      "location": "45..1340",
+      "sequence_id": "zf-6",
+      "qualifiers": {
+        "codon_start": [
+          {
+            "value": "1"
+          }
+        ],
+        "gene": [
+          {
+            "value": "zf-6"
+          }
+        ],
+        "product": [
+          {
+            "value": "zinc finger protein"
+          }
+        ]
+      }
+    }
+  ]
+}
