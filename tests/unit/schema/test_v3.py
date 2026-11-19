@@ -21,6 +21,7 @@ from ddbj_record.schema.v3 import (
     RelationTarget,
     Sample,
     Sequences,
+    StructuredComment,
 )
 
 RECORDS_DIR = Path(__file__).resolve().parents[2].joinpath("fixtures", "v3", "records")
@@ -413,6 +414,29 @@ def test_structured_comments_of_an_entry_are_separate_from_those_of_the_sequence
         [{"Coverage": "1523x", "Sequencing Technology": "Illumina"}],
         [],
     ]
+
+
+def test_a_structured_comment_keeps_the_order_of_its_fields_and_its_place_among_the_comments() -> None:
+    comment = StructuredComment.model_validate(
+        {
+            "tagset_id": "Genome-Assembly-Data",
+            "fields": {"Assembly Method": "Newbler v. 2.9", "Finishing Goal": "Noncontiguous Finished"},
+            "field_order": ["Finishing Goal", "Assembly Method"],
+            "after": 0,
+        }
+    )
+
+    assert comment.field_order == ["Finishing Goal", "Assembly Method"]
+    assert comment.after == 0
+    assert not comment.model_extra
+
+    plain = StructuredComment.model_validate({"tagset_id": "Genome-Assembly-Data", "fields": {"Assembly Method": "x"}})
+
+    assert plain.field_order is None
+    assert plain.after is None
+
+    with pytest.raises(ValidationError):
+        StructuredComment.model_validate({"after": -1})
 
 
 def test_entry_keywords_are_separate_from_the_keywords_of_the_sequences() -> None:

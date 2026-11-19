@@ -1244,6 +1244,19 @@ class StructuredComment(BaseModel):
 
     tagset_id: str | None = Field(None, examples=["Genome-Assembly-Data"])
     fields: dict[str, str] | None = None
+    # flat file に項目を書く順。fields は JSON の object で、object は順序を持たない (正準形は key の順に
+    # 並べる) ので、書かれた順を残すときはここに項目名を並べる。省いたときは key の順に書く。ここに無い項目は、
+    # ここにある項目の後に key の順で書く。fields に無い名前は書かない。
+    # 登録された順は決まった 1 つの並びではない ("Assembly Method"、"Genome Coverage"、"Assembly Name" の順も
+    # "Assembly Method"、"Assembly Name"、"Genome Coverage" の順もある) ので、tagset_id から決めずに持つ。
+    field_order: list[str] | None = Field(
+        None, examples=[["Finishing Goal", "Current Finishing Status", "Assembly Method"]]
+    )
+    # flat file の COMMENT で、このブロックの前に書く comments の数。その entry の COMMENT に書く comments
+    # (submission.comments、entries[].comments の順) を先頭から数える。0 は全ての comments より前。
+    # 省いたときは全ての comments の後に書く。同じ数のブロックは、sequences.structured_comments、
+    # entries[].structured_comments の順で、それぞれ list の順に書く。
+    after: int | None = Field(None, ge=0, examples=[0])
 
     model_config = ConfigDict(extra="allow")
 
@@ -1303,6 +1316,7 @@ class Entry(BaseModel):
     # 丸ごとここに置き、sequences.structured_comments には置かない。同じ tagset_id を両方に置いても合わせて
     # 1 つにはせず、flat file には 2 つのブロックとして出る。
     # flat file の COMMENT は、comments (submission、entry の順)、sequences.structured_comments、これ、の順。
+    # ブロックを comments より前や間に書くときは、そのブロックの after に前に書く comments の数を置く。
     structured_comments: list[StructuredComment] | None = None
     # この entry にだけ付く KEYWORD。flat file の KEYWORDS 欄は、sequences.keywords の後にこれを続けたもの。
     # common_source と違って足すだけで、sequences.keywords の値を entry で取り消すことはできない。
