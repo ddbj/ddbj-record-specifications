@@ -297,7 +297,13 @@
           "Assembly Method": "HGAP v. x.x",
           "Genome Coverage": "60x",
           "Sequencing Technology": "Illumina MiSeq; PacBio RSII"
-        }
+        },
+        "field_order": [
+          "Sequencing Technology",
+          "Assembly Method",
+          "Genome Coverage"
+        ],
+        "after": 1
       }
     ],
     "keywords": [
