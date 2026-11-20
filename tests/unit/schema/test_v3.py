@@ -429,6 +429,41 @@ def test_entry_keywords_are_separate_from_the_keywords_of_the_sequences() -> Non
 # 綴り違いや置き場違いのキーの指摘は ddbj-validator のルールが行う。
 
 
+def test_submitters_of_an_entry_are_separate_from_those_of_the_submission() -> None:
+    # セットの中で登録者の違う entry は、自分の登録者を持つ。持たない entry は submission のものに従う。
+    record = DdbjRecord.model_validate(
+        {
+            "submission": {"submitters": [{"abbreviation": "Mishima,H.", "role": "contact"}]},
+            "sequences": {
+                "entries": [
+                    {"alias": "contig_001"},
+                    {
+                        "alias": "contig_002",
+                        "submitters": [
+                            {"abbreviation": "Tojo,M.", "role": "contact"},
+                            {"abbreviation": "Mishima,H.", "role": "submitter"},
+                        ],
+                    },
+                ]
+            },
+        }
+    )
+    assert record.submission is not None
+    assert record.sequences is not None
+    assert record.sequences.entries is not None
+    first, second = record.sequences.entries
+    assert first.submitters is None
+    assert second.submitters is not None
+    assert [person.abbreviation for person in second.submitters] == ["Tojo,M.", "Mishima,H."]
+    assert record.submission.submitters is not None
+    assert [person.abbreviation for person in record.submission.submitters] == ["Mishima,H."]
+
+
+def test_entry_submitters_given_as_one_person_are_rejected() -> None:
+    with pytest.raises(ValidationError):
+        Entry.model_validate({"alias": "contig_001", "submitters": {"abbreviation": "Tojo,M."}})
+
+
 def test_unknown_keys_are_kept() -> None:
     project = Project.model_validate({"title": "x", "bogus": 1})
     assert project.title == "x"
