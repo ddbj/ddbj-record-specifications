@@ -262,6 +262,16 @@
             "location": "bases 1 to 81630"
           }
         ],
+        "submitters": [
+          {
+            "abbreviation": "Tanizawa,Y.",
+            "role": "contact"
+          },
+          {
+            "abbreviation": "Mishima,H.",
+            "role": "submitter"
+          }
+        ],
         "source_features": [
           {
             "location": "1..81630",

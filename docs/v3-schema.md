@@ -25,8 +25,8 @@ DB ごとにモデルを分けず、同じ意味のものを 1 つのモデル�
 | `datasets` / `access_control` | JGA の dataset、policy、DAC |
 | `submission` | 登録の手続きについての情報 (登録者、公開予定日 (`hold_date`)、SRA の submission、GEA の IDF の Comment など、ST.26 の出願情報) |
 
-- Trad の論文 (flat file の REFERENCE) は `sequences.publications` に、entry ごとに違うものは `sequences.entries[].publications` に置く。`projects[].publications` は BioProject の論文で、project と配列を 1 つの record に入れたとき、project の論文が配列の REFERENCE になるとは限らないので分ける。REFERENCE の 1 つ目 (Direct Submission) は論文ではないので record に置かず、登録システムが `submission.submitters` と登録日から作る。REFERENCE の番号は、Direct Submission、`sequences.publications`、`entries[].publications` の順に 1 から数え、feature の `/citation` はこの番号で論文を指す
-- 登録者は `submission.submitters` に置く。同じセット (WGS / TSA / TLS) の中で登録者の違う entry は、自分の登録者を `sequences.entries[].submitters` に全員書く。書いた entry の REFERENCE の 1 つ目は、そちらから作る
+- Trad の論文 (flat file の REFERENCE) は `sequences.publications` に、entry ごとに違うものは `sequences.entries[].publications` に置く。`projects[].publications` は BioProject の論文で、project と配列を 1 つの record に入れたとき、project の論文が配列の REFERENCE になるとは限らないので分ける。REFERENCE の 1 つ目 (Direct Submission) は論文ではないので record に置かず、登録システムが登録者と登録日から作る。REFERENCE の番号は、Direct Submission、`sequences.publications`、`entries[].publications` の順に 1 から数え、feature の `/citation` はこの番号で論文を指す
+- 登録者は `submission.submitters` に置く。同じセット (WGS / TSA / TLS) の中で登録者の違う entry は、自分の登録者を `sequences.entries[].submitters` に全員書く。`sequences.entries[].submitters` を書いた entry の REFERENCE の 1 つ目は、`submission.submitters` でなく `sequences.entries[].submitters` から作る
 - GFF は record の要素にせず、入力の形式として扱う。GFF の feature は `features` に入れる
 - 染色体やプラスミドを表すモデルは作らない。`sequences.entries[]` の `name` / `type` / `topology` で表す (例: `{"name": "pPLH-1", "type": "plasmid", "topology": "circular"}`)
 - `array_design` は accession を持つ独立した登録で、多くの experiment から参照されるので、`assembly` と同じくトップレベルに置く

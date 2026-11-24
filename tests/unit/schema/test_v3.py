@@ -447,12 +447,6 @@ def test_entry_keywords_are_separate_from_the_keywords_of_the_sequences() -> Non
     assert sequences.entries[0].keywords == ["HTG"]
 
 
-# === 型に無いキー (extra="allow") ===
-#
-# 利用側が固定している commit より新しいフィールドを持つ record も読め、読んだものを書き出しても失わない。
-# 綴り違いや置き場違いのキーの指摘は ddbj-validator のルールが行う。
-
-
 def test_submitters_of_an_entry_are_separate_from_those_of_the_submission() -> None:
     # セットの中で登録者の違う entry は、自分の登録者を持つ。持たない entry は submission のものに従う。
     record = DdbjRecord.model_validate(
@@ -486,6 +480,12 @@ def test_submitters_of_an_entry_are_separate_from_those_of_the_submission() -> N
 def test_entry_submitters_given_as_one_person_are_rejected() -> None:
     with pytest.raises(ValidationError):
         Entry.model_validate({"alias": "contig_001", "submitters": {"abbreviation": "Tojo,M."}})
+
+
+# === 型に無いキー (extra="allow") ===
+#
+# 利用側が固定している commit より新しいフィールドを持つ record も読め、読んだものを書き出しても失わない。
+# 綴り違いや置き場違いのキーの指摘は ddbj-validator のルールが行う。
 
 
 def test_unknown_keys_are_kept() -> None:

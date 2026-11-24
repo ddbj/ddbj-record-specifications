@@ -1354,7 +1354,8 @@ class Sequences(BaseModel):
     keywords: list[str] | None = Field(None, examples=[["WGS", "STANDARD_DRAFT"]])
     # 配列についての論文。flat file では全ての entry の REFERENCE になる。順序は保つ (feature の `/citation` が
     # REFERENCE を番号で指す。数え方は Entry.publications)。ただし REFERENCE の 1 つ目
-    # ("Direct Submission") は論文でないのでここに置かない。登録システムが submission.submitters と登録日から作る。
+    # ("Direct Submission") は論文でないのでここに置かない。登録システムが登録者 (submission.submitters。
+    # entry が submitters を持つときは entries[].submitters) と登録日から作る。
     # BioProject の論文 (projects[].publications) とは別で、project の論文が配列の REFERENCE になるとは
     # 限らない。entry ごとに違うものは entries[].publications に置く。
     publications: list[Publication] | None = None
