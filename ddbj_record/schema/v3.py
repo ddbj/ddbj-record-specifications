@@ -1328,6 +1328,13 @@ class Entry(BaseModel):
     # 両方にあっても除かずに数える。したがって sequences.publications に論文を足すと、entry の論文の番号が
     # 全て 1 つずれる。`/citation` を持つ record では、番号も合わせて直す。
     publications: list[Publication] | None = None
+    # この entry の登録者。submission.submitters と違う entry にだけ置く。置いた entry では、flat file の
+    # REFERENCE の 1 つ目 ("Direct Submission") を submission.submitters でなくこれから作る。keywords や
+    # publications と違って足すのではなく、丸ごと置き換える: 一部だけ違うときも全員を書く。
+    # 1 つの登録の entry は登録者が同じなのが普通で、新しい record には要らない。同じセット (WGS / TSA / TLS)
+    # の中で entry によって登録者が違う既存のデータを、違うまま持つためにある (セットは 1 つの record なので、
+    # 登録者ごとに record を分けられない)。先頭の人が連絡先なのは submission.submitters と同じ。
+    submitters: list[Person] | None = None
     source_features: list[SourceFeature] | None = None
     st26: St26Sequence | None = None
 
